@@ -45,6 +45,7 @@ public final class BookmarkCrafting {
 	public static boolean start(Group group, boolean useInventory) {
 		if (active != null) return false;
 		if (group == null) return rejected("no_group");
+		if (!group.crafting) return rejected("crafting_disabled");
 		try {
 			ClientAccess access = ClientAccess.create();
 			if (access == null) return rejected("invalid_screen_or_cursor");
@@ -85,6 +86,7 @@ public final class BookmarkCrafting {
 		if (toInventory && all) return start(group, false);
 		if (active != null) return false;
 		if (group == null) return rejected("no_group");
+		if (!group.crafting) return rejected("crafting_disabled");
 		try {
 			ClientAccess access = ClientAccess.create();
 			if (access == null) return rejected("invalid_screen_or_cursor");

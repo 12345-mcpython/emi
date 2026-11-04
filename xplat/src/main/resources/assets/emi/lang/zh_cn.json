@@ -376,6 +376,7 @@
   "emi.bookmarks.reason.not_started": "尚未开始",
   "emi.bookmarks.reason.user_cancelled": "用户取消",
   "emi.bookmarks.reason.no_group": "没有收藏组",
+  "emi.bookmarks.reason.crafting_disabled": "该收藏组的配方链计算已关闭",
   "emi.bookmarks.reason.invalid_screen_or_cursor": "不支持当前界面或光标持有物品",
   "emi.bookmarks.reason.empty_or_cyclic_plan": "计划为空或存在循环",
   "emi.bookmarks.reason.exception": "执行异常",

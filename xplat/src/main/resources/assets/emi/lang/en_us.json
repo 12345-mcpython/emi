@@ -281,6 +281,7 @@
   "emi.bookmarks.reason.not_started": "not started",
   "emi.bookmarks.reason.user_cancelled": "cancelled by user",
   "emi.bookmarks.reason.no_group": "no bookmark group",
+  "emi.bookmarks.reason.crafting_disabled": "recipe chain is disabled for this group",
   "emi.bookmarks.reason.invalid_screen_or_cursor": "unsupported screen or occupied cursor",
   "emi.bookmarks.reason.empty_or_cyclic_plan": "empty or cyclic plan",
   "emi.bookmarks.reason.exception": "execution error",

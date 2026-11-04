@@ -512,11 +512,11 @@ public final class EmiBookmarkGroups {
 						stock.amount -= taken;
 						outstanding -= taken;
 						if (!stock.inventory) flows.add(new Flow(stock.ingredient, source, anchor, stock.recipe, recipe, taken, 0));
-						if (node.catalyst) returned.add(new Stock(stock.ingredient, stock.inventory ? null : recipe, taken, stock.inventory));
+						if (node.catalyst) returned.add(new Stock(stock.ingredient, stock.inventory ? null : recipe, taken, stock.inventory, true));
 					}
 					if (outstanding > 1.0e-9) {
 						flows.add(new Flow(input, source, anchor, null, recipe, outstanding, input.getAmount()));
-						if (node.catalyst) returned.add(new Stock(input, recipe, outstanding, false));
+						if (node.catalyst) returned.add(new Stock(input, recipe, outstanding, false, true));
 					}
 					if (!node.catalyst && !node.remainder.isEmpty()) {
 						returned.add(new Stock(node.remainder, recipe,
@@ -527,7 +527,7 @@ public final class EmiBookmarkGroups {
 				for (EmiStack output : recipe.getOutputs()) stocks.add(new Stock(output, recipe,
 					multiply(output.getAmount(), batches) * chance(output.getChance()), false));
 			}
-			for (Stock stock : stocks) if (!stock.inventory && stock.amount > 1.0e-9) {
+			for (Stock stock : stocks) if (!stock.inventory && !stock.catalyst && stock.amount > 1.0e-9) {
 				flows.add(new Flow(stock.ingredient, stock.ingredient, selected.get(stock.recipe), stock.recipe, null, stock.amount, 0));
 			}
 		}
@@ -564,9 +564,14 @@ public final class EmiBookmarkGroups {
 		final EmiIngredient ingredient;
 		final EmiRecipe recipe;
 		final boolean inventory;
+		final boolean catalyst;
 		double amount;
 		Stock(EmiIngredient ingredient, EmiRecipe recipe, double amount, boolean inventory) {
+			this(ingredient, recipe, amount, inventory, false);
+		}
+		Stock(EmiIngredient ingredient, EmiRecipe recipe, double amount, boolean inventory, boolean catalyst) {
 			this.ingredient = ingredient; this.recipe = recipe; this.amount = amount; this.inventory = inventory;
+			this.catalyst = catalyst;
 		}
 	}
 	private static final class Boundary {

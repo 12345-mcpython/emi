@@ -239,7 +239,8 @@ public class BookmarkGroupChecks {
 		var rows = EmiBookmarkGroups.rows(group, null);
 		check(row(rows, "tool", EmiBookmarkGroups.Role.INGREDIENT).amount == 1, "folded catalyst is one startup tool, never multiplied by four batches");
 		check(row(rows, "ore", EmiBookmarkGroups.Role.INGREDIENT).amount == 4, "folded consumed input still scales by batches");
-		check(row(rows, "tool", EmiBookmarkGroups.Role.REMAINDER).amount == 1, "reusable startup tool survives as remainder");
+		check(rows.stream().noneMatch(r -> r.role == EmiBookmarkGroups.Role.REMAINDER
+			&& r.ingredient.getEmiStacks().get(0).id.equals("tool")), "reusable startup tool is not duplicated as remainder");
 		var stock = new dev.emi.emi.api.recipe.EmiPlayerInventory(List.of(stack("plate", 2), stack("ore", 1), stack("tool", 1)));
 		rows = EmiBookmarkGroups.rows(group, stock);
 		var oreRow = row(rows, "ore", EmiBookmarkGroups.Role.INGREDIENT);
