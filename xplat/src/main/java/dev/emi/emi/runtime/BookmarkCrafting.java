@@ -22,6 +22,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 
 /** Client-thread, bounded, one-batch runner. Production is confirmed only by server inventory packets. */
 public final class BookmarkCrafting {
@@ -110,6 +111,8 @@ public final class BookmarkCrafting {
 		List<Long> outputCounts(EmiRecipe recipe);
 		boolean canCraft(Budget budget);
 		boolean craft(Budget budget);
+		default boolean hasGridItems(EmiRecipe recipe) { return false; }
+		default boolean clearGrid(EmiRecipe recipe) { return false; }
 		default String reason() { return "no_craftable_recipe"; }
 	}
 	static final class Budget {
@@ -124,10 +127,16 @@ public final class BookmarkCrafting {
 		boolean running = true;
 		String result = "running", reason = "ready";
 		Budget pending;
+		EmiRecipe lastRecipe;
+		boolean craftedOnce;
 		List<Long> outputBefore;
-		long feedbackBefore, sentAt, lastTick = Long.MIN_VALUE;
+		long feedbackBefore, sentAt, lastTick = Long.MIN_VALUE, cleanupAt;
 		int operations, completed;
-		Runner(Access access, List<Budget> plan) { this.access = access; this.plan = plan; }
+		Runner(Access access, List<Budget> plan) {
+			this.access = access;
+			this.plan = plan;
+			this.lastRecipe = plan.isEmpty() ? null : plan.get(0).recipe;
+		}
 		Status status() { return new Status(running, result, reason, completed, operations); }
 		void stop(String result, String reason) { running = false; this.result = result; this.reason = reason; }
 		boolean hasCraftable() {
@@ -155,7 +164,25 @@ public final class BookmarkCrafting {
 					if (now - sentAt >= ACK_TIMEOUT) stop("stopped", "server_ack_timeout");
 					return;
 				}
-				pending.remaining--; completed++; pending = null;
+				pending.remaining--; completed++; craftedOnce = true; pending = null;
+			}
+			// Return reusable tools/catalysts left on the crafting grid before the
+			// next batch. Only clear after one of our own crafts: a foreign grid at
+			// start must still be rejected rather than silently moved.
+			if (craftedOnce && lastRecipe != null) {
+				if (access.hasGridItems(lastRecipe)) {
+					if (cleanupAt == 0) {
+						if (!access.clearGrid(lastRecipe)) {
+							stop("stopped", "grid_cleanup_blocked");
+							return;
+						}
+						cleanupAt = now;
+					} else if (now - cleanupAt >= ACK_TIMEOUT) {
+						stop("stopped", "grid_cleanup_timeout");
+					}
+					return;
+				}
+				cleanupAt = 0;
 			}
 			boolean unfinished = plan.stream().anyMatch(b -> b.remaining > 0);
 			if (!unfinished) { stop("completed", "budget_complete"); return; }
@@ -164,6 +191,7 @@ public final class BookmarkCrafting {
 				if (budget.remaining <= 0 || !access.canCraft(budget)) continue;
 				outputBefore = access.outputCounts(budget.effective);
 				feedbackBefore = access.feedback(); pending = budget; sentAt = now; operations++;
+				lastRecipe = budget.recipe;
 				reason = "awaiting_server_inventory";
 				if (!access.craft(budget)) stop("stopped", "fill_rejected");
 				return;
@@ -257,6 +285,37 @@ public final class BookmarkCrafting {
 			if (!valid()) return null;
 			EmiRecipeHandler<ScreenHandler> found = EmiRecipeFiller.getFirstValidHandler(budget.recipe, screen);
 			return found != null && found.supportsRecipe(budget.recipe) ? found : null;
+		}
+		private StandardRecipeHandler<ScreenHandler> standardFor(EmiRecipe recipe) {
+			EmiRecipeHandler<ScreenHandler> found = recipeHandler(new Budget(recipe, 1));
+			return found instanceof StandardRecipeHandler<ScreenHandler> standard ? standard : null;
+		}
+		@Override public boolean hasGridItems(EmiRecipe recipe) {
+			if (!valid()) return false;
+			StandardRecipeHandler<ScreenHandler> standard = standardFor(recipe);
+			if (standard == null) return false;
+			for (Slot slot : standard.getCraftingSlots(handler)) {
+				if (slot != null && !slot.getStack().isEmpty()) return true;
+			}
+			return false;
+		}
+		@Override public boolean clearGrid(EmiRecipe recipe) {
+			if (!valid()) return false;
+			StandardRecipeHandler<ScreenHandler> standard = standardFor(recipe);
+			if (standard == null) return false;
+			MinecraftClient client = MinecraftClient.getInstance();
+			boolean clicked = false;
+			for (Slot slot : standard.getCraftingSlots(handler)) {
+				if (slot != null && !slot.getStack().isEmpty()
+						&& slot.canTakeItems(client.player)) {
+					// Move reusable tools, catalysts and remainders back to the player
+					// inventory. A normal server click keeps both sides authoritative.
+					client.interactionManager.clickSlot(handler.syncId, slot.id, 0,
+						SlotActionType.QUICK_MOVE, client.player);
+					clicked = true;
+				}
+			}
+			return clicked;
 		}
 		private boolean safeOutputs(EmiRecipe recipe) {
 			if (recipe.getOutputs().isEmpty()) return deny("no_output");

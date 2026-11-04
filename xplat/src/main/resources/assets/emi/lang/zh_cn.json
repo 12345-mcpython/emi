@@ -384,6 +384,8 @@
   "emi.bookmarks.reason.server_ack_timeout": "等待服务器物品栏确认超时",
   "emi.bookmarks.reason.budget_complete": "计划批次已完成",
   "emi.bookmarks.reason.operation_limit": "达到操作次数上限",
+  "emi.bookmarks.reason.grid_cleanup_blocked": "工作台格子里的物品无法收回背包",
+  "emi.bookmarks.reason.grid_cleanup_timeout": "工作台格子清理超时",
   "emi.bookmarks.reason.awaiting_server_inventory": "等待服务器物品栏更新",
   "emi.bookmarks.reason.no_output": "配方没有产物",
   "emi.bookmarks.reason.unobservable_output": "无法验证配方产物",

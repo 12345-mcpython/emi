@@ -289,6 +289,8 @@
   "emi.bookmarks.reason.server_ack_timeout": "server inventory acknowledgement timed out",
   "emi.bookmarks.reason.budget_complete": "planned batches completed",
   "emi.bookmarks.reason.operation_limit": "operation limit reached",
+  "emi.bookmarks.reason.grid_cleanup_blocked": "crafting grid contains items that cannot be returned",
+  "emi.bookmarks.reason.grid_cleanup_timeout": "crafting grid cleanup timed out",
   "emi.bookmarks.reason.awaiting_server_inventory": "waiting for server inventory",
   "emi.bookmarks.reason.no_output": "recipe has no output",
   "emi.bookmarks.reason.unobservable_output": "output cannot be verified",
