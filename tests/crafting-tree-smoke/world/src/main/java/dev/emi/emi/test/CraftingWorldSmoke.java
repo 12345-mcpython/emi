@@ -285,6 +285,9 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     Group group;
                     if (extra == 0) group = group("crafting_table", "birch_planks", Items.BIRCH_PLANKS, Items.BIRCH_LOG);
                     else group = singleGroup("oak_planks");
+                    // Disabled-chain groups intentionally reject crafting now; the
+                    // synthetic single-recipe fixture still exercises the handler.
+                    group.crafting = true;
                     if (extra == 3) {
                         serverFill = dev.emi.emi.platform.EmiClient.onServer;
                         dev.emi.emi.platform.EmiClient.onServer = false;
