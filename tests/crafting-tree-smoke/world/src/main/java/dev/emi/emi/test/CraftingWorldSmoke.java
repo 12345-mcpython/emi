@@ -85,6 +85,37 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     worldName = "emi-world-smoke-" + System.currentTimeMillis();
                     output = run.resolve("screenshots/crafting-world-smoke/" + worldName);
                     Files.createDirectories(output);
+                    check(client.world == null && client.player == null, "Startup preparation must not require a world");
+                    var startup = dev.emi.emi.screen.EmiScreenManager.class.getDeclaredField("startupPrepared");
+                    startup.setAccessible(true);
+                    check(startup.getBoolean(null), "Title screen appeared before EMI interface preparation");
+                    var startupPool = dev.emi.emi.screen.EmiScreenManager.class.getDeclaredField("batchers");
+                    startupPool.setAccessible(true);
+                    Object pool = startupPool.get(null);
+                    var idle = pool.getClass().getDeclaredField("unclaimed");
+                    idle.setAccessible(true);
+                    check(((List<?>) idle.get(pool)).size() == 4, "Expected four prepared buffers at title screen");
+                    dev.emi.emi.screen.EmiScreenManager.prepareStartup();
+                    check(((List<?>) idle.get(pool)).size() == 4, "Repeated startup preparation allocated duplicate buffers");
+                    record("Title screen: four EMI buffers ready with no world/player; repeated startup preparation is a no-op");
+                    var pending = EmiReloadManager.class.getDeclaredField("synchronizedReloadPending");
+                    pending.setAccessible(true);
+                    EmiReloadManager.reloadRecipes();
+                    check(!pending.getBoolean(null), "Started initialization with tags missing");
+                    EmiReloadManager.reloadTags();
+                    check(pending.getBoolean(null), "Synchronized resources did not queue initialization");
+                    EmiReloadManager.tick();
+                    check(pending.getBoolean(null) && EmiReloadManager.getStatus() == 0,
+                        "Initialization started without world/player");
+                    EmiReloadManager.clear();
+                    check(!pending.getBoolean(null), "Disconnect retained pending initialization");
+                    EmiReloadManager.reloadTags();
+                    check(!pending.getBoolean(null), "Started initialization with recipes missing");
+                    EmiReloadManager.reloadRecipes();
+                    check(pending.getBoolean(null), "Reverse synchronization order did not queue initialization");
+                    EmiReloadManager.clear();
+                    check(!pending.getBoolean(null), "Second disconnect retained pending initialization");
+                    record("Entry scheduler: both synchronization orders queue once; missing world defers; disconnect cancels pending work");
                     check(!Files.exists(client.getLevelStorage().getSavesDirectory().resolve(worldName)), "World already exists");
                     stage = Stage.LOADING; // loader can recursively pump tasks
                     GameRules rules = new GameRules();
@@ -98,6 +129,12 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                 case LOADING -> {
                     if (client.world == null || client.player == null || client.getServer() == null || !EmiReloadManager.isLoaded()) return;
                     check(client.interactionManager != null && !client.player.isCreative(), "Expected real survival player");
+                    check(!(client.currentScreen instanceof net.minecraft.client.gui.screen.ingame.HandledScreen<?>),
+                        "Inventory opened before natural world-entry initialization completed");
+                    var queued = EmiReloadManager.class.getDeclaredField("synchronizedReloadPending");
+                    queued.setAccessible(true);
+                    check(!queued.getBoolean(null), "World-entry initialization remained queued after load");
+                    record("World entry initialized EMI without opening any inventory screen");
                     record("Loaded real flat survival world; EMI naturally loaded " + EmiApi.getRecipeManager().getRecipes().size() + " recipes");
                     serverSetup(client, player -> {
                         player.changeGameMode(GameMode.SURVIVAL);
@@ -109,7 +146,23 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                 }
                 case SETUP_INVENTORY -> {
                     if (!complete() || count(client, Items.OAK_LOG) != 1) return;
+                    var ready = dev.emi.emi.screen.EmiScreenManager.class.getDeclaredField("warmupComplete");
+                    ready.setAccessible(true);
+                    if (!ready.getBoolean(null)) return;
+                    check(client.currentScreen == null, "Prewarm must finish without opening an inventory");
+                    var poolField = dev.emi.emi.screen.EmiScreenManager.class.getDeclaredField("batchers");
+                    poolField.setAccessible(true);
+                    Object pool = poolField.get(null);
+                    var idleField = pool.getClass().getDeclaredField("unclaimed");
+                    idleField.setAccessible(true);
+                    var buffers = new ArrayList<>((List<?>) idleField.get(pool));
+                    check(buffers.size() >= 4, "Expected four preallocated sidebar buffers before first inventory");
+                    record("Before first inventory: EMI fully loaded and four reusable sidebar buffer sets prepared with no screen");
                     client.setScreen(new InventoryScreen(client.player));
+                    var activeField = pool.getClass().getDeclaredField("claimed");
+                    activeField.setAccessible(true);
+                    check(((java.util.Set<?>) activeField.get(pool)).stream().allMatch(buffers::contains),
+                        "First inventory did not reuse the preallocated sidebar buffer pool");
                     stage = Stage.INVENTORY_READY;
                     runStarted = ticks;
                 }

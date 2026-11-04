@@ -130,6 +130,54 @@ public class EmiScreenManager {
 			() -> true, (w) -> EmiApi.viewRecipeTree(),
 			List.of(EmiPort.translatable("tooltip.emi.recipe_tree")));
 
+	private static Object warmupWorld;
+	private static boolean warmupComplete;
+	private static boolean resourcesReloading;
+	private static boolean startupPrepared;
+
+	/** CPU-only preparation before the title screen's first frame; no world data or GL uploads. */
+	public static void prepareStartup() {
+		if (startupPrepared || !EmiConfig.enabled) return;
+		long start = System.nanoTime();
+		if (StackBatcher.isEnabled()) {
+			// preallocate adds at most one batcher per call. Keep this bounded: it
+			// runs during title-screen init on the render thread.
+			for (int i = 0; i < 4 && !batchers.preallocate(4); i++) {
+			}
+		}
+		startupPrepared = true;
+		EmiLog.info("Prepared EMI interface buffers before title screen in "
+			+ ((System.nanoTime() - start) / 1_000_000) + "ms; world recipe index still waits for server synchronization");
+	}
+
+	/** Called on the client thread; never opens a screen or reloads recipe data. */
+	public static void warmupTick() {
+		if (resourcesReloading || !EmiReloadManager.isLoaded() || client.world == null || client.player == null) {
+			warmupWorld = null;
+			warmupComplete = false;
+			return;
+		}
+		if (warmupWorld != client.world) {
+			warmupWorld = client.world;
+			warmupComplete = false;
+		}
+		if (warmupComplete || !EmiConfig.enabled || client.currentScreen != null) return;
+		if (!StackBatcher.isEnabled() || batchers.preallocate(4)) {
+			warmupComplete = true;
+			EmiLog.info("Prepared EMI sidebar buffers before the first inventory screen");
+		}
+	}
+
+	public static void resetWarmup() {
+		warmupWorld = null;
+		warmupComplete = false;
+	}
+
+	public static void setResourcesReloading(boolean reloading) {
+		resourcesReloading = reloading;
+		resetWarmup();
+	}
+
 	public static boolean isDisabled() {
 		return !EmiReloadManager.isLoaded() || !EmiConfig.enabled;
 	}

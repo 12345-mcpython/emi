@@ -33,7 +33,9 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
 public class EmiReloadManager {
-	private static int loadedResourcesMask = 0;
+	private static volatile int loadedResourcesMask = 0;
+	private static volatile boolean synchronizedReloadPending;
+	private static volatile boolean resourcesReady;
 	private static volatile boolean clear = false, restart = false;
 	// 0 - empty, 1 - reloading, 2 - loaded, -1 - error
 	private static volatile int status = 0;
@@ -46,30 +48,48 @@ public class EmiReloadManager {
 	}
 
 	public static void reloadTags() {
-		loadedResourcesMask |= 1;
-		if (loadedResourcesMask == 3) {
-			EmiLog.info("Recipes synchronized, reloading EMI");
-			loadedResourcesMask = 0;
-			reload();
-		} else {
-			EmiLog.info("Recipes synchronized, waiting for tags to reload EMI...");
-		}
+		resourcesSynchronized(1);
 	}
 
 	public static void reloadRecipes() {
-		loadedResourcesMask |= 2;
-		if (loadedResourcesMask == 3) {
-			EmiLog.info("Tags synchronized, reloading EMI");
+		resourcesSynchronized(2);
+	}
+
+	private static synchronized void resourcesSynchronized(int resource) {
+		loadedResourcesMask |= resource;
+		resourcesReady = loadedResourcesMask == 3;
+		if (resourcesReady) {
 			loadedResourcesMask = 0;
-			reload();
+			synchronizedReloadPending = true;
+			EmiLog.info("Recipes and tags synchronized; EMI initialization queued for the next ready client tick");
 		} else {
-			EmiLog.info("Tags synchronized, waiting for recipes to reload EMI...");
+			EmiLog.info(resource == 1 ? "Tags synchronized, waiting for recipes to reload EMI..."
+				: "Recipes synchronized, waiting for tags to reload EMI...");
 		}
+	}
+
+	/** Queue a rebuild after a resource reload, but never before recipes and tags are ready. */
+	public static synchronized void queueReload() {
+		if (resourcesReady) {
+			synchronizedReloadPending = true;
+		}
+	}
+
+	/** Packet/event callbacks queue work; start only after the client world and player exist. */
+	public static synchronized void tick() {
+		if (!synchronizedReloadPending || !resourcesReady || loadedResourcesMask != 0) return;
+		MinecraftClient client = MinecraftClient.getInstance();
+		if (client.world == null || client.player == null || !ProxyRecipeManager.isAvailable()) return;
+		synchronizedReloadPending = false;
+		EmiLog.info("Initializing EMI on world entry without waiting for an inventory screen");
+		reload();
 	}
 
 	public static void clear() {
 		synchronized (EmiReloadManager.class) {
 			loadedResourcesMask = 0;
+			synchronizedReloadPending = false;
+			resourcesReady = false;
 			clear = true;
 			status = 0;
 			reloadWorry = Long.MAX_VALUE;
@@ -85,6 +105,9 @@ public class EmiReloadManager {
 	
 	public static void reload() {
 		synchronized (EmiReloadManager.class) {
+			// A direct reload (including the world-entry tick) consumes any queued
+			// request; leaving it set would start a second index build next tick.
+			synchronizedReloadPending = false;
 			step(EmiPort.literal("Starting Reload"));
 			status = 1;
 			if (thread != null && thread.isAlive()) {
@@ -148,9 +171,11 @@ public class EmiReloadManager {
 					MinecraftClient client = MinecraftClient.getInstance();
 					if (client.world == null) {
 						EmiReloadLog.warn("World is null");
+						status = 0;
 						break;
 					} else if (!ProxyRecipeManager.isAvailable()) {
 						EmiReloadLog.warn("Recipe Manager is null");
+						status = 0;
 						break;
 					}
 					List<EmiPluginContainer> plugins = Lists.newArrayList();

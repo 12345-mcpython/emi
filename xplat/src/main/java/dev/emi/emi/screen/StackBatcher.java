@@ -250,6 +250,15 @@ public class StackBatcher {
 		private Set<StackBatcher> claimed = Sets.newHashSet();
 		private List<StackBatcher> unclaimed = Lists.newArrayList();
 
+		/** Allocate at most one reusable CPU buffer set per call; never disturb claimed renderers. */
+		public boolean preallocate(int target) {
+			synchronized (this) {
+				target = Math.max(0, Math.min(4, target));
+				if (claimed.size() + unclaimed.size() < target) unclaimed.add(new StackBatcher());
+				return claimed.size() + unclaimed.size() >= target;
+			}
+		}
+
 		public StackBatcher claim() {
 			synchronized (this) {
 				StackBatcher batcher;
