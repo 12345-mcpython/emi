@@ -166,12 +166,14 @@ public class BoM {
 	}
 
 	public static void setGoal(EmiRecipe recipe) {
-		tree = new MaterialTree(recipe);
-		craftingMode = false;
+		CraftingPlans.setGoal(recipe);
 	}
 
 	public static void addResolution(EmiIngredient ingredient, EmiRecipe recipe) {
-		tree.addResolution(ingredient, recipe);
+		if (tree != null) {
+			tree.addResolution(ingredient, recipe);
+			CraftingPlans.capture();
+		}
 	}
 
 	public static boolean isDefaultRecipe(EmiIngredient stack, EmiRecipe recipe) {

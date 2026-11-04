@@ -17,6 +17,8 @@ import dev.emi.emi.bom.BoM;
 import dev.emi.emi.config.EmiConfig;
 import dev.emi.emi.config.HelpLevel;
 import dev.emi.emi.input.EmiBind;
+import dev.emi.emi.input.EmiInput;
+import dev.emi.emi.runtime.EmiBookmarkGroups;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.EmiFavorites;
 import dev.emi.emi.runtime.EmiHistory;
@@ -246,6 +248,7 @@ public class SlotWidget extends Widget {
 				}
 			} else if (EmiConfig.favorite.isBound() && EmiConfig.helpLevel.has(HelpLevel.NORMAL) && EmiFavorites.canFavorite(getStack(), getRecipe())) {
 				list.add(TooltipComponent.of(EmiPort.ordered(EmiPort.translatable("emi.favorite_recipe", EmiConfig.favorite.getBindText()))));
+				if (EmiInput.isAltDown()) list.add(TooltipComponent.of(EmiPort.ordered(EmiPort.translatable("emi.bookmarks.favorite_chain", chainFavoriteBind().getBindText()))));
 			}
 			if (EmiConfig.showCostPerBatch && recipe.supportsRecipeTree() && !(recipe instanceof EmiResolutionRecipe)) {
 				RecipeCostTooltipComponent rctc = new RecipeCostTooltipComponent(recipe);
@@ -279,8 +282,20 @@ public class SlotWidget extends Widget {
 		return recipe != null && recipe.supportsRecipeTree() && RecipeScreen.resolve != null;
 	}
 
+	private EmiBind chainFavoriteBind() {
+		return new EmiBind(EmiConfig.favorite.translationKey, EmiConfig.favorite.boundKeys.stream()
+			.filter(key -> !key.isUnbound())
+			.map(key -> new EmiBind.ModifiedKey(key.key(), key.modifiers() | EmiInput.SHIFT_MASK))
+			.toArray(EmiBind.ModifiedKey[]::new));
+	}
+
 	private boolean slotInteraction(Function<EmiBind, Boolean> function) {
 		EmiRecipe recipe = getRecipe();
+		if (recipe != null && !canResolve() && EmiConfig.favorite.isBound()
+				&& function.apply(chainFavoriteBind())) {
+			EmiBookmarkGroups.addRecipe(recipe, true);
+			return true;
+		}
 		if (canResolve()) {
 			if (function.apply(EmiConfig.defaultStack)) {
 				if (BoM.isDefaultRecipe(getStack(), recipe)) {

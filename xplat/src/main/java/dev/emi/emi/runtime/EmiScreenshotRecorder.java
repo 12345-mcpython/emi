@@ -58,38 +58,76 @@ public class EmiScreenshotRecorder {
 			scale = EmiConfig.recipeScreenshotScale;
 		}
 
-		Framebuffer framebuffer = new SimpleFramebuffer(width * scale, height * scale, true, MinecraftClient.IS_SYSTEM_MAC);
-		framebuffer.setClearColor(0f, 0f, 0f, 0f);
-		framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
+		try {
+			NativeImage nativeImage = null;
+			try {
+				Framebuffer framebuffer = null;
+				MatrixStack view = RenderSystem.getModelViewStack();
+				boolean viewPushed = false;
+				boolean projectionBackedUp = false;
+				try {
+					framebuffer = new SimpleFramebuffer(width * scale, height * scale, true, MinecraftClient.IS_SYSTEM_MAC);
+					framebuffer.setClearColor(0f, 0f, 0f, 0f);
+					framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
+					framebuffer.beginWrite(true);
 
-		framebuffer.beginWrite(true);
+					view.push();
+					viewPushed = true;
+					view.loadIdentity();
+					view.translate(-1.0, 1.0, 0.0);
+					view.scale(2f / width, -2f / height, -1f / 1000f);
+					view.translate(0.0, 0.0, 10.0);
+					EmiPort.applyModelViewMatrix();
 
-		MatrixStack view = RenderSystem.getModelViewStack();
-		view.push();
-		view.loadIdentity();
-		view.translate(-1.0, 1.0, 0.0);
-		view.scale(2f / width, -2f / height, -1f / 1000f);
-		view.translate(0.0, 0.0, 10.0);
-		EmiPort.applyModelViewMatrix();
+					RenderSystem.backupProjectionMatrix();
+					projectionBackedUp = true;
+					RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorter.BY_Z);
+					renderer.run();
+					nativeImage = takeScreenshot(framebuffer);
+				} finally {
+					// Each cleanup still runs if rendering, readback, or an earlier cleanup fails.
+					try {
+						if (projectionBackedUp) RenderSystem.restoreProjectionMatrix();
+					} finally {
+						try {
+							if (viewPushed) {
+								view.pop();
+								EmiPort.applyModelViewMatrix();
+							}
+						} finally {
+							try {
+								if (framebuffer != null) framebuffer.delete();
+							} finally {
+								client.getFramebuffer().beginWrite(true);
+							}
+						}
+					}
+				}
 
-		Matrix4f backupProj = RenderSystem.getProjectionMatrix();
-		RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorter.BY_Z);
-
-		renderer.run();
-
-		RenderSystem.setProjectionMatrix(backupProj, VertexSorter.BY_Z);
-		view.pop();
-		EmiPort.applyModelViewMatrix();
-
-		framebuffer.endWrite();
-		client.getFramebuffer().beginWrite(true);
-
-		saveScreenshotInner(client.runDirectory, path, framebuffer,
-			message -> client.execute(() -> client.inGameHud.getChatHud().addMessage(message)));
+				saveScreenshotInner(client.runDirectory, path, nativeImage,
+					message -> client.execute(() -> client.inGameHud.getChatHud().addMessage(message)));
+				// The IO worker owns the image only after submission succeeds.
+				nativeImage = null;
+			} finally {
+				if (nativeImage != null) nativeImage.close();
+			}
+		} catch (Throwable e) {
+			EmiLog.error("Failed to capture screenshot", e);
+			try {
+				client.execute(() -> {
+					try {
+						client.inGameHud.getChatHud().addMessage(EmiPort.translatable("screenshot.failure", e.getMessage()));
+					} catch (Throwable feedbackError) {
+						EmiLog.error("Failed to report screenshot error", feedbackError);
+					}
+				});
+			} catch (Throwable feedbackError) {
+				EmiLog.error("Failed to schedule screenshot error", feedbackError);
+			}
+		}
 	}
 
-	private static void saveScreenshotInner(File gameDirectory, String suggestedPath, Framebuffer framebuffer, Consumer<Text> messageReceiver) {
-		NativeImage nativeImage = takeScreenshot(framebuffer);
+	private static void saveScreenshotInner(File gameDirectory, String suggestedPath, NativeImage nativeImage, Consumer<Text> messageReceiver) {
 
 		File screenshots = new File(gameDirectory, SCREENSHOTS_DIRNAME);
 		screenshots.mkdir();
@@ -122,10 +160,16 @@ public class EmiScreenshotRecorder {
 		int i = framebuffer.textureWidth;
 		int j = framebuffer.textureHeight;
 		NativeImage nativeImage = new NativeImage(i, j, false);
-		RenderSystem.bindTexture(framebuffer.getColorAttachment());
-		nativeImage.loadFromTextureImage(0, false);
-		nativeImage.mirrorVertically();
-		return nativeImage;
+		boolean captured = false;
+		try {
+			RenderSystem.bindTexture(framebuffer.getColorAttachment());
+			nativeImage.loadFromTextureImage(0, false);
+			nativeImage.mirrorVertically();
+			captured = true;
+			return nativeImage;
+		} finally {
+			if (!captured) nativeImage.close();
+		}
 	}
 
 	private static String getScreenshotFilename(File directory, String path) {

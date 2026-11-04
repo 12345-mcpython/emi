@@ -1,16 +1,17 @@
 package dev.emi.emi.screen;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
 import org.lwjgl.glfw.GLFW;
-
-import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
@@ -18,847 +19,698 @@ import dev.emi.emi.EmiUtil;
 import dev.emi.emi.api.EmiApi;
 import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;
-import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import dev.emi.emi.api.recipe.EmiResolutionRecipe;
-import dev.emi.emi.api.render.EmiTooltipComponents;
+import dev.emi.emi.api.recipe.handler.EmiCraftContext;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.bom.BoM;
 import dev.emi.emi.bom.ChanceMaterialCost;
-import dev.emi.emi.bom.ChanceState;
+import dev.emi.emi.bom.CraftingPlan;
+import dev.emi.emi.bom.CraftingPlans;
+import dev.emi.emi.bom.CraftingTreeModel;
+import dev.emi.emi.bom.CraftingTreeModel.Entry;
 import dev.emi.emi.bom.FlatMaterialCost;
-import dev.emi.emi.bom.FoldState;
-import dev.emi.emi.bom.MaterialNode;
-import dev.emi.emi.bom.ProgressState;
+import dev.emi.emi.bom.MaterialTree;
 import dev.emi.emi.config.EmiConfig;
-import dev.emi.emi.data.EmiRecipeCategoryProperties;
-import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.input.EmiInput;
-import dev.emi.emi.registry.EmiStackList;
+import dev.emi.emi.registry.EmiRecipeFiller;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.EmiFavorites;
 import dev.emi.emi.runtime.EmiHistory;
-import dev.emi.emi.screen.StackBatcher.Batchable;
-import dev.emi.emi.screen.tooltip.EmiTooltip;
+import dev.emi.emi.runtime.EmiPersistentData;
+import dev.emi.emi.runtime.EmiScreenshotRecorder;
 import dev.emi.emi.screen.tooltip.RecipeTooltipComponent;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.MutableText;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.MathHelper;
 
+/** A selected recipe plan, a shared material ledger, and a pannable dependency graph. */
 public class BoMScreen extends Screen {
-	private static final int NODE_WIDTH = 30;
-	private static final int NODE_HORIZONTAL_SPACING = 8;
-	private static final int NODE_VERTICAL_SPACING = 20;
-	private static final int COST_HORIZONTAL_SPACING = 8;
-	private static StackBatcher batcher = new StackBatcher();
-	private static int zoom = 0;
-	private Bounds batches = new Bounds(-24, -50, 48, 26);
-	private Bounds mode = new Bounds(-24, -50, 16, 16);
-	private Bounds help = new Bounds(0, 0, 16, 16);
-	private double offX, offY;
-	private List<Node> nodes = Lists.newArrayList();
-	private List<Cost> costs = Lists.newArrayList();
-	private EmiPlayerInventory playerInv;
-	private boolean hasRemainders = false;;
-	public HandledScreen<?> old;
-	private int nodeWidth = 0;
-	private int nodeHeight = 0;
-	private int lastMouseX, lastMouseY;
-	private double scrollAcc = 0;
+	public final HandledScreen<?> old;
+	private final Screen returnScreen;
+	private final MaterialTree groupTree;
+	private final String groupName;
+	private final Set<String> folded = new LinkedHashSet<>();
+	private final List<Visual> visuals = new ArrayList<>();
+	private final Map<Entry, Visual> visualByEntry = new IdentityHashMap<>();
+	private final List<StatRow> stats = new ArrayList<>();
+	private CraftingTreeModel model;
+	private CraftingPlan boundPlan;
+	private Object boundTree;
+	private EmiPlayerInventory snapshot;
+	private boolean useInventory, showStats = true;
+	private int collapseMode, section, statScroll, planScroll, searchIndex = -1;
+	private int leftWidth, rightWidth, top, lastMouseX, lastMouseY;
+	private float zoom = 1;
+	private double panX, panY, scrollAcc;
+	private int graphWidth = 1, graphHeight = 1;
+	private CraftingPlan namePlan;
+	private Object nameTree;
+	private TextFieldWidget search, name;
+	private final Map<String, ButtonWidget> toolbar = new LinkedHashMap<>();
+	private Visual pressedNode;
+	private boolean draggingGraph, movedGraph;
+	private double dragDistance;
+	private Bounds canvas = new Bounds(0, 0, 1, 1);
+	private Text notice = Text.empty();
+	private boolean firstLayout = true;
+	private enum Section { NEEDED, AVAILABLE, CRAFTING, READY, RESULTS, LEFTOVERS, MACHINES }
 
 	public BoMScreen(HandledScreen<?> old) {
 		super(EmiPort.translatable("screen.emi.recipe_tree"));
 		this.old = old;
+		this.returnScreen = old;
+		this.groupTree = null;
+		this.groupName = null;
 	}
 
+	/** Group snapshot never replaces the active global tree or saved plan. */
+	public BoMScreen(Screen previous, MaterialTree tree, String name) {
+		super(EmiPort.translatable("screen.emi.recipe_tree"));
+		this.old = previous instanceof HandledScreen<?> handled ? handled : EmiApi.getHandledScreen();
+		this.returnScreen = previous;
+		this.groupTree = java.util.Objects.requireNonNull(tree);
+		this.groupName = name;
+	}
+
+	private MaterialTree tree() { return groupTree == null ? BoM.tree : groupTree; }
+	private CraftingPlan plan() { return groupTree == null ? CraftingPlans.current() : null; }
+
+	@Override
 	public void init() {
-		if (BoM.tree != null) {
-			offY = height / -3;
-		} else {
-			offY = 0;
+		String query = search == null ? "" : search.getText();
+		String draftName = name == null ? "" : name.getText();
+		boolean samePlan = boundPlan == plan() && boundTree == tree();
+		boolean sameNameTarget = namePlan == plan() && nameTree == tree();
+		draggingGraph = movedGraph = false;
+		pressedNode = null;
+		toolbar.clear();
+		leftWidth = MathHelper.clamp(width / 5, 72, 132);
+		rightWidth = showStats ? MathHelper.clamp(width / 4, 102, 210) : 0;
+		clearChildren();
+		search = new TextFieldWidget(textRenderer, leftWidth + 8, 5, Math.max(36, width - leftWidth - 16), 18, tr("search"));
+		search.setMaxLength(128);
+		search.setPlaceholder(tr("search"));
+		search.setText(query);
+		search.setChangedListener(s -> searchIndex = -1);
+		addDrawableChild(search);
+		String[] actions = {"fit", "inventory", "refresh", "fold", "stats", "sections", "save", "delete", "copy", "paste", "screenshot", "next"};
+		int columns = Math.max(1, width / 56);
+		int buttonWidth = width / columns;
+		for (int i = 0; i < actions.length; i++) {
+			String action = actions[i];
+			ButtonWidget button = EmiPort.newButton((i % columns) * buttonWidth + 2, 27 + (i / columns) * 21,
+				buttonWidth - 4, 19, actionText(action), b -> action(action));
+			addDrawableChild(button);
+			toolbar.put(action, button);
 		}
+		top = 30 + ((actions.length + columns - 1) / columns) * 21;
+		canvas = new Bounds(leftWidth + 3, top, Math.max(1, width - leftWidth - rightWidth - 6), Math.max(1, height - top - 30));
+		name = new TextFieldWidget(textRenderer, 4, top + 3, leftWidth - 8, 18, tr("plan_name"));
+		name.setMaxLength(80);
+		addDrawableChild(name);
 		recalculateTree();
+		if (samePlan && sameNameTarget) name.setText(draftName);
+		else name.setText(groupTree != null ? groupName : plan() == null ? "" : plan().name);
+		name.setEditable(groupTree == null);
+		namePlan = plan();
+		nameTree = tree();
+		if (firstLayout) {
+			fit();
+			firstLayout = false;
+		}
+	}
+
+	private Text tr(String suffix, Object... args) {
+		return EmiPort.translatable("emi.tree." + suffix, args);
+	}
+
+	private Text actionText(String action) {
+		if (action.equals("inventory")) return tr(useInventory ? "inventory_on" : "inventory_off");
+		if (action.equals("fold")) return tr("fold_" + collapseMode);
+		return tr(action);
+	}
+
+	private void action(String action) {
+		if (groupTree != null && Set.of("save", "delete", "paste", "copy", "next").contains(action)) return;
+		switch (action) {
+			case "fit" -> fit();
+			case "inventory" -> {
+				useInventory = !useInventory;
+				snapshot = useInventory && client.player != null ? EmiPlayerInventory.of(client.player) : null;
+				remember();
+				recalculateTree();
+				init();
+			}
+			case "refresh" -> {
+				snapshot = useInventory && client.player != null ? EmiPlayerInventory.of(client.player) : null;
+				recalculateTree();
+			}
+			case "fold" -> {
+				collapseMode = (collapseMode + 1) % 3;
+				folded.clear();
+				if (model != null) for (int i = 1; i < model.entries.size(); i++) {
+					Entry e = model.entries.get(i);
+					if (!e.children.isEmpty() && (collapseMode == 2 || collapseMode == 1 && (e.needed == 0 || e.recipe != null && ready(e.recipe)))) folded.add(CraftingPlans.key(e.ingredient));
+				}
+				remember();
+				init();
+				fit();
+			}
+			case "stats" -> { showStats = !showStats; init(); fit(); }
+			case "sections" -> { section = (section + 1) % (Section.values().length + 1); statScroll = 0; buildStats(); }
+			case "save" -> {
+				if (tree() == null) return;
+				CraftingPlans.saveCurrent();
+				boundPlan = plan();
+				if (boundPlan == null) { notice = tr("plan_limit"); return; }
+				if (!name.getText().isBlank()) CraftingPlans.rename(name.getText());
+				remember();
+				recalculateTree();
+				notice = tr("saved");
+			}
+			case "delete" -> {
+				int index = CraftingPlans.all().indexOf(plan());
+				if (index >= 0) { CraftingPlans.remove(index); firstLayout = true; init(); }
+			}
+			case "copy" -> {
+				remember();
+				String json = CraftingPlans.exportCurrent();
+				if (json != null && !json.isEmpty()) {
+					// Temporary trees have UI state as well, without implicitly saving a plan.
+					var data = com.google.gson.JsonParser.parseString(json).getAsJsonObject();
+					var collapsed = new com.google.gson.JsonArray();
+					folded.forEach(collapsed::add);
+					data.add("folded", collapsed);
+					data.addProperty("use_inventory", useInventory);
+					client.keyboard.setClipboard(data.toString());
+					notice = tr("copied");
+				}
+			}
+			case "paste" -> {
+				if (CraftingPlans.importPlan(client.keyboard.getClipboard())) { firstLayout = true; init(); notice = tr("imported"); }
+				else notice = tr("invalid_plan");
+			}
+			case "screenshot" -> screenshot();
+			case "next" -> fillNext();
+		}
+	}
+
+	private void remember() {
+		CraftingPlan plan = plan();
+		if (plan != null) {
+			plan.folded.clear();
+			plan.folded.addAll(folded);
+			plan.useInventory = useInventory;
+			CraftingPlans.capture();
+			EmiPersistentData.save();
+		}
 	}
 
 	public void recalculateTree() {
-		help = new Bounds(width - 18, height - 18, 16, 16);
-		if (BoM.tree != null) {
-			TreeVolume volume = addNewNodes(BoM.tree.goal, BoM.tree.batches, 1, 0, ChanceState.DEFAULT);
-			nodes = volume.nodes;
-			int horizontalOffset = (volume.getMaxRight() + volume.getMinLeft()) / 2;
-			for (Node node : volume.nodes) {
-				node.x -= horizontalOffset;
-			}
-			if (!volume.nodes.isEmpty()) {
-				Node node = volume.nodes.get(0);
-				int width = textRenderer.getWidth("x" + BoM.tree.batches);
-				batches = new Bounds(node.x + node.width / 2 + 6, node.y - 10, width + 12, 22);
-			}
+		CraftingPlan plan = plan();
+		if (boundPlan != plan || boundTree != tree()) {
+			folded.clear();
+			if (plan != null) folded.addAll(plan.folded);
+			useInventory = plan != null && plan.useInventory;
+			boundPlan = plan;
+			boundTree = tree();
+			snapshot = useInventory && client.player != null ? EmiPlayerInventory.of(client.player) : null;
+		}
+		if (groupTree == null) BoM.craftingMode = useInventory;
+		model = tree() == null ? null : new CraftingTreeModel(tree(), useInventory ? snapshot : null);
+		if (name != null && (namePlan != plan || nameTree != tree())) {
+			name.setText(groupTree != null ? groupName : plan == null ? "" : plan.name);
+			namePlan = plan;
+			nameTree = tree();
+		}
+		layoutGraph();
+		buildStats();
+		toolbar.forEach((action, button) -> {
+			button.setMessage(actionText(action));
+			button.active = groupTree != null && Set.of("save", "delete", "paste", "copy", "next").contains(action) ? false : switch (action) {
+				case "delete" -> plan != null;
+				case "paste", "stats", "sections" -> true;
+				default -> model != null;
+			};
+		});
+	}
 
-			nodeWidth = volume.getMaxRight() - volume.getMinLeft();
-			nodeHeight = getNodeHeight(BoM.tree.goal);
-			playerInv = EmiPlayerInventory.of(client.player);
-			BoM.tree.calculateProgress(playerInv);
-			Map<EmiIngredient, FlatMaterialCost> progressCosts = BoM.tree.cost.costs.values().stream()
-				.collect(Collectors.toMap(c -> c.ingredient, c -> c));
-			Map<EmiIngredient, ChanceMaterialCost> chanceProgressCosts = BoM.tree.cost.chanceCosts.values().stream()
-				.collect(Collectors.toMap(c -> c.ingredient, c -> c));
-				
-			costs.clear();
-			BoM.tree.calculateCost();
+	private void layoutGraph() {
+		visuals.clear();
+		visualByEntry.clear();
+		if (model == null || model.entries.isEmpty()) return;
+		Set<Entry> visible = Collections.newSetFromMap(new IdentityHashMap<>());
+		List<Entry> queue = new ArrayList<>();
+		queue.add(model.entries.get(0));
+		for (int i = 0; i < queue.size(); i++) {
+			Entry e = queue.get(i);
+			if (!visible.add(e)) continue;
+			if (!folded.contains(CraftingPlans.key(e.ingredient))) queue.addAll(e.children);
+		}
+		Map<Integer, List<Visual>> rows = new LinkedHashMap<>();
+		graphWidth = 1;
+		graphHeight = 1;
+		for (Entry e : model.entries) {
+			if (!visible.contains(e)) continue;
+			Visual v = new Visual(e);
+			visuals.add(v);
+			visualByEntry.put(e, v);
+			rows.computeIfAbsent(e.depth, k -> new ArrayList<>()).add(v);
+		}
+		for (Map.Entry<Integer, List<Visual>> row : rows.entrySet()) {
+			int rowWidth = row.getValue().stream().mapToInt(v -> v.width + 18).sum() - 18;
+			int x = -rowWidth / 2;
+			for (Visual v : row.getValue()) {
+				v.x = x;
+				v.y = row.getKey() * 70;
+				x += v.width + 18;
+				graphHeight = Math.max(graphHeight, v.y + 40);
+			}
+			graphWidth = Math.max(graphWidth, rowWidth);
+		}
+	}
 
-			List<FlatMaterialCost> treeCosts = Stream.concat(
-				BoM.tree.cost.costs.values().stream(),
-				BoM.tree.cost.chanceCosts.values().stream()
-			).sorted((a, b) -> Integer.compare(
-				EmiStackList.getIndex(a.ingredient.getEmiStacks().get(0)),
-				EmiStackList.getIndex(b.ingredient.getEmiStacks().get(0))
-			)).toList();
-			int cy = nodeHeight * NODE_VERTICAL_SPACING * 2;
-			int costX = 0;
-			for (FlatMaterialCost node : treeCosts) {
-				Cost cost = new Cost(node, costX, cy, false);
-				if (BoM.craftingMode) {
-					if (node instanceof ChanceMaterialCost cmc) {
-						if (!chanceProgressCosts.containsKey(node.ingredient)) {
-							cost.alreadyDone = node.getEffectiveAmount();
-						} else {
-							ChanceMaterialCost progress = chanceProgressCosts.get(node.ingredient);
-							cost.alreadyDone = (long) Math.ceil(cmc.amount * cmc.chance - progress.amount * progress.chance);
-						}
-					} else {
-						if (!progressCosts.containsKey(node.ingredient)) {
-							cost.alreadyDone = node.amount;
-						} else {
-							FlatMaterialCost progress = progressCosts.get(node.ingredient);
-							cost.alreadyDone = node.amount - progress.amount;
-						}
+	private void fit() {
+		zoom = MathHelper.clamp(Math.min((canvas.width() - 24f) / Math.max(1, graphWidth), (canvas.height() - 24f) / Math.max(1, graphHeight)), 0.15f, 2f);
+		panX = 0;
+		panY = 12;
+	}
+
+	private void buildStats() {
+		stats.clear();
+		if (model == null) return;
+		for (Section s : EnumSet.allOf(Section.class)) {
+			if (section > 0 && section != s.ordinal() + 1) continue;
+			stats.add(new StatRow(tr("section." + s.name().toLowerCase(Locale.ROOT)), null, null));
+			int before = stats.size();
+			switch (s) {
+				case NEEDED -> { for (FlatMaterialCost cost : useInventory ? model.missing : model.required) addCost(cost); }
+				case AVAILABLE -> { if (useInventory) for (FlatMaterialCost cost : model.available) addCost(cost); }
+				case CRAFTING, READY -> {
+					for (CraftingTreeModel.Step step : model.steps) {
+						if ((s == Section.READY) != ready(step.recipe)) continue;
+						EmiIngredient output = step.recipe.getOutputs().get(0);
+						stats.add(new StatRow(EmiPort.literal("×" + step.batches + " " + label(output)), output, step.recipe));
 					}
 				}
-				costs.add(cost);
-				costX += 16 + COST_HORIZONTAL_SPACING + EmiRenderHelper.getAmountOverflow(cost.getAmountText());
-			}
-			int costOffset = (costX - COST_HORIZONTAL_SPACING) / 2;
-			for (Cost cost : costs) {
-				cost.x -= costOffset;
-			}
-
-			int totalCostWidth = textRenderer.getWidth(EmiPort.translatable("emi.total_cost"));
-			mode = new Bounds(totalCostWidth / 2 + 4, cy - 20, 16, 16);
-
-			List<Cost> remainders = Lists.newArrayList();
-
-			List<FlatMaterialCost> remainderCosts = Stream.concat(
-				BoM.tree.cost.remainders.values().stream(),
-				BoM.tree.cost.chanceRemainders.values().stream()
-			).sorted((a, b) -> Integer.compare(
-				EmiStackList.getIndex(a.ingredient.getEmiStacks().get(0)),
-				EmiStackList.getIndex(b.ingredient.getEmiStacks().get(0))
-			)).toList();
-			cy += 40;
-			int remainderX = 0;
-			for (FlatMaterialCost node : remainderCosts) {
-				if (node.getEffectiveAmount() <= 0) {
-					continue;
+				case RESULTS -> stats.add(new StatRow(amount(model.result, model.resultAmount), model.result, null));
+				case LEFTOVERS -> { for (FlatMaterialCost cost : model.leftovers) addCost(cost); }
+				case MACHINES -> {
+					Map<Text, Long> machines = new LinkedHashMap<>();
+					for (CraftingTreeModel.Step step : model.steps) machines.merge(step.recipe.getCategory().getName(), step.batches, BoMScreen::addSaturated);
+					for (Map.Entry<Text, Long> entry : machines.entrySet()) stats.add(new StatRow(EmiPort.literal("×" + entry.getValue() + " " + entry.getKey().getString()), null, null));
 				}
-				Cost cost = new Cost(node, remainderX, cy, true);
-				remainders.add(cost);
-				remainderX += 16 + COST_HORIZONTAL_SPACING + EmiRenderHelper.getAmountOverflow(cost.getAmountText());
 			}
-			costOffset = (remainderX - COST_HORIZONTAL_SPACING) / 2;
-			for (Cost cost : remainders) {
-				cost.x -= costOffset;
-			}
-			costs.addAll(remainders);
-			hasRemainders = !remainders.isEmpty();
-		} else {
-			nodes = Lists.newArrayList();
+			if (stats.size() == before) stats.add(new StatRow(tr("none"), null, null));
 		}
-		batcher.repopulate();
+		statScroll = MathHelper.clamp(statScroll, 0, Math.max(0, stats.size() - statRows()));
+	}
+
+	private static long addSaturated(long a, long b) {
+		return a > Long.MAX_VALUE - b ? Long.MAX_VALUE : a + b;
+	}
+
+	private void addCost(FlatMaterialCost cost) {
+		Text text = amount(cost.ingredient, cost.getEffectiveAmount());
+		if (cost instanceof ChanceMaterialCost) text = EmiPort.literal("≈" + text.getString()).formatted(Formatting.GOLD);
+		stats.add(new StatRow(text, cost.ingredient, null));
+	}
+
+	private Text amount(EmiIngredient ingredient, long count) {
+		return EmiPort.literal(EmiRenderHelper.getAmountText(ingredient, count).getString() + " " + label(ingredient));
+	}
+
+	private String label(EmiIngredient ingredient) {
+		return ingredient.getEmiStacks().isEmpty() ? "?" : ingredient.getEmiStacks().get(0).getName().getString();
+	}
+
+	/** Readiness describes materials, independently of whether this screen has that machine. */
+	private boolean ready(EmiRecipe recipe) {
+		if (snapshot == null || !useInventory) return recipe.getInputs().stream().allMatch(EmiIngredient::isEmpty);
+		List<EmiStack> stacks = snapshot.inventory.values().stream().map(EmiStack::copy).toList();
+		long[] used = new long[stacks.size()];
+		List<EmiIngredient> inputs = new ArrayList<>(recipe.getInputs());
+		inputs.sort(java.util.Comparator.comparingInt(i -> i.getEmiStacks().size()));
+		for (EmiIngredient input : inputs) {
+			if (input.isEmpty()) continue;
+			long needed = input.getAmount();
+			for (int i = 0; i < stacks.size() && needed > 0; i++) {
+				EmiStack stock = stacks.get(i);
+				if (input.getEmiStacks().stream().anyMatch(stock::isEqual)) {
+					long take = Math.min(needed, Math.max(0, stock.getAmount() - used[i]));
+					used[i] += take;
+					needed -= take;
+				}
+			}
+			if (needed > 0) return false;
+		}
+		return true;
+	}
+
+	private boolean canFill(EmiRecipe recipe) {
+		return old != null && canFill(recipe, old);
+	}
+
+	private <T extends net.minecraft.screen.ScreenHandler> boolean canFill(EmiRecipe recipe, HandledScreen<T> screen) {
+		var handler = EmiRecipeFiller.getFirstValidHandler(recipe, screen);
+		return handler != null && handler.canCraft(recipe, new EmiCraftContext<>(screen, handler.getInventory(screen), EmiCraftContext.Type.FILL_BUTTON, EmiCraftContext.Destination.NONE, 1));
+	}
+
+	private void fillNext() {
+		if (model == null || old == null) return;
+		for (CraftingTreeModel.Step step : model.steps) {
+			if (canFill(step.recipe) && EmiRecipeFiller.performFill(step.recipe, old, EmiCraftContext.Type.FILL_BUTTON, EmiCraftContext.Destination.NONE, 1)) return;
+		}
+		notice = tr("no_next");
 	}
 
 	@Override
 	public void render(DrawContext raw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
-		this.renderBackgroundTexture(context.raw());
+		renderBackgroundTexture(raw);
 		lastMouseX = mouseX;
 		lastMouseY = mouseY;
-		float scale = getScale();
-		int scaledWidth = (int) (width / scale);
-		int scaledHeight = (int) (height / scale);
-		// TODO should be the ingredient width if higher
-		int contentWidth = nodeWidth * NODE_WIDTH;
-		int contentHeight = nodeHeight * NODE_VERTICAL_SPACING + 80;
-		int xBound = scaledWidth / 2 + contentWidth - 100;
-		int topBound = scaledHeight * 1 / -2 + 20;
-		int bottomBound = contentHeight + scaledHeight / 2 - 20;
-		offX = MathHelper.clamp(offX, -xBound, xBound);
-		offY = MathHelper.clamp(offY, -bottomBound, -topBound);
-
-		int mx = (int) ((mouseX - width / 2) / scale - offX);
-		int my = (int) ((mouseY - height / 2) / scale - offY);
-
-		MatrixStack view = RenderSystem.getModelViewStack();
-		view.push();
-		view.translate(width / 2, height / 2, 0);
-		view.scale(scale, scale, 1);
-		view.translate(offX, offY, 0);
-		EmiPort.applyModelViewMatrix();
-		if (BoM.tree != null) {
-			batcher.begin(0, 0, 0);
-			int cy = nodeHeight * NODE_VERTICAL_SPACING * 2;
-			context.drawCenteredText(EmiPort.translatable("emi.total_cost"), 0, cy - 16);
-			if (hasRemainders) {
-				context.drawCenteredText(EmiPort.translatable("emi.leftovers"), 0, cy - 16 + 40);
-			}
-			for (Cost cost : costs) {
-				cost.render(context);
-			}
-			for (Node node : nodes) {
-				node.render(context, mx, my, delta);
-			}
-			int color = -1;
-			if (batches.contains(mx, my)) {
-				color = 0xff8099ff;
-			}
-			context.drawTextWithShadow(EmiPort.literal("x" + BoM.tree.batches),
-					batches.x() + 6, batches.y() + batches.height() / 2 - 4, color);
-
-			if (mode.contains(mx, my)) {
-				context.setColor(0.5f, 0.6f, 1f, 1f);
-			}
-			context.drawTexture(EmiRenderHelper.WIDGETS, mode.x(), mode.y(), BoM.craftingMode ? 16 : 0, 146, mode.width(), mode.height());
-			context.setColor(1f, 1f, 1f, 1f);
-			batcher.draw();
-		} else {
-			context.drawCenteredText(EmiPort.translatable("emi.tree_welcome", EmiRenderHelper.getEmiText()), 0, -72);
-			context.drawCenteredText(EmiPort.translatable("emi.no_tree"), 0, -48);
-			context.drawCenteredText(EmiPort.translatable("emi.random_tree"), 0, -24);
-			context.drawCenteredText(EmiPort.translatable("emi.random_tree_input"), 0, 0);
+		context.fill(0, top, leftWidth, height - top - 24, 0xc020222a);
+		context.drawText(tr("plans"), 5, 9, 0xffb6c7e8);
+		renderPlans(context);
+		raw.enableScissor(canvas.x(), canvas.y(), canvas.right(), canvas.bottom());
+		context.push();
+		context.translate((float) (canvas.x() + canvas.width() / 2.0 + panX), (float) (canvas.y() + panY));
+		context.matrices().scale(zoom, zoom, 1);
+		renderGraph(context, delta);
+		context.pop();
+		raw.disableScissor();
+		if (model == null) context.drawCenteredText(tr("empty"), canvas.x() + canvas.width() / 2, canvas.y() + 36);
+		if (showStats) renderStats(context, mouseX, mouseY, delta);
+		if (tree() != null) {
+			context.fill(canvas.x(), canvas.bottom() + 2, canvas.width(), 20, 0xcc20222a);
+			context.drawCenteredText(tr("batches", tree().batches), canvas.x() + canvas.width() / 2, canvas.bottom() + 7);
 		}
-
-		view.pop();
-		EmiPort.applyModelViewMatrix();
-
-		if (help.contains(mouseX, mouseY)) {
-			context.setColor(0.5f, 0.6f, 1f, 1f);
-		}
-		context.drawTexture(EmiRenderHelper.WIDGETS, help.x(), help.y(), 0, 200, help.width(), help.height());
-		context.setColor(1f, 1f, 1f, 1f);
-
-		Hover hover = getHoveredStack(mouseX, mouseY);
-		if (hover != null) {
-			hover.drawTooltip(this, context, mouseX, mouseY);
-		} else if (BoM.tree != null && batches.contains(mx, my)) {
-			List<TooltipComponent> list = Lists.newArrayList();
-			list.addAll(EmiTooltip.splitTranslate("tooltip.emi.bom.batch_size", BoM.tree.batches));
-			list.add(EmiTooltipComponents.of(EmiPort.translatable("tooltip.emi.bom.batch_size.ideal", EmiBind.LEFT_CLICK.getBindText())));
-			EmiRenderHelper.drawTooltip(this, context, list, mouseX, mouseY);
-		} else if (BoM.tree != null && mode.contains(mx, my)) {
-			String key = BoM.craftingMode ? "tooltip.emi.bom.mode.craft" : "tooltip.emi.bom.mode.view";
-			List<TooltipComponent> list = EmiTooltip.splitTranslate(key, BoM.tree.batches);
-			EmiRenderHelper.drawTooltip(this, context, list, mouseX, mouseY);
-		} else if (help.contains(mouseX, mouseY)) {
-			List<TooltipComponent> list =  EmiTooltip.splitTranslate("tooltip.emi.bom.help");
-			EmiRenderHelper.drawTooltip(this, context, list, width - 18, height - 18, width);
+		context.drawText(EmiPort.literal(textRenderer.trimToWidth(notice.getString(), Math.max(1, width - 10))), 5, height - 10, 0xffb6c7e8);
+		super.render(raw, mouseX, mouseY, delta);
+		Visual hovered = hovered(mouseX, mouseY);
+		if (hovered != null && !search.isFocused() && !name.isFocused()) drawEntryTooltip(context, hovered.entry, mouseX, mouseY);
+		else if (showStats && mouseX >= width - rightWidth && mouseY >= top) {
+			int index = statScroll + (mouseY - top - 4) / 22;
+			if (index >= 0 && index < stats.size()) {
+				StatRow row = stats.get(index);
+				if (row.ingredient != null) EmiRenderHelper.drawTooltip(this, context, row.ingredient.getTooltip(), mouseX, mouseY);
+			}
 		}
 	}
 
-	public Hover getHoveredStack(int mx, int my) {
-		float scale = getScale();
-		mx = (int) ((mx - width / 2) / scale - offX);
-		my = (int) ((my - height / 2) / scale - offY);
-		for (Cost cost : costs) {
-			if (mx >= cost.x && mx < cost.x + 16 && my >= cost.y && my < cost.y + 16) {
-				return new Hover(cost.cost.ingredient);
-			}
+	private void renderPlans(EmiDrawContext context) {
+		List<CraftingPlan> plans = groupTree == null ? CraftingPlans.all() : List.of();
+		int visible = Math.max(0, (height - top - 50) / 23);
+		planScroll = MathHelper.clamp(planScroll, 0, Math.max(0, plans.size() - visible));
+		for (int i = planScroll; i < Math.min(plans.size(), planScroll + visible); i++) {
+			int y = top + 27 + (i - planScroll) * 23;
+			if (plans.get(i) == plan()) context.fill(2, y - 2, leftWidth - 4, 22, 0xff384966);
+			context.drawText(EmiPort.literal(textRenderer.trimToWidth(plans.get(i).name, leftWidth - 10)), 5, y + 4);
 		}
-		for (Node node : nodes) {
-			Hover hover = node.getHover(mx, my);
-			if (hover != null) {
-				return hover;
-			}
+	}
+
+	private void renderGraph(EmiDrawContext context, float delta) {
+		if (model == null) return;
+		for (CraftingTreeModel.Link link : model.links) {
+			Visual parent = visualByEntry.get(link.parent), child = visualByEntry.get(link.child);
+			if (parent == null || child == null || folded.contains(CraftingPlans.key(link.parent.ingredient))) continue;
+			int x1 = parent.x + parent.width / 2, y1 = parent.y + 40, x2 = child.x + child.width / 2, y2 = child.y;
+			int middle = y1 + (y2 - y1) / 2;
+			int color = useInventory && child.entry.needed == 0 ? 0xff58b783 : 0xff6b7d9d;
+			context.fill(x1, y1, 1, Math.max(1, middle - y1), color);
+			context.fill(Math.min(x1, x2), middle, Math.abs(x2 - x1) + 1, 1, color);
+			context.fill(x2, middle, 1, Math.max(1, y2 - middle), color);
 		}
+		String query = search == null ? "" : search.getText().toLowerCase(Locale.ROOT);
+		for (Visual v : visuals) {
+			boolean match = !query.isBlank() && matches(v.entry, query);
+			int border = match ? 0xffffcc55 : v.entry.cycle || v.entry.truncated ? 0xffdb8457 : useInventory && v.entry.needed == 0 ? 0xff58b783 : 0xff8299bd;
+			context.fill(v.x - 1, v.y - 1, v.width + 2, 42, border);
+			context.fill(v.x, v.y, v.width, 40, 0xff20242e);
+			v.entry.ingredient.render(context.raw(), v.x + 4, v.y + 4, delta, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
+			context.drawText(EmiPort.literal(textRenderer.trimToWidth(label(v.entry.ingredient), v.width - 28)), v.x + 24, v.y + 5);
+			Text quantity = EmiRenderHelper.getAmountText(v.entry.ingredient, useInventory ? v.entry.needed : v.entry.total);
+			if (v.entry.chance != 1) quantity = EmiPort.literal("≈" + quantity.getString());
+			context.drawText(quantity, v.x + 24, v.y + 18, border);
+			if (v.entry.recipe != null) {
+				v.entry.recipe.getCategory().renderSimplified(context.raw(), v.x + 4, v.y + 22, delta);
+			}
+			if (!v.entry.children.isEmpty()) context.drawText(EmiPort.literal(folded.contains(CraftingPlans.key(v.entry.ingredient)) ? "+" : "−"), v.x + v.width - 9, v.y + 28, 0xffb6c7e8);
+		}
+	}
+
+	private int statRows() { return Math.max(1, (height - top - 28) / 22); }
+
+	private void renderStats(EmiDrawContext context, int mx, int my, float delta) {
+		int x = width - rightWidth;
+		context.fill(x, top, rightWidth, height - top - 24, 0xe020222a);
+		for (int i = statScroll; i < Math.min(stats.size(), statScroll + statRows()); i++) {
+			StatRow row = stats.get(i);
+			int y = top + 4 + (i - statScroll) * 22;
+			if (row.ingredient != null) {
+				row.ingredient.render(context.raw(), x + 4, y, delta, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
+				context.drawText(EmiPort.literal(textRenderer.trimToWidth(row.text.getString(), rightWidth - 28)), x + 24, y + 5);
+			} else context.drawText(EmiPort.literal(textRenderer.trimToWidth(row.text.getString(), rightWidth - 10)), x + 5, y + 5, 0xffb6c7e8);
+		}
+	}
+
+	private void drawEntryTooltip(EmiDrawContext context, Entry e, int mx, int my) {
+		List<TooltipComponent> tooltip = new ArrayList<>(e.ingredient.getTooltip());
+		tooltip.add(TooltipComponent.of(tr("quantity", e.total, e.needed).asOrderedText()));
+		tooltip.add(TooltipComponent.of(tr("node_help").asOrderedText()));
+		if (e.cycle) tooltip.add(TooltipComponent.of(tr("cycle").asOrderedText()));
+		if (e.truncated) tooltip.add(TooltipComponent.of(tr("truncated").asOrderedText()));
+		if (e.catalyst) tooltip.add(TooltipComponent.of(tr("catalyst").asOrderedText()));
+		if (e.recipe != null) tooltip.add(new RecipeTooltipComponent(e.recipe));
+		EmiRenderHelper.drawTooltip(this, context, tooltip, mx, my);
+	}
+
+	private Visual hovered(double mx, double my) {
+		if (!canvas.contains((int) mx, (int) my)) return null;
+		double x = (mx - canvas.x() - canvas.width() / 2.0 - panX) / zoom;
+		double y = (my - canvas.y() - panY) / zoom;
+		for (Visual v : visuals) if (x >= v.x && x < v.x + v.width && y >= v.y && y < v.y + 40) return v;
 		return null;
 	}
 
-	public int getNodeHeight(MaterialNode node) {
-		if (node.recipe != null && node.state == FoldState.EXPANDED) {
-			int i = 1;
-			for (MaterialNode n : node.children) {
-				i = Math.max(i, getNodeHeight(n));
-			}
-			if (node.recipe instanceof EmiResolutionRecipe) {
-				return i;
-			}
-			return i + 1;
-		}
-		return 1;
+	private boolean matches(Entry e, String query) {
+		return label(e.ingredient).toLowerCase(Locale.ROOT).contains(query)
+			|| e.ingredient.getEmiStacks().stream().anyMatch(s -> s.getId().toString().toLowerCase(Locale.ROOT).contains(query));
 	}
 
-	public TreeVolume addNewNodes(MaterialNode node, long multiplier, long divisor, int depth, ChanceState chance) {
-		if (node.catalyst) {
-			multiplier = node.amount;
-		} else {
-			multiplier = node.amount * (int) Math.ceil(multiplier / (float) divisor);
-		}
-		if (node.recipe != null && node.children.size() > 0 && node.state == FoldState.EXPANDED) {
-			ChanceState produced = chance.produce(node.produceChance);
-			if (node.recipe instanceof EmiResolutionRecipe) {
-				TreeVolume volume = addNewNodes(node.children.get(0), multiplier, node.divisor, depth, produced);
-				volume.nodes.get(0).resolution = node;
-				return volume;
-			}
-			TreeVolume left = null;
-			for (int i = 0; i < node.children.size(); i++) {
-				ChanceState consumed = produced.consume(node.children.get(i).consumeChance);
-				TreeVolume volume = addNewNodes(node.children.get(i), multiplier, node.divisor, depth + 1, consumed);
-				if (left == null) {
-					left = volume;
-				} else {
-					left.addToRight(volume);
-				}
-			}
-			left.addHead(node, multiplier, depth * NODE_VERTICAL_SPACING, chance);
-			return left;
-		}
-		return new TreeVolume(node, multiplier, depth * NODE_VERTICAL_SPACING, chance);
+	private void find(boolean backwards) {
+		if (model == null || search.getText().isBlank()) return;
+		List<Entry> matches = model.entries.stream().filter(e -> matches(e, search.getText().toLowerCase(Locale.ROOT))).toList();
+		if (matches.isEmpty()) { notice = tr("no_matches"); return; }
+		searchIndex = searchIndex < 0 ? (backwards ? matches.size() - 1 : 0) : Math.floorMod(searchIndex + (backwards ? -1 : 1), matches.size());
+		Entry target = matches.get(searchIndex);
+		// Reveal every ancestor without altering any recipe or calculated quantity.
+		Set<Entry> path = Collections.newSetFromMap(new IdentityHashMap<>());
+		path.add(target);
+		boolean changed;
+		do {
+			changed = false;
+			for (CraftingTreeModel.Link link : model.links) if (path.contains(link.child) && path.add(link.parent)) changed = true;
+		} while (changed);
+		for (Entry e : path) folded.remove(CraftingPlans.key(e.ingredient));
+		layoutGraph();
+		Visual v = visualByEntry.get(target);
+		if (v != null) { panX = -(v.x + v.width / 2.0) * zoom; panY = canvas.height() / 2.0 - (v.y + 20) * zoom; }
+		remember();
 	}
 
-	private static void drawLine(EmiDrawContext context, int x1, int y1, int x2, int y2) {
-		if (x2 < x1) {
-			drawLine(context, x2, y1, x1, y2);
-			return;
-		}
-		if (y2 < y1) {
-			drawLine(context, x1, y2, x2, y1);
-			return;
-		}
-		context.fill(x1, y1, x2 - x1 + 1, y2 - y1 + 1, 0xFFFFFFFF);
-	}
-
-	public float getScale() {
-		zoom = MathHelper.clamp(zoom, -6, 4);
-		int scale = (int) this.client.getWindow().getScaleFactor();
-		int desired = scale + zoom;
-		if (desired < 1) {
-			zoom -= desired - 1;
-			desired = 1;
-		}
-		return (float) desired / scale;
-	}
-
-	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-			this.close();
-			return true;
-		} else if (this.client.options.inventoryKey.matchesKey(keyCode, scanCode)) {
-			this.close();
-			return true;
-		}
-		Function<EmiBind, Boolean> function = bind -> bind.matchesKey(keyCode, scanCode);
-		if (function.apply(EmiConfig.back)) {
-			EmiHistory.pop();
-			return true;
-		}
-		Hover hover = getHoveredStack(lastMouseX, lastMouseY);
-		if (hover != null && hover.stack != null && !hover.stack.isEmpty()) {
-			if (function.apply(EmiConfig.favorite)) {
-				EmiFavorites.addFavorite(hover.stack, hover.node == null ? null : hover.node.recipe);
+	private void recipes(EmiIngredient ingredient, EmiRecipe recipe, boolean uses) {
+		remember();
+		if (uses) EmiApi.displayUses(ingredient);
+		else {
+			EmiApi.displayRecipes(ingredient);
+			if (groupTree == null && client.currentScreen instanceof RecipeScreen rs) {
+				rs.setResolutionTarget(ingredient);
+				rs.init(client, rs.width, rs.height);
+				if (recipe != null) EmiApi.focusRecipe(recipe);
 			}
 		}
-		if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_R) {
-			List<EmiRecipe> recipes = EmiApi.getRecipeManager().getRecipes();
-			if (recipes.size() > 0) {
-				for (int i = 0; i < 100_000; i++) {
-					EmiRecipe recipe = recipes.get(EmiUtil.RANDOM.nextInt(recipes.size()));
-					if (recipe.supportsRecipeTree()) {
-						BoM.setGoal(recipe);
-						init();
-						return true;
-					}
-				}
-			}
-		} else if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_C) {
-			BoM.tree = null;
-			init();
-		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
-	}
-
-	private boolean getAutoResolutions(Hover hover, BiConsumer<EmiIngredient, EmiRecipe> consumer) {
-		EmiPlayerInventory inv = playerInv;
-		if (inv != null) {
-			List<EmiStack> stacks = hover.stack.getEmiStacks();
-			if (stacks.size() > 1) {
-				for (EmiStack stack : stacks) {
-					if (inv.inventory.containsKey(stack)) {
-						consumer.accept(hover.stack, new EmiResolutionRecipe(hover.stack, stack));
-						return true;
-					}
-				}
-				for (EmiStack stack : stacks) {
-					for (Cost cost : costs) {
-						if (cost.cost.ingredient.equals(stack)) {
-							consumer.accept(hover.stack, new EmiResolutionRecipe(hover.stack, stack));
-							return true;
-						}
-					}
-				}
-				consumer.accept(hover.stack, new EmiResolutionRecipe(hover.stack, stacks.get(0)));
-				return true;
-			} else {
-				EmiRecipe recipe = EmiUtil.getRecipeResolution(hover.stack, inv);
-				if (recipe != null) {
-					consumer.accept(hover.stack, recipe);
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		Hover hover = getHoveredStack((int) mouseX, (int) mouseY);
-		float scale = getScale();
-		int mx = (int) ((mouseX - width / 2) / scale - offX);
-		int my = (int) ((mouseY - height / 2) / scale - offY);
-		if (hover != null) {
-			if (button == 1 && hover.node != null && hover.node.recipe != null) {
-				if (EmiInput.isShiftDown()) {
-					BoM.tree.addResolution(hover.node.ingredient, null);
-				} else if (!(hover.node.recipe instanceof EmiResolutionRecipe)) {
-					if (hover.node.state == FoldState.EXPANDED) {
-						hover.node.state = FoldState.COLLAPSED;
-					} else {
-						hover.node.state = FoldState.EXPANDED;
-					}
-				}
-				recalculateTree();
-				return true;
-			}
-			if (hover.stack != null) {
-				if (EmiInput.isShiftDown() && button == 0) {
-					if (getAutoResolutions(hover, BoM.tree::addResolution)) {
-						recalculateTree();
-					}
-					return true;
-				} else {
-					if (button == 0) {
-						EmiApi.displayRecipes(hover.stack);
-						RecipeScreen.resolve = hover.stack;
-						MinecraftClient client = MinecraftClient.getInstance();
-						// The first init doesn't realize a resolution exists so we do it again. What
-						// could go wrong.
-						client.currentScreen.init(client, client.currentScreen.width, client.currentScreen.height);
-						if (hover.node != null) {
-							if (hover.node.recipe != null) {
-								EmiApi.focusRecipe(hover.node.recipe);
-							}
-						}
-						return true;
-					}
-				}
-			}
-		} else if (mode.contains(mx, my)) {
-			EmiPort.playClickSound();
-			BoM.craftingMode = !BoM.craftingMode;
-			recalculateTree();
-		} else if (batches.contains(mx, my) && BoM.tree != null) {
-			long ideal = BoM.tree.cost.getIdealBatch(BoM.tree.goal, 1, 1);
-			if (ideal != BoM.tree.batches) {
-				EmiPort.playClickSound();
-				BoM.tree.batches = ideal;
-				recalculateTree();
-			}
-		}
-		Function<EmiBind, Boolean> function = bind -> bind.matchesMouse(button);
-		if (function.apply(EmiConfig.back)) {
-			EmiHistory.pop();
+		if (super.mouseClicked(mouseX, mouseY, button)) return true;
+		search.setFocused(false);
+		name.setFocused(false);
+		if (EmiConfig.back.matchesMouse(button)) { remember(); EmiHistory.pop(); return true; }
+		Visual boundHover = hovered(mouseX, mouseY);
+		if (button > 2 && boundHover != null && stackAction(boundHover, bind -> bind.matchesMouse(button))) return true;
+		if (groupTree == null && mouseX < leftWidth && mouseY >= top + 27 && mouseY < height - 24) {
+			int index = planScroll + ((int) mouseY - top - 27) / 23;
+			if (index < CraftingPlans.all().size()) { remember(); CraftingPlans.open(index); firstLayout = true; init(); }
 			return true;
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		if (showStats && mouseX >= width - rightWidth && mouseY >= top + 4 && mouseY < height - 24) {
+			int index = statScroll + ((int) mouseY - top - 4) / 22;
+			if (index < stats.size() && stats.get(index).ingredient != null) {
+				StatRow row = stats.get(index);
+				if (button == 0) { search.setText(label(row.ingredient)); find(EmiInput.isShiftDown()); }
+				else if (button == 1) recipes(row.ingredient, row.recipe, false);
+			}
+			return true;
+		}
+		Visual v = hovered(mouseX, mouseY);
+		if (canvas.contains((int) mouseX, (int) mouseY) && (button == 0 || button == 2)) {
+			pressedNode = v;
+			draggingGraph = true;
+			movedGraph = false;
+			dragDistance = 0;
+			return true;
+		}
+		if (v != null) {
+			if (groupTree == null && button == 1 && EmiInput.isShiftDown() && v.entry != model.entries.get(0)) {
+				BoM.addResolution(v.entry.ingredient, null);
+				recalculateTree();
+				remember();
+			} else if (button == 1) {
+				String key = CraftingPlans.key(v.entry.ingredient);
+				if (!folded.remove(key)) folded.add(key);
+				layoutGraph(); remember();
+			}
+			return true;
+		}
+		return false;
 	}
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
 		scrollAcc += amount;
-		amount = (int) scrollAcc;
-		scrollAcc %= 1;
-		float scale = getScale();
-		int mx = (int) ((mouseX - width / 2) / scale - offX);
-		int my = (int) ((mouseY - height / 2) / scale - offY);
-		if (BoM.tree != null && batches.contains(mx, my)) {
-			long adjustment = (long) amount;
-			if (EmiInput.isShiftDown()) {
-				adjustment *= 16;
-			} else if (EmiInput.isControlDown()) {
-				if (amount > 0) {
-					adjustment = BoM.tree.batches;
-				} else {
-					adjustment = -BoM.tree.batches / 2;
-				}
-			}
-			if (BoM.tree.batches == 1 && adjustment > 1) {
-				BoM.tree.batches = adjustment;
-			} else {
-				BoM.tree.batches += adjustment;
-			}
-			BoM.tree.batches = Math.max(1, BoM.tree.batches);
-			recalculateTree();
-			return true;
+		int steps = (int) scrollAcc;
+		scrollAcc -= steps;
+		if (steps == 0) return true;
+		if (mouseX < leftWidth && mouseY >= top) { planScroll -= steps; return true; }
+		if (showStats && mouseX >= width - rightWidth && mouseY >= top) { statScroll = MathHelper.clamp(statScroll - steps, 0, Math.max(0, stats.size() - statRows())); return true; }
+		if (groupTree == null && tree() != null && (mouseY > canvas.bottom() && mouseY < height - 10 || EmiInput.isControlDown() && hovered(mouseX, mouseY) != null && hovered(mouseX, mouseY).entry == model.entries.get(0))) {
+			long change = steps * (EmiInput.isShiftDown() ? 16L : 1L);
+			tree().batches = change > 0 ? addSaturated(tree().batches, change) : Math.max(1, tree().batches + change);
+			recalculateTree(); remember(); return true;
 		}
-		zoom += (int) amount;
+		Visual v = hovered(mouseX, mouseY);
+		if (groupTree == null && v != null && EmiInput.isShiftDown() && v.entry.ingredient.getEmiStacks().size() > 1) {
+			List<EmiStack> choices = v.entry.ingredient.getEmiStacks();
+			EmiRecipe current = tree().getRecipe(v.entry.ingredient);
+			int index = current instanceof EmiResolutionRecipe r ? choices.indexOf(r.stack) : 0;
+			BoM.addResolution(v.entry.ingredient, new EmiResolutionRecipe(v.entry.ingredient, choices.get(Math.floorMod(index + steps, choices.size()))));
+			recalculateTree(); remember(); return true;
+		}
+		if (!canvas.contains((int) mouseX, (int) mouseY)) return false;
+		float oldZoom = zoom;
+		zoom = MathHelper.clamp(zoom * (float) Math.pow(1.2, steps), 0.15f, 4f);
+		double x = mouseX - canvas.x() - canvas.width() / 2.0;
+		double y = mouseY - canvas.y();
+		panX = x - (x - panX) * zoom / oldZoom;
+		panY = y - (y - panY) * zoom / oldZoom;
 		return true;
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-		if (button == 0 || button == 2) {
-			float scale = getScale();
-			offX += deltaX / scale;
-			offY += deltaY / scale;
+	public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+		if (draggingGraph && (button == 0 || button == 2)) {
+			dragDistance += Math.abs(dx) + Math.abs(dy);
+			movedGraph |= dragDistance > 3;
+			if (movedGraph) { panX += dx; panY += dy; }
 			return true;
 		}
-		return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		return super.mouseDragged(mx, my, button, dx, dy);
 	}
 
 	@Override
-	public boolean shouldPause() {
+	public boolean mouseReleased(double mx, double my, int button) {
+		if (draggingGraph && (button == 0 || button == 2)) {
+			Visual clicked = pressedNode;
+			boolean activate = button == 0 && !movedGraph && clicked != null && hovered(mx, my) == clicked;
+			draggingGraph = false;
+			pressedNode = null;
+			if (activate) {
+				if (groupTree == null && EmiInput.isShiftDown()) {
+					EmiRecipe recipe = EmiUtil.getRecipeResolution(clicked.entry.ingredient, EmiPlayerInventory.of(client.player));
+					if (recipe != null) { BoM.addResolution(clicked.entry.ingredient, recipe); recalculateTree(); remember(); }
+				} else if (!stackAction(clicked, bind -> bind.matchesMouse(button))) recipes(clicked.entry.ingredient, clicked.entry.recipe, false);
+			}
+			return true;
+		}
+		return super.mouseReleased(mx, my, button);
+	}
+
+	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
+			if (search.isFocused() || name.isFocused()) { search.setFocused(false); name.setFocused(false); return true; }
+			close(); return true;
+		}
+		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+			if (name.isFocused()) action("save"); else find(EmiInput.isShiftDown());
+			return true;
+		}
+		if (super.keyPressed(keyCode, scanCode, modifiers)) return true;
+		if (search.isFocused() || name.isFocused()) return false;
+		if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_F) { setFocused(search); search.setFocused(true); return true; }
+		if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_S) { action("save"); return true; }
+		if (EmiConfig.back.matchesKey(keyCode, scanCode)) { remember(); EmiHistory.pop(); return true; }
+		if (client.options.inventoryKey.matchesKey(keyCode, scanCode)) { close(); return true; }
+		Visual v = hovered(lastMouseX, lastMouseY);
+		return v != null && stackAction(v, bind -> bind.matchesKey(keyCode, scanCode));
+	}
+
+	private boolean stackAction(Visual v, java.util.function.Predicate<dev.emi.emi.input.EmiBind> matches) {
+		if (matches.test(EmiConfig.favorite)) { EmiFavorites.addFavorite(v.entry.ingredient, v.entry.recipe); return true; }
+		if (matches.test(EmiConfig.viewUses)) { recipes(v.entry.ingredient, v.entry.recipe, true); return true; }
+		if (matches.test(EmiConfig.viewRecipes)) { recipes(v.entry.ingredient, v.entry.recipe, false); return true; }
 		return false;
 	}
 
-	@Override
-	public void close() {
-		MinecraftClient.getInstance().setScreen(old);
+	private void screenshot() {
+		if (model == null || visuals.isEmpty()) return;
+		int imageWidth = graphWidth + (showStats ? 240 : 0) + 32;
+		int imageHeight = Math.max(graphHeight + 55, showStats ? stats.size() * 22 + 32 : 1);
+		int scale = EmiConfig.recipeScreenshotScale < 1 ? EmiPort.getGuiScale(client) : EmiConfig.recipeScreenshotScale;
+		// Guard before allocating GPU/CPU storage. Oversized trees remain fully editable.
+		long pixels = (long) imageWidth * imageHeight * scale * scale;
+		if (imageWidth * (long) scale > 8192 || imageHeight * (long) scale > 8192 || pixels > 16_777_216L) { notice = tr("image_too_large"); return; }
+		EmiScreenshotRecorder.saveScreenshot("emi/trees/plan", imageWidth, imageHeight, () -> {
+			DrawContext raw = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
+			EmiDrawContext context = EmiDrawContext.wrap(raw);
+			context.fill(0, 0, imageWidth, imageHeight, 0xff171b24);
+			context.drawText(title, 12, 8);
+			context.push();
+			context.translate(graphWidth / 2f + 16, 30);
+			renderGraph(context, 0);
+			context.pop();
+			if (showStats) for (int i = 0; i < stats.size(); i++) {
+				StatRow row = stats.get(i);
+				int x = graphWidth + 26, y = 24 + i * 22;
+				if (row.ingredient != null) row.ingredient.render(raw, x, y, 0, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
+				context.drawText(EmiPort.literal(textRenderer.trimToWidth(row.text.getString(), 202)), x + (row.ingredient == null ? 0 : 22), y + 4);
+			}
+			raw.draw();
+		});
 	}
 
-	private class Cost {
-		public FlatMaterialCost cost;
-		public int x, y;
-		public long alreadyDone = 0;
-		public boolean remainder;
+	@Override public boolean shouldPause() { return false; }
+	@Override public void close() { remember(); client.setScreen(returnScreen); }
 
-		public Cost(FlatMaterialCost cost, int x, int y, boolean remainder) {
-			this.cost = cost;
-			this.x = x;
-			this.y = y;
-			this.remainder = remainder;
-		}
-
-		public void render(EmiDrawContext context) {
-			batcher.render(cost.ingredient, context.raw(), x, y, 0, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
-			EmiRenderHelper.renderAmount(context, x, y, getAmountText());
-		}
-
-		public Text getAmountText() {
-			long adjusted = cost.getEffectiveAmount();
-			Text totalText;
-			if (cost instanceof ChanceMaterialCost cmc) {
-				totalText = EmiPort.append(EmiPort.literal("≈"), EmiRenderHelper.getAmountText(cost.ingredient, adjusted))
-					.formatted(Formatting.GOLD);
-			} else {
-				totalText = EmiRenderHelper.getAmountText(cost.ingredient, adjusted);
-			}
-			if (!remainder && BoM.craftingMode) {
-				long amount = alreadyDone;
-				if (amount < adjusted) {
-					Text amountText = amount == 0 ? EmiPort.literal("0") : (EmiRenderHelper.getAmountText(cost.ingredient, amount));
-					MutableText text = EmiPort.append(EmiPort.literal("", Formatting.RED), amountText);
-					text = EmiPort.append(text, EmiPort.literal("/"));
-					text = EmiPort.append(text, totalText);
-					return text;
-				}
-			}
-			return totalText;
+	private class Visual {
+		final Entry entry;
+		final int width;
+		int x, y;
+		Visual(Entry entry) {
+			this.entry = entry;
+			width = Math.max(90, Math.min(170, textRenderer.getWidth(label(entry.ingredient)) + 32));
 		}
 	}
-
-	private class Hover {
-		public EmiIngredient stack;
-		public MaterialNode node, resolve;
-		public EmiRecipeCategory category;
-
-		public Hover(EmiIngredient stack) {
-			this.stack = stack;
-		}
-
-		public Hover(EmiIngredient stack, MaterialNode node, MaterialNode resolve) {
-			this.stack = stack;
-			this.node = node;
-			this.resolve = resolve;
-		}
-
-		public Hover(EmiRecipeCategory category, MaterialNode node) {
-			this.category = category;
-			this.node = node;
-		}
-
-		public Hover(MaterialNode node) {
-			this.node = node;
-		}
-
-		public boolean drawTooltip(Screen screen, EmiDrawContext context, int mouseX, int mouseY) {
-			if (stack != null) {
-				List<TooltipComponent> list = Lists.newArrayList();
-				list.addAll(stack.getTooltip());
-				if (EmiInput.isShiftDown()) {
-					getAutoResolutions(this, (stack, recipe) -> {
-						if (node == null || recipe != node.recipe) {
-							list.add(new RecipeTooltipComponent(recipe, 0x4488FFAA));
-						} else {
-							list.add(new RecipeTooltipComponent(recipe));
-						}
-					});
-				} else if (node != null && node.recipe != null) {
-					list.add(new RecipeTooltipComponent(node.recipe));
-				}
-				if (node != null) {
-					if (node.consumeChance != 1) {
-						list.add(EmiTooltip.chance("consume", node.consumeChance));
-					} else if (resolve != null && resolve.consumeChance != 1) {
-						list.add(EmiTooltip.chance("consume", resolve.consumeChance));
-					}
-					if (node.produceChance != 1) {
-						list.add(EmiTooltip.chance("produce", node.produceChance));
-					}
-				}
-				EmiRenderHelper.drawTooltip(screen, context, list, mouseX, mouseY);
-				return true;
-			} else if (category != null) {
-				EmiRenderHelper.drawTooltip(screen, context, category.getTooltip(), mouseX, mouseY);
-				return true;
-			}
-			return false;
-		}
-	}
-
-	private class Node {
-		public Node parent = null;
-		public MaterialNode resolution = null;
-		public MaterialNode node;
-		public int width, x, y, midOffset;
-		public long amount;
-		public ChanceState chance;
-
-		public Node(MaterialNode node, long amount, int x, int y, ChanceState chance) {
-			this.node = node;
-			if (node.recipe != null) {
-				width = 42;
-			} else {
-				width = 16;
-			}
-			this.amount = amount;
-			this.x = x;
-			this.y = y;
-			this.chance = chance;
-			int tw = EmiRenderHelper.getAmountOverflow(getAmountText());
-			width += tw;
-			midOffset = tw / -2;
-		}
-
-		public void render(EmiDrawContext context, int mouseX, int mouseY, float delta) {
-			if (parent != null) {
-				context.push();
-
-				setColor(context, parent.node, node.consumeChance != 1 || (resolution != null && resolution.consumeChance != 1), false);
-				
-				int nx = x;
-				int ny = y;
-				int px = parent.x;
-				int py = parent.y;
-				int off = NODE_VERTICAL_SPACING - 1;
-				if (resolution != null) {
-					context.drawTexture(EmiRenderHelper.WIDGETS, x - 3, y - 19, 9, 192, 7, 7);
-					drawLine(context, nx, y - 12, nx, ny - 11);
-					drawLine(context, nx, py + off, nx, y - 19);
-				} else {
-					drawLine(context, nx, ny - 11, nx, py + off);
-				}
-				setColor(context, parent.node, false, false);
-				drawLine(context, px, py + off, nx, py + off);
-				context.pop();
-			}
-			int xo = 0;
-			if (node.recipe != null) {
-				int lx = x - width / 2;
-				int ly = y - 11;
-				int hx = x + width / 2;
-				int hy = y + 10;
-				context.push();
-
-				setColor(context, node, node.produceChance != 1, false);
-
-				if (node.state != FoldState.EXPANDED) {
-					drawLine(context, x, hy + 1, x, hy + 3);
-				} else {
-					drawLine(context, x, hy + 1, x, hy + 8);
-				}
-
-				boolean hovered = mouseX >= lx && mouseY >= ly && mouseX <= hx && mouseY <= hy;
-				setColor(context, node, node.produceChance != 1, hovered);
-				drawLine(context, lx, ly, lx, hy);
-				drawLine(context, hx, ly, hx, hy);
-				drawLine(context, lx, ly, hx, ly);
-				drawLine(context, lx, hy, hx, hy);
-				EmiRecipeCategory cat = node.recipe.getCategory();
-				if (StackBatcher.isEnabled() && EmiRecipeCategoryProperties.getSimplifiedIcon(cat) instanceof Batchable b) {
-					batcher.render(b, context.raw(), x - 18 + midOffset, y - 8, delta);
-				} else {
-					cat.renderSimplified(context.raw(), x - 18 + midOffset, y - 8, delta);
-				}
-				xo = 11;
-				context.pop();
-			}
-			context.setColor(1f, 1f, 1f, 1f);
-			batcher.render(node.ingredient, context.raw(), x + xo - 8 + midOffset, y - 8, 0);
-			EmiRenderHelper.renderAmount(context, x + xo - 8 + midOffset, y - 8, getAmountText());
-		}
-
-		public void setColor(EmiDrawContext context, MaterialNode node, boolean chanced, boolean hovered) {
-			context.setColor(1f, 1f, 1f, 1f);
-			if (chanced) {
-				context.setColor(0.8f, 0.6f, 0.1f, 1f);
-			}
-			if (BoM.craftingMode) {
-				if (node.progress == ProgressState.COMPLETED) {
-					context.setColor(0.1f, 0.8f, 0.5f, 1f);
-				} else if (node.progress == ProgressState.PARTIAL) {
-					context.setColor(0.8f, 0.2f, 0.9f, 1f);
-				}
-			}
-			if (hovered) {
-				context.setColor(0.5f, 0.6f, 1f, 1f);
-			}
-		}
-
-		public Text getAmountText() {
-			if (chance.chanced()) {
-				long a = Math.round(amount * chance.chance());
-				a = Math.max(a, node.amount);
-				return EmiPort.append(EmiPort.literal("≈"),
-						EmiRenderHelper.getAmountText(node.ingredient, a))
-					.formatted(Formatting.GOLD);
-			} else {
-				return EmiRenderHelper.getAmountText(node.ingredient, amount);
-			}
-		}
-
-		public Hover getHover(int mouseX, int mouseY) {
-			if (resolution != null) {
-				if (mouseX >= x - 4 && mouseX < x + 4 && mouseY >= y - 19 && mouseY < y - 11) {
-					return new Hover(resolution.ingredient, resolution, null);
-				}
-			}
-			int imx = mouseX;
-			if (node.recipe != null) {
-				if (mouseX >= x - 18 + midOffset && mouseX < x - 2 + midOffset && mouseY >= y - 8 && mouseY < y + 8) {
-					return new Hover(node.recipe.getCategory(), node);
-				}
-				imx -= 11;
-			}
-			if (imx >= x - 8 + midOffset && imx < x + 8 + midOffset && mouseY >= y - 8 && mouseY < y + 8) {
-				return new Hover(node.ingredient, node, resolution);
-			}
-			int lx = x - width / 2;
-			int ly = y - 11;
-			int hx = x + width / 2;
-			int hy = y + 10;
-			if (mouseX >= lx && mouseY >= ly && mouseX <= hx && mouseY <= hy) {
-				return new Hover(node);
-			}
-			return null;
-		}
-	}
-
-	private class TreeVolume {
-		public List<Width> widths = Lists.newArrayList();
-		public List<Node> nodes = Lists.newArrayList();
-
-		public TreeVolume(MaterialNode node, long amount, int y, ChanceState chance) {
-			Node head = new Node(node, amount, 0, y, chance);
-			int l = head.width / 2;
-			widths.add(new Width(-l, head.width - l));
-			nodes.add(head);
-		}
-
-		public void addHead(MaterialNode node, long amount, int y, ChanceState chance) {
-			int x = (getLeft(0) + getRight(0)) / 2;
-			Node newNode = new Node(node, amount, x, y, chance);
-			for (Node n : nodes) {
-				if (n.parent == null) {
-					n.parent = newNode;
-				}
-				n.y += NODE_VERTICAL_SPACING;
-			}
-			int l = newNode.width / 2;
-			widths.add(0, new Width(x - l, x + newNode.width - l));
-			nodes.add(0, newNode);
-		}
-
-		public int getDepth() {
-			return widths.size();
-		}
-
-		public int getMinLeft() {
-			int m = getLeft(0);
-			for (int i = 1; i < getDepth(); i++) {
-				m = Math.min(m, getLeft(i));
-			}
-			return m;
-		}
-
-		public int getMaxRight() {
-			int m = getRight(0);
-			for (int i = 1; i < getDepth(); i++) {
-				m = Math.max(m, getRight(i));
-			}
-			return m;
-		}
-
-		public int getLeft(int depth) {
-			return widths.get(depth).left;
-		}
-
-		public int getRight(int depth) {
-			return widths.get(depth).right;
-		}
-
-		public void addToRight(TreeVolume other) {
-			int rOff = getRight(0) - other.getLeft(0) + NODE_HORIZONTAL_SPACING;
-			for (int i = 1; i < getDepth() && i < other.getDepth(); i++) {
-				rOff = Math.max(rOff, getRight(i) - other.getLeft(i) + NODE_HORIZONTAL_SPACING);
-			}
-			for (int i = 0; i < other.getDepth(); i++) {
-				if (i < getDepth()) {
-					widths.get(i).right = other.getRight(i) + rOff;
-				} else {
-					widths.add(new Width(other.getLeft(i) + rOff, other.getRight(i) + rOff));
-				}
-			}
-			for (Node node : other.nodes) {
-				node.x += rOff;
-				nodes.add(node);
-			}
-		}
-
-		private static class Width {
-			private int left, right;
-
-			public Width(int left, int right) {
-				this.left = left;
-				this.right = right;
-			}
-		}
-	}
+	private record StatRow(Text text, EmiIngredient ingredient, EmiRecipe recipe) {}
 }

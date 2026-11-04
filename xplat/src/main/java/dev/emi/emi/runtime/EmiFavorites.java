@@ -143,6 +143,7 @@ public class EmiFavorites {
 		} else {
 			favorites.add(offset, favorite);
 		}
+		EmiBookmarkGroups.favoritesChanged();
 		EmiPersistentData.save();
 	}
 
@@ -186,6 +187,7 @@ public class EmiFavorites {
 				favorites.add(new EmiFavorite(stack, null));
 			}
 		}
+		EmiBookmarkGroups.favoritesChanged();
 		EmiPersistentData.save();
 	}
 
