@@ -118,6 +118,11 @@ public class EmiConfig {
 	@ConfigValue("ui.bookmark-quantity-step")
 	public static int bookmarkQuantityStep = 64;
 
+	@Comment("Initial layout for new bookmark groups. DEFAULT flows items through the grid;"
+		+ " TODO puts each result/item on its own row. The group header still toggles this per group.")
+	@ConfigValue("ui.bookmark-view-mode")
+	public static BookmarkViewMode bookmarkViewMode = BookmarkViewMode.DEFAULT;
+
 	/** Clamp on use as the config UI can assign integer fields directly. */
 	public static int getBookmarkQuantityStep() {
 		return Math.max(1, bookmarkQuantityStep);

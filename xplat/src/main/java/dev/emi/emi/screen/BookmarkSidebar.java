@@ -12,6 +12,7 @@ import dev.emi.emi.api.stack.FluidEmiStack;
 import dev.emi.emi.input.EmiInput;
 import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.config.EmiConfig;
+import dev.emi.emi.config.BookmarkViewMode;
 import dev.emi.emi.runtime.BookmarkCrafting;
 import dev.emi.emi.runtime.BookmarkGroupActions;
 import dev.emi.emi.runtime.BookmarkMaterialTransfer;
@@ -70,13 +71,13 @@ public final class BookmarkSidebar {
             if (col > 0) { row++; col = 0; }
             EmiFavorite previous = null;
             for (Row item : contents) {
-                if (group.todo && previous != null && previous != item.anchor && col > 0) { row++; col = 0; }
+                if (group.viewMode == BookmarkViewMode.TODO && previous != null && previous != item.anchor && col > 0) { row++; col = 0; }
                 int attempts = 0;
                 while (capacity(space, row) == 0 && attempts++ <= space.th) row++;
                 if (attempts > space.th) break;
                 if (col >= capacity(space, row)) {
                     if (group.collapsed) break;
-                    row++; col = group.todo && item.input && capacity(space, row) > 1 ? 1 : 0;
+                    row++; col = group.viewMode == BookmarkViewMode.TODO && item.input && capacity(space, row) > 1 ? 1 : 0;
                 }
                 attempts = 0;
                 while (capacity(space, row) == 0 && attempts++ <= space.th) row++;

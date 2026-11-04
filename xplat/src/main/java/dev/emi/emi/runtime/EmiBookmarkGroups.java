@@ -26,6 +26,8 @@ import dev.emi.emi.bom.BoM;
 import dev.emi.emi.bom.CraftingTreeModel;
 import dev.emi.emi.bom.MaterialTree;
 import dev.emi.emi.bom.MaterialNode;
+import dev.emi.emi.config.BookmarkViewMode;
+import dev.emi.emi.config.EmiConfig;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
@@ -44,9 +46,21 @@ public final class EmiBookmarkGroups {
 
 	public static final class Group {
 		public final String id;
-		public boolean todo, crafting, collapsed;
+		public BookmarkViewMode viewMode;
+		/** Legacy boolean mirror kept for older callers and serialized data. */
+		@Deprecated
+		public boolean todo;
+		public boolean crafting, collapsed;
 		public final Set<String> collapsedRecipes = new LinkedHashSet<>();
-		private Group(String id) { this.id = id; }
+		private Group(String id) { this(id, BookmarkViewMode.DEFAULT); }
+		private Group(String id, BookmarkViewMode mode) {
+			this.id = id;
+			setViewMode(mode);
+		}
+		public void setViewMode(BookmarkViewMode mode) {
+			viewMode = mode == null ? BookmarkViewMode.DEFAULT : mode;
+			todo = viewMode == BookmarkViewMode.TODO;
+		}
 		public List<EmiFavorite> anchors() { return favorites(this); }
 	}
 
@@ -192,7 +206,7 @@ public final class EmiBookmarkGroups {
 	public static void group(List<EmiFavorite> selection) {
 		List<EmiFavorite> actual = actual(selection);
 		if (actual.isEmpty()) return;
-		Group group = new Group(UUID.randomUUID().toString());
+		Group group = new Group(UUID.randomUUID().toString(), EmiConfig.bookmarkViewMode);
 		states.put(group.id, group);
 		int insertion = identityIndex(actual.get(0));
 		Set<EmiFavorite> identities = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -298,7 +312,12 @@ public final class EmiBookmarkGroups {
 		EmiFavorites.favorites.addAll(reordered);
 		changed();
 	}
-	public static void toggleView(Group group) { if (group != null) { group.todo = !group.todo; changed(); } }
+	public static void toggleView(Group group) {
+		if (group != null) {
+			group.setViewMode(group.viewMode.toggle());
+			changed();
+		}
+	}
 	public static void toggleCrafting(Group group) { if (group != null) { group.crafting = !group.crafting; changed(); } }
 	public static void toggleCollapsed(Group group) { if (group != null) { group.collapsed = !group.collapsed; changed(); } }
 	public static void toggleRecipe(Group group, EmiRecipe recipe) {
@@ -357,7 +376,7 @@ public final class EmiBookmarkGroups {
 			group(added);
 			if (expandDefaults && !added.isEmpty()) {
 				Group group = groupOf(added.get(0));
-				group.todo = true;
+				group.setViewMode(BookmarkViewMode.TODO);
 				group.crafting = true;
 				changed();
 			}
@@ -585,7 +604,7 @@ public final class EmiBookmarkGroups {
 		for (List<Boundary> view : List.of(full, net, real)) for (Boundary row : view) boundary(all, row.ingredient, row.source, row.anchor, row.role);
 		List<Row> result = new ArrayList<>();
 		for (Role role : List.of(Role.RESULT, Role.REMAINDER, Role.INGREDIENT)) for (Boundary row : all) {
-			if (row.role != role || role == Role.INGREDIENT && !group.todo) continue;
+			if (row.role != role || role == Role.INGREDIENT && group.viewMode != BookmarkViewMode.TODO) continue;
 			result.add(new Row(row.ingredient, row.source, root, anchor, row.anchor, role,
 				boundaryAmount(real, row), boundaryAmount(full, row), boundaryAmount(net, row), amounts.getOrDefault(root, 0L), group));
 		}
@@ -707,7 +726,9 @@ public final class EmiBookmarkGroups {
 		for (Group group : groups()) {
 			JsonObject state = new JsonObject();
 			state.addProperty("id", group.id);
-			state.addProperty("todo", group.todo);
+			state.addProperty("view_mode", group.viewMode.getName());
+			// Keep the legacy field for configs read by the previous build.
+			state.addProperty("todo", group.viewMode == BookmarkViewMode.TODO);
 			state.addProperty("crafting", group.crafting);
 			state.addProperty("collapsed", group.collapsed);
 			JsonArray folded = new JsonArray();
@@ -735,7 +756,8 @@ public final class EmiBookmarkGroups {
 	}
 	public static void load(JsonObject json) {
 		states.clear(); membership.clear(); fullRecipes.clear(); multipliers.clear(); ingredientChoices.clear();
-		DEFAULT.todo = DEFAULT.crafting = DEFAULT.collapsed = false;
+		DEFAULT.setViewMode(EmiConfig.bookmarkViewMode);
+		DEFAULT.crafting = DEFAULT.collapsed = false;
 		DEFAULT.collapsedRecipes.clear();
 		states.put(DEFAULT.id, DEFAULT);
 		if (json != null) {
@@ -743,8 +765,15 @@ public final class EmiBookmarkGroups {
 				try {
 					JsonObject data = element.getAsJsonObject();
 					String id = data.get("id").getAsString();
-					Group group = id.equals("0") ? DEFAULT : new Group(id);
-					group.todo = data.has("todo") && data.get("todo").getAsBoolean();
+					Group group = id.equals("0") ? DEFAULT : new Group(id, EmiConfig.bookmarkViewMode);
+					if (data.has("view_mode")) {
+						group.setViewMode(BookmarkViewMode.byName(data.get("view_mode").getAsString()));
+					} else if (data.has("todo")) {
+						group.setViewMode(data.get("todo").getAsBoolean()
+							? BookmarkViewMode.TODO : BookmarkViewMode.DEFAULT);
+					} else {
+						group.setViewMode(EmiConfig.bookmarkViewMode);
+					}
 					group.crafting = data.has("crafting") && data.get("crafting").getAsBoolean();
 					group.collapsed = data.has("collapsed") && data.get("collapsed").getAsBoolean();
 					if (data.has("collapsed_recipes")) for (JsonElement recipe : data.getAsJsonArray("collapsed_recipes")) group.collapsedRecipes.add(recipe.getAsString());

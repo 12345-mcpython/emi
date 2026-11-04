@@ -50,6 +50,20 @@ public class EmiPersistentData { public static void save() { EmiBookmarkGroups.s
 public class EmiLog { public static void error(String text, Throwable error) { throw new AssertionError(text, error); } }''',
     'dev/emi/emi/config/SidebarType.java': '''package dev.emi.emi.config;
 public enum SidebarType { FAVORITES }''',
+    'dev/emi/emi/config/BookmarkViewMode.java': '''package dev.emi.emi.config;
+public enum BookmarkViewMode {
+    DEFAULT("default"), TODO("todo");
+    final String name;
+    BookmarkViewMode(String name) { this.name = name; }
+    public String getName() { return name; }
+    public BookmarkViewMode toggle() { return this == DEFAULT ? TODO : DEFAULT; }
+    public static BookmarkViewMode byName(String name) {
+        for (BookmarkViewMode mode : values()) if (mode.name.equalsIgnoreCase(name)) return mode;
+        return DEFAULT;
+    }
+}''',
+    'dev/emi/emi/config/EmiConfig.java': '''package dev.emi.emi.config;
+public class EmiConfig { public static BookmarkViewMode bookmarkViewMode = BookmarkViewMode.DEFAULT; }''',
     'dev/emi/emi/screen/EmiScreenManager.java': '''package dev.emi.emi.screen;
 public class EmiScreenManager { public static void repopulatePanels(dev.emi.emi.config.SidebarType type) {} }''',
     'dev/emi/emi/api/stack/serializer/EmiIngredientSerializer.java': '''package dev.emi.emi.api.stack.serializer;
