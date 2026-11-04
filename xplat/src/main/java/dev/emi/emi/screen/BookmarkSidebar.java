@@ -1,7 +1,9 @@
 package dev.emi.emi.screen;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import dev.emi.emi.EmiPort;
@@ -9,6 +11,9 @@ import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.FluidEmiStack;
+import dev.emi.emi.bom.CraftingTreeModel;
+import dev.emi.emi.bom.FlatMaterialCost;
+import dev.emi.emi.bom.MaterialTree;
 import dev.emi.emi.input.EmiInput;
 import dev.emi.emi.input.EmiBind;
 import dev.emi.emi.config.EmiConfig;
@@ -24,6 +29,7 @@ import dev.emi.emi.runtime.EmiFavorite;
 import dev.emi.emi.runtime.EmiFavorites;
 import dev.emi.emi.screen.EmiScreenManager.ScreenSpace;
 import dev.emi.emi.screen.EmiScreenManager.SidebarPanel;
+import dev.emi.emi.screen.tooltip.BookmarkChainTooltipComponent;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.util.Formatting;
@@ -43,6 +49,12 @@ public final class BookmarkSidebar {
     private boolean moved, movingGroup;
     private long pressedAt, edgeSince;
     private int edgeDirection;
+    private Group chainGroup;
+    private long chainRevision = -1;
+    private Object chainInventory;
+    private List<BookmarkChainTooltipComponent.Entry> chainOutputs = List.of();
+    private List<BookmarkChainTooltipComponent.Entry> chainRequired = List.of();
+    private List<BookmarkChainTooltipComponent.Entry> chainMissing = List.of();
     private final List<DragCell> groupPreview = new ArrayList<>();
     private record DragCell(EmiFavorite favorite, int dx, int dy) {}
     private static final long DRAG_THRESHOLD_MS = 250;
@@ -213,18 +225,123 @@ public final class BookmarkSidebar {
     }
 
     public List<TooltipComponent> tooltip(int mx, int my) {
-        if (!EmiInput.isAltDown()) return List.of();
         layout();
         if (!header(mx, my) && !gutter(mx, my)) return List.of();
         Group group = groupAt(mx, my);
         if (group == null) return List.of(TooltipComponent.of(EmiPort.translatable("emi.bookmarks.drag_group").asOrderedText()));
-        List<TooltipComponent> result = new ArrayList<>(List.of(
-            tip("group"), tip(group.crafting ? "crafting_on" : "crafting_off"),
-            tip("toggle_view"), tip("toggle_crafting"), tip("collapse_group"),
-            tip("drag_group"), tip("ungroup"), tip("sort_group"), quantityTip(), tip("display_amounts"),
-            treeTip(), takeTip(), craftTip()));
-        addCraftStatus(result);
+        ensureChain(group);
+        List<TooltipComponent> result = new ArrayList<>();
+        result.add(TooltipComponent.of(EmiPort.translatable("emi.bookmarks.chain.title")
+            .formatted(Formatting.GOLD).asOrderedText()));
+        if (!chainOutputs.isEmpty()) {
+            result.add(chainLabel("outputs"));
+            result.add(new BookmarkChainTooltipComponent(chainOutputs, false));
+        }
+        if (!chainRequired.isEmpty()) {
+            result.add(chainLabel("required"));
+            result.add(new BookmarkChainTooltipComponent(chainRequired, false));
+        }
+        if (!chainMissing.isEmpty()) {
+            result.add(chainLabel("missing"));
+            result.add(new BookmarkChainTooltipComponent(chainMissing, true));
+        }
+        if (EmiInput.isAltDown()) {
+            result.addAll(List.of(
+                tip("group"), tip(group.crafting ? "crafting_on" : "crafting_off"),
+                tip("toggle_view"), tip("toggle_crafting"), tip("collapse_group"),
+                tip("drag_group"), tip("ungroup"), tip("sort_group"), quantityTip(), tip("display_amounts"),
+                treeTip(), takeTip(), craftTip()));
+            addCraftStatus(result);
+        } else {
+            result.add(tip("chain_help"));
+        }
         return result;
+    }
+
+    private static TooltipComponent chainLabel(String key) {
+        return TooltipComponent.of(EmiPort.translatable("emi.bookmarks.chain." + key)
+            .formatted(Formatting.GRAY).asOrderedText());
+    }
+
+    private void ensureChain(Group group) {
+        long revision = EmiBookmarkGroups.revision();
+        Object inventory = EmiScreenManager.lastPlayerInventory;
+        if (group == chainGroup && revision == chainRevision && inventory == chainInventory) return;
+        chainGroup = group;
+        chainRevision = revision;
+        chainInventory = inventory;
+
+        List<Row> rows = EmiBookmarkGroups.rows(group, EmiScreenManager.lastPlayerInventory);
+        Map<EmiIngredient, Long> outputs = new LinkedHashMap<>();
+        for (Row row : rows) {
+            if (!row.input && row.role == EmiBookmarkGroups.Role.RESULT && row.recipe != null) {
+                addAmount(outputs, row.ingredient, row.explicitAmount);
+            }
+        }
+
+        Map<EmiIngredient, Long> required = new LinkedHashMap<>();
+        Map<EmiIngredient, Long> missing = new LinkedHashMap<>();
+        MaterialTree tree = EmiBookmarkGroups.tree(group);
+        CraftingTreeModel model = null;
+        if (tree != null) {
+            try {
+                model = new CraftingTreeModel(tree, EmiScreenManager.lastPlayerInventory);
+            } catch (RuntimeException ignored) {
+            }
+        }
+        if (model != null) {
+            for (FlatMaterialCost cost : model.required) addAmount(required, cost.ingredient, cost.getEffectiveAmount());
+            for (FlatMaterialCost cost : model.missing) addAmount(missing, cost.ingredient, cost.getEffectiveAmount());
+        } else {
+            // Fallback for an unloaded/recipe-less chain: use the visible input rows.
+            for (Row row : rows) {
+                if (row.input) {
+                    addAmount(required, row.ingredient, row.calculatedAmount);
+                    addAmount(missing, row.ingredient, row.remainingAmount);
+                }
+            }
+        }
+
+        List<BookmarkChainTooltipComponent.Entry> requiredEntries = new ArrayList<>();
+        for (Map.Entry<EmiIngredient, Long> e : required.entrySet()) {
+            requiredEntries.add(new BookmarkChainTooltipComponent.Entry(e.getKey(), e.getValue(),
+                amountOf(missing, e.getKey())));
+        }
+        List<BookmarkChainTooltipComponent.Entry> missingEntries = new ArrayList<>();
+        for (Map.Entry<EmiIngredient, Long> e : missing.entrySet()) {
+            if (e.getValue() > 0) {
+                missingEntries.add(new BookmarkChainTooltipComponent.Entry(e.getKey(), e.getValue(), e.getValue()));
+            }
+        }
+        List<BookmarkChainTooltipComponent.Entry> outputEntries = new ArrayList<>();
+        for (Map.Entry<EmiIngredient, Long> e : outputs.entrySet()) {
+            outputEntries.add(new BookmarkChainTooltipComponent.Entry(e.getKey(), Math.max(1, e.getValue()), 0));
+        }
+        chainOutputs = List.copyOf(outputEntries);
+        chainRequired = List.copyOf(requiredEntries);
+        chainMissing = List.copyOf(missingEntries);
+    }
+
+    private static void addAmount(Map<EmiIngredient, Long> map, EmiIngredient ingredient, long amount) {
+        if (ingredient == null || ingredient.isEmpty() || amount <= 0) return;
+        for (Map.Entry<EmiIngredient, Long> entry : map.entrySet()) {
+            if (EmiIngredient.areEqual(entry.getKey(), ingredient)) {
+                entry.setValue(saturatedAdd(entry.getValue(), amount));
+                return;
+            }
+        }
+        map.put(ingredient.copy().setAmount(1), amount);
+    }
+
+    private static long amountOf(Map<EmiIngredient, Long> map, EmiIngredient ingredient) {
+        for (Map.Entry<EmiIngredient, Long> entry : map.entrySet()) {
+            if (EmiIngredient.areEqual(entry.getKey(), ingredient)) return entry.getValue();
+        }
+        return 0;
+    }
+
+    private static long saturatedAdd(long a, long b) {
+        return a > Long.MAX_VALUE - b ? Long.MAX_VALUE : a + b;
     }
     private static TooltipComponent tip(String key, Object... args) { return TooltipComponent.of(EmiPort.translatable("emi.bookmarks." + key, args).asOrderedText()); }
     private static TooltipComponent quantityTip() { return tip("quantity", EmiConfig.getBookmarkQuantityStep()); }
