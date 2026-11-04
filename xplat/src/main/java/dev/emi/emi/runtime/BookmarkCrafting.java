@@ -370,9 +370,9 @@ public final class BookmarkCrafting {
 				if (output == null) return deny("no_instant_output_slot");
 				if (!output.getStack().isEmpty() && !budget.effective.getOutputs().get(0).isEqual(EmiStack.of(output.getStack()))) return deny("foreign_output_slot");
 				for (EmiStack result : budget.effective.getOutputs()) if (!reserve(room, result.getItemStack())) return deny("no_output_capacity");
-				for (EmiIngredient input : inputs) for (EmiStack option : input.getEmiStacks()) {
-					if (!option.getRemainder().isEmpty() && !reserve(room, option.getRemainder().getItemStack())) return deny("no_return_capacity");
-				}
+				// Remainders replace the inputs consumed by the recipe and therefore
+				// need no second slot. Reserving them again made tool/catalyst
+				// recipes report a false no_return_capacity.
 			}
 			return true;
 		}
