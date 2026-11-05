@@ -172,8 +172,11 @@ public final class EmiPort {
 
 	public static ItemStack getOutput(Recipe<?> recipe) {
 		MinecraftClient client = MinecraftClient.getInstance();
-		return recipe.getOutput(client.world.getRegistryManager());
-	}
+        if (client.world != null) {
+            return recipe.getOutput(client.world.getRegistryManager());
+        }
+		throw new RuntimeException("getOutput failed because of the null world");
+    }
 
 	public static void focus(TextFieldWidget widget, boolean focused) {
 		widget.setFocused(focused);
@@ -181,8 +184,11 @@ public final class EmiPort {
 
 	public static Stream<Item> getDisabledItems() {
 		MinecraftClient client = MinecraftClient.getInstance();
-		FeatureSet fs = client.world.getEnabledFeatures();
-		return getItemRegistry().stream().filter(i -> !i.isEnabled(fs));
+		if (client.world != null) {
+			FeatureSet fs = client.world.getEnabledFeatures();
+			return getItemRegistry().stream().filter(i -> !i.isEnabled(fs));
+		}
+		throw new RuntimeException("getDisabledItems failed because of the null world");
 	}
 
 	public static Comparison compareStrict() {
