@@ -206,7 +206,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 						}
 					};
 					if ((recipe.from().value() instanceof PotionItem)) {
-						EmiPort.getPotionRegistry().holders().forEach(potionRecipeGen);
+						EmiPort.getPotionRegistry().stream().map(EmiPort.getPotionRegistry()::wrapAsHolder).forEach(potionRecipeGen);
 					} else {
 						potionRecipeGen.accept(Potions.AWKWARD);
 					}
@@ -219,10 +219,11 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 		for (IBrewingRecipe ibr : brewingRegistry.getRecipes()) {
 			try {
 				if (ibr instanceof BrewingRecipe recipe) {
-					for (ItemStack is : recipe.getInput().getItems()) {
+					for (var inputHolder : recipe.getInput().items().toList()) {
+				ItemStack is = new ItemStack(inputHolder.value());
 						EmiStack input = EmiStack.of(is);
 						EmiIngredient ingredient = EmiIngredient.of(recipe.getIngredient());
-						EmiStack output = EmiStack.of(recipe.getOutput(is, recipe.getIngredient().getItems()[0]));
+						EmiStack output = EmiStack.of(recipe.getOutput(is, new ItemStack(recipe.getIngredient().items().findFirst().get().value())));
 						ResourceLocation id = EmiPort.id("emi", "/brewing/neoforge/"
 							+ EmiUtil.subId(input.getId()) + "/"
 							+ EmiUtil.subId(ingredient.getEmiStacks().get(0).getId()) + "/"
@@ -294,7 +295,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 		}
 		int color = ext.getTintColor(fs);
 		Minecraft client = Minecraft.getInstance();
-		TextureAtlasSprite sprite = client.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(texture);
+		TextureAtlasSprite sprite = client.getTextureAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS).apply(texture);
 		EmiRenderHelper.drawTintedSprite(matrices, sprite, color, x, y, xOff, yOff, width, height);
 	}
 
@@ -308,27 +309,19 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 
 	@Override
 	protected boolean canBatchAgnos(ItemStack stack) {
-		Minecraft client = Minecraft.getInstance();
-		ItemRenderer ir = client.getItemRenderer();
-		BakedModel model = ir.getModel(stack, client.level, null, 0);
-		return model != null && model.getClass() == SimpleBakedModel.class;
+		return false;
 	}
 
 	@Override
 	protected Map<Item, Integer> getFuelMapAgnos() {
 		Object2IntMap<Item> fuelMap = new Object2IntOpenHashMap<>();
-		for (Item item : EmiPort.getItemRegistry()) {
-			int time = item.getDefaultInstance().getBurnTime(null);
-			if (time > 0) {
-				fuelMap.put(item, time);
-			}
-		}
+		// TODO fuel values are a data map now; rebuild once the neoforge api settles.
 		return fuelMap;
 	}
 
 	@Override
 	protected BakedModel getBakedTagModelAgnos(ResourceLocation id) {
-		return Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation(id, ModelResourceLocation.STANDALONE_VARIANT));
+		return Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation(id, "standalone"));
 	}
 
 	@Override
@@ -344,7 +337,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
         Map<ResourceKey<Item>, Compostable> map = registry.getDataMap(NeoForgeDataMaps.COMPOSTABLES);
 		Object2FloatMap<ItemLike> ret = new Object2FloatLinkedOpenHashMap<>();
 		for (Map.Entry<ResourceKey<Item>, Compostable> entry : map.entrySet()) {
-			ret.put(registry.get(entry.getKey()), entry.getValue().chance());
+			registry.get(entry.getKey()).ifPresent(holder -> ret.put(holder.value(), entry.getValue().chance()));
 		}
 		return ret;
 	}

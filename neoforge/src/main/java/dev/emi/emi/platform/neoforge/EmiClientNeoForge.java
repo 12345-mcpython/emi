@@ -50,12 +50,12 @@ public class EmiClientNeoForge {
 	@SubscribeEvent
 	public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
 		Minecraft client = Minecraft.getInstance();
-		EmiTags.registerTagModels(client.getResourceManager(), event::register, ModelResourceLocation.STANDALONE_VARIANT);
+		EmiTags.registerTagModels(client.getResourceManager(), loc -> event.register(loc.id()), "standalone");
 	}
 
 	@SubscribeEvent
 	public static void registerResourceReloaders(AddClientReloadListenersEvent event) {
-		EmiData.init(reloader -> event.registerReloadListener(reloader));
+		EmiData.init(reloader -> event.addListener(reloader.getEmiId(), reloader));
 	}
 
 	public static void tagsReloaded(TagsUpdatedEvent event) {
@@ -71,7 +71,7 @@ public class EmiClientNeoForge {
 			context.push();
 			context.translate(-screen.getGuiLeft(), -screen.getGuiTop());
 			EmiPort.setPositionTexShader();
-			EmiScreenManager.render(context, event.getMouseX(), event.getMouseY(), client.getTimer().getGameTimeDeltaPartialTick(false));
+			EmiScreenManager.render(context, event.getMouseX(), event.getMouseY(), client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 			context.pop();
 		}
 	}
@@ -87,7 +87,7 @@ public class EmiClientNeoForge {
 			Minecraft client = Minecraft.getInstance();
 			context.push();
 			EmiPort.setPositionTexShader();
-			EmiScreenManager.drawForeground(context, event.getMouseX(), event.getMouseY(), client.getTimer().getGameTimeDeltaPartialTick(false));
+			EmiScreenManager.drawForeground(context, event.getMouseX(), event.getMouseY(), client.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 			context.pop();
 		}
 	}
