@@ -37,7 +37,7 @@ public class CraftingRecipeHandler implements StandardRecipeHandler<CraftingMenu
 
 	@Override
 	public @Nullable Slot getOutputSlot(CraftingMenu handler) {
-		return handler.slots.get(0);
+		return handler.slots.getFirst();
 	}
 
 	@Override

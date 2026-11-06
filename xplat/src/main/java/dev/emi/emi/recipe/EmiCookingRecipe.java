@@ -28,10 +28,10 @@ public class EmiCookingRecipe implements EmiRecipe {
 	public EmiCookingRecipe(AbstractCookingRecipe recipe, EmiRecipeCategory category, int fuelMultiplier, boolean infiniBurn) {
 		this.id = ProxyRecipeManager.getId(recipe);
 		this.category = category;
-		input = EmiIngredient.of(recipe.getIngredients().get(0));
+		input = EmiIngredient.of(recipe.getIngredients().getFirst());
 		output = EmiStack.of(EmiPort.getOutput(recipe));
-		if (input.getEmiStacks().get(0).getItemStack().is(Items.WET_SPONGE)) {
-			input.getEmiStacks().get(0).setRemainder(EmiStack.of(Fluids.WATER, FluidUnit.BUCKET));
+		if (input.getEmiStacks().getFirst().getItemStack().is(Items.WET_SPONGE)) {
+			input.getEmiStacks().getFirst().setRemainder(EmiStack.of(Fluids.WATER, FluidUnit.BUCKET));
 		}
 		this.recipe = recipe;
 		this.fuelMultiplier = fuelMultiplier;
@@ -70,9 +70,7 @@ public class EmiCookingRecipe implements EmiRecipe {
 
 	@Override
 	public void addWidgets(WidgetHolder widgets) {
-		widgets.addFillingArrow(24, 5, 50 * recipe.getCookingTime()).tooltip((mx, my) -> {
-			return List.of(ClientTooltipComponent.create(EmiPort.ordered(EmiPort.translatable("emi.cooking.time", recipe.getCookingTime() / 20f))));
-		});
+		widgets.addFillingArrow(24, 5, 50 * recipe.getCookingTime()).tooltip((mx, my) -> List.of(ClientTooltipComponent.create(EmiPort.ordered(EmiPort.translatable("emi.cooking.time", recipe.getCookingTime() / 20f)))));
 		if (infiniBurn) {
 			widgets.addTexture(EmiTexture.FULL_FLAME, 1, 24);
 		} else {

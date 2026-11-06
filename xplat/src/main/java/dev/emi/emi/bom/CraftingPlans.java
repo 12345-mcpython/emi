@@ -102,7 +102,7 @@ public final class CraftingPlans {
 				captureNodes(child, tree, choices, path);
 			}
 		}
-		path.remove(path.size() - 1);
+		path.removeLast();
 	}
 
 	public static void open(int index) {
@@ -274,7 +274,7 @@ public final class CraftingPlans {
 		if (recipe == null || recipe.isJsonNull()) {
 			return null;
 		}
-		CraftingPlan plan = new CraftingPlan(BoM.tree.goal.ingredient.getEmiStacks().get(0).getName().getString(), recipe);
+		CraftingPlan plan = new CraftingPlan(BoM.tree.goal.ingredient.getEmiStacks().getFirst().getName().getString(), recipe);
 		capture(plan, BoM.tree);
 		return plan;
 	}
@@ -432,10 +432,10 @@ public final class CraftingPlans {
 		EmiIngredient ingredient = deserializeIngredient(resolution.get("ingredient"));
 		EmiIngredient stack = deserializeIngredient(resolution.get("stack"));
 		if (ingredient.isEmpty() || stack.isEmpty() || stack.getEmiStacks().size() != 1
-				|| !ingredient.getEmiStacks().contains(stack.getEmiStacks().get(0))) {
+				|| !ingredient.getEmiStacks().contains(stack.getEmiStacks().getFirst())) {
 			throw new IllegalArgumentException("Invalid ingredient resolution");
 		}
-		return new EmiResolutionRecipe(ingredient, stack.getEmiStacks().get(0));
+		return new EmiResolutionRecipe(ingredient, stack.getEmiStacks().getFirst());
 	}
 
 	private static JsonElement serialize(EmiIngredient ingredient) {

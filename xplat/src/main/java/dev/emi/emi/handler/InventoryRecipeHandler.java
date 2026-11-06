@@ -65,7 +65,7 @@ public class InventoryRecipeHandler implements StandardRecipeHandler<InventoryMe
 
 	@Override
 	public @Nullable Slot getOutputSlot(InventoryMenu handler) {
-		return handler.slots.get(0);
+		return handler.slots.getFirst();
 	}
 
 	@Override

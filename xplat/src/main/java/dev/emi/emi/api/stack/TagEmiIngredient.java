@@ -119,7 +119,7 @@ public class TagEmiIngredient implements EmiIngredient {
 		if ((flags & RENDER_ICON) != 0) {
 			if (!tagKey.hasCustomModel()) {
 				if (!stacks.isEmpty()) {
-					stacks.get(0).render(context.raw(), x, y, delta, -1 ^ RENDER_AMOUNT);
+					stacks.getFirst().render(context.raw(), x, y, delta, -1 ^ RENDER_AMOUNT);
 				}
 			} else {
 				BakedModel model = EmiAgnos.getBakedTagModel(tagKey.getCustomModel());

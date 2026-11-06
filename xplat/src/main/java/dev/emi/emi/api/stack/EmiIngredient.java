@@ -107,14 +107,14 @@ public interface EmiIngredient extends EmiRenderable {
 		if (list.isEmpty()) {
 			return EmiStack.EMPTY;
 		} else if (list.size() == 1) {
-			EmiIngredient stack = list.get(0);
+			EmiIngredient stack = list.getFirst();
 			if (stack.getAmount() < amount) {
 				return stack.copy().setAmount(amount);
 			} else {
 				return stack;
 			}
 		} else {
-			long internalAmount = list.get(0).getAmount();
+			long internalAmount = list.getFirst().getAmount();
 			for (EmiIngredient i : list) {
 				if (i.getAmount() != internalAmount) {
 					internalAmount = 1;

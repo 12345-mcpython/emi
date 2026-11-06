@@ -126,7 +126,7 @@ class ChessBoard {
 		if (moves.isEmpty()) {
 			return moves;
 		}
-		ChessPiece piece = get(moves.get(0).start());
+		ChessPiece piece = get(moves.getFirst().start());
 		PieceColor color = piece.color();
 		return moves.stream().filter(m -> {
 			ChessBoard copy = this.copy();

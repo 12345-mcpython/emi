@@ -30,7 +30,7 @@ public class JemiRecipeSlotsView implements IRecipeSlotsView {
 	@Override
 	public Optional<IRecipeSlotView> findSlotByName(String slotName) {
 		for (IRecipeSlotView slot : slots) {
-			if (Objects.equals(slot.getSlotName().orElseGet(() -> null), slotName)) {
+			if (Objects.equals(slot.getSlotName().orElse(null), slotName)) {
 				return Optional.of(slot);
 			}
 		}

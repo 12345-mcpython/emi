@@ -24,7 +24,7 @@ public class JemiCategory extends EmiRecipeCategory {
 			} else {
 				List<EmiIngredient> workstations = EmiApi.getRecipeManager().getWorkstations(this);
 				if (!workstations.isEmpty()) {
-					workstations.get(0).render(context.raw(), x, y, delta, EmiIngredient.RENDER_ICON);
+					workstations.getFirst().render(context.raw(), x, y, delta, EmiIngredient.RENDER_ICON);
 				} else {
 					String title = category.getTitle().getString();
 					context.drawCenteredTextWithShadow(EmiPort.literal(title.substring(0, Math.min(2, title.length()))), x + 8, y + 2);

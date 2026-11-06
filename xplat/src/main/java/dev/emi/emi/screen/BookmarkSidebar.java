@@ -422,7 +422,7 @@ public final class BookmarkSidebar {
             edgeDirection = direction;
             edgeSince = now;
         } else if (now - edgeSince >= PAGE_SCROLL_DELAY_MS) {
-            int next = Math.max(0, Math.min(pages - 1, panel.page + direction));
+            int next = Math.clamp(panel.page + direction, 0, pages - 1);
             panel.page = next;
             edgeSince = now;
         }
@@ -431,7 +431,8 @@ public final class BookmarkSidebar {
             return;
         }
         if (startRow >= 0 && mx >= space.tx && mx < space.tx + space.tw * 18) {
-            int local = Math.max(0, Math.min(space.th - 1, (my - space.ty) / 18));
+            int maxLocal = Math.max(0, space.th - 1);
+            int local = Math.clamp((my - space.ty) / 18, 0, maxLocal);
             endRow = Math.min(rows.size() - 1, baseRow() + local);
         }
     }
@@ -631,7 +632,7 @@ public final class BookmarkSidebar {
             if (recipe != null && (flags & EmiIngredient.RENDER_INGREDIENT) != 0)
                 EmiRenderHelper.renderRecipeFavorite(stack, context, x, y);
             if ((flags & EmiIngredient.RENDER_AMOUNT) != 0) {
-                boolean fluid = !stack.getEmiStacks().isEmpty() && stack.getEmiStacks().get(0) instanceof FluidEmiStack;
+                boolean fluid = !stack.getEmiStacks().isEmpty() && stack.getEmiStacks().getFirst() instanceof FluidEmiStack;
                 long amount = displayAmount();
                 var text = fluid ? EmiConfig.fluidUnit.translate(amount) : EmiPort.literal(compactAmount(amount));
                 int width = net.minecraft.client.Minecraft.getInstance().font.width(text);
@@ -655,7 +656,7 @@ public final class BookmarkSidebar {
         }
         private ClientTooltipComponent amountTip(String key, long amount) {
             amount = Math.max(0, amount);
-            boolean fluid = !stack.getEmiStacks().isEmpty() && stack.getEmiStacks().get(0) instanceof FluidEmiStack;
+            boolean fluid = !stack.getEmiStacks().isEmpty() && stack.getEmiStacks().getFirst() instanceof FluidEmiStack;
             return tip(key, fluid ? EmiConfig.fluidUnit.translate(amount)
                 : amount == 0 ? EmiPort.literal("0") : EmiRenderHelper.getAmountText(stack, amount));
         }

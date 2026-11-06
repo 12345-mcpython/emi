@@ -29,9 +29,7 @@ public class IntEdit {
 			} catch (Exception e) {
 			}
 		});
-		text.setFilter(s -> {
-			return NUMBER.matcher(s).matches();
-		});
+		text.setFilter(s -> NUMBER.matcher(s).matches());
 
 		up = new SizedButtonWidget(150, 0, 12, 10, 232, 48, () -> true, button -> {
 			setter.accept(getter.getAsInt() + getInc());

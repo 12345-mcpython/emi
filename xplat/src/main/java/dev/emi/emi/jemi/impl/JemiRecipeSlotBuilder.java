@@ -105,7 +105,7 @@ public class JemiRecipeSlotBuilder implements IRecipeSlotBuilder {
 		if (renderers == null) {
 			renderers = Maps.newHashMap();
 		}
-		renderers.put(ingredientType, new IngredientRenderer<T>(ingredientType, ingredientRenderer));
+		renderers.put(ingredientType, new IngredientRenderer<>(ingredientType, ingredientRenderer));
 		return this;
 	}
 

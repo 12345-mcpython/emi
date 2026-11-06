@@ -242,7 +242,7 @@ public class EmiScreenManager {
 
 		spaceExclusion = Lists.newArrayList();
 		if (panels.get(0).isVisible()) {
-			spaceExclusion.add(panels.get(0).getBounds());
+			spaceExclusion.add(panels.getFirst().getBounds());
 		}
 		if (panels.get(1).isVisible()) {
 			spaceExclusion.add(panels.get(1).getBounds());
@@ -401,7 +401,7 @@ public class EmiScreenManager {
 		};
 		panel.header = header;
 		panel.theme = theme;
-		ScreenSpace space = new ScreenSpace(tx, ty, tw, th, rtl, exclusion, () -> panel.getType(), panel.isSearch());
+		ScreenSpace space = new ScreenSpace(tx, ty, tw, th, rtl, exclusion, panel::getType, panel.isSearch());
 		List<ScreenSpace> subspaces = Lists.newArrayList();
 		for (SidebarSubpanels.Subpanel subpanel : subpanels.subpanels) {
 			ty += th * ENTRY_SIZE + SUBPANEL_SEPARATOR_SIZE;
@@ -994,9 +994,9 @@ public class EmiScreenManager {
 				search.y = screen.height - 21;
 				search.setWidth(panels.get(1).space.tw * ENTRY_SIZE);
 			} else {
-				search.x = panels.get(0).space.tx;
+				search.x = panels.getFirst().space.tx;
 				search.y = screen.height - 21 - 21;
-				search.setWidth(panels.get(0).space.tw * ENTRY_SIZE);
+				search.setWidth(panels.getFirst().space.tw * ENTRY_SIZE);
 			}
 		}
 		EmiPort.focus(search, false);
@@ -1328,15 +1328,15 @@ public class EmiScreenManager {
 			if (EmiApi.isCheatMode()) {
 				if (ingredient.getEmiStacks().size() == 1 && stack instanceof SidebarEmiStackInteraction) {
 					if (function.apply(EmiConfig.cheatOneToInventory)) {
-						return give(ingredient.getEmiStacks().get(0), 1, 0);
+						return give(ingredient.getEmiStacks().getFirst(), 1, 0);
 					} else if (function.apply(EmiConfig.cheatStackToInventory)) {
-						return give(ingredient.getEmiStacks().get(0),
-								ingredient.getEmiStacks().get(0).getItemStack().getMaxStackSize(), 0);
+						return give(ingredient.getEmiStacks().getFirst(),
+								ingredient.getEmiStacks().getFirst().getItemStack().getMaxStackSize(), 0);
 					} else if (function.apply(EmiConfig.cheatOneToCursor)) {
-						return give(ingredient.getEmiStacks().get(0), 1, 1);
+						return give(ingredient.getEmiStacks().getFirst(), 1, 1);
 					} else if (function.apply(EmiConfig.cheatStackToCursor)) {
-						return give(ingredient.getEmiStacks().get(0),
-								ingredient.getEmiStacks().get(0).getItemStack().getMaxStackSize(), 1);
+						return give(ingredient.getEmiStacks().getFirst(),
+								ingredient.getEmiStacks().getFirst().getItemStack().getMaxStackSize(), 1);
 					}
 				}
 			}
@@ -1368,9 +1368,7 @@ public class EmiScreenManager {
 				EmiApi.viewRecipeTree();
 				return true;
 			}
-			Supplier<EmiRecipe> supplier = () -> {
-				return EmiUtil.getPreferredRecipe(ingredient, lastPlayerInventory, true);
-			};
+			Supplier<EmiRecipe> supplier = () -> EmiUtil.getPreferredRecipe(ingredient, lastPlayerInventory, true);
 			if (craftInteraction(ingredient, supplier, stack, function)) {
 				return true;
 			}
@@ -1423,7 +1421,7 @@ public class EmiScreenManager {
 				}
 				int amount = all ? Integer.MAX_VALUE : 1;
 				if (ingredient instanceof RowFavorite favorite) {
-					amount = (int) Math.min(amount, Math.max(0L, favorite.row.batches));
+					amount = (int) Math.clamp(favorite.row.batches, 0L, amount);
 				}
 				if (stack.getStack() instanceof EmiFavorite.Synthetic syn) {
 					long batches = Math.max(0L, syn.batches);
@@ -1455,7 +1453,7 @@ public class EmiScreenManager {
 			if (EmiInput.isShiftDown()) {
 				EmiBookmarkGroups.addRecipe(recipe, true);
 			} else {
-				EmiFavorites.addFavorite(recipe.getOutputs().get(0), recipe);
+				EmiFavorites.addFavorite(recipe.getOutputs().getFirst(), recipe);
 			}
 			repopulatePanels(SidebarType.FAVORITES);
 			return true;
@@ -1832,7 +1830,7 @@ public class EmiScreenManager {
 				return Bounds.EMPTY;
 			}
 			int headerOffset = (header ? 18 : 0);
-			ScreenSpace end = getSpaces().get(getSpaces().size() - 1);
+			ScreenSpace end = getSpaces().getLast();
 			return new Bounds(
 					space.tx - theme.horizontalPadding,
 					space.ty - theme.verticalPadding - headerOffset,
@@ -2016,11 +2014,7 @@ public class EmiScreenManager {
 						off += x - to;
 					}
 				} else {
-					if (x < widths[y]) {
-						off += x;
-					} else {
-						off += widths[y];
-					}
+                    off += Math.min(x, widths[y]);
 				}
 				return off;
 			}

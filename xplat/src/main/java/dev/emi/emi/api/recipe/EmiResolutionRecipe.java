@@ -19,6 +19,15 @@ public class EmiResolutionRecipe implements EmiRecipe {
 		this.stack = stack;
 	}
 
+	// Accessor-style readers, kept so call sites written against the record form keep working.
+	public EmiIngredient ingredient() {
+		return ingredient;
+	}
+
+	public EmiStack stack() {
+		return stack;
+	}
+
 	@Override
 	public EmiRecipeCategory getCategory() {
 		return VanillaPlugin.RESOLUTION;

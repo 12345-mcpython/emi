@@ -39,7 +39,7 @@ public class EmiSmithingTrimRecipe extends EmiSmithingRecipe {
 	private EmiStack getStack(Random r, int i) {
 		EmiStack input = this.input.getEmiStacks().get(r.nextInt(this.input.getEmiStacks().size()));
 		EmiStack addition = this.addition.getEmiStacks().get(r.nextInt(this.addition.getEmiStacks().size()));
-		SmithingRecipeInput inv = new SmithingRecipeInput(template.getEmiStacks().get(0).getItemStack(), input.getItemStack(), addition.getItemStack());
+		SmithingRecipeInput inv = new SmithingRecipeInput(template.getEmiStacks().getFirst().getItemStack(), input.getItemStack(), addition.getItemStack());
 		Minecraft client = Minecraft.getInstance();
 		return new EmiStack[] {
 			input,

@@ -8,12 +8,8 @@ import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.network.chat.FormattedText;
 
-public class JemiScrollBoxWidget implements IScrollBoxWidget {
+public record JemiScrollBoxWidget(int x, int y, int width, int height) implements IScrollBoxWidget {
 	private static final int SCROLL_BAR_WIDTH = 18;
-	public final int x;
-    public final int y;
-	public final int width;
-    public final int height;
 
 	public JemiScrollBoxWidget(int x, int y, int width, int height) {
 		this.x = x;
@@ -53,5 +49,5 @@ public class JemiScrollBoxWidget implements IScrollBoxWidget {
 		// Unimplemented
 		return this;
 	}
-	
+
 }

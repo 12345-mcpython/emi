@@ -34,7 +34,7 @@ public class BoM {
 
 	public static void setDefaults(RecipeDefaults defaults) {
 		BoM.defaults = defaults;
-		Minecraft.getInstance().execute(() -> reload());
+		Minecraft.getInstance().execute(BoM::reload);
 	}
 
 	public static JsonObject saveAdded() {
@@ -44,10 +44,11 @@ public class BoM {
 		Set<ResourceLocation> placed = Sets.newHashSet();
 		for (Map.Entry<EmiIngredient, EmiRecipe> entry : addedRecipes.entrySet()) {
 			EmiRecipe recipe = entry.getValue();
-			if (recipe instanceof EmiResolutionRecipe err) {
-				if (err.ingredient instanceof TagEmiIngredient tei) {
+			if (recipe instanceof EmiResolutionRecipe resolution) {
+				EmiIngredient ingredient = resolution.ingredient;
+				if (ingredient instanceof TagEmiIngredient tei) {
 					JsonElement el = EmiIngredientSerializer.getSerialized(tei.copy().setAmount(1).setChance(1));
-					JsonElement val = EmiIngredientSerializer.getSerialized(err.stack);
+					JsonElement val = EmiIngredientSerializer.getSerialized(resolution.stack);
 					if (el != null && GsonHelper.isStringValue(el) && val != null) {
 						addedTags.add(el.getAsString(), val);
 					}
@@ -178,8 +179,8 @@ public class BoM {
 
 	public static boolean isDefaultRecipe(EmiIngredient stack, EmiRecipe recipe) {
 		if (recipe instanceof EmiResolutionRecipe err) {
-			if (getRecipe(err.ingredient) instanceof EmiResolutionRecipe res) {
-				return stack.equals(res.stack);
+			if (getRecipe(err.ingredient()) instanceof EmiResolutionRecipe res) {
+				return stack.equals(res.stack());
 			}
 		}
 		return getRecipe(stack) == recipe;
@@ -196,7 +197,7 @@ public class BoM {
 
 	public static void addRecipe(EmiIngredient stack, EmiRecipe recipe) {
 		if (recipe instanceof EmiResolutionRecipe err) {
-			stack = err.ingredient;
+			stack = err.ingredient();
 		}
 		addedRecipes.put(stack, recipe);
 		EmiPersistentData.save();
@@ -216,8 +217,8 @@ public class BoM {
 
 	public static void removeRecipe(EmiIngredient stack, EmiRecipe recipe) {
 		if (recipe instanceof EmiResolutionRecipe err) {
-			if (addedRecipes.get(err.ingredient) instanceof EmiResolutionRecipe res && stack.equals(res.stack)) {
-				addedRecipes.remove(err.ingredient);
+			if (addedRecipes.get(err.ingredient()) instanceof EmiResolutionRecipe res && stack.equals(res.stack())) {
+				addedRecipes.remove(err.ingredient());
 			}
 		} else {
 			addedRecipes.remove(stack, recipe);

@@ -36,7 +36,7 @@ public class RegexTagQuery extends Query {
 					return true;
 				}
 				return false;
-			}).flatMap(v -> v.stream()).collect(Collectors.toSet());
+			}).flatMap(EmiTagKey::stream).collect(Collectors.toSet());
 		}
 	}
 

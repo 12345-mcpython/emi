@@ -34,7 +34,7 @@ public class StonecuttingRecipeHandler implements StandardRecipeHandler<Stonecut
 
 	@Override
 	public List<Slot> getCraftingSlots(StonecutterMenu handler) {
-		return List.of(handler.slots.get(0));
+		return List.of(handler.slots.getFirst());
 	}
 
 	@Override
@@ -51,16 +51,16 @@ public class StonecuttingRecipeHandler implements StandardRecipeHandler<Stonecut
 	public boolean craft(EmiRecipe recipe, EmiCraftContext<StonecutterMenu> context) {
 		boolean action = StandardRecipeHandler.super.craft(recipe, context);
 		Minecraft client = Minecraft.getInstance();
-		SingleRecipeInput inv = new SingleRecipeInput(recipe.getInputs().get(0).getEmiStacks().get(0).getItemStack());
+		SingleRecipeInput inv = new SingleRecipeInput(recipe.getInputs().getFirst().getEmiStacks().getFirst().getItemStack());
 		List<StonecutterRecipe> recipes = ProxyRecipeManager.getMatches(RecipeType.STONECUTTING, inv);
 		for (int i = 0; i < recipes.size(); i++) {
 			ResourceLocation id = ProxyRecipeManager.getId(recipes.get(i));
 			if (id != null && id.equals(recipe.getId())) {
 				StonecutterMenu sh = context.getScreenHandler();
 				client.gameMode.handleInventoryButtonClick(sh.containerId, i);
-				if (context.getDestination() == EmiCraftContext.Destination.CURSOR) {
+				if (context.destination() == EmiCraftContext.Destination.CURSOR) {
 					client.gameMode.handleInventoryMouseClick(sh.containerId, 1, 0, ClickType.PICKUP, client.player);
-				} else if (context.getDestination() == EmiCraftContext.Destination.INVENTORY) {
+				} else if (context.destination() == EmiCraftContext.Destination.INVENTORY) {
 					client.gameMode.handleInventoryMouseClick(sh.containerId, 1, 0, ClickType.QUICK_MOVE, client.player);
 				}
 				break;

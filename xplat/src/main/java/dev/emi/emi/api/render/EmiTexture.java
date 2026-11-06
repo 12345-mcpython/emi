@@ -19,9 +19,6 @@ public class EmiTexture implements EmiRenderable {
 	public final int u, v, width, height;
 	public final int regionWidth, regionHeight, textureWidth, textureHeight;
 
-	public EmiTexture(ResourceLocation texture, int u, int v, int width, int height) {
-		this(texture, u, v, width, height, width, height, 256, 256);
-	}
 	public EmiTexture(ResourceLocation texture, int u, int v, int width, int height,
 			int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
 		this.texture = texture;
@@ -33,6 +30,47 @@ public class EmiTexture implements EmiRenderable {
 		this.regionHeight = regionHeight;
 		this.textureWidth = textureWidth;
 		this.textureHeight = textureHeight;
+	}
+
+	public EmiTexture(ResourceLocation texture, int u, int v, int width, int height) {
+		this(texture, u, v, width, height, width, height, 256, 256);
+	}
+
+	// Accessor-style readers, kept so call sites written against the record form keep working.
+	public ResourceLocation texture() {
+		return texture;
+	}
+
+	public int u() {
+		return u;
+	}
+
+	public int v() {
+		return v;
+	}
+
+	public int width() {
+		return width;
+	}
+
+	public int height() {
+		return height;
+	}
+
+	public int regionWidth() {
+		return regionWidth;
+	}
+
+	public int regionHeight() {
+		return regionHeight;
+	}
+
+	public int textureWidth() {
+		return textureWidth;
+	}
+
+	public int textureHeight() {
+		return textureHeight;
 	}
 
 	@Override

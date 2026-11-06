@@ -18,18 +18,14 @@ public class ScreenAlignWidget extends ConfigEntryWidget {
 		super(name, tooltip, search, 20);
 		this.mutator = mutator;
 
-		horizontal = EmiPort.newButton(0, 0, 106, 20, getHorizontalText(), button -> {
-			EnumWidget.page(mutator.get().horizontal, v -> true, c -> {
-				mutator.get().horizontal = (ScreenAlign.Horizontal) c;
-				mutator.set(mutator.get());
-			});
-		});
-		vertical = EmiPort.newButton(0, 0, 106, 20, getVerticalText(), button -> {
-			EnumWidget.page(mutator.get().vertical, v -> true, c -> {
-				mutator.get().vertical = (ScreenAlign.Vertical) c;
-				mutator.set(mutator.get());
-			});
-		});
+		horizontal = EmiPort.newButton(0, 0, 106, 20, getHorizontalText(), button -> EnumWidget.page(mutator.get().horizontal, v -> true, c -> {
+            mutator.get().horizontal = (ScreenAlign.Horizontal) c;
+            mutator.set(mutator.get());
+        }));
+		vertical = EmiPort.newButton(0, 0, 106, 20, getVerticalText(), button -> EnumWidget.page(mutator.get().vertical, v -> true, c -> {
+            mutator.get().vertical = (ScreenAlign.Vertical) c;
+            mutator.set(mutator.get());
+        }));
 		this.setChildren(List.of(horizontal, vertical));
 	}
 

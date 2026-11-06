@@ -44,9 +44,7 @@ public class ConfigPresetScreen extends Screen {
 			this.init(client, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
 		});
 		this.addRenderableWidget(resetButton);
-		this.addRenderableWidget(EmiPort.newButton(x + w / 2 + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> {
-			this.onClose();
-		}));
+		this.addRenderableWidget(EmiPort.newButton(x + w / 2 + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> this.onClose()));
 		list = new ListWidget(minecraft, width, height, 40, height - 40);
 		try {
 			for (Field field : ConfigPresets.class.getFields()) {

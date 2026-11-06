@@ -1,10 +1,9 @@
 package dev.emi.emi.registry;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -79,7 +78,7 @@ public class EmiTags {
 		if (map.isEmpty()) {
 			return EmiStack.EMPTY;
 		} else if (map.size() == 1) {
-			return map.values().stream().toList().get(0).copy().setAmount(amount);
+			return map.values().stream().toList().getFirst().copy().setAmount(amount);
 		}
 		EmiRegistryAdapter<T> adapter = (EmiRegistryAdapter<T>) ADAPTERS_BY_CLASS.get(clazz);
 		if (adapter == null) {
@@ -116,14 +115,13 @@ public class EmiTags {
 			return new ListEmiIngredient(stacks.stream().toList(), amount);
 		} else if (map.isEmpty()) {
 			if (keys.size() == 1) {
-				return tagIngredient(keys.get(0), amount);
+				return tagIngredient(keys.getFirst(), amount);
 			} else {
 				return new ListEmiIngredient(keys.stream().map(k -> tagIngredient(k, 1)).toList(), amount);
 			}
 		} else {
-			return new ListEmiIngredient(List.of(map.values().stream().map(i -> i.copy().setAmount(1)).toList(),
-					keys.stream().map(k -> tagIngredient(k, 1)).toList())
-				.stream().flatMap(a -> a.stream()).toList(), amount);
+			return new ListEmiIngredient(Stream.of(map.values().stream().map(i -> i.copy().setAmount(1)).toList(),
+					keys.stream().map(k -> tagIngredient(k, 1)).toList()).flatMap(Collection::stream).toList(), amount);
 		}
 	}
 
@@ -132,7 +130,7 @@ public class EmiTags {
 		if (list == null || list.isEmpty()) {
 			return EmiStack.EMPTY;
 		} else if (list.size() == 1) {
-			return new TagEmiIngredient(key, amount).getEmiStacks().get(0).copy().setAmount(amount);
+			return new TagEmiIngredient(key, amount).getEmiStacks().getFirst().copy().setAmount(amount);
 		} else {
 			return new TagEmiIngredient(key, amount);
 		}
@@ -199,7 +197,7 @@ public class EmiTags {
 				TAG_VALUES.put(key, values);
 			}
 		}
-		EmiTags.TAGS.addAll(tags.stream().sorted((a, b) -> a.id().toString().compareTo(b.id().toString())).toList());
+		EmiTags.TAGS.addAll(tags.stream().sorted(Comparator.comparing(a -> a.id().toString())).toList());
 		tags = tags.stream()
 			.sorted((a, b) -> Long.compare(b.stream().count(), a.stream().count()))
 			.toList();
@@ -234,16 +232,15 @@ public class EmiTags {
 
 	private static <T> List<EmiTagKey<T>> consolodateTags(List<EmiTagKey<T>> tags) {
 		Map<Set<T>, EmiTagKey<T>> map = Maps.newHashMap();
-		for (int i = 0; i < tags.size(); i++) {
-			EmiTagKey<T> key = tags.get(i);
-			Set<T> values = key.getSet();
-			EmiTagKey<T> original = map.get(values);
-			if (original != null) {
-				map.put(values, betterTag(key, original));
-			} else {
-				map.put(values, key);
-			}
-		}
+        for (EmiTagKey<T> key : tags) {
+            Set<T> values = key.getSet();
+            EmiTagKey<T> original = map.get(values);
+            if (original != null) {
+                map.put(values, betterTag(key, original));
+            } else {
+                map.put(values, key);
+            }
+        }
 		return map.values().stream().toList();
 	}
 

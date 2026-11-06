@@ -1,5 +1,6 @@
 package dev.emi.emi.jemi.widget;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -47,7 +48,7 @@ public class JemiSlotWidget extends SlotWidget {
 
 	private ITypedIngredient<?> getIngredient() {
 		if (slot.renderers != null) {
-			Optional<ITypedIngredient<?>> opt = JemiUtil.getTyped(getStack().getEmiStacks().get(0));
+			Optional<ITypedIngredient<?>> opt = JemiUtil.getTyped(getStack().getEmiStacks().getFirst());
 			if (opt.isPresent()) {
 				return opt.get();
 			}
@@ -106,10 +107,9 @@ public class JemiSlotWidget extends SlotWidget {
 		super.drawOverlay(context.raw(), mouseX, mouseY, delta);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static void addTooltip(List<ClientTooltipComponent> list, JemiRecipeSlot slot, EmiIngredient stack, IIngredientRenderer<?> renderer) {
 		if (renderer != null) {
-			if (stack.getEmiStacks().size() == 1 && stack.getEmiStacks().get(0) instanceof JemiStack js) {
+			if (stack.getEmiStacks().size() == 1 && stack.getEmiStacks().getFirst() instanceof JemiStack js) {
 				js = js.copy();
 				js.renderer = renderer;
 				stack = js;
@@ -127,9 +127,9 @@ public class JemiSlotWidget extends SlotWidget {
 		} else if (slot.tooltipCallback != null) {
 			try {
 				List<Component> event = Lists.newArrayList();
-				List<Component> original = stack.getEmiStacks().get(0).getTooltipText();
-				Set<Component> toRemove = original.stream().collect(Collectors.toSet());
-				event.addAll(stack.getEmiStacks().get(0).getTooltipText());
+				List<Component> original = stack.getEmiStacks().getFirst().getTooltipText();
+				Set<Component> toRemove = new HashSet<>(original);
+				event.addAll(stack.getEmiStacks().getFirst().getTooltipText());
 				slot.tooltipCallback.onTooltip(slot, event);
 				int index = Math.min(list.size(), 1);
 				if (!event.isEmpty()) {

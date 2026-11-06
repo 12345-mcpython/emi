@@ -146,7 +146,7 @@ public class EmiTagKey<T> {
 
 	@SuppressWarnings("unchecked")
 	public static <T> EmiTagKey<T> of(TagKey<T> raw) {
-		return (EmiTagKey<T>) CACHE.computeIfAbsent(raw, k -> new EmiTagKey<>(k));
+		return (EmiTagKey<T>) CACHE.computeIfAbsent(raw, EmiTagKey::new);
 	}
 
 	public static <T> EmiTagKey<T> of(Registry<T> registry, ResourceLocation id) {

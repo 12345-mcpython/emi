@@ -93,14 +93,7 @@ public class CraftingTreeModel {
 		}
 	}
 
-	public static class Step {
-		public final EmiRecipe recipe;
-		public final long batches;
-
-		public Step(EmiRecipe recipe, long batches) {
-			this.recipe = recipe;
-			this.batches = batches;
-		}
+	public record Step(EmiRecipe recipe, long batches) {
 	}
 
 	private Entry build(MaterialNode node, Set<MaterialNode> path) {
@@ -199,7 +192,7 @@ public class CraftingTreeModel {
 	private Plan calculate(EmiPlayerInventory inventory, boolean progress) {
 		Map<Entry, Demand> demands = new IdentityHashMap<>();
 		for (Entry entry : entries) demands.put(entry, new Demand());
-		demands.get(entries.get(0)).add(resultAmount, resultAmount, false, false, 1, null);
+		demands.get(entries.getFirst()).add(resultAmount, resultAmount, false, false, 1, null);
 		List<Stock> stock = new ArrayList<>();
 		if (inventory != null) {
 			for (EmiStack stack : inventory.inventory.values()) {

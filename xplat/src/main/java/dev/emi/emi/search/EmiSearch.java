@@ -169,20 +169,24 @@ public class EmiSearch {
 				if (negated) {
 					q = q.substring(1);
 				}
-				if (q.isEmpty()) {
-					continue;
-				}
-				if (q.equals("&")) {
-					// Default behavior
-					continue;
-				} else if (q.equals("|")) {
-					if (!queries.isEmpty()) {
-						full.add(new LogicalAndQuery(queries));
-						queries = Lists.newArrayList();
-					}
-					continue;
-				}
-				QueryType type = QueryType.fromString(q);
+                switch (q) {
+                    case "" -> {
+                        continue;
+                    }
+                    case "&" -> {
+                        // Default behavior
+                        continue;
+                        // Default behavior
+                    }
+                    case "|" -> {
+                        if (!queries.isEmpty()) {
+                            full.add(new LogicalAndQuery(queries));
+                            queries = Lists.newArrayList();
+                        }
+                        continue;
+                    }
+                }
+                QueryType type = QueryType.fromString(q);
 				Function<String, Query> constructor = type.queryConstructor;
 				Function<String, Query> regexConstructor = type.regexQueryConstructor;
 				if (type == QueryType.DEFAULT) {
@@ -280,7 +284,7 @@ public class EmiSearch {
 					List<EmiStack> ess = stack.getEmiStacks();
 					// TODO properly support ingredients?
 					if (ess.size() == 1) {
-						EmiStack es = ess.get(0);
+						EmiStack es = ess.getFirst();
 						if (compiled.test(es)) {
 							stacks.add(stack);
 						}

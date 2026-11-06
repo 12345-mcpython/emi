@@ -48,7 +48,7 @@ public interface EmiDragDropHandler<T extends Screen> {
 		public BoundsBased(BiConsumer<T, BiConsumer<Bounds, Consumer<EmiIngredient>>> bounds) {
 			this.bounds = screen -> {
 				Map<Bounds, Consumer<EmiIngredient>> map = Maps.newHashMap();
-				bounds.accept(screen, (b, consumer) -> map.put(b, consumer));
+				bounds.accept(screen, map::put);
 				return map;
 			};
 		}

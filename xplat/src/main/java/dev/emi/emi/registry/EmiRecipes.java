@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.ResourceLocation;
@@ -67,8 +68,8 @@ public class EmiRecipes {
 
 	public static void bake() {
 		long start = System.currentTimeMillis();
-		recipes.addAll(EmiData.recipes.stream().map(r -> r.get()).toList());
-		categories.sort((a, b) -> EmiRecipeCategoryProperties.getOrder(a) - EmiRecipeCategoryProperties.getOrder(b));
+		recipes.addAll(EmiData.recipes.stream().map(Supplier::get).toList());
+		categories.sort(Comparator.comparingInt(EmiRecipeCategoryProperties::getOrder));
 		invalidators.addAll(EmiData.recipeFilters);
 
 		invalidators.add(r -> {
@@ -196,15 +197,9 @@ public class EmiRecipes {
 				}
 				byCategory.put(category, cRecipes);
 				for (EmiRecipe recipe : cRecipes) {
-					recipe.getInputs().stream().flatMap(i -> i.getEmiStacks().stream()).forEach(i -> {
-						byInput.computeIfAbsent(i.copy(), b -> Sets.newLinkedHashSet()).add(recipe);
-					});
-					recipe.getCatalysts().stream().flatMap(i -> i.getEmiStacks().stream()).forEach(i -> {
-						byInput.computeIfAbsent(i.copy(), b -> Sets.newLinkedHashSet()).add(recipe);
-					});
-					recipe.getOutputs().stream().forEach(i -> {
-						byOutput.computeIfAbsent(i.copy(), b -> Sets.newLinkedHashSet()).add(recipe);
-					});
+					recipe.getInputs().stream().flatMap(i -> i.getEmiStacks().stream()).forEach(i -> byInput.computeIfAbsent(i.copy(), b -> Sets.newLinkedHashSet()).add(recipe));
+					recipe.getCatalysts().stream().flatMap(i -> i.getEmiStacks().stream()).forEach(i -> byInput.computeIfAbsent(i.copy(), b -> Sets.newLinkedHashSet()).add(recipe));
+					recipe.getOutputs().forEach(i -> byOutput.computeIfAbsent(i.copy(), b -> Sets.newLinkedHashSet()).add(recipe));
 				}
 			}
 			for (EmiStack key : byInput.keySet()) {
@@ -281,27 +276,19 @@ public class EmiRecipes {
 		}
 	}
 
-	private static class Worker implements Runnable {
-		private final List<EmiRecipeCategory> categories;
-		private final Map<EmiRecipeCategory, List<EmiIngredient>> workstations;
-		private final List<EmiRecipe> recipes;
-
-		public Worker(List<EmiRecipeCategory> categories, Map<EmiRecipeCategory, List<EmiIngredient>> workstations, List<EmiRecipe> recipes) {
-			this.categories = categories;
-			this.workstations = workstations;
-			this.recipes = recipes;
-		}
+	private record Worker(List<EmiRecipeCategory> categories, Map<EmiRecipeCategory, List<EmiIngredient>> workstations,
+						  List<EmiRecipe> recipes) implements Runnable {
 
 		@Override
-		public void run() {
-			long startTime = System.currentTimeMillis();
-			Manager manager = new Manager(categories, workstations, recipes, true);
-			if (activeWorker == this) {
-				long endTime = System.currentTimeMillis();
-				EmiLog.info("Baked recipes after reload in " + (endTime - startTime) + "ms");
-				EmiRecipes.manager = manager;
+			public void run() {
+				long startTime = System.currentTimeMillis();
+				Manager manager = new Manager(categories, workstations, recipes, true);
+				if (activeWorker == this) {
+					long endTime = System.currentTimeMillis();
+					EmiLog.info("Baked recipes after reload in " + (endTime - startTime) + "ms");
+					EmiRecipes.manager = manager;
+				}
+				setWorker(null);
 			}
-			setWorker(null);
 		}
-	}
 }

@@ -173,7 +173,7 @@ public class ItemEmiStack extends EmiStack implements Batchable {
 		List<ClientTooltipComponent> list = Lists.newArrayList();
 		if (!isEmpty()) {
 			list.addAll(EmiAgnos.getItemTooltip(stack));
-			if (!list.isEmpty() && list.get(0) instanceof ClientTextTooltip ottc) {
+			if (!list.isEmpty() && list.getFirst() instanceof ClientTextTooltip ottc) {
 				list.set(0, new EmiTextTooltipWrapper(this, ottc));
 			}
 			//String namespace = EmiPort.getItemRegistry().getId(stack.getItem()).getNamespace();

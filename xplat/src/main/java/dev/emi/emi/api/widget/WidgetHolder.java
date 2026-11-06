@@ -45,8 +45,8 @@ public interface WidgetHolder {
 	}
 
 	default TextureWidget addTexture(EmiTexture texture, int x, int y) {
-		return addTexture(texture.texture, x, y, texture.width, texture.height, texture.u, texture.v,
-			texture.regionWidth, texture.regionHeight, texture.textureWidth, texture.textureHeight);
+		return addTexture(texture.texture(), x, y, texture.width(), texture.height(), texture.u(), texture.v(),
+				texture.regionWidth(), texture.regionHeight(), texture.textureWidth(), texture.textureHeight());
 	}
 
 	default DrawableWidget addDrawable(int x, int y, int width, int height, DrawableWidgetConsumer consumer) {
@@ -115,8 +115,8 @@ public interface WidgetHolder {
 	 */
 	default AnimatedTextureWidget addAnimatedTexture(EmiTexture texture, int x, int y, int time,
 			boolean horizontal, boolean endToStart, boolean fullToEmpty) {
-		return addAnimatedTexture(texture.texture, x, y, texture.width, texture.height, texture.u, texture.v,
-			texture.regionWidth, texture.regionHeight, texture.textureWidth, texture.textureHeight,
+		return addAnimatedTexture(texture.texture(), x, y, texture.width(), texture.height(), texture.u(), texture.v(),
+				texture.regionWidth(), texture.regionHeight(), texture.textureWidth(), texture.textureHeight(),
 			time, horizontal, endToStart, fullToEmpty);
 	}
 

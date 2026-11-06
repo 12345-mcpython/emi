@@ -39,11 +39,11 @@ public class EmiSidebars {
 
 	public static void lookup(EmiIngredient stack) {
 		if (!stack.isEmpty()) {
-			if (!lookupHistory.isEmpty() && lookupHistory.get(0).equals(stack)) {
+			if (!lookupHistory.isEmpty() && lookupHistory.getFirst().equals(stack)) {
 				return;
 			}
 			lookupHistory.remove(stack);
-			lookupHistory.add(0, stack);
+			lookupHistory.addFirst(stack);
 			EmiPersistentData.save();
 			EmiScreenManager.repopulatePanels(SidebarType.LOOKUP_HISTORY);
 		}
@@ -51,12 +51,12 @@ public class EmiSidebars {
 
 	public static void craft(EmiRecipe recipe) {
 		if (!recipe.getOutputs().isEmpty()) {
-			if (!craftHistory.isEmpty() && EmiApi.getRecipeContext(craftHistory.get(0)).equals(recipe)) {
+			if (!craftHistory.isEmpty() && EmiApi.getRecipeContext(craftHistory.getFirst()).equals(recipe)) {
 				return;
 			}
 			EmiIngredient stack = new EmiFavorite.Craftable(recipe);
 			craftHistory.removeIf(i -> i instanceof EmiFavorite.Craftable c && c.getRecipe().equals(recipe));
-			craftHistory.add(0, stack);
+			craftHistory.addFirst(stack);
 			EmiPersistentData.save();
 			EmiScreenManager.repopulatePanels(SidebarType.CRAFT_HISTORY);
 		}

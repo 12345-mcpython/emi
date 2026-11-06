@@ -12,7 +12,7 @@ public class TooltipQuery extends Query {
 	private final String name;
 
 	public TooltipQuery(String name) {
-		EmiSearch.tooltips.search(name.toLowerCase()).forEach(s -> valid.add(s.stack));
+		EmiSearch.tooltips.search(name.toLowerCase()).forEach(s -> valid.add(s.stack()));
 		this.name = name.toLowerCase();
 	}
 

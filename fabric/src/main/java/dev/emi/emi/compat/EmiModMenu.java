@@ -9,6 +9,6 @@ public class EmiModMenu implements ModMenuApi {
 
 	@Override
 	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return (s) -> new ConfigScreen(s);
+		return ConfigScreen::new;
 	}
 }

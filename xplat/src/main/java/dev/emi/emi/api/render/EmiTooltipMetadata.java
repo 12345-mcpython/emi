@@ -46,7 +46,7 @@ public class EmiTooltipMetadata {
 	 */
 	public static EmiTooltipMetadata of(List<ClientTooltipComponent> tooltip) {
 		if (!tooltip.isEmpty()) {
-			ClientTooltipComponent title = tooltip.get(0);
+			ClientTooltipComponent title = tooltip.getFirst();
 			EmiRecipe recipe = null;
 			for (ClientTooltipComponent comp : tooltip) {
 				if (comp instanceof RecipeTooltipComponent rtc) {

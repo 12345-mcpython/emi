@@ -132,18 +132,14 @@ public class EmiConfig {
 	public static final boolean centerSearchBar = true;
 
 	@ConfigFilter("ui.search-sidebar-focus")
-	private static final Predicate<SidebarType> searchSidebarFocusFilter = type -> {
-		return type != SidebarType.CHESS;
-	};
+	private static final Predicate<SidebarType> searchSidebarFocusFilter = type -> type != SidebarType.CHESS;
 
 	@Comment("Which sidebar type to switch to when searching.")
 	@ConfigValue("ui.search-sidebar-focus")
 	public static SidebarType searchSidebarFocus = SidebarType.INDEX;
 
 	@ConfigFilter("ui.empty-search-sidebar-focus")
-	private static final Predicate<SidebarType> emptySearchSidebarFocusFilter = type -> {
-		return type != SidebarType.CHESS;
-	};
+	private static final Predicate<SidebarType> emptySearchSidebarFocusFilter = type -> type != SidebarType.CHESS;
 
 	@Comment("Which sidebar type to focus when the search is empty.")
 	@ConfigValue("ui.empty-search-sidebar-focus")
@@ -173,9 +169,7 @@ public class EmiConfig {
 	public static final int verticalMargin = 20;
 
 	@ConfigFilter("ui.workstation-location")
-	private static final Predicate<SidebarSide> workstationLocationFilter = side -> {
-		return side != SidebarSide.TOP;
-	};
+	private static final Predicate<SidebarSide> workstationLocationFilter = side -> side != SidebarSide.TOP;
 	@Comment("Where to show workstations in the recipe screen")
 	@ConfigValue("ui.workstation-location")
 	public static final SidebarSide workstationLocation = SidebarSide.BOTTOM;
@@ -734,7 +728,7 @@ public class EmiConfig {
 	}
 
 	private static void defineType(Class<?> clazz, Setter setter) {
-		defineType(clazz, setter, field -> field.toString());
+		defineType(clazz, setter, Object::toString);
 	}
 
 	private static void defineMultiType(Class<?> clazz, Setter setter, MultiWriter<?> writer) {
@@ -822,12 +816,8 @@ public class EmiConfig {
 					return field.subpanels.stream().map(p -> p.type.getName() + " " + p.rows).collect(Collectors.joining(", "));
 				}
 			});
-		defineType(IntGroup.class, (css, annot, field) -> {
-			((IntGroup) field.get(null)).deserialize(css.get(annot).get());
-		}, (IntGroup group) -> group.serialize());
-		defineType(Margins.class, (css, annot, field) -> {
-			((Margins) field.get(null)).deserialize(css.get(annot).get());
-		}, (Margins group) -> group.serialize());
+		defineType(IntGroup.class, (css, annot, field) -> ((IntGroup) field.get(null)).deserialize(css.get(annot).get()), (IntGroup group) -> group.serialize());
+		defineType(Margins.class, (css, annot, field) -> ((Margins) field.get(null)).deserialize(css.get(annot).get()), (Margins group) -> group.serialize());
 		defineType(ConfigEnum.class, (css, annot, field) -> {
 			String name = css.get(annot).get();
 			for (ConfigEnum e : (ConfigEnum[]) field.getType().getEnumConstants()) {

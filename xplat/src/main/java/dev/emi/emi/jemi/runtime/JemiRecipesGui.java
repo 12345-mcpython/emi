@@ -58,7 +58,7 @@ public class JemiRecipesGui implements IRecipesGui {
 		if (client.screen instanceof RecipeScreen screen) {
 			EmiIngredient stack = screen.getHoveredStack();
 			if (!stack.isEmpty()) {
-				Optional<ITypedIngredient<?>> opt = JemiUtil.getTyped(stack.getEmiStacks().get(0));
+				Optional<ITypedIngredient<?>> opt = JemiUtil.getTyped(stack.getEmiStacks().getFirst());
 				if (opt.isPresent()) {
 					return opt.get().getIngredient(ingredientType);
 				}

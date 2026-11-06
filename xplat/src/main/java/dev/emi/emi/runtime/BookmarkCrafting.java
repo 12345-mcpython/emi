@@ -138,7 +138,7 @@ public final class BookmarkCrafting {
 		Runner(Access access, List<Budget> plan) {
 			this.access = access;
 			this.plan = plan;
-			this.lastRecipe = plan.isEmpty() ? null : plan.get(0).recipe;
+			this.lastRecipe = plan.isEmpty() ? null : plan.getFirst().recipe;
 		}
 		Status status() { return new Status(running, result, reason, completed, operations); }
 		void stop(String result, String reason) { running = false; this.result = result; this.reason = reason; }
@@ -369,7 +369,7 @@ public final class BookmarkCrafting {
 			if (production) {
 				Slot output = standard.getOutputSlot(handler);
 				if (output == null) return deny("no_instant_output_slot");
-				if (!output.getItem().isEmpty() && !budget.effective.getOutputs().get(0).isEqual(EmiStack.of(output.getItem()))) return deny("foreign_output_slot");
+				if (!output.getItem().isEmpty() && !budget.effective.getOutputs().getFirst().isEqual(EmiStack.of(output.getItem()))) return deny("foreign_output_slot");
 				for (EmiStack result : budget.effective.getOutputs()) if (!reserve(room, result.getItemStack())) return deny("no_output_capacity");
 				// Remainders replace the inputs consumed by the recipe and therefore
 				// need no second slot. Reserving them again made tool/catalyst
@@ -382,7 +382,7 @@ public final class BookmarkCrafting {
 			for (ItemStack stack : inventory) {
 				if (count <= 0) return true;
 				if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, added)) {
-					int moved = Math.min(count, Math.max(0, stack.getMaxStackSize() - stack.getCount()));
+					int moved = Math.clamp(stack.getMaxStackSize() - stack.getCount(), 0, count);
 					stack.setCount(stack.getCount() + moved); count -= moved;
 				}
 			}

@@ -140,7 +140,7 @@ public class EmiFavorite implements EmiIngredient, Batchable {
 	public static class Craftable extends EmiFavorite {
 
 		public Craftable(EmiRecipe recipe) {
-			super(recipe.getOutputs().isEmpty() ? EmiStack.EMPTY : recipe.getOutputs().get(0), recipe);
+			super(recipe.getOutputs().isEmpty() ? EmiStack.EMPTY : recipe.getOutputs().getFirst(), recipe);
 		}
 
 		@Override
@@ -156,7 +156,7 @@ public class EmiFavorite implements EmiIngredient, Batchable {
 		public final long total;
 
 		public Synthetic(EmiRecipe recipe, long batches, long amount, long total, int state) {
-			super(recipe.getOutputs().get(0), recipe);
+			super(recipe.getOutputs().getFirst(), recipe);
 			this.batches = batches;
 			this.amount = amount;
 			this.total = total;
@@ -184,7 +184,7 @@ public class EmiFavorite implements EmiIngredient, Batchable {
 			}
 			//context.fill(x - 1, y - 1, 18, 18, 0x44000000 | color);
 			stack.render(context.raw(), x, y, delta, flags & (~EmiIngredient.RENDER_AMOUNT));
-			MicroTextRenderer.render(context, amount, stack.getEmiStacks().get(0) instanceof FluidEmiStack, 18, x + 17, y + 17, color);
+			MicroTextRenderer.render(context, amount, stack.getEmiStacks().getFirst() instanceof FluidEmiStack, 18, x + 17, y + 17, color);
 		}
 
 		@Override

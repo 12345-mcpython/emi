@@ -29,7 +29,7 @@ public class CookingRecipeHandler<T extends AbstractFurnaceMenu> implements Stan
 	
 	@Override
 	public List<Slot> getCraftingSlots(T handler) {
-		return List.of(handler.slots.get(0));
+		return List.of(handler.slots.getFirst());
 	}
 
 	@Override

@@ -151,10 +151,8 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 			}
 		});
 
-		registry.addGenericStackProvider((screen, x, y) -> {
-			return new EmiStackInteraction(runtime.getScreenHelper().getClickableIngredientUnderMouse(screen, x, y)
-					.map(IClickableIngredient::getTypedIngredient).map(JemiUtil::getStack).findFirst().orElse(EmiStack.EMPTY), null, false);
-		});
+		registry.addGenericStackProvider((screen, x, y) -> new EmiStackInteraction(runtime.getScreenHelper().getClickableIngredientUnderMouse(screen, x, y)
+                .map(IClickableIngredient::getTypedIngredient).map(JemiUtil::getStack).findFirst().orElse(EmiStack.EMPTY), null, false));
 
 		registry.addGenericDragDropHandler(new JemiDragDropHandler());
 
@@ -344,7 +342,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 								
 							};
 						} else {
-							replacement = new EmiCraftingRecipe(inputs, outputs.get(0), category.getRegistryName(recipe), builder.shapeless);
+							replacement = new EmiCraftingRecipe(inputs, outputs.getFirst(), category.getRegistryName(recipe), builder.shapeless);
 						}
 						if (replacement.getId() != null) {
 							replaced.add(replacement.getId());
@@ -367,9 +365,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 			List<IIngredientType<?>> types = Lists.newArrayList(im.getRegisteredIngredientTypes());
 			for (Item item : EmiPort.getItemRegistry()) {
 				if (hasSubtype.test(VanillaTypes.ITEM_STACK, item.getDefaultInstance())) {
-					registry.setDefaultComparison(item, Comparison.compareData(stack -> {
-						return subtypeManager.getSubtypeInfo(stack.getItemStack(), UidContext.Recipe);
-					}));
+					registry.setDefaultComparison(item, Comparison.compareData(stack -> subtypeManager.getSubtypeInfo(stack.getItemStack(), UidContext.Recipe)));
 				}
 			}
 			for (Fluid fluid : EmiPort.getFluidRegistry()) {

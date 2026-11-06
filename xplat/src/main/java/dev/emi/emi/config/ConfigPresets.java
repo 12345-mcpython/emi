@@ -189,15 +189,11 @@ public class ConfigPresets {
 	@ConfigGroup("presets.restore")
 	@Comment("Restore all settings to backup from most recently launch")
 	@ConfigValue("presets.backup")
-	public static Runnable backup = () -> {
-		EmiConfig.loadConfig(QDCSS.load("backup", EmiConfig.startupConfig));
-	};
+	public static Runnable backup = () -> EmiConfig.loadConfig(QDCSS.load("backup", EmiConfig.startupConfig));
 
 	@Comment("Restore all default settings")
 	@ConfigValue("presets.defaults")
-	public static Runnable defaults = () -> {
-		EmiConfig.loadConfig(QDCSS.load("defaults", EmiConfig.DEFAULT_CONFIG));
-	};
+	public static Runnable defaults = () -> EmiConfig.loadConfig(QDCSS.load("defaults", EmiConfig.DEFAULT_CONFIG));
 
 	private static void setPages(SidebarPages pages, List<SidebarPages.SidebarPage> list) {
 		pages.pages.clear();

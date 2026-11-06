@@ -55,12 +55,8 @@ public abstract class EmiIngredientRecipe implements EmiRecipe {
 		int pageSize = (ph + 1) * 8;
 		PageManager manager = new PageManager(stacks, pageSize);
 		if (pageSize < stacks.size()) {
-			widgets.addButton(2, 2, 12, 12, 0, 0, () -> true, (mouseX, mouseY, button) -> {
-				manager.scroll(-1);
-			});
-			widgets.addButton(widgets.getWidth() - 14, 2, 12, 12, 12, 0, () -> true, (mouseX, mouseY, button) -> {
-				manager.scroll(1);
-			});
+			widgets.addButton(2, 2, 12, 12, 0, 0, () -> true, (mouseX, mouseY, button) -> manager.scroll(-1));
+			widgets.addButton(widgets.getWidth() - 14, 2, 12, 12, 12, 0, () -> true, (mouseX, mouseY, button) -> manager.scroll(1));
 		}
 		for (int i = 0; i < stacks.size() && i / 8 <= ph; i++) {
 			widgets.add(new PageSlotWidget(manager, i, i % 8 * 18, i / 8 * 18 + 24));
@@ -136,7 +132,7 @@ public abstract class EmiIngredientRecipe implements EmiRecipe {
 		public void drawBackground(GuiGraphics draw, int mouseX, int mouseY, float delta) {
 			super.drawBackground(draw, mouseX, mouseY, delta);
 			EmiDrawContext context = EmiDrawContext.wrap(draw);
-			if (BoM.getRecipe(getIngredient()) instanceof EmiResolutionRecipe err && err.stack.equals(getStack())) {
+			if (BoM.getRecipe(getIngredient()) instanceof EmiResolutionRecipe err && err.stack().equals(getStack())) {
 				context.drawTexture(EmiRenderHelper.WIDGETS, x, y, 36, 128, 18, 18);
 			}
 		}

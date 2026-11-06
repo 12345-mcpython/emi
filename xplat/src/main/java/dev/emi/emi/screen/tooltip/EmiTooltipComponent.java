@@ -60,16 +60,6 @@ public interface EmiTooltipComponent extends ClientTooltipComponent {
 		}
 	}
 
-	class TooltipRenderData {
-		public final Font text;
-		public final ItemRenderer item;
-		public final int x, y;
-
-		public TooltipRenderData(Font text, ItemRenderer item, int x, int y) {
-			this.text = text;
-			this.item = item;
-			this.x = x;
-			this.y = y;
-		}
+	record TooltipRenderData(Font text, ItemRenderer item, int x, int y) {
 	}
 }

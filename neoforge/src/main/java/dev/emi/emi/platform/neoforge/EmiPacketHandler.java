@@ -18,8 +18,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 public class EmiPacketHandler {
-    private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(EmiPort.id("emi:chess_s2c"));
-    private static final CustomPacketPayload.Type<EmiChessPacket.C2S> ID_CHESS_SERVERBOUND = new CustomPacketPayload.Type<EmiChessPacket.C2S>(EmiPort.id("emi:chess_c2s"));
+    private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<>(EmiPort.id("emi:chess_s2c"));
+    private static final CustomPacketPayload.Type<EmiChessPacket.C2S> ID_CHESS_SERVERBOUND = new CustomPacketPayload.Type<>(EmiPort.id("emi:chess_c2s"));
 
     public static void init(RegisterPayloadHandlersEvent event) {
         var registrar = event.registrar("emi").optional();

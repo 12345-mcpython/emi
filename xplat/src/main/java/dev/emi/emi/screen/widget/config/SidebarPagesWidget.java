@@ -29,19 +29,15 @@ public class SidebarPagesWidget extends ConfigEntryWidget {
 		for (int i = 0; i < pages.pages.size(); i++) {
 			final int j = i;
 			SidebarPages.SidebarPage page = pages.pages.get(i);
-			buttons.add(EmiPort.newButton(0, 0, 194, 20, page.type.getText(), b -> {
-				EnumWidget.page(page.type, t -> pages.canShowChess() || t != SidebarType.CHESS, t -> {
-					pages.pages.get(j).type = (SidebarType) t;
-					pages.unique();
-				});
-			}));
+			buttons.add(EmiPort.newButton(0, 0, 194, 20, page.type.getText(), b -> EnumWidget.page(page.type, t -> pages.canShowChess() || t != SidebarType.CHESS, t -> {
+                pages.pages.get(j).type = (SidebarType) t;
+                pages.unique();
+            })));
 		}
-		buttons.add(EmiPort.newButton(0, 0, 20, 20, EmiPort.literal("+"), b -> {
-			EnumWidget.page(SidebarType.INDEX, t -> pages.canShowChess() || t != SidebarType.CHESS, t -> {
-				pages.pages.add(new SidebarPages.SidebarPage((SidebarType) t));
-				pages.unique();
-			});
-		}));
+		buttons.add(EmiPort.newButton(0, 0, 20, 20, EmiPort.literal("+"), b -> EnumWidget.page(SidebarType.INDEX, t -> pages.canShowChess() || t != SidebarType.CHESS, t -> {
+            pages.pages.add(new SidebarPages.SidebarPage((SidebarType) t));
+            pages.unique();
+        })));
 	}
 
 	@Override
@@ -53,7 +49,7 @@ public class SidebarPagesWidget extends ConfigEntryWidget {
 			button.y = y + h;
 			h += 24;
 		}
-		Button button = buttons.get(buttons.size() - 1);
+		Button button = buttons.getLast();
 		button.x = x + width - 20;
 		button.y = y;
 	}

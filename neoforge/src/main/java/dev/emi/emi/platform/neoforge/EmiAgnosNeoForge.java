@@ -127,7 +127,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 			for (ModFileScanData.AnnotationData annot : data.getAnnotations()) {
 				try {
 					if (entrypointType.equals(annot.annotationType())) {
-						mods.add(data.getIModInfoData().get(0).getMods().get(0).getModId());
+						mods.add(data.getIModInfoData().getFirst().getMods().getFirst().getModId());
 					}
 				} catch (Throwable t) {
 					EmiLog.error("Exception constructing entrypoint:", t);
@@ -224,7 +224,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 						EmiStack output = EmiStack.of(recipe.getOutput(is, recipe.getIngredient().getItems()[0]));
 						ResourceLocation id = EmiPort.id("emi", "/brewing/neoforge/"
 							+ EmiUtil.subId(input.getId()) + "/"
-							+ EmiUtil.subId(ingredient.getEmiStacks().get(0).getId()) + "/"
+							+ EmiUtil.subId(ingredient.getEmiStacks().getFirst().getId()) + "/"
 							+ EmiUtil.subId(output.getId()));
 						registry.addRecipe(new EmiBrewingRecipe(input, ingredient, output, id));
 					}

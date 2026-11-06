@@ -60,7 +60,7 @@ public class ProxyRecipeManager {
 		if (raw == null) {
 			return Stream.empty();
 		}
-		return raw.getRecipesFor(type, inventory, client.level).stream().map(e -> e.value());
+		return raw.getRecipesFor(type, inventory, client.level).stream().map(RecipeHolder::value);
 	}
 
 	public static <I extends RecipeInput, T extends Recipe<I>> List<T> getMatches(RecipeType<T> type, I inventory) {
@@ -72,7 +72,7 @@ public class ProxyRecipeManager {
 		if (raw == null) {
 			return null;
 		}
-		return raw.getRecipeFor(type, inventory, client.level).map(e -> e.value()).orElse(null);
+		return raw.getRecipeFor(type, inventory, client.level).map(RecipeHolder::value).orElse(null);
 	}
 
 	public static void bakeIds() {

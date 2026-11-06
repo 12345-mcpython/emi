@@ -24,7 +24,7 @@ public class EmiBannerShieldRecipe extends EmiPatternCraftingRecipe {
 		Items.LIGHT_GRAY_BANNER, Items.CYAN_BANNER, Items.PURPLE_BANNER, Items.BLUE_BANNER,
 		Items.BROWN_BANNER, Items.GREEN_BANNER, Items.RED_BANNER, Items.BLACK_BANNER
 	);
-	private static final List<EmiStack> EMI_BANNERS = BANNERS.stream().map(i -> EmiStack.of(i)).collect(Collectors.toList());
+	private static final List<EmiStack> EMI_BANNERS = BANNERS.stream().map(EmiStack::of).toList();
 	public static final EmiStack SHIELD = EmiStack.of(Items.SHIELD);
 
 	@SuppressWarnings("unchecked")

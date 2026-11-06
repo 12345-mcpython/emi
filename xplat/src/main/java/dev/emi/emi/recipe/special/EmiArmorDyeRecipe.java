@@ -19,7 +19,7 @@ import dev.emi.emi.api.widget.GeneratedSlotWidget;
 import dev.emi.emi.api.widget.SlotWidget;
 
 public class EmiArmorDyeRecipe extends EmiPatternCraftingRecipe {
-	private static final List<DyeItem> DYES = Stream.of(DyeColor.values()).map(c -> DyeItem.byColor(c)).collect(Collectors.toList());
+	private static final List<DyeItem> DYES = Stream.of(DyeColor.values()).map(DyeItem::byColor).toList();
 	private final Item armor;
 
 	public EmiArmorDyeRecipe(Item armor, ResourceLocation id) {
@@ -47,9 +47,7 @@ public class EmiArmorDyeRecipe extends EmiPatternCraftingRecipe {
 
 	@Override
 	public SlotWidget getOutputWidget(int x, int y) {
-		return new GeneratedSlotWidget(r -> {
-			return EmiStack.of(DyedItemColor.applyDyes(new ItemStack(armor), getDyes(r)));
-		}, unique, x, y);
+		return new GeneratedSlotWidget(r -> EmiStack.of(DyedItemColor.applyDyes(new ItemStack(armor), getDyes(r))), unique, x, y);
 	}
 	
 	private List<DyeItem> getDyes(Random random) {

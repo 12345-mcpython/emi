@@ -108,7 +108,7 @@ public class RecipeScreen extends Screen {
 		if (recipes != null) {
 			EmiRecipe current = null;
 			if (tab < tabs.size() && page < tabs.get(tab).getPageCount() && !tabs.get(tab).getPage(page).isEmpty()) {
-				current = tabs.get(tab).getPage(page).get(0).recipe;
+				current = tabs.get(tab).getPage(page).getFirst().recipe;
 			}
 			tabs.clear();
 			if (!recipes.isEmpty()) {

@@ -166,29 +166,29 @@ public class TreeCost {
 		}
 		EmiRecipe recipe = node.recipe;
 		if (recipe instanceof EmiResolutionRecipe err) {
-			calculateCost(node.children.get(0), amount, chance, trackProgress);
+			calculateCost(node.children.getFirst(), amount, chance, trackProgress);
 			if (catalyst) {
-				addRemainder(err.stack, amount, chance);
+				addRemainder(err.stack(), amount, chance);
 			}
 			return;
 		}
 		long original = amount;
 		List<EmiStack> ingredientStacks = node.ingredient.getEmiStacks();
-		for (int i = 0; i < ingredientStacks.size(); i++) {
-			if (chance.chanced()) {
-				double desired = amount * chance.chance();
-				double given = getChancedRemainder(ingredientStacks.get(i), desired, catalyst, chance);
-				if (given > 0) {
-					double scaled = given / chance.chance();
-					amount -= (long) scaled;
-					if (amount > 0) {
-						chance = new ChanceState((float) ((amount - (scaled % 1)) * chance.chance() / amount), true);
-					}
-				}
-			} else {
-				amount -= getRemainder(ingredientStacks.get(i), amount, catalyst);
-			}
-		}
+        for (EmiStack ingredientStack : ingredientStacks) {
+            if (chance.chanced()) {
+                double desired = amount * chance.chance();
+                double given = getChancedRemainder(ingredientStack, desired, catalyst, chance);
+                if (given > 0) {
+                    double scaled = given / chance.chance();
+                    amount -= (long) scaled;
+                    if (amount > 0) {
+                        chance = new ChanceState((float) ((amount - (scaled % 1)) * chance.chance() / amount), true);
+                    }
+                }
+            } else {
+                amount -= getRemainder(ingredientStack, amount, catalyst);
+            }
+        }
 		if (amount == 0) {
 			if (trackProgress) {
 				complete(node);
@@ -211,7 +211,7 @@ public class TreeCost {
 			for (MaterialNode n : node.children) {
 				calculateCost(n, minBatches * n.amount, produced.consume(n.consumeChance), trackProgress);
 			}
-			EmiStack stack = node.ingredient.getEmiStacks().get(0);
+			EmiStack stack = node.ingredient.getEmiStacks().getFirst();
 			addRemainder(stack, effectiveCrafts - amount, produced);
 
 			for (EmiStack es : recipe.getOutputs()) {

@@ -16,7 +16,7 @@ public class MaterialTree {
 	public long batches = 1;
 
 	public MaterialTree(EmiRecipe recipe) {
-		EmiStack output = recipe.getOutputs().get(0);
+		EmiStack output = recipe.getOutputs().getFirst();
 		goal = new MaterialNode(output);
 		goal.defineRecipe(recipe);
 		recalculate();

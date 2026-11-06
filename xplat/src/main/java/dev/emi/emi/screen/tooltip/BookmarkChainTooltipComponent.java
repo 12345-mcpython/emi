@@ -27,7 +27,7 @@ public class BookmarkChainTooltipComponent implements EmiTooltipComponent {
 	}
 
 	private int columns() {
-		return Math.max(1, Math.min(COLUMNS, entries.size()));
+		return Math.clamp(entries.size(), 1, COLUMNS);
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class BookmarkChainTooltipComponent implements EmiTooltipComponent {
 			long amount = missingOnly ? entry.missing() : entry.amount();
 			if (amount > 0) {
 				Component text = EmiPort.literal(compact(amount));
-				int width = render.text.width(text);
+				int width = render.text().width(text);
 				float scale = Math.min(1f, 17f / Math.max(1, width));
 				context.push();
 				context.matrices().translate(x + SLOT - 1, y + SLOT - 1, 300);

@@ -43,7 +43,7 @@ public class EmiRecipeSorter {
 			if (stack.isEmpty()) {
 				continue;
 			}
-			int value = EmiStackList.getIndex(stack.getEmiStacks().get(0));
+			int value = EmiStackList.getIndex(stack.getEmiStacks().getFirst());
 			list.add(value);
 		}
 		return list;

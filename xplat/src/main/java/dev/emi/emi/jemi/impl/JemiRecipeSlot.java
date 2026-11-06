@@ -71,7 +71,7 @@ public class JemiRecipeSlot implements IRecipeSlotView {
 
 	@Override
 	public <T> Stream<T> getIngredients(IIngredientType<T> ingredientType) {
-		return (Stream<T>) getAllIngredients().filter(t -> t.getType() == ingredientType).map(t -> t.getIngredient());
+		return (Stream<T>) getAllIngredients().filter(t -> t.getType() == ingredientType).map(ITypedIngredient::getIngredient);
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class JemiRecipeSlot implements IRecipeSlotView {
 
 	@Override
 	public Optional<ITypedIngredient<?>> getDisplayedIngredient() {
-		return JemiUtil.getTyped(stack.getEmiStacks().get(0));
+		return JemiUtil.getTyped(stack.getEmiStacks().getFirst());
 	}
 
 	@Override

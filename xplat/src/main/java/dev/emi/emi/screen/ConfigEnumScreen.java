@@ -36,12 +36,10 @@ public class ConfigEnumScreen<T> extends Screen {
 		this.addRenderableOnly(new EmiNameWidget(width / 2, 16));
 		int w = 200;
 		int x = (width - w) / 2;
-		this.addRenderableWidget(EmiPort.newButton(x, height - 30, w, 20, EmiPort.translatable("gui.done"), button -> {
-			onClose();
-		}));
+		this.addRenderableWidget(EmiPort.newButton(x, height - 30, w, 20, EmiPort.translatable("gui.done"), button -> onClose()));
 		list = new ListWidget(minecraft, width, height, 40, height - 40);
 		for (Entry<T> e : entries) {
-			list.addEntry(new SelectionWidget<T>(this, e));
+			list.addEntry(new SelectionWidget<>(this, e));
 		}
 		this.addWidget(list);
 	}

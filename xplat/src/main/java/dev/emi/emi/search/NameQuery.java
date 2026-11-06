@@ -11,7 +11,7 @@ public class NameQuery extends Query {
 	private final String name;
 	
 	public NameQuery(String name) {
-		EmiSearch.names.search(name.toLowerCase()).forEach(s -> valid.add(s.stack));
+		EmiSearch.names.search(name.toLowerCase()).forEach(s -> valid.add(s.stack()));
 		this.name = name.toLowerCase();
 	}
 

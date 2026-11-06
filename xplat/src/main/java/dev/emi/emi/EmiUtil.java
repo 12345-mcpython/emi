@@ -99,7 +99,7 @@ public class EmiUtil {
 	public static EmiRecipe getPreferredRecipe(EmiIngredient ingredient, EmiPlayerInventory inventory, boolean requireCraftable) {
 		if (ingredient.getEmiStacks().size() == 1 && !ingredient.isEmpty()) {
 			AbstractContainerScreen<?> hs = EmiApi.getHandledScreen();
-			EmiStack stack = ingredient.getEmiStacks().get(0);
+			EmiStack stack = ingredient.getEmiStacks().getFirst();
 			return getPreferredRecipe(EmiApi.getRecipeManager().getRecipesByOutput(stack).stream().filter(r -> {
 				@SuppressWarnings("rawtypes")
 				EmiRecipeHandler handler = EmiRecipeFiller.getFirstValidHandler(r, hs);
@@ -149,10 +149,8 @@ public class EmiUtil {
 
 	public static EmiRecipe getRecipeResolution(EmiIngredient ingredient, EmiPlayerInventory inventory) {
 		if (ingredient.getEmiStacks().size() == 1 && !ingredient.isEmpty()) {
-			EmiStack stack = ingredient.getEmiStacks().get(0);
-			return getPreferredRecipe(EmiApi.getRecipeManager().getRecipesByOutput(stack).stream().filter(r -> {
-					return r.getOutputs().stream().anyMatch(i -> i.isEqual(stack));
-				}).toList(), inventory, false);
+			EmiStack stack = ingredient.getEmiStacks().getFirst();
+			return getPreferredRecipe(EmiApi.getRecipeManager().getRecipesByOutput(stack).stream().filter(r -> r.getOutputs().stream().anyMatch(i -> i.isEqual(stack))).toList(), inventory, false);
 		}
 		return null;
 	}

@@ -18,7 +18,7 @@ public class JemiBookmarkOverlay implements IBookmarkOverlay {
 	public Optional<ITypedIngredient<?>> getIngredientUnderMouse() {
 		EmiStackInteraction stack = EmiScreenManager.getHoveredStack(EmiScreenManager.lastMouseX, EmiScreenManager.lastMouseY, false);
 		if (stack instanceof EmiScreenManager.SidebarEmiStackInteraction sesi && sesi.getType() == SidebarType.FAVORITES && sesi.getStack().getEmiStacks().size() == 1) {
-			return JemiUtil.getTyped(stack.getStack().getEmiStacks().get(0));
+			return JemiUtil.getTyped(stack.getStack().getEmiStacks().getFirst());
 		}
 		return Optional.empty();
 	}
@@ -26,6 +26,6 @@ public class JemiBookmarkOverlay implements IBookmarkOverlay {
 	@Override
 	public <T> @Nullable T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
 		Optional<ITypedIngredient<?>> opt = getIngredientUnderMouse();
-        return opt.map(iTypedIngredient -> iTypedIngredient.getIngredient(ingredientType).orElseGet(() -> null)).orElse(null);
+        return opt.map(iTypedIngredient -> iTypedIngredient.getIngredient(ingredientType).orElse(null)).orElse(null);
     }
 }

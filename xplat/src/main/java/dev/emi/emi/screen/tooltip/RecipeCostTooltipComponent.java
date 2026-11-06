@@ -1,5 +1,6 @@
 package dev.emi.emi.screen.tooltip;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 import net.minecraft.ChatFormatting;
@@ -39,10 +40,7 @@ public class RecipeCostTooltipComponent implements EmiTooltipComponent {
 		List<FlatMaterialCost> costs = Stream.concat(
 			tree.cost.costs.values().stream(),
 			tree.cost.chanceCosts.values().stream()
-		).sorted((a, b) -> Integer.compare(
-			EmiStackList.getIndex(a.ingredient.getEmiStacks().get(0)),
-			EmiStackList.getIndex(b.ingredient.getEmiStacks().get(0))
-		)).toList();
+		).sorted(Comparator.comparingInt(a -> EmiStackList.getIndex(a.ingredient.getEmiStacks().getFirst()))).toList();
 		for (FlatMaterialCost cost : costs) {
 			if (cost instanceof ChanceMaterialCost cmc) {
 				nodes.add(new Node(cost.ingredient, cost.amount / batches * cmc.chance, true));
@@ -79,7 +77,7 @@ public class RecipeCostTooltipComponent implements EmiTooltipComponent {
 	@Override
 	public int getHeight() {
 		if (!nodes.isEmpty()) {
-			return nodes.get(nodes.size() - 1).y + 18;
+			return nodes.getLast().y + 18;
 		}
 		return 10;
 	}

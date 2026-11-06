@@ -92,9 +92,9 @@ public class FluidEmiStack extends EmiStack {
 		List<ClientTooltipComponent> list = Lists.newArrayList();
 		List<Component> text = getTooltipText();
 		if (!text.isEmpty()) {
-			list.add(new EmiTextTooltipWrapper(this, EmiPort.ordered(text.get(0))));
+			list.add(new EmiTextTooltipWrapper(this, EmiPort.ordered(text.getFirst())));
 		}
-		list.addAll(text.stream().skip(1).map(EmiTooltipComponents::of).collect(Collectors.toList()));
+		list.addAll(text.stream().skip(1).map(EmiTooltipComponents::of).toList());
 		if (amount > 1) {
 			list.add(EmiTooltipComponents.getAmount(this));
 		}

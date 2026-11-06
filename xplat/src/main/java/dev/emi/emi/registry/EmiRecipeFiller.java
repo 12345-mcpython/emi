@@ -86,7 +86,7 @@ public class EmiRecipeFiller {
 				if (slot instanceof ResultSlot crs) {
 					CraftingContainer inv = ((CraftingResultSlotAccessor) crs).getInput();
 					if (inv != null && inv.getWidth() > 0 && inv.getHeight() > 0) {
-						return List.of(new CoercedRecipeHandler<T>(crs));
+						return List.of(new CoercedRecipeHandler<>(crs));
 					}
 				}
 			}
@@ -117,7 +117,7 @@ public class EmiRecipeFiller {
 		EmiRecipeHandler<T> handler = getFirstValidHandler(recipe, screen);
 		if (handler != null && handler.supportsRecipe(recipe)) {
 			EmiPlayerInventory inv = handler.getInventory(screen);
-			EmiCraftContext<T> context = new EmiCraftContext<T>(screen, inv, type, destination, amount);
+			EmiCraftContext<T> context = new EmiCraftContext<>(screen, inv, type, destination, amount);
 			if (handler.canCraft(recipe, context)) {
 				EmiSidebars.craft(recipe);
 				boolean crafted = handler.craft(recipe, context);
@@ -147,22 +147,21 @@ public class EmiRecipeFiller {
 						discovered.add(null);
 						continue;
 					}
-					for (int e = 0; e < emiStacks.size(); e++) {
-						EmiStack stack = emiStacks.get(e);
-						slotLoop:
-						for (Slot s : slots) {
-							ItemStack ss = s.getItem();
-							if (EmiStack.of(s.getItem()).isEqual(stack)) {
-								for (DiscoveredItem di : d) {
-									if (ItemStack.isSameItemSameComponents(ss, di.stack)) {
-										di.amount += ss.getCount();
-										continue slotLoop;
-									}
-								}
-								d.add(new DiscoveredItem(stack, ss, ss.getCount(), (int) ingredient.getAmount(), ss.getMaxStackSize()));
-							}
-						}
-					}
+                    for (EmiStack stack : emiStacks) {
+                        slotLoop:
+                        for (Slot s : slots) {
+                            ItemStack ss = s.getItem();
+                            if (EmiStack.of(s.getItem()).isEqual(stack)) {
+                                for (DiscoveredItem di : d) {
+                                    if (ItemStack.isSameItemSameComponents(ss, di.stack)) {
+                                        di.amount += ss.getCount();
+                                        continue slotLoop;
+                                    }
+                                }
+                                d.add(new DiscoveredItem(stack, ss, ss.getCount(), (int) ingredient.getAmount(), ss.getMaxStackSize()));
+                            }
+                        }
+                    }
 					DiscoveredItem biggest = null;
 					for (DiscoveredItem di : d) {
 						if (biggest == null) {
@@ -218,17 +217,16 @@ public class EmiRecipeFiller {
 				}
 
 				List<ItemStack> desired = Lists.newArrayList();
-				for (int i = 0; i < discovered.size(); i++) {
-					DiscoveredItem di = discovered.get(i);
-					if (di != null) {
-						ItemStack is = di.stack.copy();
-						int a = di.catalyst() ? di.consumed : di.consumed * maxAmount;
-						is.setCount(a);
-						desired.add(is);
-					} else {
-						desired.add(ItemStack.EMPTY);
-					}
-				}
+                for (DiscoveredItem di : discovered) {
+                    if (di != null) {
+                        ItemStack is = di.stack.copy();
+                        int a = di.catalyst() ? di.consumed : di.consumed * maxAmount;
+                        is.setCount(a);
+                        desired.add(is);
+                    } else {
+                        desired.add(ItemStack.EMPTY);
+                    }
+                }
 				return desired;
 			}
 		} catch (Exception e) {
@@ -242,7 +240,7 @@ public class EmiRecipeFiller {
 		List<ItemStack> stacks = Lists.newArrayList();
 		Slot output = handler.getOutputSlot(screen.getMenu());
 		if (output != null && !output.getItem().isEmpty() && !recipe.getOutputs().isEmpty()
-				&& !ItemStack.matches(output.getItem(), recipe.getOutputs().get(0).getItemStack())) {
+				&& !ItemStack.matches(output.getItem(), recipe.getOutputs().getFirst().getItemStack())) {
 			return 0;
 		}
 		for (Slot slot : handler.getCraftingSlots(recipe, screen.getMenu())) {

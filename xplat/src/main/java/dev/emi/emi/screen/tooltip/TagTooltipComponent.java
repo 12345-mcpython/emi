@@ -49,7 +49,7 @@ public class TagTooltipComponent implements EmiTooltipComponent {
 		}
 		if (stacks.size() > MAX_DISPLAYED) {
 			context.resetColor();
-			context.drawTexture(TEXTURE, getWidth(render.text) - 14, getHeight() - 8, 0, 192, 9, 3);
+			context.drawTexture(TEXTURE, getWidth(render.text()) - 14, getHeight() - 8, 0, 192, 9, 3);
 		}
 	}
 }

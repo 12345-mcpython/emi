@@ -20,8 +20,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.EmiUtil;
@@ -30,7 +28,6 @@ import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.EmiResolutionRecipe;
 import dev.emi.emi.api.recipe.handler.EmiCraftContext;
-import dev.emi.emi.api.recipe.handler.EmiRecipeHandler;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
@@ -270,7 +267,7 @@ public class BoMScreen extends Screen {
 		if (model == null || model.entries.isEmpty()) return;
 		Set<Entry> visible = Collections.newSetFromMap(new IdentityHashMap<>());
 		List<Entry> queue = new ArrayList<>();
-		queue.add(model.entries.get(0));
+		queue.add(model.entries.getFirst());
 		for (int i = 0; i < queue.size(); i++) {
 			Entry e = queue.get(i);
 			if (!visible.add(e)) continue;
@@ -317,16 +314,16 @@ public class BoMScreen extends Screen {
 				case AVAILABLE -> { if (useInventory) for (FlatMaterialCost cost : model.available) addCost(cost); }
 				case CRAFTING, READY -> {
 					for (CraftingTreeModel.Step step : model.steps) {
-						if ((s == Section.READY) != ready(step.recipe)) continue;
-						EmiIngredient output = step.recipe.getOutputs().get(0);
-						stats.add(new StatRow(EmiPort.literal("×" + step.batches + " " + label(output)), output, step.recipe));
+						if ((s == Section.READY) != ready(step.recipe())) continue;
+						EmiIngredient output = step.recipe().getOutputs().getFirst();
+						stats.add(new StatRow(EmiPort.literal("×" + step.batches() + " " + label(output)), output, step.recipe()));
 					}
 				}
 				case RESULTS -> stats.add(new StatRow(amount(model.result, model.resultAmount), model.result, null));
 				case LEFTOVERS -> { for (FlatMaterialCost cost : model.leftovers) addCost(cost); }
 				case MACHINES -> {
 					Map<Component, Long> machines = new LinkedHashMap<>();
-					for (CraftingTreeModel.Step step : model.steps) machines.merge(step.recipe.getCategory().getName(), step.batches, BoMScreen::addSaturated);
+					for (CraftingTreeModel.Step step : model.steps) machines.merge(step.recipe().getCategory().getName(), step.batches(), BoMScreen::addSaturated);
 					for (Map.Entry<Component, Long> entry : machines.entrySet()) stats.add(new StatRow(EmiPort.literal("×" + entry.getValue() + " " + entry.getKey().getString()), null, null));
 				}
 			}
@@ -350,7 +347,7 @@ public class BoMScreen extends Screen {
 	}
 
 	private String label(EmiIngredient ingredient) {
-		return ingredient.getEmiStacks().isEmpty() ? "?" : ingredient.getEmiStacks().get(0).getName().getString();
+		return ingredient.getEmiStacks().isEmpty() ? "?" : ingredient.getEmiStacks().getFirst().getName().getString();
 	}
 
 	/** Readiness describes materials, independently of whether this screen has that machine. */
@@ -366,7 +363,7 @@ public class BoMScreen extends Screen {
 			for (int i = 0; i < stacks.size() && needed > 0; i++) {
 				EmiStack stock = stacks.get(i);
 				if (input.getEmiStacks().stream().anyMatch(stock::isEqual)) {
-					long take = Math.min(needed, Math.max(0, stock.getAmount() - used[i]));
+					long take = Math.clamp(stock.getAmount() - used[i], 0, needed);
 					used[i] += take;
 					needed -= take;
 				}
@@ -388,7 +385,7 @@ public class BoMScreen extends Screen {
 	private void fillNext() {
 		if (model == null || old == null) return;
 		for (CraftingTreeModel.Step step : model.steps) {
-			if (canFill(step.recipe) && EmiRecipeFiller.performFill(step.recipe, old, EmiCraftContext.Type.FILL_BUTTON, EmiCraftContext.Destination.NONE, 1)) return;
+			if (canFill(step.recipe()) && EmiRecipeFiller.performFill(step.recipe(), old, EmiCraftContext.Type.FILL_BUTTON, EmiCraftContext.Destination.NONE, 1)) return;
 		}
 		notice = tr("no_next");
 	}
@@ -574,7 +571,7 @@ public class BoMScreen extends Screen {
 			return true;
 		}
 		if (v != null) {
-			if (groupTree == null && button == 1 && EmiInput.isShiftDown() && v.entry != model.entries.get(0)) {
+			if (groupTree == null && button == 1 && EmiInput.isShiftDown() && v.entry != model.entries.getFirst()) {
 				BoM.addResolution(v.entry.ingredient, null);
 				recalculateTree();
 				remember();
@@ -596,7 +593,7 @@ public class BoMScreen extends Screen {
 		if (steps == 0) return true;
 		if (mouseX < leftWidth && mouseY >= top) { planScroll -= steps; return true; }
 		if (showStats && mouseX >= width - rightWidth && mouseY >= top) { statScroll = Mth.clamp(statScroll - steps, 0, Math.max(0, stats.size() - statRows())); return true; }
-		if (groupTree == null && tree() != null && (mouseY > canvas.bottom() && mouseY < height - 10 || EmiInput.isControlDown() && hovered(mouseX, mouseY) != null && hovered(mouseX, mouseY).entry == model.entries.get(0))) {
+		if (groupTree == null && tree() != null && (mouseY > canvas.bottom() && mouseY < height - 10 || EmiInput.isControlDown() && hovered(mouseX, mouseY) != null && hovered(mouseX, mouseY).entry == model.entries.getFirst())) {
 			long change = steps * (EmiInput.isShiftDown() ? 16L : 1L);
 			tree().batches = change > 0 ? addSaturated(tree().batches, change) : Math.max(1, tree().batches + change);
 			recalculateTree(); remember(); return true;
@@ -605,7 +602,7 @@ public class BoMScreen extends Screen {
 		if (groupTree == null && v != null && EmiInput.isShiftDown() && v.entry.ingredient.getEmiStacks().size() > 1) {
 			List<EmiStack> choices = v.entry.ingredient.getEmiStacks();
 			EmiRecipe current = tree().getRecipe(v.entry.ingredient);
-			int index = current instanceof EmiResolutionRecipe r ? choices.indexOf(r.stack) : 0;
+			int index = current instanceof EmiResolutionRecipe r ? choices.indexOf(r.stack()) : 0;
 			BoM.addResolution(v.entry.ingredient, new EmiResolutionRecipe(v.entry.ingredient, choices.get(Math.floorMod(index + steps, choices.size()))));
 			recalculateTree(); remember(); return true;
 		}
@@ -711,7 +708,7 @@ public class BoMScreen extends Screen {
 		int x, y;
 		Visual(Entry entry) {
 			this.entry = entry;
-			width = Math.max(90, Math.min(170, font.width(label(entry.ingredient)) + 32));
+			width = Math.clamp(font.width(label(entry.ingredient)) + 32, 90, 170);
 		}
 	}
 	private record StatRow(Component text, EmiIngredient ingredient, EmiRecipe recipe) {}

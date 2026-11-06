@@ -40,17 +40,11 @@ public class EmiMainFabric implements ModInitializer {
 		PayloadTypeRegistry.playS2C().register(EmiNetwork.COMMAND, StreamCodec.of((buf, v) -> v.write(buf), CommandS2CPacket::new));
 		PayloadTypeRegistry.playS2C().register(EmiNetwork.CHESS, StreamCodec.of((buf, v) -> v.write(buf), EmiChessPacket.S2C::new));
 
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			EmiNetwork.sendToClient(handler.player, new PingS2CPacket());
-		});
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> EmiNetwork.sendToClient(handler.player, new PingS2CPacket()));
 	}
 
 	private <T extends EmiPacket> void registerPacketReader(CustomPacketPayload.Type<T> id, StreamDecoder<RegistryFriendlyByteBuf, T> decode) {
 		PayloadTypeRegistry.playC2S().register(id, StreamCodec.of((buf, v) -> v.write(buf), decode));
-		ServerPlayNetworking.registerGlobalReceiver(id, (payload, context) -> {
-			context.player().getServer().execute(() -> {
-				payload.apply(context.player());
-			});
-		});
+		ServerPlayNetworking.registerGlobalReceiver(id, (payload, context) -> context.player().getServer().execute(() -> payload.apply(context.player())));
 	}
 }

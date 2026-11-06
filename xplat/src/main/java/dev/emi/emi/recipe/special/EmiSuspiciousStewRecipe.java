@@ -19,7 +19,7 @@ import dev.emi.emi.api.widget.SlotWidget;
 
 public class EmiSuspiciousStewRecipe extends EmiPatternCraftingRecipe {
 	private static final List<Item> FLOWERS = EmiPort.getItemRegistry().stream()
-		.filter(i -> i instanceof BlockItem bi && bi.getBlock() instanceof FlowerBlock).collect(Collectors.toList());
+		.filter(i -> i instanceof BlockItem bi && bi.getBlock() instanceof FlowerBlock).toList();
 
 	public EmiSuspiciousStewRecipe(ResourceLocation id) {
 		super(List.of(

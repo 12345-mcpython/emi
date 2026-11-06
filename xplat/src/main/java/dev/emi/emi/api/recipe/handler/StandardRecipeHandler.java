@@ -12,8 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
@@ -60,19 +58,19 @@ public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends 
 
 	@Override
 	default boolean canCraft(EmiRecipe recipe, EmiCraftContext<T> context) {
-		return context.getInventory().canCraft(recipe);
+		return context.inventory().canCraft(recipe);
 	}
 
 	@Override
 	default boolean craft(EmiRecipe recipe, EmiCraftContext<T> context) {
-		List<ItemStack> stacks = EmiRecipeFiller.getStacks(this, recipe, context.getScreen(), context.getAmount());
+		List<ItemStack> stacks = EmiRecipeFiller.getStacks(this, recipe, context.screen(), context.amount());
 		if (stacks != null) {
 			if (stacks != null) {
-				Minecraft.getInstance().setScreen(context.getScreen());
+				Minecraft.getInstance().setScreen(context.screen());
 				if (!EmiClient.onServer) {
-					return EmiRecipeFiller.clientFill(this, recipe, context.getScreen(), stacks, context.getDestination());
+					return EmiRecipeFiller.clientFill(this, recipe, context.screen(), stacks, context.destination());
 				} else {
-					EmiClient.sendFillRecipe(this, context.getScreen(), context.getScreenHandler().containerId, switch(context.getDestination()) {
+					EmiClient.sendFillRecipe(this, context.screen(), context.getScreenHandler().containerId, switch(context.destination()) {
 						case NONE -> 0;
 						case CURSOR -> 1;
 						case INVENTORY -> 2;
@@ -86,7 +84,7 @@ public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends 
 
 	@Override
 	default void render(EmiRecipe recipe, EmiCraftContext<T> context, List<Widget> widgets, GuiGraphics draw) {
-		renderMissing(recipe, context.getInventory(), widgets, draw);
+		renderMissing(recipe, context.inventory(), widgets, draw);
 	}
 
 	@ApiStatus.Internal

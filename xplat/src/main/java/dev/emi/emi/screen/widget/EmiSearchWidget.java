@@ -90,11 +90,11 @@ public class EmiSearchWidget extends EditBox {
 				int start = matcher.start();
 				int end = matcher.end();
 				if (last < start) {
-					styles.add(new Tuple<Integer, Style>(start, Style.EMPTY.applyFormat(ChatFormatting.WHITE)));
+					styles.add(new Tuple<>(start, Style.EMPTY.applyFormat(ChatFormatting.WHITE)));
 				}
 				String group = matcher.group();
 				if (group.startsWith("-")) {
-					styles.add(new Tuple<Integer, Style>(start + 1, Style.EMPTY.applyFormat(ChatFormatting.RED)));
+					styles.add(new Tuple<>(start + 1, Style.EMPTY.applyFormat(ChatFormatting.RED)));
 					start++;
 					group = group.substring(1);
 				}
@@ -102,30 +102,30 @@ public class EmiSearchWidget extends EditBox {
 				int subStart = type.prefix.length();
 				if (group.length() > 1 + subStart && group.substring(subStart).startsWith("/") && group.endsWith("/")) {
 					int rOff = start + subStart + 1;
-					styles.add(new Tuple<Integer, Style>(rOff, type.slashColor));
+					styles.add(new Tuple<>(rOff, type.slashColor));
 					Matcher rMatcher = ESCAPE.matcher(string.substring(rOff, end - 1));
 					int rLast = 0;
 					while (rMatcher.find()) {
 						int rStart = rMatcher.start();
 						int rEnd = rMatcher.end();
 						if (rLast < rStart) {
-							styles.add(new Tuple<Integer, Style>(rStart + rOff, type.regexColor));
+							styles.add(new Tuple<>(rStart + rOff, type.regexColor));
 						}
-						styles.add(new Tuple<Integer, Style>(rEnd + rOff, type.escapeColor));
+						styles.add(new Tuple<>(rEnd + rOff, type.escapeColor));
 						rLast = rEnd;
 					}
 					if (rLast < end - 1) {
-						styles.add(new Tuple<Integer, Style>(end - 1, type.regexColor));
+						styles.add(new Tuple<>(end - 1, type.regexColor));
 					}
-					styles.add(new Tuple<Integer, Style>(end, type.slashColor));
+					styles.add(new Tuple<>(end, type.slashColor));
 				} else {
-					styles.add(new Tuple<Integer, Style>(end, type.color));
+					styles.add(new Tuple<>(end, type.color));
 				}
 
 				last = end;
 			}
 			if (last < string.length()) {
-				styles.add(new Tuple<Integer, Style>(string.length(), Style.EMPTY.applyFormat(ChatFormatting.WHITE)));
+				styles.add(new Tuple<>(string.length(), Style.EMPTY.applyFormat(ChatFormatting.WHITE)));
 			}
 			this.styles = styles;
 			EmiSearch.search(string);
@@ -153,9 +153,9 @@ public class EmiSearchWidget extends EditBox {
 			if (!currentSearch.isBlank() && !currentSearch.isEmpty()) {
 				searchHistory.removeIf(String::isBlank);
 				searchHistory.remove(currentSearch);
-				searchHistory.add(0, currentSearch);
+				searchHistory.addFirst(currentSearch);
 				if (searchHistory.size() > 36) {
-					searchHistory.remove(searchHistory.size() - 1);
+					searchHistory.removeLast();
 				}
 			}
 		}

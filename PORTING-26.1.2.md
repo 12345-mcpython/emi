@@ -149,3 +149,40 @@ State on the 1.21 branch:
   about 60 compile errors, all vanilla member/signature differences: `Player#changeGameMode` → `setGameMode`,
   `Inventory#setStack` → `setItem`, the `GameRules` key names, and the world-creation flow
   (`createWorldOpenFlows().createFreshLevel(…)` plus `WorldPresets.FLAT` dimension holders).
+
+## Code cleanup review, second batch
+
+The follow-up cleanup converted several types to records and adopted Java 21 APIs. Two consequences were found and
+handled.
+
+### Toolchain
+
+The production code now relies on Java 21 (`List#getFirst`/`getLast`/`removeLast`, `Math.clamp(int, int, int)` and
+record deconstruction patterns), which is fine because Minecraft 1.21 itself requires Java 21. The regression
+harnesses, however, compiled with `javac --release 17`, so four of five of them failed. `tests/bookmark-groups`,
+`tests/bookmark-crafting`, `tests/bookmark-transfer` and `scripts/test_crafting_plans.py` now use `--release 21`.
+
+### API compatibility (conservative choice)
+
+Records make the former `public final` fields inaccessible, which breaks addons that read them. Two public API
+types were therefore kept as plain classes with their original public fields, while also exposing accessor style
+readers so the newer call sites keep working:
+
+* `EmiTexture` — `public final texture, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight`
+  plus `texture()`, `u()`, `v()`, `width()`, `height()`, `regionWidth()`, `regionHeight()`, `textureWidth()`,
+  `textureHeight()`.
+* `EmiResolutionRecipe` — `public final ingredient, stack` plus `ingredient()`, `stack()`; the record patterns in
+  `BoM` and `CraftingPlans` became classic `instanceof` checks.
+
+`EmiCraftContext` stays a record because its former getters can be offered as deprecated delegates; it now exposes
+`@Deprecated getScreen()/getInventory()/getType()/getDestination()/getAmount()` next to the record accessors
+`screen()/inventory()/type()/destination()/amount()`.
+
+Internal-only records (`CraftingTreeModel.Step`, `SearchStack`, `JemiScrollBoxWidget`) were left as records; the
+regression fixtures were updated to accessor calls (`step.recipe()`, `step.batches()`) and their
+`EmiResolutionRecipe` stubs were aligned with the class form.
+
+Verification after the compatibility pass: `:fabric:build` and `:neoforge:build` succeed, and all five harnesses
+pass (crafting tree 79, crafting plans 290 + 7, bookmark groups 141, bookmark crafting 59, bookmark material
+transfer full scenario).
+

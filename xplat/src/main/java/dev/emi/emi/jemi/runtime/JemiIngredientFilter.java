@@ -29,7 +29,7 @@ public class JemiIngredientFilter implements IIngredientFilter {
 			return List.of();
 		}
 		return search.space.getStacks().stream()
-			.map(i -> JemiUtil.getTyped(i.getEmiStacks().get(0)))
+			.map(i -> JemiUtil.getTyped(i.getEmiStacks().getFirst()))
 			.filter(Optional::isPresent).map(Optional::get)
 			.map(i -> i.getIngredient(ingredientType))
 			.filter(Optional::isPresent).map(Optional::get)

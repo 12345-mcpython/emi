@@ -136,8 +136,8 @@ public class EmiWorldInteractionRecipe implements EmiRecipe {
 		int rl = (lr + ol) / 2 - rightSize * 9 - 4;
 		int rr = rl + rightSize * 18;
 
-		widgets.addTexture(EmiTexture.PLUS, (lr + rl) / 2 - EmiTexture.PLUS.width / 2, -6 + slotHeight * 9);
-		widgets.addTexture(EmiTexture.EMPTY_ARROW, (rr + ol) / 2 - EmiTexture.EMPTY_ARROW.width / 2, -8 + slotHeight * 9);
+		widgets.addTexture(EmiTexture.PLUS, (lr + rl) / 2 - EmiTexture.PLUS.width() / 2, -6 + slotHeight * 9);
+		widgets.addTexture(EmiTexture.EMPTY_ARROW, (rr + ol) / 2 - EmiTexture.EMPTY_ARROW.width() / 2, -8 + slotHeight * 9);
 
 		int yo = (slotHeight - leftHeight) * 9;
 		for (int i = 0; i < left.size(); i++) {

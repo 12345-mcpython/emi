@@ -23,7 +23,6 @@ import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.runtime.ProxyRecipeManager;
 import dev.emi.emi.screen.EmiScreenManager;
 import mezz.jei.api.gui.builder.IIngredientAcceptor;
-import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
@@ -77,7 +76,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 	public boolean craft(EmiRecipe recipe, EmiCraftContext<T> context) {
 		IRecipeTransferError err = jeiCraft(recipe, context, true, null);
 		if (err == null || err.getType().allowsTransfer) {
-			Minecraft.getInstance().setScreen(context.getScreen());
+			Minecraft.getInstance().setScreen(context.screen());
 		}
 		return err == null || err.getType().allowsTransfer;
 	}
@@ -131,7 +130,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 				return () -> IRecipeTransferError.Type.INTERNAL;
 			}
 			
-			return handler.transferRecipe(context.getScreenHandler(), rawRecipe != null ? rawRecipe : (R) recipe, view, client.player, context.getAmount() > 1, craft);
+			return handler.transferRecipe(context.getScreenHandler(), rawRecipe != null ? rawRecipe : (R) recipe, view, client.player, context.amount() > 1, craft);
 		} catch (Exception e) {
 			EmiLog.error("Error executing JEI craft", e);
 		}

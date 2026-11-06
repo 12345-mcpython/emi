@@ -111,13 +111,9 @@ public class EmiData {
 								String id = GsonHelper.getAsString(obj, "category");
 								if (id.startsWith("/") && id.endsWith("/")) {
 									Pattern pat = Pattern.compile(id.substring(1, id.length() - 1));
-									predicates.add(r -> {
-										return pat.matcher(r.getCategory().getId().toString()).find();
-									});
+									predicates.add(r -> pat.matcher(r.getCategory().getId().toString()).find());
 								} else {
-									predicates.add(r -> {
-										return r.getCategory().getId().toString().equals(id);
-									});
+									predicates.add(r -> r.getCategory().getId().toString().equals(id));
 								}
 							}
 							if (predicates.size() <= 1) {
@@ -185,8 +181,8 @@ public class EmiData {
 							if (el.isJsonObject()) {
 								JsonObject obj = el.getAsJsonObject();
 								list.add(() -> new EmiAlias(
-									getArrayOrSingleton(obj, "stacks").map(e -> EmiIngredientSerializer.getDeserialized(e)).toList(),
-									getArrayOrSingleton(obj, "text").map(e -> e.getAsString()).toList()));
+									getArrayOrSingleton(obj, "stacks").map(EmiIngredientSerializer::getDeserialized).toList(),
+									getArrayOrSingleton(obj, "text").map(JsonElement::getAsString).toList()));
 							}
 						}
 					}
@@ -205,13 +201,13 @@ public class EmiData {
 						list.add(() -> {
 							EmiWorldInteractionRecipe.Builder builder = EmiWorldInteractionRecipe.builder();
 							getArrayOrSingleton(json, "left").map(EmiIngredientSerializer::getDeserialized).forEach(
-								i -> builder.leftInput(i)
+                                    builder::leftInput
 							);
 							getArrayOrSingleton(json, "right").map(EmiIngredientSerializer::getDeserialized).forEach(
 								i -> builder.rightInput(i, false)
 							);
 							getArrayOrSingleton(json, "output").map(EmiIngredientSerializer::getDeserialized).forEach(
-								i -> builder.output(i.getEmiStacks().get(0))
+								i -> builder.output(i.getEmiStacks().getFirst())
 							);
 							builder.id(id);
 							return builder.build();

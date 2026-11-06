@@ -60,7 +60,7 @@ public class JemiStack<T> extends EmiStack {
 
 	@Override
 	public JemiStack<T> copy() {
-		return new JemiStack<T>(type, helper, renderer, helper.copyIngredient(ingredient));
+		return new JemiStack<>(type, helper, renderer, helper.copyIngredient(ingredient));
 	}
 
 	@Override

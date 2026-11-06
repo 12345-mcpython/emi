@@ -207,7 +207,7 @@ public final class EmiBookmarkGroups {
 		if (actual.isEmpty()) return;
 		Group group = new Group(UUID.randomUUID().toString(), EmiConfig.bookmarkViewMode);
 		states.put(group.id, group);
-		int insertion = identityIndex(actual.get(0));
+		int insertion = identityIndex(actual.getFirst());
 		Set<EmiFavorite> identities = Collections.newSetFromMap(new IdentityHashMap<>());
 		identities.addAll(actual);
 		EmiFavorites.favorites.removeIf(identities::contains);
@@ -360,7 +360,7 @@ public final class EmiBookmarkGroups {
 		for (EmiRecipe selected : recipes) {
 			// An explicit chain action may promote an ungrouped bookmark. A bookmark
 			// already assigned to a named group is never silently stolen from that group.
-			EmiFavorite anchor = new EmiFavorite(selected.getOutputs().get(0).copy(), selected);
+			EmiFavorite anchor = new EmiFavorite(selected.getOutputs().getFirst().copy(), selected);
 			String key = key(anchor);
 			EmiFavorite existing = null;
 			for (EmiFavorite favorite : EmiFavorites.favorites) if (key(favorite).equals(key)) { existing = favorite; break; }
@@ -374,7 +374,7 @@ public final class EmiBookmarkGroups {
 		if (!added.isEmpty()) {
 			group(added);
 			if (expandDefaults && !added.isEmpty()) {
-				Group group = groupOf(added.get(0));
+				Group group = groupOf(added.getFirst());
 				group.setViewMode(BookmarkViewMode.TODO);
 				group.crafting = true;
 				changed();
@@ -475,7 +475,7 @@ public final class EmiBookmarkGroups {
 		Map<EmiRecipe, Long> result = new IdentityHashMap<>(explicit);
 		if (model != null) {
 			for (EmiRecipe recipe : selected.keySet()) result.put(recipe, 0L);
-			for (CraftingTreeModel.Step step : model.steps) if (selected.containsKey(step.recipe)) result.put(step.recipe, step.batches);
+			for (CraftingTreeModel.Step step : model.steps) if (selected.containsKey(step.recipe())) result.put(step.recipe(), step.batches());
 		}
 		return result;
 	}
@@ -489,7 +489,7 @@ public final class EmiBookmarkGroups {
 				stocks.add(new Stock(item, null, item.getAmount(), true));
 			}
 			List<EmiRecipe> order = new ArrayList<>();
-			if (model != null) for (CraftingTreeModel.Step step : model.steps) if (selected.containsKey(step.recipe)) order.add(step.recipe);
+			if (model != null) for (CraftingTreeModel.Step step : model.steps) if (selected.containsKey(step.recipe())) order.add(step.recipe());
 			for (EmiRecipe recipe : selected.keySet()) if (!order.contains(recipe)) order.add(recipe);
 			for (EmiRecipe recipe : order) {
 				long batches = amounts.getOrDefault(recipe, 0L);
@@ -626,7 +626,7 @@ public final class EmiBookmarkGroups {
 			}
 			if (!consumed) result.add(candidate);
 		}
-		return result.isEmpty() && !anchors.isEmpty() ? List.of(anchors.get(0)) : result;
+		return result.isEmpty() && !anchors.isEmpty() ? List.of(anchors.getFirst()) : result;
 	}
 	/** Selected-candidate view for filling; handler lookup and execution budgets must use original. */
 	public static EmiRecipe effectiveRecipe(Group group, EmiRecipe original) {
@@ -660,7 +660,7 @@ public final class EmiBookmarkGroups {
 	private static TreeSnapshot treeSnapshot(Map<EmiRecipe, EmiFavorite> selected) {
 		List<EmiIngredient> goals = new ArrayList<>();
 		for (Map.Entry<EmiRecipe, EmiFavorite> entry : selected.entrySet()) {
-			EmiStack output = entry.getKey().getOutputs().get(0);
+			EmiStack output = entry.getKey().getOutputs().getFirst();
 			boolean consumed = false;
 			for (EmiRecipe other : selected.keySet()) {
 				if (other == entry.getKey()) continue;
@@ -672,7 +672,7 @@ public final class EmiBookmarkGroups {
 		// A wholly cyclic selection still has an explicit bounded goal.
 		if (goals.isEmpty()) {
 			Map.Entry<EmiRecipe, EmiFavorite> first = selected.entrySet().iterator().next();
-			EmiStack output = first.getKey().getOutputs().get(0);
+			EmiStack output = first.getKey().getOutputs().getFirst();
 			goals.add(output.copy().setAmount(multiply(output.getAmount(), multiplier(first.getValue()))).setChance(1));
 		}
 		Map<EmiRecipe, EmiRecipe> originals = new IdentityHashMap<>();
@@ -709,8 +709,8 @@ public final class EmiBookmarkGroups {
 			CraftingTreeModel model = new CraftingTreeModel(snapshot.tree, inventory);
 			for (int i = 0; i < model.steps.size(); i++) {
 				CraftingTreeModel.Step step = model.steps.get(i);
-				EmiRecipe original = originals.get(step.recipe);
-				if (original != null) model.steps.set(i, new CraftingTreeModel.Step(original, step.batches));
+				EmiRecipe original = originals.get(step.recipe());
+				if (original != null) model.steps.set(i, new CraftingTreeModel.Step(original, step.batches()));
 			}
 			return model;
 		} catch (RuntimeException e) {

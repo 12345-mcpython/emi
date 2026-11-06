@@ -164,24 +164,22 @@ public class EmiFavorites {
 					ies.getItemStack().setCount(1);
 				}
 				if (!es.isEmpty()) {
-					for (int i = 0; i < favorites.size(); i++) {
-						EmiFavorite fav = favorites.get(i);
-						if (fav.getRecipe() == context && fav.strictEquals(es)) {
-							return;
-						}
-					}
+                    for (EmiFavorite fav : favorites) {
+                        if (fav.getRecipe() == context && fav.strictEquals(es)) {
+                            return;
+                        }
+                    }
 					favorites.add(new EmiFavorite(es, context));
 				}
 			} else {
 				if (stack.isEmpty()) {
 					return;
 				}
-				for (int i = 0; i < favorites.size(); i++) {
-					EmiFavorite fav = favorites.get(i);
-					if (fav.getRecipe() == null && fav.strictEquals(stack)) {
-						return;
-					}
-				}
+                for (EmiFavorite fav : favorites) {
+                    if (fav.getRecipe() == null && fav.strictEquals(stack)) {
+                        return;
+                    }
+                }
 				favorites.add(new EmiFavorite(stack, null));
 			}
 		}
@@ -249,7 +247,7 @@ public class EmiFavorites {
 
 	public static void countRecipes(Object2LongMap<EmiRecipe> batches, Object2LongMap<EmiRecipe> amounts, MaterialNode node) {
 		if (node.recipe instanceof EmiResolutionRecipe recipe) {
-			countRecipes(batches, amounts, node.children.get(0));
+			countRecipes(batches, amounts, node.children.getFirst());
 			return;
 		}
 		// Include empty costs for proper sorting

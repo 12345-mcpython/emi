@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import net.fabricmc.loader.api.metadata.Person;
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.google.common.collect.Lists;
@@ -108,7 +109,7 @@ public class EmiAgnosFabric extends EmiAgnos {
 	@Override
 	protected List<String> getAllModAuthorsAgnos() {
 		return FabricLoader.getInstance().getAllMods().stream().flatMap(c -> c.getMetadata().getAuthors().stream())
-			.map(p -> p.getName()).distinct().toList();
+			.map(Person::getName).distinct().toList();
 	}
 
 	@Override

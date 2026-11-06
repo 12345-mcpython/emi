@@ -1,5 +1,6 @@
 package dev.emi.emi.api;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -116,7 +117,7 @@ public class EmiApi {
 
 	public static void displayAllRecipes() {
 		EmiRecipeManager manager = EmiApi.getRecipeManager();
-		setPages(manager.getCategories().stream().collect(Collectors.toMap(c -> c, c -> manager.getRecipes(c))), EmiStack.EMPTY);
+		setPages(manager.getCategories().stream().collect(Collectors.toMap(c -> c, manager::getRecipes)), EmiStack.EMPTY);
 	}
 
 	public static void displayRecipeCategory(EmiRecipeCategory category) {
@@ -152,7 +153,7 @@ public class EmiApi {
 		} else if (stack instanceof ListEmiIngredient list) {
 			setPages(Map.of(VanillaPlugin.INGREDIENT, List.of(new EmiSyntheticIngredientRecipe(stack))), stack);
 		} else if (stack.getEmiStacks().size() == 1) {
-			EmiStack es = stack.getEmiStacks().get(0);
+			EmiStack es = stack.getEmiStacks().getFirst();
 			setPages(mapRecipes(pruneSources(EmiApi.getRecipeManager().getRecipesByOutput(es), es)), stack);
 			focusRecipe(BoM.getRecipe(es));
 		}
@@ -160,7 +161,7 @@ public class EmiApi {
 
 	public static void displayUses(EmiIngredient stack) {
 		if (!stack.isEmpty()) {
-			EmiStack zero = stack.getEmiStacks().get(0);
+			EmiStack zero = stack.getEmiStacks().getFirst();
 			Map<EmiRecipeCategory, List<EmiRecipe>> map
 				= mapRecipes(Stream.concat(
 						pruneUses(getRecipeManager().getRecipesByInput(zero), stack).stream(),
@@ -201,16 +202,12 @@ public class EmiApi {
 	}
 
 	private static List<EmiRecipe> pruneSources(List<EmiRecipe> list, EmiStack context) {
-		return list.stream().filter(r -> {
-			return r.getOutputs().stream().anyMatch(i -> i.isEqual(context));
-		}).toList();
+		return list.stream().filter(r -> r.getOutputs().stream().anyMatch(i -> i.isEqual(context))).toList();
 	}
 
 	private static List<EmiRecipe> pruneUses(List<EmiRecipe> list, EmiIngredient context) {
-		return list.stream().filter(r -> {
-			return r.getInputs().stream().anyMatch(i -> containsAll(i, context))
-				|| r.getCatalysts().stream().anyMatch(i -> containsAll(i, context));
-		}).sorted((a, b) -> getSmallestPresence(a, context) - getSmallestPresence(b, context)).toList();
+		return list.stream().filter(r -> r.getInputs().stream().anyMatch(i -> containsAll(i, context))
+            || r.getCatalysts().stream().anyMatch(i -> containsAll(i, context))).sorted(Comparator.comparingInt(a -> getSmallestPresence(a, context))).toList();
 	}
 
 	private static int getSmallestPresence(EmiRecipe recipe, EmiIngredient context) {
@@ -250,7 +247,7 @@ public class EmiApi {
 
 	private static void setPages(Map<EmiRecipeCategory, List<EmiRecipe>> recipes, EmiIngredient stack) {
 		recipes = recipes.entrySet().stream().filter(e -> !e.getValue().isEmpty())
-			.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+			.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		if (!recipes.isEmpty()) {
 			EmiSidebars.lookup(stack);
 			if (getHandledScreen() == null) {

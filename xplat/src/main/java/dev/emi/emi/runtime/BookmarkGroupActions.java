@@ -17,8 +17,8 @@ public final class BookmarkGroupActions {
         var client = Minecraft.getInstance();
         String name = "";
         if (!group.anchors().isEmpty()) {
-            EmiIngredient ingredient = group.anchors().get(0).getStack();
-            if (!ingredient.getEmiStacks().isEmpty()) name = ingredient.getEmiStacks().get(0).getName().getString();
+            EmiIngredient ingredient = group.anchors().getFirst().getStack();
+            if (!ingredient.getEmiStacks().isEmpty()) name = ingredient.getEmiStacks().getFirst().getName().getString();
         }
         client.setScreen(new BoMScreen(client.screen, tree, name));
         return true;

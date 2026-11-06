@@ -15,11 +15,7 @@ import static dev.emi.emi.api.recipe.VanillaEmiRecipeCategories.SMOKING;
 import static dev.emi.emi.api.recipe.VanillaEmiRecipeCategories.STONECUTTING;
 import static dev.emi.emi.api.recipe.VanillaEmiRecipeCategories.WORLD_INTERACTION;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -51,32 +47,7 @@ import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.crafting.ArmorDyeRecipe;
-import net.minecraft.world.item.crafting.BannerDuplicateRecipe;
-import net.minecraft.world.item.crafting.BlastingRecipe;
-import net.minecraft.world.item.crafting.BookCloningRecipe;
-import net.minecraft.world.item.crafting.CampfireCookingRecipe;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.FireworkRocketRecipe;
-import net.minecraft.world.item.crafting.FireworkStarFadeRecipe;
-import net.minecraft.world.item.crafting.FireworkStarRecipe;
-import net.minecraft.world.item.crafting.MapCloningRecipe;
-import net.minecraft.world.item.crafting.MapExtendingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.RepairItemRecipe;
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraft.world.item.crafting.ShieldDecorationRecipe;
-import net.minecraft.world.item.crafting.ShulkerBoxColoring;
-import net.minecraft.world.item.crafting.SmeltingRecipe;
-import net.minecraft.world.item.crafting.SmithingRecipe;
-import net.minecraft.world.item.crafting.SmokingRecipe;
-import net.minecraft.world.item.crafting.StonecutterRecipe;
-import net.minecraft.world.item.crafting.SuspiciousStewRecipe;
-import net.minecraft.world.item.crafting.TippedArrowRecipe;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
@@ -198,9 +169,7 @@ public class VanillaPlugin implements EmiPlugin {
 			EmiStack.of(Items.BREWING_STAND), simplifiedRenderer(224, 224), EmiRecipeSorting.none());
 		WORLD_INTERACTION = new EmiRecipeCategory(EmiPort.id("emi:world_interaction"),
 			EmiStack.of(Items.GRASS_BLOCK), simplifiedRenderer(208, 224), EmiRecipeSorting.none());
-		EmiRenderable flame = (matrices, x, y, delta) -> {
-			EmiTexture.FULL_FLAME.render(matrices, x + 1, y + 1, delta);
-		};
+		EmiRenderable flame = (matrices, x, y, delta) -> EmiTexture.FULL_FLAME.render(matrices, x + 1, y + 1, delta);
 		FUEL = new EmiRecipeCategory(EmiPort.id("emi:fuel"), flame, flame, EmiRecipeSorting.compareInputThenOutput());
 		COMPOSTING = new EmiRecipeCategory(EmiPort.id("emi:composting"), EmiStack.of(Items.COMPOSTER),
 			EmiStack.of(Items.COMPOSTER), EmiRecipeSorting.compareInputThenOutput());
@@ -257,9 +226,9 @@ public class VanillaPlugin implements EmiPlugin {
 
 		registry.addRecipeHandler(null, new InventoryRecipeHandler());
 		registry.addRecipeHandler(MenuType.CRAFTING, new CraftingRecipeHandler());
-		registry.addRecipeHandler(MenuType.FURNACE, new CookingRecipeHandler<FurnaceMenu>(SMELTING));
-		registry.addRecipeHandler(MenuType.BLAST_FURNACE, new CookingRecipeHandler<BlastFurnaceMenu>(BLASTING));
-		registry.addRecipeHandler(MenuType.SMOKER, new CookingRecipeHandler<SmokerMenu>(SMOKING));
+		registry.addRecipeHandler(MenuType.FURNACE, new CookingRecipeHandler<>(SMELTING));
+		registry.addRecipeHandler(MenuType.BLAST_FURNACE, new CookingRecipeHandler<>(BLASTING));
+		registry.addRecipeHandler(MenuType.SMOKER, new CookingRecipeHandler<>(SMOKING));
 		registry.addRecipeHandler(MenuType.STONECUTTER, new StonecuttingRecipeHandler());
 
 		registry.addExclusionArea(CreativeModeInventoryScreen.class, (screen, consumer) -> {
@@ -616,13 +585,13 @@ public class VanillaPlugin implements EmiPlugin {
 				ResourceLocation id = synthetic("world/tilling", EmiUtil.subId(b));
 				List<EmiStack> list = EmiClient.HOE_ACTIONS.get(consumer).stream().map(EmiStack::of).toList();
 				if (list.size() == 1) {
-					addRecipeSafe(registry, () -> basicWorld(EmiStack.of(b), hoes, list.get(0), id));
+					addRecipeSafe(registry, () -> basicWorld(EmiStack.of(b), hoes, list.getFirst(), id));
 				} else if (list.size() == 2) {
 					addRecipeSafe(registry, () -> EmiWorldInteractionRecipe.builder()
 						.id(id)
 						.leftInput(EmiStack.of(b))
 						.rightInput(hoes, true)
-						.output(list.get(0))
+						.output(list.getFirst())
 						.output(list.get(1))
 						.build());
 				} else {
@@ -752,11 +721,9 @@ public class VanillaPlugin implements EmiPlugin {
 
 	private static void addFuel(EmiRegistry registry, Set<Item> hiddenItems) {
 		Map<Item, Integer> fuelMap = EmiAgnos.getFuelMap();
-		compressRecipesToTags(fuelMap.keySet().stream().collect(Collectors.toSet()), (a, b) -> {
-				return Integer.compare(fuelMap.get(a), fuelMap.get(b));
-			}, tag -> {
+		compressRecipesToTags(new HashSet<>(fuelMap.keySet()), Comparator.comparingInt(fuelMap::get), tag -> {
 				EmiIngredient stack = EmiIngredient.of(tag.raw());
-				Item item = stack.getEmiStacks().get(0).getItemStack().getItem();
+				Item item = stack.getEmiStacks().getFirst().getItemStack().getItem();
 				int time = fuelMap.get(item);
 				registry.addRecipe(new EmiFuelRecipe(stack, time, synthetic("fuel/tag", EmiUtil.subId(tag.id()))));
 			}, item -> {
@@ -770,11 +737,9 @@ public class VanillaPlugin implements EmiPlugin {
 	private static void addComposting(EmiRegistry registry, Set<Item> hiddenItems) {
 		Object2FloatMap<ItemLike> itemToLevelIncreaseChance = EmiAgnos.getComposterMap();
 		compressRecipesToTags(itemToLevelIncreaseChance.keySet().stream()
-			.map(ItemLike::asItem).collect(Collectors.toSet()), (a, b) -> {
-				return Float.compare(itemToLevelIncreaseChance.getFloat(a), itemToLevelIncreaseChance.getFloat(b));
-			}, tag -> {
+			.map(ItemLike::asItem).collect(Collectors.toSet()), (a, b) -> Float.compare(itemToLevelIncreaseChance.getFloat(a), itemToLevelIncreaseChance.getFloat(b)), tag -> {
 				EmiIngredient stack = EmiIngredient.of(tag.raw());
-				Item item = stack.getEmiStacks().get(0).getItemStack().getItem();
+				Item item = stack.getEmiStacks().getFirst().getItemStack().getItem();
 				float chance = itemToLevelIncreaseChance.getFloat(item);
 				registry.addRecipe(new EmiCompostingRecipe(stack, chance, synthetic("composting/tag", EmiUtil.subId(tag.id()))));
 			}, item -> {
@@ -793,7 +758,7 @@ public class VanillaPlugin implements EmiPlugin {
 			if (items.size() < 2) {
 				continue;
 			}
-			Item base = items.get(0);
+			Item base = items.getFirst();
 			if (!stacks.contains(base)) {
 				continue;
 			}
@@ -822,7 +787,7 @@ public class VanillaPlugin implements EmiPlugin {
 	}
 
 	private static <C extends RecipeInput, T extends Recipe<C>> Iterable<T> getRecipes(EmiRegistry registry, RecipeType<T> type) {
-		return registry.getRecipeManager().getAllRecipesFor(type).stream().map(e -> e.value())::iterator;
+		return registry.getRecipeManager().getAllRecipesFor(type).stream().map(RecipeHolder::value)::iterator;
 	}
 
 	private static void safely(String name, Runnable runnable) {

@@ -35,7 +35,7 @@ public class EmiShapedRecipe extends EmiCraftingRecipe {
 						continue;
 					}
 					if (!input.get(j).isEmpty()) {
-						inv.setItem(j, input.get(j).getEmiStacks().get(0).getItemStack().copy());
+						inv.setItem(j, input.get(j).getEmiStacks().getFirst().getItemStack().copy());
 					}
 				}
 				List<EmiStack> stacks = input.get(i).getEmiStacks();

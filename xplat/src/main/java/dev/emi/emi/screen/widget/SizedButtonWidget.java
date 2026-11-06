@@ -40,7 +40,7 @@ public class SizedButtonWidget extends Button {
 
 	public SizedButtonWidget(int x, int y, int width, int height, int u, int v, BooleanSupplier isActive, OnPress action,
 			IntSupplier vOffset, Supplier<List<Component>> text) {
-		super(x, y, width, height, EmiPort.literal(""), action, s -> s.get());
+		super(x, y, width, height, EmiPort.literal(""), action, Supplier::get);
 		this.u = u;
 		this.v = v;
 		this.isActive = isActive;

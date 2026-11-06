@@ -63,7 +63,7 @@ public class RecipeDisplay {
 
 	public WidgetGroup getWidgets(int x, int y, int availableWidth, int availableHeight) {
 		int wx = x + (availableWidth - width) / 2;
-		wx = Math.max(x + getLeftWidth(), Math.min(x + availableWidth - width - getRightWidth(), wx));
+		wx = Math.clamp(wx, x + getLeftWidth(), x + availableWidth - width - getRightWidth());
 		int wy = y;
 		int wWidth = width;
 		int wHeight = Math.min(availableHeight, height);

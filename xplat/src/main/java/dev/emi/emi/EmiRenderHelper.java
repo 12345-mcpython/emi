@@ -225,7 +225,7 @@ public class EmiRenderHelper {
 		if (stack.isEmpty() || amount == 0) {
 			return EMPTY_TEXT;
 		}
-		if (stack.getEmiStacks().get(0).getKey() instanceof Fluid) {
+		if (stack.getEmiStacks().getFirst().getKey() instanceof Fluid) {
 			return getFluidAmount(amount);
 		}
 		return EmiPort.literal(TEXT_FORMAT.format(amount));
@@ -235,7 +235,7 @@ public class EmiRenderHelper {
 		if (stack.isEmpty() || amount == 0) {
 			return EMPTY_TEXT;
 		}
-		if (stack.getEmiStacks().get(0).getKey() instanceof Fluid) {
+		if (stack.getEmiStacks().getFirst().getKey() instanceof Fluid) {
 			return EmiConfig.fluidUnit.translate(amount);
 		}
 		return EmiPort.literal(TEXT_FORMAT.format(amount));

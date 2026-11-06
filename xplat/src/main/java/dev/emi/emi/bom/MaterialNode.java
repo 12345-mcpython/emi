@@ -34,7 +34,7 @@ public class MaterialNode {
 		this.minBatch = this.amount;
 		this.ingredient = ingredient.copy().setAmount(1).setChance(1);
 		if (this.ingredient.getEmiStacks().size() == 1) {
-			this.remainder = this.ingredient.getEmiStacks().get(0).getRemainder().copy();
+			this.remainder = this.ingredient.getEmiStacks().getFirst().getRemainder().copy();
 			this.remainderAmount = remainder.getAmount();
 			this.remainder.setAmount(1);
 		} else {
@@ -92,7 +92,7 @@ public class MaterialNode {
 			for (MaterialNode node : children) {
 				node.recalculate(tree, used, budget);
 			}
-			used.remove(used.size() - 1);
+			used.removeLast();
 		}
 	}
 
@@ -132,7 +132,7 @@ public class MaterialNode {
 		for (EmiIngredient i : recipe.getInputs()) {
 			EmiStack remainder = EmiStack.EMPTY;
 			if (i.getEmiStacks().size() == 1) {
-				remainder = i.getEmiStacks().get(0).getRemainder();
+				remainder = i.getEmiStacks().getFirst().getRemainder();
 			}
 			for (MaterialNode node : children) {
 				if (EmiIngredient.areEqual(i, node.ingredient) && EmiIngredient.areEqual(remainder, node.remainder)) {

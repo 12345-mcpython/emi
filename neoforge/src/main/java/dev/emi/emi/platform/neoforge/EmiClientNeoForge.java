@@ -38,7 +38,7 @@ public class EmiClientNeoForge {
 	
 	@SubscribeEvent
 	public static void clientInit(FMLClientSetupEvent event) {
-		StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(f -> f.get()).toList());
+		StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(NeoForgeRenderTypes::get).toList());
 		EmiClient.init();
 		EmiNetwork.initClient(packet -> PacketDistributor.sendToServer(EmiPacketHandler.wrap(packet)));
 		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::recipesReloaded);
@@ -57,7 +57,7 @@ public class EmiClientNeoForge {
 
 	@SubscribeEvent
 	public static void registerResourceReloaders(RegisterClientReloadListenersEvent event) {
-		EmiData.init(reloader -> event.registerReloadListener(reloader));
+		EmiData.init(event::registerReloadListener);
 	}
 
 	public static void recipesReloaded(RecipesUpdatedEvent event) {

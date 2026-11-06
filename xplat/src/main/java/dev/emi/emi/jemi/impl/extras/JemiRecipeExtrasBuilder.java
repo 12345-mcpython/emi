@@ -41,19 +41,13 @@ public class JemiRecipeExtrasBuilder implements IRecipeExtrasBuilder {
 
 	@Override
 	public IPlaceable<?> addDrawable(IDrawable drawable) {
-		return addEmi(new JemiWidgetBuilder(drawable.getWidth(), drawable.getHeight(), (self, holder) -> {
-			holder.addDrawable(self.x, self.y, drawable.getWidth(), drawable.getHeight(), (raw, mouseX, mouseY, delta) -> {
-				drawable.draw(raw);
-			});
-		}));
+		return addEmi(new JemiWidgetBuilder(drawable.getWidth(), drawable.getHeight(), (self, holder) -> holder.addDrawable(self.x, self.y, drawable.getWidth(), drawable.getHeight(), (raw, mouseX, mouseY, delta) -> drawable.draw(raw))));
 	}
 
 	@Override
 	public void addWidget(IRecipeWidget widget) {
 		addEmi(new JemiWidgetBuilder(0, 0, (self, holder) -> {
-			holder.addDrawable(self.x, self.y, 0, 0, (raw, mouseX, mouseY, delta) -> {
-				widget.drawWidget(raw, mouseX, mouseY);
-			});
+			holder.addDrawable(self.x, self.y, 0, 0, (raw, mouseX, mouseY, delta) -> widget.drawWidget(raw, mouseX, mouseY));
 			// Tooltip not implemented as JEI widgets have no bounds
 		}));
 	}
@@ -110,13 +104,11 @@ public class JemiRecipeExtrasBuilder implements IRecipeExtrasBuilder {
 	}
 
 	private IPlaceable<?> addEmiTexture(EmiTexture texture) {
-		return addEmi(new JemiWidgetBuilder(texture.width, texture.height, (self, holder) -> {
-			holder.addTexture(texture, self.x, self.y);
-		}));
+		return addEmi(new JemiWidgetBuilder(texture.width(), texture.height(), (self, holder) -> holder.addTexture(texture, self.x, self.y)));
 	}
 
 	private IPlaceable<?> addAnimatedEmiTexture(EmiTexture texture, EmiTexture animated, int time, boolean horizontal, boolean endToStart, boolean fullToEmpty) {
-		return addEmi(new JemiWidgetBuilder(texture.width, texture.height, (self, holder) -> {
+		return addEmi(new JemiWidgetBuilder(texture.width(), texture.height(), (self, holder) -> {
 			holder.addTexture(texture, self.x, self.y);
 			holder.addAnimatedTexture(animated, self.x, self.y, time, horizontal, endToStart, fullToEmpty);
 		}));

@@ -143,9 +143,7 @@ public class ConfigScreen extends Screen {
 			Minecraft client = Minecraft.getInstance();
 			this.init(client, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
 		});
-		this.addRenderableWidget(EmiPort.newButton(x + w / 2 + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> {
-			this.onClose();
-		}));
+		this.addRenderableWidget(EmiPort.newButton(x + w / 2 + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> this.onClose()));
 		this.addRenderableWidget(EmiPort.newButton(x + w / 2 + 2, height - 52, w / 2 - 24, 20, EmiPort.translatable("screen.emi.presets"), button -> {
 			Minecraft client = Minecraft.getInstance();
 			client.setScreen(new ConfigPresetScreen(this));
@@ -196,37 +194,41 @@ public class ConfigScreen extends Screen {
 					Component translation = EmiPort.translatable("config.emi." + annot.value().replace('-', '_'));
 					ConfigEntryWidget entry = null;
 					if (field.getType() == boolean.class) {
-						entry = new BooleanWidget(translation, getFieldTooltip(field), searchSupplier, new Mutator<Boolean>() {
+						entry = new BooleanWidget(translation, getFieldTooltip(field), searchSupplier, new Mutator<>() {
 
-							public Boolean getValue() {
-								try {
-									return field.getBoolean(null);
-								} catch(Exception e) {}
-								return false;
-							}
+                            public Boolean getValue() {
+                                try {
+                                    return field.getBoolean(null);
+                                } catch (Exception e) {
+                                }
+                                return false;
+                            }
 
-							public void setValue(Boolean value) {
-								try {
-									field.setBoolean(null, value);
-								} catch (Exception e) {}
-							}						
-						});
+                            public void setValue(Boolean value) {
+                                try {
+                                    field.setBoolean(null, value);
+                                } catch (Exception e) {
+                                }
+                            }
+                        });
 					} else if (field.getType() == int.class) {
-						entry = new IntWidget(translation, getFieldTooltip(field), searchSupplier, new Mutator<Integer>() {
+						entry = new IntWidget(translation, getFieldTooltip(field), searchSupplier, new Mutator<>() {
 
-							public Integer getValue() {
-								try {
-									return field.getInt(null);
-								} catch(Exception e) {}
-								return -1;
-							}
+                            public Integer getValue() {
+                                try {
+                                    return field.getInt(null);
+                                } catch (Exception e) {
+                                }
+                                return -1;
+                            }
 
-							public void setValue(Integer value) {
-								try {
-									field.setInt(null, value);
-								} catch (Exception e) {}
-							}						
-						});
+                            public void setValue(Integer value) {
+                                try {
+                                    field.setInt(null, value);
+                                } catch (Exception e) {
+                                }
+                            }
+                        });
 					} else if (field.getType() == EmiBind.class) {
 						entry = new EmiBindWidget(this, getFieldTooltip(field), searchSupplier, (EmiBind) field.get(null));
 					} else if (field.getType() == ScreenAlign.class) {
@@ -323,23 +325,23 @@ public class ConfigScreen extends Screen {
 
 	@SuppressWarnings("unchecked")
 	public <T> Mutator<T> objectMutator(Field field) {
-		return new Mutator<T>() {
-			public T getValue() {
-				try {
-					return (T) field.get(null);
-				} catch(Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
+		return new Mutator<>() {
+            public T getValue() {
+                try {
+                    return (T) field.get(null);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
 
-			public void setValue(T en) {
-				try {
-					field.set(null, en);
-				} catch(Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		};
+            public void setValue(T en) {
+                try {
+                    field.set(null, en);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
 	}
 
 	public void updateChanges() {

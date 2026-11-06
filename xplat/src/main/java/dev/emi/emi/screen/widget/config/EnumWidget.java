@@ -23,9 +23,7 @@ public class EnumWidget extends ConfigEntryWidget {
 		super(name, tooltip, search, 20);
 		this.mutator = mutator;
 
-		button = EmiPort.newButton(0, 0, 150, 20, getText(), button -> {
-			page(mutator.get(), filter, mutator::set);
-		});
+		button = EmiPort.newButton(0, 0, 150, 20, getText(), button -> page(mutator.get(), filter, mutator::set));
 		this.setChildren(List.of(button));
 	}
 
@@ -34,10 +32,10 @@ public class EnumWidget extends ConfigEntryWidget {
 		Enum<?>[] values =  e.getClass().getEnumConstants();
 		Minecraft client = Minecraft.getInstance();
 		if (client.screen instanceof ConfigScreen cs) {
-			client.setScreen(new ConfigEnumScreen<ConfigEnum>(cs, Stream.of(values).filter(f -> filter.test((ConfigEnum) f)).map(v -> {
-				ConfigEnum en = (ConfigEnum) v;
-				return new ConfigEnumScreen.Entry<ConfigEnum>(en, en.getText(), List.of());
-			}).toList(), consumer));
+			client.setScreen(new ConfigEnumScreen<>(cs, Stream.of(values).filter(f -> filter.test((ConfigEnum) f)).map(v -> {
+                ConfigEnum en = (ConfigEnum) v;
+                return new ConfigEnumScreen.Entry<>(en, en.getText(), List.of());
+            }).toList(), consumer));
 		}
 	}
 
