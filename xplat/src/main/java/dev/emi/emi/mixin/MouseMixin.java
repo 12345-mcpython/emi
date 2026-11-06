@@ -27,9 +27,13 @@ public class MouseMixin {
 
 	@Shadow private double accumulatedDY;
 
-	@Inject(at = @At(value = "INVOKE", ordinal = 0, target = "net/minecraft/client/gui/screens/Screen.wrapScreenError(Ljava/lang/Runnable;Ljava/lang/String;Ljava/lang/String;)V"),
-		method = "onPress(JIII)V", cancellable = true)
+	// 1.21.4 removed Screen.wrapScreenError and Screen.mouseScrolled, which used to be the
+	// injection points, so these hooks sit on the handler entry points instead.
+	@Inject(at = @At("HEAD"), method = "onPress(JIII)V", cancellable = true)
 	private void onMouseDown(long window, int button, int action, int mods, CallbackInfo info) {
+		if (action != 1) {
+			return;
+		}
 		try {
 			Screen screen = minecraft.screen;
 			if (screen instanceof AbstractContainerScreen<?> hs) {
@@ -44,9 +48,11 @@ public class MouseMixin {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", ordinal = 1, target = "net/minecraft/client/gui/screens/Screen.wrapScreenError(Ljava/lang/Runnable;Ljava/lang/String;Ljava/lang/String;)V"),
-		method = "onPress(JIII)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "onPress(JIII)V", cancellable = true)
 	private void onMouseUp(long window, int button, int action, int mods, CallbackInfo info) {
+		if (action != 0) {
+			return;
+		}
 		try {
 			Screen screen = minecraft.screen;
 			if (screen instanceof AbstractContainerScreen<?> hs) {
@@ -61,8 +67,7 @@ public class MouseMixin {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", ordinal = 1, target = "net/minecraft/client/gui/screens/Screen.wrapScreenError(Ljava/lang/Runnable;Ljava/lang/String;Ljava/lang/String;)V"),
-		method = "handleAccumulatedMovement", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "handleAccumulatedMovement", cancellable = true)
 	private void onMouseDragged(CallbackInfo info) {
 		try {
 			Screen screen = minecraft.screen;
@@ -78,8 +83,7 @@ public class MouseMixin {
 		}
 	}
 
-	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/gui/screens/Screen.mouseScrolled(DDDD)Z"),
-		method = "onScroll(JDD)V", cancellable = true)
+	@Inject(at = @At("HEAD"), method = "onScroll(JDD)V", cancellable = true)
 	private void onMouseScrolled(long window, double horizontal, double vertical, CallbackInfo info) {
 		try {
 			Screen screen = minecraft.screen;
