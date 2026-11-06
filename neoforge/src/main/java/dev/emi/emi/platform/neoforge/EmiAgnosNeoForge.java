@@ -21,6 +21,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.registries.datamaps.builtin.Compostable;
 import net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps;
+import net.neoforged.neoforgespi.language.IModInfo;
 import org.apache.commons.lang3.text.WordUtils;
 import org.objectweb.asm.Type;
 
@@ -116,7 +117,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 
 	@Override
 	protected List<String> getAllModNamesAgnos() {
-		return ModList.get().getMods().stream().map(m -> m.getDisplayName()).toList();
+		return ModList.get().getMods().stream().map(IModInfo::getDisplayName).toList();
 	}
 
 	@Override
@@ -149,7 +150,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 						if (EmiPlugin.class.isAssignableFrom(clazz)) {
 							Class<? extends EmiPlugin> pluginClass = clazz.asSubclass(EmiPlugin.class);
 							EmiPlugin plugin = pluginClass.getConstructor().newInstance();
-							String id = data.getIModInfoData().get(0).getMods().get(0).getModId();
+							String id = data.getIModInfoData().getFirst().getMods().getFirst().getModId();
 							containers.add(new EmiPluginContainer(plugin, id));
 						} else {
 							EmiLog.error("EmiEntrypoint " + annot.memberName() + " does not implement EmiPlugin");
