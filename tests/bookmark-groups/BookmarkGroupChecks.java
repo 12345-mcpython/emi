@@ -5,7 +5,7 @@ import java.util.List;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 /** Executed with the production bookmark class and production material graph implementation. */
 public class BookmarkGroupChecks {
@@ -17,7 +17,7 @@ public class BookmarkGroupChecks {
 	}
 
 	private record Recipe(String id, List<EmiIngredient> inputs, List<EmiStack> outputs) implements EmiRecipe {
-		public Identifier getId() { return new Identifier(id); }
+		public ResourceLocation getId() { return new ResourceLocation(id); }
 		public List<EmiIngredient> getInputs() { return inputs; }
 		public List<EmiStack> getOutputs() { return outputs; }
 	}
@@ -601,7 +601,7 @@ public class BookmarkGroupChecks {
 		EmiStack tool = stack("hammer", 1);
 		tool.remainder(tool.copy());
 		EmiRecipe tooling = new EmiRecipe() {
-			public Identifier getId() { return new Identifier("test:tooling"); }
+			public ResourceLocation getId() { return new ResourceLocation("test:tooling"); }
 			public List<EmiIngredient> getInputs() { return List.of(stack("ore", 1), tool); }
 			public List<EmiStack> getOutputs() { return List.of(stack("plate", 1)); }
 			public List<EmiIngredient> getCatalysts() { return List.of(tool); }

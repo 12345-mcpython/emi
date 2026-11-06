@@ -4,7 +4,7 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.bom.MaterialTree;
 import dev.emi.emi.runtime.EmiBookmarkGroups.Group;
 import dev.emi.emi.screen.BoMScreen;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 /** Entry points shared by the native bookmark sidebar and its group shortcuts. */
 public final class BookmarkGroupActions {
@@ -14,13 +14,13 @@ public final class BookmarkGroupActions {
         if (group == null) return false;
         MaterialTree tree = EmiBookmarkGroups.tree(group);
         if (tree == null) return false;
-        var client = MinecraftClient.getInstance();
+        var client = Minecraft.getInstance();
         String name = "";
         if (!group.anchors().isEmpty()) {
             EmiIngredient ingredient = group.anchors().get(0).getStack();
             if (!ingredient.getEmiStacks().isEmpty()) name = ingredient.getEmiStacks().get(0).getName().getString();
         }
-        client.setScreen(new BoMScreen(client.currentScreen, tree, name));
+        client.setScreen(new BoMScreen(client.screen, tree, name));
         return true;
     }
 }

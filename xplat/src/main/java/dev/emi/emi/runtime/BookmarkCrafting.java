@@ -5,7 +5,14 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.handler.EmiCraftContext;
@@ -17,12 +24,6 @@ import dev.emi.emi.platform.EmiClient;
 import dev.emi.emi.registry.EmiRecipeFiller;
 import dev.emi.emi.runtime.EmiBookmarkGroups.Group;
 import dev.emi.emi.runtime.EmiBookmarkGroups.Row;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.screen.slot.SlotActionType;
 
 /** Client-thread, bounded, one-batch runner. Production is confirmed only by server inventory packets. */
 public final class BookmarkCrafting {
@@ -49,7 +50,7 @@ public final class BookmarkCrafting {
 		try {
 			ClientAccess access = ClientAccess.create();
 			if (access == null) return rejected("invalid_screen_or_cursor");
-			EmiPlayerInventory inventory = useInventory ? EmiPlayerInventory.of(MinecraftClient.getInstance().player) : null;
+			EmiPlayerInventory inventory = useInventory ? EmiPlayerInventory.of(Minecraft.getInstance().player) : null;
 			List<Budget> plan = plan(EmiBookmarkGroups.executionRows(group, inventory));
 			if (plan.isEmpty()) return rejected("empty_or_cyclic_plan");
 			Runner runner = new Runner(access, plan);
@@ -232,44 +233,44 @@ public final class BookmarkCrafting {
 	}
 
 	private static final class ClientAccess implements Access {
-		final HandledScreen<ScreenHandler> screen;
-		final ScreenHandler handler;
+		final AbstractContainerScreen<AbstractContainerMenu> screen;
+		final AbstractContainerMenu handler;
 		final int syncId;
 		final List<ItemStack> serverInventory = new ArrayList<>();
 		long feedback;
 		String reason = "no_craftable_recipe";
 		@SuppressWarnings("unchecked")
-		ClientAccess(HandledScreen<?> screen) {
-			this.screen = (HandledScreen<ScreenHandler>) screen; handler = screen.getScreenHandler(); syncId = handler.syncId;
-			var inventory = MinecraftClient.getInstance().player.getInventory();
-			for (int i = 0; i < inventory.size(); i++) serverInventory.add(inventory.getStack(i).copy());
+		ClientAccess(AbstractContainerScreen<?> screen) {
+			this.screen = (AbstractContainerScreen<AbstractContainerMenu>) screen; handler = screen.getMenu(); syncId = handler.containerId;
+			var inventory = Minecraft.getInstance().player.getInventory();
+			for (int i = 0; i < inventory.getContainerSize(); i++) serverInventory.add(inventory.getItem(i).copy());
 		}
 		static ClientAccess create() {
-			MinecraftClient client = MinecraftClient.getInstance();
-			if (!client.isOnThread() || client.player == null || !(client.currentScreen instanceof HandledScreen<?> screen)) return null;
+			Minecraft client = Minecraft.getInstance();
+			if (!client.isSameThread() || client.player == null || !(client.screen instanceof AbstractContainerScreen<?> screen)) return null;
 			ClientAccess access = new ClientAccess(screen);
-			return access.valid() && access.handler.getCursorStack().isEmpty() ? access : null;
+			return access.valid() && access.handler.getCarried().isEmpty() ? access : null;
 		}
 		@Override public boolean valid() {
-			MinecraftClient client = MinecraftClient.getInstance();
-			return client.isOnThread() && client.player != null && client.world != null && client.interactionManager != null
-				&& client.currentScreen == screen && screen.getScreenHandler() == handler
-				&& client.player.currentScreenHandler == handler && handler.syncId == syncId && handler.getCursorStack().isEmpty();
+			Minecraft client = Minecraft.getInstance();
+			return client.isSameThread() && client.player != null && client.level != null && client.gameMode != null
+				&& client.screen == screen && screen.getMenu() == handler
+				&& client.player.containerMenu == handler && handler.containerId == syncId && handler.getCarried().isEmpty();
 		}
-		@Override public long time() { return MinecraftClient.getInstance().player.age; }
+		@Override public long time() { return Minecraft.getInstance().player.tickCount; }
 		@Override public long feedback() { return feedback; }
 		@Override public String reason() { return reason; }
 		boolean deny(String reason) { this.reason = reason; return false; }
 		void observeSlot(int packetSyncId, int slotIndex, ItemStack stack) {
 			if (!valid()) return;
 			int index = -1;
-			var player = MinecraftClient.getInstance().player;
+			var player = Minecraft.getInstance().player;
 			if (packetSyncId == -2) index = slotIndex;
 			else {
-				ScreenHandler source = packetSyncId == syncId ? handler : packetSyncId == 0 ? player.playerScreenHandler : null;
+				AbstractContainerMenu source = packetSyncId == syncId ? handler : packetSyncId == 0 ? player.inventoryMenu : null;
 				if (source != null && slotIndex >= 0 && slotIndex < source.slots.size()) {
 					Slot slot = source.slots.get(slotIndex);
-					if (slot.inventory == player.getInventory()) index = slot.getIndex();
+					if (slot.container == player.getInventory()) index = slot.getContainerSlot();
 				}
 			}
 			if (index >= 0 && index < serverInventory.size()) { serverInventory.set(index, stack.copy()); feedback++; }
@@ -283,37 +284,37 @@ public final class BookmarkCrafting {
 			}
 			return totals;
 		}
-		private EmiRecipeHandler<ScreenHandler> recipeHandler(Budget budget) {
+		private EmiRecipeHandler<AbstractContainerMenu> recipeHandler(Budget budget) {
 			if (!valid()) return null;
-			EmiRecipeHandler<ScreenHandler> found = EmiRecipeFiller.getFirstValidHandler(budget.recipe, screen);
+			EmiRecipeHandler<AbstractContainerMenu> found = EmiRecipeFiller.getFirstValidHandler(budget.recipe, screen);
 			return found != null && found.supportsRecipe(budget.recipe) ? found : null;
 		}
-		private StandardRecipeHandler<ScreenHandler> standardFor(EmiRecipe recipe) {
-			EmiRecipeHandler<ScreenHandler> found = recipeHandler(new Budget(recipe, 1));
-			return found instanceof StandardRecipeHandler<ScreenHandler> standard ? standard : null;
+		private StandardRecipeHandler<AbstractContainerMenu> standardFor(EmiRecipe recipe) {
+			EmiRecipeHandler<AbstractContainerMenu> found = recipeHandler(new Budget(recipe, 1));
+			return found instanceof StandardRecipeHandler<AbstractContainerMenu> standard ? standard : null;
 		}
 		@Override public boolean hasGridItems(EmiRecipe recipe) {
 			if (!valid()) return false;
-			StandardRecipeHandler<ScreenHandler> standard = standardFor(recipe);
+			StandardRecipeHandler<AbstractContainerMenu> standard = standardFor(recipe);
 			if (standard == null) return false;
 			for (Slot slot : standard.getCraftingSlots(handler)) {
-				if (slot != null && !slot.getStack().isEmpty()) return true;
+				if (slot != null && !slot.getItem().isEmpty()) return true;
 			}
 			return false;
 		}
 		@Override public boolean clearGrid(EmiRecipe recipe) {
 			if (!valid()) return false;
-			StandardRecipeHandler<ScreenHandler> standard = standardFor(recipe);
+			StandardRecipeHandler<AbstractContainerMenu> standard = standardFor(recipe);
 			if (standard == null) return false;
-			MinecraftClient client = MinecraftClient.getInstance();
+			Minecraft client = Minecraft.getInstance();
 			boolean clicked = false;
 			for (Slot slot : standard.getCraftingSlots(handler)) {
-				if (slot != null && !slot.getStack().isEmpty()
-						&& slot.canTakeItems(client.player)) {
+				if (slot != null && !slot.getItem().isEmpty()
+						&& slot.mayPickup(client.player)) {
 					// Move reusable tools, catalysts and remainders back to the player
 					// inventory. A normal server click keeps both sides authoritative.
-					client.interactionManager.clickSlot(handler.syncId, slot.id, 0,
-						SlotActionType.QUICK_MOVE, client.player);
+					client.gameMode.handleInventoryMouseClick(handler.containerId, slot.index, 0,
+						ClickType.QUICK_MOVE, client.player);
 					clicked = true;
 				}
 			}
@@ -344,31 +345,31 @@ public final class BookmarkCrafting {
 			// QUICK_MOVE may repeat until ingredients run out. A catalyst-only recipe has no one-batch bound.
 			return consumed || deny("no_consumed_input");
 		}
-		private boolean safeGrid(Budget budget, StandardRecipeHandler<ScreenHandler> standard, boolean production) {
+		private boolean safeGrid(Budget budget, StandardRecipeHandler<AbstractContainerMenu> standard, boolean production) {
 			List<Slot> slots = standard.getCraftingSlots(budget.recipe, handler);
 			List<EmiIngredient> inputs = budget.effective.getInputs();
 			if (slots.isEmpty() || inputs.size() > slots.size()) return deny("invalid_crafting_slots");
 			List<Slot> all = new ArrayList<>(standard.getCraftingSlots(handler));
 			for (Slot slot : slots) if (slot != null && !all.contains(slot)) all.add(slot);
 			for (Slot slot : all) {
-				if (slot == null || slot.getStack().isEmpty()) continue;
+				if (slot == null || slot.getItem().isEmpty()) continue;
 				int index = slots.indexOf(slot);
 				boolean own = false;
 				if (index >= 0 && index < inputs.size()) for (EmiStack option : inputs.get(index).getEmiStacks()) {
-					EmiStack actual = EmiStack.of(slot.getStack());
+					EmiStack actual = EmiStack.of(slot.getItem());
 					if (option.isEqual(actual) || (!option.getRemainder().isEmpty() && option.getRemainder().isEqual(actual))) own = true;
 				}
-				if (!own || !slot.canTakeItems(MinecraftClient.getInstance().player)) return deny("foreign_or_locked_grid");
+				if (!own || !slot.mayPickup(Minecraft.getInstance().player)) return deny("foreign_or_locked_grid");
 			}
 			// Clearing happens in both fill-only and production paths. Never risk dropping the old layout.
 			List<ItemStack> room = new ArrayList<>();
-			var inventory = MinecraftClient.getInstance().player.getInventory();
-			for (int i = 0; i < 36; i++) room.add(inventory.getStack(i).copy());
-			for (Slot slot : all) if (slot != null && !reserve(room, slot.getStack())) return deny("no_return_capacity");
+			var inventory = Minecraft.getInstance().player.getInventory();
+			for (int i = 0; i < 36; i++) room.add(inventory.getItem(i).copy());
+			for (Slot slot : all) if (slot != null && !reserve(room, slot.getItem())) return deny("no_return_capacity");
 			if (production) {
 				Slot output = standard.getOutputSlot(handler);
 				if (output == null) return deny("no_instant_output_slot");
-				if (!output.getStack().isEmpty() && !budget.effective.getOutputs().get(0).isEqual(EmiStack.of(output.getStack()))) return deny("foreign_output_slot");
+				if (!output.getItem().isEmpty() && !budget.effective.getOutputs().get(0).isEqual(EmiStack.of(output.getItem()))) return deny("foreign_output_slot");
 				for (EmiStack result : budget.effective.getOutputs()) if (!reserve(room, result.getItemStack())) return deny("no_output_capacity");
 				// Remainders replace the inputs consumed by the recipe and therefore
 				// need no second slot. Reserving them again made tool/catalyst
@@ -380,21 +381,21 @@ public final class BookmarkCrafting {
 			int count = added.getCount();
 			for (ItemStack stack : inventory) {
 				if (count <= 0) return true;
-				if (!stack.isEmpty() && ItemStack.areItemsAndComponentsEqual(stack, added)) {
-					int moved = Math.min(count, Math.max(0, stack.getMaxCount() - stack.getCount()));
+				if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(stack, added)) {
+					int moved = Math.min(count, Math.max(0, stack.getMaxStackSize() - stack.getCount()));
 					stack.setCount(stack.getCount() + moved); count -= moved;
 				}
 			}
 			for (int i = 0; i < inventory.size() && count > 0; i++) if (inventory.get(i).isEmpty()) {
-				ItemStack stack = added.copy(); stack.setCount(Math.min(count, stack.getMaxCount())); count -= stack.getCount(); inventory.set(i, stack);
+				ItemStack stack = added.copy(); stack.setCount(Math.min(count, stack.getMaxStackSize())); count -= stack.getCount(); inventory.set(i, stack);
 			}
 			return count <= 0;
 		}
 		@Override public boolean canCraft(Budget budget) { return safeOutputs(budget.effective) && prepare(budget, 1, true) != null; }
 		boolean canFill(Budget budget, int amount) { return prepare(budget, amount, false) != null; }
 		private List<ItemStack> prepare(Budget budget, int amount, boolean production) {
-			EmiRecipeHandler<ScreenHandler> found = recipeHandler(budget);
-			if (!(found instanceof StandardRecipeHandler<ScreenHandler> standard)) { deny("unsupported_handler"); return null; }
+			EmiRecipeHandler<AbstractContainerMenu> found = recipeHandler(budget);
+			if (!(found instanceof StandardRecipeHandler<AbstractContainerMenu> standard)) { deny("unsupported_handler"); return null; }
 			try {
 				if (standard.getClass().getMethod("craft", EmiRecipe.class, EmiCraftContext.class).getDeclaringClass() != StandardRecipeHandler.class) {
 					deny("custom_craft_handler"); return null;
@@ -406,11 +407,11 @@ public final class BookmarkCrafting {
 			if (!found.canCraft(budget.recipe, new EmiCraftContext<>(screen, inventory, EmiCraftContext.Type.CRAFTABLE,
 				production ? EmiCraftContext.Destination.INVENTORY : EmiCraftContext.Destination.NONE, amount))) { deny("handler_rejected"); return null; }
 			// Only the ingredient view is wrapped. Every slot/type/identity query sees the plugin's original recipe.
-			StandardRecipeHandler<ScreenHandler> view = new StandardRecipeHandler<>() {
-				public List<Slot> getInputSources(ScreenHandler h) { return standard.getInputSources(h); }
-				public List<Slot> getCraftingSlots(ScreenHandler h) { return standard.getCraftingSlots(h); }
-				public List<Slot> getCraftingSlots(EmiRecipe r, ScreenHandler h) { return standard.getCraftingSlots(budget.recipe, h); }
-				public Slot getOutputSlot(ScreenHandler h) { return standard.getOutputSlot(h); }
+			StandardRecipeHandler<AbstractContainerMenu> view = new StandardRecipeHandler<>() {
+				public List<Slot> getInputSources(AbstractContainerMenu h) { return standard.getInputSources(h); }
+				public List<Slot> getCraftingSlots(AbstractContainerMenu h) { return standard.getCraftingSlots(h); }
+				public List<Slot> getCraftingSlots(EmiRecipe r, AbstractContainerMenu h) { return standard.getCraftingSlots(budget.recipe, h); }
+				public Slot getOutputSlot(AbstractContainerMenu h) { return standard.getOutputSlot(h); }
 				public boolean supportsRecipe(EmiRecipe r) { return standard.supportsRecipe(budget.recipe); }
 			};
 			List<ItemStack> stacks = EmiRecipeFiller.getStacks(view, budget.effective, screen, amount);
@@ -432,12 +433,12 @@ public final class BookmarkCrafting {
 		boolean fill(Budget budget, int amount, boolean production) {
 			List<ItemStack> stacks = prepare(budget, amount, production);
 			if (stacks == null) return false;
-			StandardRecipeHandler<ScreenHandler> standard = (StandardRecipeHandler<ScreenHandler>) recipeHandler(budget);
+			StandardRecipeHandler<AbstractContainerMenu> standard = (StandardRecipeHandler<AbstractContainerMenu>) recipeHandler(budget);
 			boolean accepted;
 			if (EmiClient.onServer) { EmiClient.sendFillRecipe(standard, screen, syncId, production ? 2 : 0, stacks, budget.recipe); accepted = true; }
 			else accepted = EmiRecipeFiller.clientFill(standard, budget.recipe, screen, stacks,
 				production ? EmiCraftContext.Destination.INVENTORY : EmiCraftContext.Destination.NONE);
-			if (accepted) { EmiSidebars.craft(budget.recipe); MinecraftClient.getInstance().setScreen(screen); }
+			if (accepted) { EmiSidebars.craft(budget.recipe); Minecraft.getInstance().setScreen(screen); }
 			return accepted;
 		}
 	}

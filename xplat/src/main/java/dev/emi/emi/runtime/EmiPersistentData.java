@@ -3,13 +3,12 @@ package dev.emi.emi.runtime;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-
+import net.minecraft.util.GsonHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import dev.emi.emi.bom.BoM;
 import dev.emi.emi.bom.CraftingPlans;
-import net.minecraft.util.JsonHelper;
 
 public class EmiPersistentData {
 	public static final File FILE = new File("emi.json");
@@ -46,19 +45,19 @@ public class EmiPersistentData {
 			if (json == null) {
 				return;
 			}
-			if (JsonHelper.hasArray(json, "favorites")) {
-				EmiFavorites.load(JsonHelper.getArray(json, "favorites"));
+			if (GsonHelper.isArrayNode(json, "favorites")) {
+				EmiFavorites.load(GsonHelper.getAsJsonArray(json, "favorites"));
 			}
-			EmiBookmarkGroups.load(JsonHelper.hasJsonObject(json, "bookmark_groups") ? JsonHelper.getObject(json, "bookmark_groups") : null);
+			EmiBookmarkGroups.load(GsonHelper.isObjectNode(json, "bookmark_groups") ? GsonHelper.getAsJsonObject(json, "bookmark_groups") : null);
 			EmiSidebars.load(json);
-			if (JsonHelper.hasJsonObject(json, "recipe_defaults")) {
-				BoM.loadAdded(JsonHelper.getObject(json, "recipe_defaults"));
+			if (GsonHelper.isObjectNode(json, "recipe_defaults")) {
+				BoM.loadAdded(GsonHelper.getAsJsonObject(json, "recipe_defaults"));
 			}
-			if (JsonHelper.hasJsonObject(json, "crafting_plans")) {
-				CraftingPlans.load(JsonHelper.getObject(json, "crafting_plans"));
+			if (GsonHelper.isObjectNode(json, "crafting_plans")) {
+				CraftingPlans.load(GsonHelper.getAsJsonObject(json, "crafting_plans"));
 			}
-			if (JsonHelper.hasArray(json, "hidden_stacks")) {
-				EmiHidden.load(JsonHelper.getArray(json, "hidden_stacks"));
+			if (GsonHelper.isArrayNode(json, "hidden_stacks")) {
+				EmiHidden.load(GsonHelper.getAsJsonArray(json, "hidden_stacks"));
 			}
 		} catch (Exception e) {
 			EmiLog.error("Failed to parse persistent data", e);
