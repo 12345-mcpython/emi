@@ -480,7 +480,7 @@ public class VanillaPlugin implements EmiPlugin {
 				if (i.components().getOrDefault(DataComponents.MAX_DAMAGE, 0) > 0) {
 					if (i instanceof ArmorItem ai && ai.getMaterial() != null && ai.getMaterial().value().repairIngredient().get() != null
 							&& !ai.getMaterial().value().repairIngredient().get().isEmpty()) {
-						ResourceLocation id = synthetic("anvil/repairing/material", EmiUtil.subId(i) + "/" + EmiUtil.subId(ai.getMaterial().value().repairIngredient().get().getItems()[0].getItem()));
+						ResourceLocation id = synthetic("anvil/repairing/material", EmiUtil.subId(i) + "/" + EmiUtil.subId(ai.getMaterial().value().repairIngredient().get().items().findFirst().get().getItem()));
 						addRecipeSafe(registry, () -> new EmiAnvilRecipe(EmiStack.of(i), EmiIngredient.of(ai.getMaterial().value().repairIngredient().get()), id));
 					}
 				}

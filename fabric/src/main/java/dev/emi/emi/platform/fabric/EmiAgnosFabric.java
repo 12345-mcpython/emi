@@ -143,14 +143,14 @@ public class EmiAgnosFabric extends EmiAgnos {
 		PotionBrewing brewingRegistry = Minecraft.getInstance().level != null ? Minecraft.getInstance().level.potionBrewing() : PotionBrewing.EMPTY;
 		BrewingRecipeRegistryAccessor brewingRegistryAccess = (BrewingRecipeRegistryAccessor)brewingRegistry;
 		for (Ingredient ingredient : brewingRegistryAccess.getPotionTypes()) {
-			for (ItemStack stack : ingredient.getItems()) {
+			for (ItemStack stack : ingredient.items().toList()) {
 				String pid = EmiUtil.subId(stack.getItem());
 				for (PotionBrewing.Mix<Potion> recipe : brewingRegistryAccess.getPotionRecipes()) {
 					try {
 						Ingredient recipeIngredient = recipe.ingredient();
-						if (recipeIngredient.getItems().length > 0) {
+						if (recipeIngredient.items().findAny().isPresent()) {
 							ResourceLocation id = EmiPort.id("emi", "/brewing/" + pid
-								+ "/" + EmiUtil.subId(recipeIngredient.getItems()[0].getItem())
+								+ "/" + EmiUtil.subId(recipeIngredient.items().findFirst().get().getItem())
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.from().value()))
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.to().value())));
 							registry.addRecipe(new EmiBrewingRecipe(
@@ -167,8 +167,8 @@ public class EmiAgnosFabric extends EmiAgnos {
 		for (PotionBrewing.Mix<Item> recipe : brewingRegistryAccess.getItemRecipes()) {
 			try {
 				Ingredient recipeIngredient = recipe.ingredient();
-				if (recipeIngredient.getItems().length > 0) {
-					String gid = EmiUtil.subId(recipeIngredient.getItems()[0].getItem());
+				if (recipeIngredient.items().findAny().isPresent()) {
+					String gid = EmiUtil.subId(recipeIngredient.items().findFirst().get().getItem());
 					String iid = EmiUtil.subId(recipe.from().value());
 					String oid = EmiUtil.subId(recipe.to().value());
 					Consumer<Holder<Potion>> potionRecipeGen = entry -> {

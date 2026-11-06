@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -169,7 +170,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		{	// Render background
 			RenderSystem.enableBlend();
 			ResourceLocation identifier = this.client.level == null ? MENU_LIST_BACKGROUND_TEXTURE : INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
-			draw.blit(identifier, left, top, right, bottom + (int)scrollAmount, right - left, bottom - top, 32, 32);
+			draw.blit(RenderType::guiTextured, identifier, left, top, right, bottom + (int)scrollAmount, right - left, bottom - top, 32, 32);
 			RenderSystem.disableBlend();
 		}
 
@@ -184,8 +185,8 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			RenderSystem.enableBlend();
 			ResourceLocation identifier = this.client.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
 			ResourceLocation identifier2 = this.client.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-			draw.blit(identifier, left, top - 2, 0.0F, 0.0F, width, 2, 32, 2);
-			draw.blit(identifier2, left, bottom, 0.0F, 0.0F, width, 2, 32, 2);
+			draw.blit(RenderType::guiTextured, identifier, left, top - 2, 0.0F, 0.0F, width, 2, 32, 2);
+			draw.blit(RenderType::guiTextured, identifier2, left, bottom, 0.0F, 0.0F, width, 2, 32, 2);
 			RenderSystem.disableBlend();
 		}
 

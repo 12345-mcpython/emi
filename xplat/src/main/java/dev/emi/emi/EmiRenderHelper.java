@@ -348,7 +348,7 @@ public class EmiRenderHelper {
 			context.translate(x + 4, y + 4);
 
 			recipe.addWidgets(holder);
-			float delta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
+			float delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 			for (Widget widget : widgets) {
 				widget.render(context.raw(), -1000, -1000, delta);
 			}
