@@ -2,12 +2,11 @@ package dev.emi.emi.screen.tooltip;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.runtime.EmiDrawContext;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.text.Text;
 
 /**
  * Compact icon grid for a bookmark-chain tooltip. Each cell shows an
@@ -37,7 +36,7 @@ public class BookmarkChainTooltipComponent implements EmiTooltipComponent {
 	}
 
 	@Override
-	public int getWidth(TextRenderer textRenderer) {
+	public int getWidth(Font textRenderer) {
 		return entries.isEmpty() ? 0 : columns() * SLOT;
 	}
 
@@ -58,8 +57,8 @@ public class BookmarkChainTooltipComponent implements EmiTooltipComponent {
 			}
 			long amount = missingOnly ? entry.missing() : entry.amount();
 			if (amount > 0) {
-				Text text = EmiPort.literal(compact(amount));
-				int width = render.text.getWidth(text);
+				Component text = EmiPort.literal(compact(amount));
+				int width = render.text.width(text);
 				float scale = Math.min(1f, 17f / Math.max(1, width));
 				context.push();
 				context.matrices().translate(x + SLOT - 1, y + SLOT - 1, 300);

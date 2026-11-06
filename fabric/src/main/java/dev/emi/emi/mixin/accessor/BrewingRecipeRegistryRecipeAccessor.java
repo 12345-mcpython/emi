@@ -1,20 +1,19 @@
 package dev.emi.emi.mixin.accessor;
 
+import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.recipe.BrewingRecipeRegistry;
-import net.minecraft.recipe.Ingredient;
-
-@Mixin(BrewingRecipeRegistry.Recipe.class)
+@Mixin(PotionBrewing.Mix.class)
 public interface BrewingRecipeRegistryRecipeAccessor {
 
-	@Accessor("input")
+	@Accessor("from")
 	Object getInput();
 
 	@Accessor("ingredient")
 	Ingredient getIngredient();
 
-	@Accessor("output")
+	@Accessor("to")
 	Object getOutput();
 }

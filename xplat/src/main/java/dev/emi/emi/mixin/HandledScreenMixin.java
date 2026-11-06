@@ -1,56 +1,48 @@
 package dev.emi.emi.mixin;
 
-import org.spongepowered.asm.mixin.Dynamic;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
+import com.mojang.blaze3d.platform.Window;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.platform.EmiAgnos;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.screen.EmiScreenManager;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.Window;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 
-@Mixin(HandledScreen.class)
+@Mixin(AbstractContainerScreen.class)
 public abstract class HandledScreenMixin extends Screen {
 	@Shadow
-	protected int backgroundWidth, backgroundHeight, x, y;
+	protected int imageWidth, imageHeight, leftPos, topPos;
 
 	private HandledScreenMixin() { super(null); }
 
-	@Intrinsic @Override
-	public void renderBackground(DrawContext raw) {
+	@Override
+	public void renderBackground(GuiGraphics raw) {
 		super.renderBackground(raw);
-	}
-
-	@Dynamic
-	@Inject(at = @At("RETURN"), method = "renderBackground(Lnet/minecraft/client/gui/DrawContext;)V")
-	private void renderBackground(DrawContext raw, CallbackInfo info) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
-		Window window = client.getWindow();
-		int mouseX = (int) (client.mouse.getX() * window.getScaledWidth() / window.getWidth());
-		int mouseY = (int) (client.mouse.getY() * window.getScaledHeight() / window.getHeight());
-		EmiScreenManager.drawBackground(context, mouseX, mouseY, client.getTickDelta());
+		Window window = minecraft.getWindow();
+		int mouseX = (int) (minecraft.mouseHandler.xpos() * window.getGuiScaledWidth() / window.getScreenWidth());
+		int mouseY = (int) (minecraft.mouseHandler.ypos() * window.getGuiScaledHeight() / window.getScreenHeight());
+		EmiScreenManager.drawBackground(context, mouseX, mouseY, minecraft.getFrameTime());
 	}
 
 	@Inject(at = @At(value = "INVOKE",
-			target = "net/minecraft/client/gui/screen/ingame/HandledScreen.drawForeground(Lnet/minecraft/client/gui/DrawContext;II)V",
+			target = "net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.renderLabels(Lnet/minecraft/client/gui/GuiGraphics;II)V",
 			shift = Shift.AFTER),
 		method = "render")
-	private void renderForeground(DrawContext raw, int mouseX, int mouseY, float delta, CallbackInfo info) {
+	private void renderForeground(GuiGraphics raw, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		if (EmiAgnos.isForge()) {
 			return;
 		}
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
 		context.push();
-		context.translate(-x, -y);
+		context.translate(-leftPos, -topPos);
 		EmiPort.setPositionTexShader();
 		EmiScreenManager.render(context, mouseX, mouseY, delta);
 		EmiScreenManager.drawForeground(context, mouseX, mouseY, delta);

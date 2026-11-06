@@ -1,7 +1,10 @@
 package dev.emi.emi.recipe;
 
 import java.util.List;
-
+import net.minecraft.world.inventory.TransientCraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import com.google.common.collect.Lists;
 
 import dev.emi.emi.EmiPort;
@@ -11,10 +14,6 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.runtime.ProxyRecipeManager;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.ShapedRecipe;
 
 public class EmiShapedRecipe extends EmiCraftingRecipe {
 
@@ -25,7 +24,7 @@ public class EmiShapedRecipe extends EmiCraftingRecipe {
 
 	public static void setRemainders(List<EmiIngredient> input, CraftingRecipe recipe) {
 		try {
-			CraftingInventory inv = EmiUtil.getCraftingInventory();
+			TransientCraftingContainer inv = EmiUtil.getCraftingInventory();
 			for (int i = 0; i < input.size(); i++) {
 				if (input.get(i).isEmpty()) {
 					continue;
@@ -35,18 +34,18 @@ public class EmiShapedRecipe extends EmiCraftingRecipe {
 						continue;
 					}
 					if (!input.get(j).isEmpty()) {
-						inv.setStack(j, input.get(j).getEmiStacks().get(0).getItemStack().copy());
+						inv.setItem(j, input.get(j).getEmiStacks().get(0).getItemStack().copy());
 					}
 				}
 				List<EmiStack> stacks = input.get(i).getEmiStacks();
 				for (EmiStack stack : stacks) {
-					inv.setStack(i, stack.getItemStack().copy());
-					ItemStack remainder = recipe.getRemainder(inv).get(i);
+					inv.setItem(i, stack.getItemStack().copy());
+					ItemStack remainder = recipe.getRemainingItems(inv).get(i);
 					if (!remainder.isEmpty()) {
 						stack.setRemainder(EmiStack.of(remainder));
 					}
 				}
-				inv.clear();
+				inv.clearContent();
 			}
 		} catch (Exception e) {
 			EmiLog.error("Exception thrown setting remainders for " + ProxyRecipeManager.getId(recipe), e);

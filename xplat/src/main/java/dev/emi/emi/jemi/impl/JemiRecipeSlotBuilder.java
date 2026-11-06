@@ -19,8 +19,8 @@ import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.material.Fluid;
 
 public class JemiRecipeSlotBuilder implements IRecipeSlotBuilder {
 	public final JemiIngredientAcceptor acceptor;
@@ -70,7 +70,7 @@ public class JemiRecipeSlotBuilder implements IRecipeSlotBuilder {
 	}
 
 	@Override
-	public IRecipeSlotBuilder addFluidStack(Fluid fluid, long amount, NbtCompound tag) {
+	public IRecipeSlotBuilder addFluidStack(Fluid fluid, long amount, CompoundTag tag) {
 		acceptor.addFluidStack(fluid, amount, tag);
 		return this;
 	}

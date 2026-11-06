@@ -4,7 +4,7 @@ import dev.emi.emi.network.EmiNetwork;
 import dev.emi.emi.network.PingS2CPacket;
 import dev.emi.emi.platform.EmiMain;
 import dev.emi.emi.registry.EmiCommands;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -29,7 +29,7 @@ public class EmiForge {
 	}
 
 	public void playerConnect(PlayerEvent.PlayerLoggedInEvent event) {
-		if (event.getEntity() instanceof ServerPlayerEntity spe) {
+		if (event.getEntity() instanceof ServerPlayer spe) {
 			EmiNetwork.sendToClient(spe, new PingS2CPacket());
 		}
 	}

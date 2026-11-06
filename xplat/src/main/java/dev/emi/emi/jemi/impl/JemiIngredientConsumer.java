@@ -14,8 +14,8 @@ import dev.emi.emi.jemi.JemiUtil;
 import mezz.jei.api.gui.builder.IIngredientConsumer;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.material.Fluid;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JemiIngredientConsumer implements IIngredientConsumer {
@@ -72,7 +72,7 @@ public class JemiIngredientConsumer implements IIngredientConsumer {
 		return addFluidStack(fluid, amount, null);
 	}
 
-	public IIngredientConsumer addFluidStack(Fluid fluid, long amount, NbtCompound nbt) {
+	public IIngredientConsumer addFluidStack(Fluid fluid, long amount, CompoundTag nbt) {
 		stacks.add(EmiStack.of(fluid, nbt, amount));
 		return this;
 	}

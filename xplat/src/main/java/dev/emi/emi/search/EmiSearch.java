@@ -6,7 +6,13 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.searchtree.SuffixArray;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -22,13 +28,6 @@ import dev.emi.emi.registry.EmiStackList;
 import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.runtime.EmiReloadLog;
 import dev.emi.emi.screen.EmiScreenManager;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.client.search.SuffixArray;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 public class EmiSearch {
 	public static final Pattern TOKENS = Pattern.compile(
@@ -64,28 +63,28 @@ public class EmiSearch {
 			try {
 				SearchStack searchStack = new SearchStack(stack);
 				bakedStacks.add(stack);
-				Text name = NameQuery.getText(stack);
+				Component name = NameQuery.getText(stack);
 				if (name != null) {
 					names.add(searchStack, name.getString().toLowerCase());
 				}
-				List<Text> tooltip = stack.getTooltipText();
+				List<Component> tooltip = stack.getTooltipText();
 				if (tooltip != null) {
 					for (int i = 1; i < tooltip.size(); i++) {
-						Text text = tooltip.get(i);
+						Component text = tooltip.get(i);
 						if (text != null) {
 							tooltips.add(searchStack, text.getString().toLowerCase());
 						}
 					}
 				}
-				Identifier id = stack.getId();
+				ResourceLocation id = stack.getId();
 				if (id != null) {
 					mods.add(searchStack, EmiUtil.getModName(id.getNamespace()).toLowerCase());
 					mods.add(searchStack, id.getNamespace().toLowerCase());
 					names.add(searchStack, id.getPath().toLowerCase());
 				}
 				if (stack.getItemStack().getItem() == Items.ENCHANTED_BOOK) {
-					for (Enchantment e : EnchantmentHelper.get(stack.getItemStack()).keySet()) {
-						Identifier eid = EmiPort.getEnchantmentRegistry().getId(e);
+					for (Enchantment e : EnchantmentHelper.getEnchantments(stack.getItemStack()).keySet()) {
+						ResourceLocation eid = EmiPort.getEnchantmentRegistry().getKey(e);
 						if (eid != null && !eid.getNamespace().equals("minecraft")) {
 							mods.add(searchStack, EmiUtil.getModName(eid.getNamespace()).toLowerCase());
 						}
@@ -98,10 +97,10 @@ public class EmiSearch {
 		for (Supplier<EmiAlias> supplier : EmiData.aliases) {
 			EmiAlias alias = supplier.get();
 			for (String key : alias.keys()) {
-				if (!I18n.hasTranslation(key)) {
+				if (!I18n.exists(key)) {
 					EmiReloadLog.warn("Untranslated alias " + key);
 				}
-				String text = I18n.translate(key).toLowerCase();
+				String text = I18n.get(key).toLowerCase();
 				for (EmiIngredient ing : alias.stacks()) {
 					for (EmiStack stack : ing.getEmiStacks()) {
 						aliases.add(stack.copy().comparison(EmiPort.compareStrict()), text);
@@ -110,7 +109,7 @@ public class EmiSearch {
 			}
 		}
 		for (EmiAlias.Baked alias : EmiStackList.registryAliases) {
-			for (Text text : alias.text()) {
+			for (Component text : alias.text()) {
 				for (EmiIngredient ing : alias.stacks()) {
 					for (EmiStack stack : ing.getEmiStacks()) {
 						aliases.add(stack.copy().comparison(EmiPort.compareStrict()), text.getString().toLowerCase());
@@ -119,10 +118,10 @@ public class EmiSearch {
 			}
 		}
 		EmiConfig.appendItemModId = old;
-		names.build();
-		tooltips.build();
-		mods.build();
-		aliases.build();
+		names.generate();
+		tooltips.generate();
+		mods.generate();
+		aliases.generate();
 		EmiSearch.names = names;
 		EmiSearch.tooltips = tooltips;
 		EmiSearch.mods = mods;
@@ -131,7 +130,7 @@ public class EmiSearch {
 	}
 
 	public static void update() {
-		search(EmiScreenManager.search.getText());
+		search(EmiScreenManager.search.getValue());
 	}
 
 	public static void search(String query) {

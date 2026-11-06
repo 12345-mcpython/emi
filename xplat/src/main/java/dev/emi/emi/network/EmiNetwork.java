@@ -2,20 +2,19 @@ package dev.emi.emi.network;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 
 public class EmiNetwork {
-	public static final Identifier FILL_RECIPE = new Identifier("emi:fill_recipe");
-	public static final Identifier CREATE_ITEM = new Identifier("emi:create_item");
-	public static final Identifier COMMAND = new Identifier("emi:command");
-	public static final Identifier CHESS = new Identifier("emi:chess");
-	public static final Identifier PING = new Identifier("emi:ping");
-	private static BiConsumer<ServerPlayerEntity, EmiPacket> clientSender;
+	public static final ResourceLocation FILL_RECIPE = new ResourceLocation("emi:fill_recipe");
+	public static final ResourceLocation CREATE_ITEM = new ResourceLocation("emi:create_item");
+	public static final ResourceLocation COMMAND = new ResourceLocation("emi:command");
+	public static final ResourceLocation CHESS = new ResourceLocation("emi:chess");
+	public static final ResourceLocation PING = new ResourceLocation("emi:ping");
+	private static BiConsumer<ServerPlayer, EmiPacket> clientSender;
 	private static Consumer<EmiPacket> serverSender;
 
-	public static void initServer(BiConsumer<ServerPlayerEntity, EmiPacket> sender) {
+	public static void initServer(BiConsumer<ServerPlayer, EmiPacket> sender) {
 		clientSender = sender;
 	}
 
@@ -23,7 +22,7 @@ public class EmiNetwork {
 		serverSender = sender;
 	}
 
-	public static void sendToClient(ServerPlayerEntity player, EmiPacket packet) {
+	public static void sendToClient(ServerPlayer player, EmiPacket packet) {
 		clientSender.accept(player, packet);
 	}
 

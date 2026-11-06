@@ -6,7 +6,7 @@ import dev.emi.emi.mixinsupport.annotation.Extends;
 import dev.emi.emi.mixinsupport.annotation.InvokeTarget;
 import dev.emi.emi.mixinsupport.annotation.StripConstructors;
 import dev.emi.emi.mixinsupport.annotation.Transform;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 @StripConstructors
 @Transform(visibility = "PUBLIC")

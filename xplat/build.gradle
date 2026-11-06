@@ -13,7 +13,7 @@ loom {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-	mappings "net.fabricmc:yarn:${rootProject.yarn_mappings}:v2"
+	mappings loom.officialMojangMappings()
 
 	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
@@ -59,8 +59,35 @@ def apiJar = tasks.register('apiJar', Jar, {
 	exclude 'dev/emi/emi/api/stack/ListEmiIngredient**'
 })
 
+// The common sources are compiled with Mojang mappings, so downstream mods that also use
+// Mojang mappings consume the unremapped artifacts instead of a remapped variant.
+def mojmapJar = tasks.register('mojmapJar', Jar, {
+	archiveClassifier = 'mojmap'
+	from sourceSets.main.output
+})
+
+def mojmapSourcesJar = tasks.register('mojmapSourcesJar', Jar, {
+	archiveClassifier = 'mojmap-sources'
+	from sourceSets.main.allSource
+})
+
+def mojmapApiJar = tasks.register('mojmapApiJar', Jar, {
+	archiveClassifier = 'mojmap-api'
+	from sourceSets.main.output
+	include 'fabric.mod.json'
+	include 'emi.mixins.json'
+	include 'emi.accesswidener'
+	include 'dev/emi/emi/api/**'
+	exclude 'dev/emi/emi/api/EmiRecipeHandler**'
+	exclude 'dev/emi/emi/api/stack/FluidEmiStack**'
+	exclude 'dev/emi/emi/api/stack/ItemEmiStack**'
+	exclude 'dev/emi/emi/api/stack/EmptyEmiStack**'
+	exclude 'dev/emi/emi/api/stack/TagEmiIngredient**'
+	exclude 'dev/emi/emi/api/stack/ListEmiIngredient**'
+})
+
 tasks.named("build").configure {
-	dependsOn(filteredSourcesJar, apiJar)
+	dependsOn(filteredSourcesJar, apiJar, mojmapJar, mojmapSourcesJar, mojmapApiJar)
 }
 
 publishing {
@@ -78,6 +105,22 @@ publishing {
 			}
 			artifact(apiJar) {
 				builtBy apiJar
+				classifier = 'api'
+			}
+		}
+		register('mojmap', MavenPublication) {
+			artifactId = "${rootProject.name}-xplat-mojmap"
+			version = project.ext.mavenVersion
+			artifact(mojmapJar) {
+				builtBy mojmapJar
+				classifier = null
+			}
+			artifact(mojmapSourcesJar) {
+				builtBy mojmapSourcesJar
+				classifier = 'sources'
+			}
+			artifact(mojmapApiJar) {
+				builtBy mojmapApiJar
 				classifier = 'api'
 			}
 		}

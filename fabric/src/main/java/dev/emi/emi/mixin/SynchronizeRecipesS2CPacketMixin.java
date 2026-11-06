@@ -7,16 +7,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import dev.emi.emi.runtime.EmiLog;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.play.SynchronizeRecipesS2CPacket;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
 
-@Mixin(SynchronizeRecipesS2CPacket.class)
+@Mixin(ClientboundUpdateRecipesPacket.class)
 public class SynchronizeRecipesS2CPacketMixin {
 	
-	@Inject(at = @At("RETURN"), method = "readRecipe", locals = LocalCapture.CAPTURE_FAILHARD)
-	private static void readRecipe(PacketByteBuf buf, CallbackInfoReturnable<Recipe<?>> info, Identifier serializer, Identifier id) {
+	@Inject(at = @At("RETURN"), method = "fromNetwork", locals = LocalCapture.CAPTURE_FAILHARD)
+	private static void readRecipe(FriendlyByteBuf buf, CallbackInfoReturnable<Recipe<?>> info, ResourceLocation serializer, ResourceLocation id) {
 		Recipe<?> recipe = info.getReturnValue();
 		if (recipe == null) {
 			EmiLog.error("Recipe " + id + " was deserialized as null using recipe serializer " + serializer

@@ -8,24 +8,23 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import dev.emi.emi.api.widget.TextWidget.Alignment;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.text.OrderedText;
-import net.minecraft.util.Identifier;
-
 import java.util.List;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 public class EmiGrindstoneDisenchantingBookRecipe implements EmiRecipe {
-	private static final Identifier BACKGROUND = EmiPort.id("minecraft", "textures/gui/container/grindstone.png");
+	private static final ResourceLocation BACKGROUND = EmiPort.id("minecraft", "textures/gui/container/grindstone.png");
 	private final Enchantment enchantment;
 	private final int level;
-	private final Identifier id;
+	private final ResourceLocation id;
 
-	public EmiGrindstoneDisenchantingBookRecipe(Enchantment enchantment, int level, Identifier id) {
+	public EmiGrindstoneDisenchantingBookRecipe(Enchantment enchantment, int level, ResourceLocation id) {
 		this.enchantment = enchantment;
 		this.level = level;
 		this.id = id;
@@ -37,7 +36,7 @@ public class EmiGrindstoneDisenchantingBookRecipe implements EmiRecipe {
 	}
 
 	@Override
-	public Identifier getId() {
+	public ResourceLocation getId() {
 		return id;
 	}
 
@@ -77,25 +76,25 @@ public class EmiGrindstoneDisenchantingBookRecipe implements EmiRecipe {
 
 	private EmiStack getBook() {
 		ItemStack enchantedTool = new ItemStack(Items.ENCHANTED_BOOK);;
-		enchantedTool.addEnchantment(enchantment, level);
+		enchantedTool.enchant(enchantment, level);
 
 		ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
-		NbtCompound tag = new NbtCompound();
-		NbtList StoredEnchantments = new NbtList();
-		NbtCompound enchant = new NbtCompound();
-		String id = enchantedTool.getNbt().getList("Enchantments", NbtElement.COMPOUND_TYPE).getCompound(0).getString("id");
+		CompoundTag tag = new CompoundTag();
+		ListTag StoredEnchantments = new ListTag();
+		CompoundTag enchant = new CompoundTag();
+		String id = enchantedTool.getTag().getList("Enchantments", Tag.TAG_COMPOUND).getCompound(0).getString("id");
 
 		enchant.putString("id", id);
 		enchant.putShort("lvl", (short) level);
 		StoredEnchantments.add(enchant);
 		tag.put("StoredEnchantments", StoredEnchantments);
-		book.setNbt(tag);
+		book.setTag(tag);
 
 		return EmiStack.of(book);
 	}
 
-	private OrderedText getExp(){
-		int minPower = enchantment.getMinPower(level);
+	private FormattedCharSequence getExp(){
+		int minPower = enchantment.getMinCost(level);
 		int minXP = (int)Math.ceil((double)minPower / 2.0);
 		int maxXP = 2 * minXP - 1;
 		return EmiPort.ordered(EmiPort.translatable("emi.grinding.experience", minXP, maxXP));

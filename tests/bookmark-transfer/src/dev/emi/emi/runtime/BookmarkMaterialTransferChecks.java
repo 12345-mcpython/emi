@@ -2,7 +2,7 @@ package dev.emi.emi.runtime;
 
 import java.util.*;
 import dev.emi.emi.api.stack.*;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class BookmarkMaterialTransferChecks {
  static class Fake implements BookmarkMaterialTransfer.Access {

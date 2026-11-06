@@ -10,7 +10,7 @@ import dev.emi.emi.mixinsupport.MixinPlaceholder;
 import dev.emi.emi.mixinsupport.annotation.InvokeTarget;
 import dev.emi.emi.mixinsupport.annotation.Transform;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(ItemEmiStack.class)
 public abstract class ItemEmiStackMixin {
@@ -22,7 +22,7 @@ public abstract class ItemEmiStackMixin {
 		desc = "(Lnet/fabricmc/fabric/api/transfer/v1/item/ItemVariant;)V", type = "NEW")
 	private static Object newEntry(Object newDup, ItemVariant variant) { throw new AbstractMethodError(); }
 
-	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/item/ItemStack;J)V")
+	@Inject(at = @At("RETURN"), method = "<init>(Lnet/minecraft/world/item/ItemStack;J)V")
 	public void constructor(ItemStack stack, long amount, CallbackInfo info) {
 		this.item = ItemVariant.of(stack);
 		this.entry = newEntry(MixinPlaceholder.NEW_DUP, item);

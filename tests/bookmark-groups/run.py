@@ -24,9 +24,9 @@ java = args.java_home / 'bin'
 java_suffix = '.exe' if (java / 'javac.exe').is_file() else ''
 
 stubs = {
-    'net/minecraft/util/Identifier.java': '''package net.minecraft.util;
-public record Identifier(String value) { public String toString() { return value; } }''',
-    'net/minecraft/item/Items.java': '''package net.minecraft.item;
+    'net/minecraft/resources/ResourceLocation.java': '''package net.minecraft.resources;
+public record ResourceLocation(String value) { public String toString() { return value; } }''',
+    'net/minecraft/world/item/Items.java': '''package net.minecraft.world.item;
 public class Items { public static final String BARRIER = "barrier"; }''',
     'dev/emi/emi/api/recipe/EmiRecipeCategory.java': '''package dev.emi.emi.api.recipe;
 public class EmiRecipeCategory {}''',
@@ -96,7 +96,7 @@ with tempfile.TemporaryDirectory(prefix='emi-bookmark-checks-') as temporary:
         text = fixture.read_text(encoding='utf-8')
         if fixture.name == 'EmiRecipe.java':
             text = text.replace('public interface EmiRecipe {', '''public interface EmiRecipe {
-    default net.minecraft.util.Identifier getId() { return null; }
+    default net.minecraft.resources.ResourceLocation getId() { return null; }
     default EmiRecipeCategory getCategory() { return null; }
     default java.util.List<dev.emi.emi.api.stack.EmiIngredient> getCatalysts() { return java.util.List.of(); }
     default boolean supportsRecipeTree() { return !getInputs().isEmpty() && !getOutputs().isEmpty(); }

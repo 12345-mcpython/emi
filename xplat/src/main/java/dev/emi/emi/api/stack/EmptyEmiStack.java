@@ -1,21 +1,20 @@
 package dev.emi.emi.api.stack;
 
 import java.util.List;
-
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.ApiStatus;
 
 import dev.emi.emi.EmiPort;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 @ApiStatus.Internal
 public class EmptyEmiStack extends EmiStack {
-	private static final Identifier ID = EmiPort.id("emi", "empty");
+	private static final ResourceLocation ID = EmiPort.id("emi", "empty");
 
 	@Override
 	public EmiStack getRemainder() {
@@ -51,7 +50,7 @@ public class EmptyEmiStack extends EmiStack {
 	}
 
 	@Override
-	public NbtCompound getNbt() {
+	public CompoundTag getNbt() {
 		return null;
 	}
 
@@ -66,7 +65,7 @@ public class EmptyEmiStack extends EmiStack {
 	}
 
 	@Override
-	public Identifier getId() {
+	public ResourceLocation getId() {
 		return ID;
 	}
 
@@ -76,21 +75,21 @@ public class EmptyEmiStack extends EmiStack {
 	}
 
 	@Override
-	public void render(DrawContext draw, int x, int y, float delta, int flags) {
+	public void render(GuiGraphics draw, int x, int y, float delta, int flags) {
 	}
 
 	@Override
-	public List<Text> getTooltipText() {
+	public List<Component> getTooltipText() {
 		return List.of();
 	}
 
 	@Override
-	public List<TooltipComponent> getTooltip() {
+	public List<ClientTooltipComponent> getTooltip() {
 		return List.of();
 	}
 
 	@Override
-	public Text getName() {
+	public Component getName() {
 		return EmiPort.literal("");
 	}
 

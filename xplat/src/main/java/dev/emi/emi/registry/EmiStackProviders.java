@@ -2,7 +2,14 @@ package dev.emi.emi.registry;
 
 import java.util.List;
 import java.util.Map;
-
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -14,14 +21,6 @@ import dev.emi.emi.api.stack.EmiStackInteraction;
 import dev.emi.emi.mixin.accessor.CraftingResultSlotAccessor;
 import dev.emi.emi.mixin.accessor.HandledScreenAccessor;
 import dev.emi.emi.runtime.ProxyRecipeManager;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.CraftingRecipe;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.screen.slot.CraftingResultSlot;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.util.Identifier;
 
 public class EmiStackProviders {
 	public static Map<Class<?>, List<EmiStackProvider<?>>> fromClass = Maps.newHashMap();
@@ -51,15 +50,15 @@ public class EmiStackProviders {
 		if (notClick && screen instanceof HandledScreenAccessor handled) {
 			Slot s = handled.getFocusedSlot();
 			if (s != null) {
-				ItemStack stack = s.getStack();
+				ItemStack stack = s.getItem();
 				if (!stack.isEmpty()) {
-					if (s instanceof CraftingResultSlot craf) {
+					if (s instanceof ResultSlot craf) {
 						// Emi be making assumptions
 						try {
-							RecipeInputInventory inv = ((CraftingResultSlotAccessor) craf).getInput();
+							CraftingContainer inv = ((CraftingResultSlotAccessor) craf).getInput();
 							CraftingRecipe crafting = ProxyRecipeManager.getFirst(RecipeType.CRAFTING, inv);
 							if (crafting != null) {
-								Identifier id = ProxyRecipeManager.getId(crafting);
+								ResourceLocation id = ProxyRecipeManager.getId(crafting);
 								EmiRecipe recipe = EmiApi.getRecipeManager().getRecipe(id);
 								if (recipe != null) {
 									return new EmiStackInteraction(EmiStack.of(stack), recipe, false);

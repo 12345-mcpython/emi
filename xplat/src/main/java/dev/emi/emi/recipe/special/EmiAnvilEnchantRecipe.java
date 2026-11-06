@@ -1,7 +1,14 @@
 package dev.emi.emi.recipe.special;
 
 import java.util.List;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
@@ -10,22 +17,14 @@ import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
 
 public class EmiAnvilEnchantRecipe implements EmiRecipe {
 	private final Item tool;
 	private final Enchantment enchantment;
 	private final int level;
-	private final Identifier id;
+	private final ResourceLocation id;
 
-	public EmiAnvilEnchantRecipe(Item tool, Enchantment enchantment, int level, Identifier id) {
+	public EmiAnvilEnchantRecipe(Item tool, Enchantment enchantment, int level, ResourceLocation id) {
 		this.tool = tool;
 		this.enchantment = enchantment;
 		this.level = level;
@@ -38,7 +37,7 @@ public class EmiAnvilEnchantRecipe implements EmiRecipe {
 	}
 
 	@Override
-	public Identifier getId() {
+	public ResourceLocation getId() {
 		return id;
 	}
 
@@ -77,23 +76,23 @@ public class EmiAnvilEnchantRecipe implements EmiRecipe {
 	}
 
 	private ItemStack getTool() {
-		ItemStack itemStack = tool.getDefaultStack();
-		itemStack.addEnchantment(enchantment, level);
+		ItemStack itemStack = tool.getDefaultInstance();
+		itemStack.enchant(enchantment, level);
 		return itemStack;
 	}
 
 	private EmiStack getBook() {
 		ItemStack item = new ItemStack(Items.ENCHANTED_BOOK);
-		NbtCompound tag = new NbtCompound();
-		NbtList StoredEnchantments = new NbtList();
-		NbtCompound enchant = new NbtCompound();
-		String id = getTool().getNbt().getList("Enchantments", NbtElement.COMPOUND_TYPE).getCompound(0).getString("id");
+		CompoundTag tag = new CompoundTag();
+		ListTag StoredEnchantments = new ListTag();
+		CompoundTag enchant = new CompoundTag();
+		String id = getTool().getTag().getList("Enchantments", Tag.TAG_COMPOUND).getCompound(0).getString("id");
 
 		enchant.putString("id", id);
 		enchant.putShort("lvl", (short) level);
 		StoredEnchantments.add(enchant);
 		tag.put("StoredEnchantments", StoredEnchantments);
-		item.setNbt(tag);
+		item.setTag(tag);
 		return EmiStack.of(item);
 	}
 }

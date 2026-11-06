@@ -3,26 +3,25 @@ package dev.emi.emi.recipe.special;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import com.google.common.collect.Lists;
 
 import dev.emi.emi.api.recipe.EmiPatternCraftingRecipe;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.GeneratedSlotWidget;
 import dev.emi.emi.api.widget.SlotWidget;
-import net.minecraft.item.DyeItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.DyeColor;
-import net.minecraft.util.Identifier;
 
 
 public class EmiFireworkRocketRecipe extends EmiPatternCraftingRecipe {
 	private static final List<DyeItem> DYES = Stream.of(DyeColor.values()).map(DyeItem::byColor).toList();
 
-	public EmiFireworkRocketRecipe(Identifier id) {
+	public EmiFireworkRocketRecipe(ResourceLocation id) {
 		super(List.of(
 				EmiStack.of(Items.PAPER),
 						EmiStack.of(Items.FIREWORK_STAR),
@@ -53,9 +52,9 @@ public class EmiFireworkRocketRecipe extends EmiPatternCraftingRecipe {
 
 	private EmiStack getFireworkRocket(Random random) {
 		ItemStack stack = new ItemStack(Items.FIREWORK_ROCKET);
-		NbtCompound tag = new NbtCompound();
-		NbtCompound fireworks = new NbtCompound();
-		NbtList explosions = new NbtList();
+		CompoundTag tag = new CompoundTag();
+		CompoundTag fireworks = new CompoundTag();
+		ListTag explosions = new ListTag();
 
 		List<EmiStack> items = getItems(random);
 		int gunpowder = 0;
@@ -73,7 +72,7 @@ public class EmiFireworkRocketRecipe extends EmiPatternCraftingRecipe {
 			fireworks.put("Explosions", explosions);
 		}
 		tag.put("Fireworks", fireworks);
-		stack.setNbt(tag);
+		stack.setTag(tag);
 		return EmiStack.of(stack, 3);
 	}
 
@@ -102,8 +101,8 @@ public class EmiFireworkRocketRecipe extends EmiPatternCraftingRecipe {
 
 	private EmiStack getFireworkStar(Random random) {
 		ItemStack stack = new ItemStack(Items.FIREWORK_STAR);
-		NbtCompound tag = new NbtCompound();
-		NbtCompound explosion = new NbtCompound();
+		CompoundTag tag = new CompoundTag();
+		CompoundTag explosion = new CompoundTag();
 		int items = 0;
 
 		int amount = random.nextInt(5);
@@ -130,7 +129,7 @@ public class EmiFireworkRocketRecipe extends EmiPatternCraftingRecipe {
 		List<DyeItem> dyeItems = getDyes(random, 8 - items);
 		List<Integer> colors = Lists.newArrayList();
 		for (DyeItem dyeItem : dyeItems) {
-			colors.add(dyeItem.getColor().getFireworkColor());
+			colors.add(dyeItem.getDyeColor().getFireworkColor());
 		}
 		explosion.putIntArray("Colors", colors);
 
@@ -140,13 +139,13 @@ public class EmiFireworkRocketRecipe extends EmiPatternCraftingRecipe {
 			List<DyeItem> dyeItemsFaded = getDyes(random, 8);
 			List<Integer> fadedColors = Lists.newArrayList();
 			for (DyeItem dyeItem : dyeItemsFaded) {
-				fadedColors.add(dyeItem.getColor().getFireworkColor());
+				fadedColors.add(dyeItem.getDyeColor().getFireworkColor());
 			}
 			explosion.putIntArray("FadeColors", fadedColors);
 		}
 
 		tag.put("Explosion", explosion);
-		stack.setNbt(tag);
+		stack.setTag(tag);
 		return EmiStack.of(stack);
 	}
 }

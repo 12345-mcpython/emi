@@ -12,33 +12,31 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.systems.VertexSorter;
-
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.config.EmiConfig;
 import dev.emi.emi.platform.EmiAgnos;
 import dev.emi.emi.runtime.EmiLog;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.VertexBuffer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.DiffuseLighting;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.TexturedRenderLayers;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.Sprite;
-import net.minecraft.item.ItemStack;
 
 /**
  * @author Una "unascribed" Thompson
@@ -59,7 +57,7 @@ public class StackBatcher {
 				clazz = Class.forName("me.jellysquid.mods.sodium.client.render.texture.SpriteUtil");
 			}
 			sodiumSpriteHandle = MethodHandles.lookup()
-				.findStatic(clazz, "markSpriteActive", MethodType.methodType(void.class, Sprite.class));
+				.findStatic(clazz, "markSpriteActive", MethodType.methodType(void.class, TextureAtlasSprite.class));
 			if (sodiumSpriteHandle != null) {
 				EmiLog.info("Discovered Sodium");
 			}
@@ -89,45 +87,45 @@ public class StackBatcher {
 		boolean isSideLit();
 		boolean isUnbatchable();
 		void setUnbatchable();
-		void renderForBatch(VertexConsumerProvider vcp, DrawContext draw, int x, int y, int z, float delta);
+		void renderForBatch(MultiBufferSource vcp, GuiGraphics draw, int x, int y, int z, float delta);
 	}
 
 	private final BatcherVertexConsumerProvider imm;
-	private final VertexConsumerProvider unlitFacade;
-	private final Map<RenderLayer, VertexBuffer> buffers = new LinkedHashMap<>();
-	private final Set<Sprite> spritesToUpdate = Sets.newHashSet();
+	private final MultiBufferSource unlitFacade;
+	private final Map<RenderType, VertexBuffer> buffers = new LinkedHashMap<>();
+	private final Set<TextureAtlasSprite> spritesToUpdate = Sets.newHashSet();
 	private boolean populated = false;
 	private boolean dirty = false;
 	private int x;
 	private int y;
 	private int z;
 
-	public static final List<RenderLayer> EXTRA_RENDER_LAYERS = Lists.newArrayList();
+	public static final List<RenderType> EXTRA_RENDER_LAYERS = Lists.newArrayList();
 
 	public static boolean isEnabled() {
 		return EmiConfig.useBatchedRenderer && !isIncompatibleSodiumLoaded;
 	}
 
 	public StackBatcher() {
-		Map<RenderLayer, BufferBuilder> buffers = new HashMap<>();
-		assign(buffers, RenderLayer.getSolid());
-		assign(buffers, RenderLayer.getCutout());
-		assign(buffers, RenderLayer.getTranslucent());
-		assign(buffers, TexturedRenderLayers.getEntitySolid());
-		assign(buffers, TexturedRenderLayers.getEntityCutout());
-		assign(buffers, TexturedRenderLayers.getEntityTranslucentCull());
-		assign(buffers, RenderLayer.getGlint());
-		assign(buffers, RenderLayer.getDirectGlint());
-		assign(buffers, RenderLayer.getEntityGlint());
-		for (RenderLayer layer : EXTRA_RENDER_LAYERS) {
+		Map<RenderType, BufferBuilder> buffers = new HashMap<>();
+		assign(buffers, RenderType.solid());
+		assign(buffers, RenderType.cutout());
+		assign(buffers, RenderType.translucent());
+		assign(buffers, Sheets.solidBlockSheet());
+		assign(buffers, Sheets.cutoutBlockSheet());
+		assign(buffers, Sheets.translucentCullBlockSheet());
+		assign(buffers, RenderType.glint());
+		assign(buffers, RenderType.glintDirect());
+		assign(buffers, RenderType.entityGlint());
+		for (RenderType layer : EXTRA_RENDER_LAYERS) {
 			assign(buffers, layer);
 		}
 		imm = new BatcherVertexConsumerProvider(new BufferBuilder(256), buffers);
 		unlitFacade = new UnlitFacade(imm);
 	}
 
-	private void assign(Map<RenderLayer, BufferBuilder> buffers, RenderLayer layer) {
-		buffers.put(layer, new BufferBuilder(layer.getExpectedBufferSize()));
+	private void assign(Map<RenderType, BufferBuilder> buffers, RenderType layer) {
+		buffers.put(layer, new BufferBuilder(layer.bufferSize()));
 	}
 
 	public boolean isPopulated() {
@@ -149,7 +147,7 @@ public class StackBatcher {
 		}
 	}
 
-	public void render(Batchable batchable, DrawContext draw, int x, int y, float delta) {
+	public void render(Batchable batchable, GuiGraphics draw, int x, int y, float delta) {
 		if (!populated) {
 			try {
 				batchable.renderForBatch(batchable.isSideLit() ? imm : unlitFacade, draw, x-this.x, y+this.y, z, delta);
@@ -162,19 +160,19 @@ public class StackBatcher {
 		}
 	}
 
-	public void render(EmiIngredient stack, DrawContext draw, int x, int y, float delta) {
+	public void render(EmiIngredient stack, GuiGraphics draw, int x, int y, float delta) {
 		render(stack, draw, x, y, delta, -1 ^ EmiIngredient.RENDER_AMOUNT);
 	}
 
-	public void render(EmiIngredient stack, DrawContext draw, int x, int y, float delta, int flags) {
+	public void render(EmiIngredient stack, GuiGraphics draw, int x, int y, float delta, int flags) {
 		if (stack instanceof Batchable b && !b.isUnbatchable() && isEnabled() && (flags & EmiIngredient.RENDER_ICON) != 0) {
 			if (!populated) {
 				try {
 					b.renderForBatch(b.isSideLit() ? imm : unlitFacade, draw, x-this.x, -y-this.y, z, delta);
 					if (sodiumSpriteHandle != null && !stack.isEmpty()) {
 						ItemStack is = stack.getEmiStacks().get(0).getItemStack();
-						MinecraftClient client = MinecraftClient.getInstance();
-						BakedModel model = client.getItemRenderer().getModels().getModel(is);
+						Minecraft client = Minecraft.getInstance();
+						BakedModel model = client.getItemRenderer().getItemModelShaper().getItemModel(is);
 						if (model != null) {
 							List<BakedQuad> quads = EmiPort.getQuads(model);
 							for (BakedQuad quad : quads) {
@@ -203,7 +201,7 @@ public class StackBatcher {
 		}
 		if (sodiumSpriteHandle != null) {
 			try {
-				for (Sprite sprite : spritesToUpdate) {
+				for (TextureAtlasSprite sprite : spritesToUpdate) {
 					sodiumSpriteHandle.invoke(sprite);
 				}
 			} catch (Throwable t) {
@@ -214,35 +212,35 @@ public class StackBatcher {
 			populated = true;
 		}
 		RenderSystem.enableDepthTest();
-		DiffuseLighting.enableGuiDepthLighting();
+		Lighting.setupFor3DItems();
 		Matrix4f mat = new Matrix4f(RenderSystem.getModelViewMatrix());
 		mat.mul(new Matrix4f().scale(1, -1, 1));
 		// Flipped Y creates an offset
 		mat.mul(new Matrix4f().translation(x, -y - 16, 0));
-		for (Map.Entry<RenderLayer, VertexBuffer> en : buffers.entrySet()) {
-			en.getKey().startDrawing();
+		for (Map.Entry<RenderType, VertexBuffer> en : buffers.entrySet()) {
+			en.getKey().setupRenderState();
 			EmiPort.setShader(en.getValue(), mat);
-			en.getKey().endDrawing();
+			en.getKey().clearRenderState();
 		}
-		BufferRenderer.reset();
+		BufferUploader.reset();
 	}
 	
 	private void bake() {
 		imm.drawCurrentLayer();
 		buffers.values().forEach(VertexBuffer::close);
 		buffers.clear();
-		for (RenderLayer layer : imm.getLayerBuffers().keySet()) {
+		for (RenderType layer : imm.getLayerBuffers().keySet()) {
 			bake(layer);
 		}
 	}
 
-	public void bake(RenderLayer layer) {
+	public void bake(RenderType layer) {
 		BufferBuilder bldr = imm.getBufferInternal(layer);
 		if (!imm.getActiveConsumers().remove(bldr)) return;
 		VertexBuffer vb = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
 		EmiPort.upload(vb, bldr);
 		buffers.put(layer, vb);
-		bldr.reset();
+		bldr.discard();
 	}
 
 	// Apparently BufferBuilder leaks memory in vanilla. Go figure
@@ -296,41 +294,41 @@ public class StackBatcher {
 	 * This class is mostly a copy of a 1.18.2 implementation of VertexConsumerProvider.Immediate
 	 * The reimplementation allows compatibility with shader mods, as well as less hackery.
 	 */
-	private static class BatcherVertexConsumerProvider implements VertexConsumerProvider {
+	private static class BatcherVertexConsumerProvider implements MultiBufferSource {
 		protected final BufferBuilder fallbackBuffer;
-		protected final Map<RenderLayer, BufferBuilder> layerBuffers;
-		protected Optional<RenderLayer> currentLayer = Optional.empty();
+		protected final Map<RenderType, BufferBuilder> layerBuffers;
+		protected Optional<RenderType> currentLayer = Optional.empty();
 		protected final Set<BufferBuilder> activeConsumers = Sets.newHashSet();
 
-		protected BatcherVertexConsumerProvider(BufferBuilder fallbackBuffer, Map<RenderLayer, BufferBuilder> layerBuffers) {
+		protected BatcherVertexConsumerProvider(BufferBuilder fallbackBuffer, Map<RenderType, BufferBuilder> layerBuffers) {
 			this.fallbackBuffer = fallbackBuffer;
 			this.layerBuffers = layerBuffers;
 		}
 
 		@Override
-		public VertexConsumer getBuffer(RenderLayer renderLayer) {
-			Optional<RenderLayer> optional = renderLayer.asOptional();
+		public VertexConsumer getBuffer(RenderType renderLayer) {
+			Optional<RenderType> optional = renderLayer.asOptional();
 			BufferBuilder bufferBuilder = this.getBufferInternal(renderLayer);
 			if (!Objects.equals(this.currentLayer, optional)) {
-				RenderLayer renderLayer2;
+				RenderType renderLayer2;
 				if (this.currentLayer.isPresent() && !this.layerBuffers.containsKey(renderLayer2 = this.currentLayer.get())) {
 					this.draw(renderLayer2);
 				}
 				if (this.activeConsumers.add(bufferBuilder)) {
-					bufferBuilder.begin(renderLayer.getDrawMode(), renderLayer.getVertexFormat());
+					bufferBuilder.begin(renderLayer.mode(), renderLayer.format());
 				}
 				this.currentLayer = optional;
 			}
 			return bufferBuilder;
 		}
 
-		private BufferBuilder getBufferInternal(RenderLayer layer) {
+		private BufferBuilder getBufferInternal(RenderType layer) {
 			return this.layerBuffers.getOrDefault(layer, this.fallbackBuffer);
 		}
 
 		public void drawCurrentLayer() {
 			if (this.currentLayer.isPresent()) {
-				RenderLayer renderLayer = this.currentLayer.get();
+				RenderType renderLayer = this.currentLayer.get();
 				if (!this.layerBuffers.containsKey(renderLayer)) {
 					this.draw(renderLayer);
 				}
@@ -338,7 +336,7 @@ public class StackBatcher {
 			}
 		}
 
-		public void draw(RenderLayer layer) {
+		public void draw(RenderType layer) {
 			BufferBuilder bufferBuilder = this.getBufferInternal(layer);
 			boolean bl = Objects.equals(this.currentLayer, layer.asOptional());
 			if (!bl && bufferBuilder == this.fallbackBuffer) {
@@ -347,13 +345,13 @@ public class StackBatcher {
 			if (!this.activeConsumers.remove(bufferBuilder)) {
 				return;
 			}
-			layer.draw(bufferBuilder, VertexSorter.BY_Z);
+			layer.end(bufferBuilder, VertexSorting.ORTHOGRAPHIC_Z);
 			if (bl) {
 				this.currentLayer = Optional.empty();
 			}
 		}
 		
-		public Map<RenderLayer, BufferBuilder> getLayerBuffers() {
+		public Map<RenderType, BufferBuilder> getLayerBuffers() {
 			return layerBuffers;
 		}
 		
@@ -362,16 +360,16 @@ public class StackBatcher {
 		}
 	}
 
-	private static class UnlitFacade implements VertexConsumerProvider {
-		private final VertexConsumerProvider delegate;
+	private static class UnlitFacade implements MultiBufferSource {
+		private final MultiBufferSource delegate;
 		private final IdentityHashMap<VertexConsumer, VertexConsumer> cache = new IdentityHashMap<>();
 
-		public UnlitFacade(VertexConsumerProvider delegate) {
+		public UnlitFacade(MultiBufferSource delegate) {
 			this.delegate = delegate;
 		}
 
 		@Override
-		public VertexConsumer getBuffer(RenderLayer layer) {
+		public VertexConsumer getBuffer(RenderType layer) {
 			return cache.computeIfAbsent(delegate.getBuffer(layer), Consumer::new);
 		}
 
@@ -397,36 +395,36 @@ public class StackBatcher {
 			}
 
 			@Override
-			public void unfixColor() {
-				delegate.unfixColor();
+			public void unsetDefaultColor() {
+				delegate.unsetDefaultColor();
 			}
 
 			@Override
-			public VertexConsumer texture(float u, float v) {
-				delegate.texture(u, v);
+			public VertexConsumer uv(float u, float v) {
+				delegate.uv(u, v);
 				return this;
 			}
 
 			@Override
-			public VertexConsumer overlay(int u, int v) {
-				delegate.overlay(u, v);
+			public VertexConsumer overlayCoords(int u, int v) {
+				delegate.overlayCoords(u, v);
 				return this;
 			}
 
 			@Override
-			public void next() {
-				delegate.next();
+			public void endVertex() {
+				delegate.endVertex();
 			}
 
 			@Override
-			public VertexConsumer light(int u, int v) {
-				delegate.light(u, v);
+			public VertexConsumer uv2(int u, int v) {
+				delegate.uv2(u, v);
 				return this;
 			}
 
 			@Override
-			public void fixedColor(int r, int g, int b, int a) {
-				delegate.fixedColor(r, g, b, a);
+			public void defaultColor(int r, int g, int b, int a) {
+				delegate.defaultColor(r, g, b, a);
 			}
 
 			@Override

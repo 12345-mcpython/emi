@@ -10,9 +10,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.lwjgl.glfw.GLFW;
-
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.EmiUtil;
@@ -21,6 +30,7 @@ import dev.emi.emi.api.recipe.EmiPlayerInventory;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.EmiResolutionRecipe;
 import dev.emi.emi.api.recipe.handler.EmiCraftContext;
+import dev.emi.emi.api.recipe.handler.EmiRecipeHandler;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.Bounds;
@@ -41,19 +51,10 @@ import dev.emi.emi.runtime.EmiHistory;
 import dev.emi.emi.runtime.EmiPersistentData;
 import dev.emi.emi.runtime.EmiScreenshotRecorder;
 import dev.emi.emi.screen.tooltip.RecipeTooltipComponent;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.math.MathHelper;
 
 /** A selected recipe plan, a shared material ledger, and a pannable dependency graph. */
 public class BoMScreen extends Screen {
-	public final HandledScreen<?> old;
+	public final AbstractContainerScreen<?> old;
 	private final Screen returnScreen;
 	private final MaterialTree groupTree;
 	private final String groupName;
@@ -73,17 +74,17 @@ public class BoMScreen extends Screen {
 	private int graphWidth = 1, graphHeight = 1;
 	private CraftingPlan namePlan;
 	private Object nameTree;
-	private TextFieldWidget search, name;
-	private final Map<String, ButtonWidget> toolbar = new LinkedHashMap<>();
+	private EditBox search, name;
+	private final Map<String, Button> toolbar = new LinkedHashMap<>();
 	private Visual pressedNode;
 	private boolean draggingGraph, movedGraph;
 	private double dragDistance;
 	private Bounds canvas = new Bounds(0, 0, 1, 1);
-	private Text notice = Text.empty();
+	private Component notice = Component.empty();
 	private boolean firstLayout = true;
 	private enum Section { NEEDED, AVAILABLE, CRAFTING, READY, RESULTS, LEFTOVERS, MACHINES }
 
-	public BoMScreen(HandledScreen<?> old) {
+	public BoMScreen(AbstractContainerScreen<?> old) {
 		super(EmiPort.translatable("screen.emi.recipe_tree"));
 		this.old = old;
 		this.returnScreen = old;
@@ -94,7 +95,7 @@ public class BoMScreen extends Screen {
 	/** Group snapshot never replaces the active global tree or saved plan. */
 	public BoMScreen(Screen previous, MaterialTree tree, String name) {
 		super(EmiPort.translatable("screen.emi.recipe_tree"));
-		this.old = previous instanceof HandledScreen<?> handled ? handled : EmiApi.getHandledScreen();
+		this.old = previous instanceof AbstractContainerScreen<?> handled ? handled : EmiApi.getHandledScreen();
 		this.returnScreen = previous;
 		this.groupTree = java.util.Objects.requireNonNull(tree);
 		this.groupName = name;
@@ -105,40 +106,40 @@ public class BoMScreen extends Screen {
 
 	@Override
 	public void init() {
-		String query = search == null ? "" : search.getText();
-		String draftName = name == null ? "" : name.getText();
+		String query = search == null ? "" : search.getValue();
+		String draftName = name == null ? "" : name.getValue();
 		boolean samePlan = boundPlan == plan() && boundTree == tree();
 		boolean sameNameTarget = namePlan == plan() && nameTree == tree();
 		draggingGraph = movedGraph = false;
 		pressedNode = null;
 		toolbar.clear();
-		leftWidth = MathHelper.clamp(width / 5, 72, 132);
-		rightWidth = showStats ? MathHelper.clamp(width / 4, 102, 210) : 0;
-		clearChildren();
-		search = new TextFieldWidget(textRenderer, leftWidth + 8, 5, Math.max(36, width - leftWidth - 16), 18, tr("search"));
+		leftWidth = Mth.clamp(width / 5, 72, 132);
+		rightWidth = showStats ? Mth.clamp(width / 4, 102, 210) : 0;
+		clearWidgets();
+		search = new EditBox(font, leftWidth + 8, 5, Math.max(36, width - leftWidth - 16), 18, tr("search"));
 		search.setMaxLength(128);
-		search.setPlaceholder(tr("search"));
-		search.setText(query);
-		search.setChangedListener(s -> searchIndex = -1);
-		addDrawableChild(search);
+		search.setHint(tr("search"));
+		search.setValue(query);
+		search.setResponder(s -> searchIndex = -1);
+		addRenderableWidget(search);
 		String[] actions = {"fit", "inventory", "refresh", "fold", "stats", "sections", "save", "delete", "copy", "paste", "screenshot", "next"};
 		int columns = Math.max(1, width / 56);
 		int buttonWidth = width / columns;
 		for (int i = 0; i < actions.length; i++) {
 			String action = actions[i];
-			ButtonWidget button = EmiPort.newButton((i % columns) * buttonWidth + 2, 27 + (i / columns) * 21,
+			Button button = EmiPort.newButton((i % columns) * buttonWidth + 2, 27 + (i / columns) * 21,
 				buttonWidth - 4, 19, actionText(action), b -> action(action));
-			addDrawableChild(button);
+			addRenderableWidget(button);
 			toolbar.put(action, button);
 		}
 		top = 30 + ((actions.length + columns - 1) / columns) * 21;
 		canvas = new Bounds(leftWidth + 3, top, Math.max(1, width - leftWidth - rightWidth - 6), Math.max(1, height - top - 30));
-		name = new TextFieldWidget(textRenderer, 4, top + 3, leftWidth - 8, 18, tr("plan_name"));
+		name = new EditBox(font, 4, top + 3, leftWidth - 8, 18, tr("plan_name"));
 		name.setMaxLength(80);
-		addDrawableChild(name);
+		addRenderableWidget(name);
 		recalculateTree();
-		if (samePlan && sameNameTarget) name.setText(draftName);
-		else name.setText(groupTree != null ? groupName : plan() == null ? "" : plan().name);
+		if (samePlan && sameNameTarget) name.setValue(draftName);
+		else name.setValue(groupTree != null ? groupName : plan() == null ? "" : plan().name);
 		name.setEditable(groupTree == null);
 		namePlan = plan();
 		nameTree = tree();
@@ -148,11 +149,11 @@ public class BoMScreen extends Screen {
 		}
 	}
 
-	private Text tr(String suffix, Object... args) {
+	private Component tr(String suffix, Object... args) {
 		return EmiPort.translatable("emi.tree." + suffix, args);
 	}
 
-	private Text actionText(String action) {
+	private Component actionText(String action) {
 		if (action.equals("inventory")) return tr(useInventory ? "inventory_on" : "inventory_off");
 		if (action.equals("fold")) return tr("fold_" + collapseMode);
 		return tr(action);
@@ -164,13 +165,13 @@ public class BoMScreen extends Screen {
 			case "fit" -> fit();
 			case "inventory" -> {
 				useInventory = !useInventory;
-				snapshot = useInventory && client.player != null ? EmiPlayerInventory.of(client.player) : null;
+				snapshot = useInventory && minecraft.player != null ? EmiPlayerInventory.of(minecraft.player) : null;
 				remember();
 				recalculateTree();
 				init();
 			}
 			case "refresh" -> {
-				snapshot = useInventory && client.player != null ? EmiPlayerInventory.of(client.player) : null;
+				snapshot = useInventory && minecraft.player != null ? EmiPlayerInventory.of(minecraft.player) : null;
 				recalculateTree();
 			}
 			case "fold" -> {
@@ -191,7 +192,7 @@ public class BoMScreen extends Screen {
 				CraftingPlans.saveCurrent();
 				boundPlan = plan();
 				if (boundPlan == null) { notice = tr("plan_limit"); return; }
-				if (!name.getText().isBlank()) CraftingPlans.rename(name.getText());
+				if (!name.getValue().isBlank()) CraftingPlans.rename(name.getValue());
 				remember();
 				recalculateTree();
 				notice = tr("saved");
@@ -210,12 +211,12 @@ public class BoMScreen extends Screen {
 					folded.forEach(collapsed::add);
 					data.add("folded", collapsed);
 					data.addProperty("use_inventory", useInventory);
-					client.keyboard.setClipboard(data.toString());
+					minecraft.keyboardHandler.setClipboard(data.toString());
 					notice = tr("copied");
 				}
 			}
 			case "paste" -> {
-				if (CraftingPlans.importPlan(client.keyboard.getClipboard())) { firstLayout = true; init(); notice = tr("imported"); }
+				if (CraftingPlans.importPlan(minecraft.keyboardHandler.getClipboard())) { firstLayout = true; init(); notice = tr("imported"); }
 				else notice = tr("invalid_plan");
 			}
 			case "screenshot" -> screenshot();
@@ -242,12 +243,12 @@ public class BoMScreen extends Screen {
 			useInventory = plan != null && plan.useInventory;
 			boundPlan = plan;
 			boundTree = tree();
-			snapshot = useInventory && client.player != null ? EmiPlayerInventory.of(client.player) : null;
+			snapshot = useInventory && minecraft.player != null ? EmiPlayerInventory.of(minecraft.player) : null;
 		}
 		if (groupTree == null) BoM.craftingMode = useInventory;
 		model = tree() == null ? null : new CraftingTreeModel(tree(), useInventory ? snapshot : null);
 		if (name != null && (namePlan != plan || nameTree != tree())) {
-			name.setText(groupTree != null ? groupName : plan == null ? "" : plan.name);
+			name.setValue(groupTree != null ? groupName : plan == null ? "" : plan.name);
 			namePlan = plan;
 			nameTree = tree();
 		}
@@ -299,7 +300,7 @@ public class BoMScreen extends Screen {
 	}
 
 	private void fit() {
-		zoom = MathHelper.clamp(Math.min((canvas.width() - 24f) / Math.max(1, graphWidth), (canvas.height() - 24f) / Math.max(1, graphHeight)), 0.15f, 2f);
+		zoom = Mth.clamp(Math.min((canvas.width() - 24f) / Math.max(1, graphWidth), (canvas.height() - 24f) / Math.max(1, graphHeight)), 0.15f, 2f);
 		panX = 0;
 		panY = 12;
 	}
@@ -324,14 +325,14 @@ public class BoMScreen extends Screen {
 				case RESULTS -> stats.add(new StatRow(amount(model.result, model.resultAmount), model.result, null));
 				case LEFTOVERS -> { for (FlatMaterialCost cost : model.leftovers) addCost(cost); }
 				case MACHINES -> {
-					Map<Text, Long> machines = new LinkedHashMap<>();
+					Map<Component, Long> machines = new LinkedHashMap<>();
 					for (CraftingTreeModel.Step step : model.steps) machines.merge(step.recipe.getCategory().getName(), step.batches, BoMScreen::addSaturated);
-					for (Map.Entry<Text, Long> entry : machines.entrySet()) stats.add(new StatRow(EmiPort.literal("×" + entry.getValue() + " " + entry.getKey().getString()), null, null));
+					for (Map.Entry<Component, Long> entry : machines.entrySet()) stats.add(new StatRow(EmiPort.literal("×" + entry.getValue() + " " + entry.getKey().getString()), null, null));
 				}
 			}
 			if (stats.size() == before) stats.add(new StatRow(tr("none"), null, null));
 		}
-		statScroll = MathHelper.clamp(statScroll, 0, Math.max(0, stats.size() - statRows()));
+		statScroll = Mth.clamp(statScroll, 0, Math.max(0, stats.size() - statRows()));
 	}
 
 	private static long addSaturated(long a, long b) {
@@ -339,12 +340,12 @@ public class BoMScreen extends Screen {
 	}
 
 	private void addCost(FlatMaterialCost cost) {
-		Text text = amount(cost.ingredient, cost.getEffectiveAmount());
-		if (cost instanceof ChanceMaterialCost) text = EmiPort.literal("≈" + text.getString()).formatted(Formatting.GOLD);
+		Component text = amount(cost.ingredient, cost.getEffectiveAmount());
+		if (cost instanceof ChanceMaterialCost) text = EmiPort.literal("≈" + text.getString()).withStyle(ChatFormatting.GOLD);
 		stats.add(new StatRow(text, cost.ingredient, null));
 	}
 
-	private Text amount(EmiIngredient ingredient, long count) {
+	private Component amount(EmiIngredient ingredient, long count) {
 		return EmiPort.literal(EmiRenderHelper.getAmountText(ingredient, count).getString() + " " + label(ingredient));
 	}
 
@@ -379,7 +380,7 @@ public class BoMScreen extends Screen {
 		return old != null && canFill(recipe, old);
 	}
 
-	private <T extends net.minecraft.screen.ScreenHandler> boolean canFill(EmiRecipe recipe, HandledScreen<T> screen) {
+	private <T extends net.minecraft.world.inventory.AbstractContainerMenu> boolean canFill(EmiRecipe recipe, AbstractContainerScreen<T> screen) {
 		var handler = EmiRecipeFiller.getFirstValidHandler(recipe, screen);
 		return handler != null && handler.canCraft(recipe, new EmiCraftContext<>(screen, handler.getInventory(screen), EmiCraftContext.Type.FILL_BUTTON, EmiCraftContext.Destination.NONE, 1));
 	}
@@ -393,9 +394,9 @@ public class BoMScreen extends Screen {
 	}
 
 	@Override
-	public void render(DrawContext raw, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics raw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
-		renderBackgroundTexture(raw);
+		renderDirtBackground(raw);
 		lastMouseX = mouseX;
 		lastMouseY = mouseY;
 		context.fill(0, top, leftWidth, height - top - 24, 0xc020222a);
@@ -414,7 +415,7 @@ public class BoMScreen extends Screen {
 			context.fill(canvas.x(), canvas.bottom() + 2, canvas.width(), 20, 0xcc20222a);
 			context.drawCenteredText(tr("batches", tree().batches), canvas.x() + canvas.width() / 2, canvas.bottom() + 7);
 		}
-		context.drawText(EmiPort.literal(textRenderer.trimToWidth(notice.getString(), Math.max(1, width - 10))), 5, height - 10, 0xffb6c7e8);
+		context.drawText(EmiPort.literal(font.plainSubstrByWidth(notice.getString(), Math.max(1, width - 10))), 5, height - 10, 0xffb6c7e8);
 		super.render(raw, mouseX, mouseY, delta);
 		Visual hovered = hovered(mouseX, mouseY);
 		if (hovered != null && !search.isFocused() && !name.isFocused()) drawEntryTooltip(context, hovered.entry, mouseX, mouseY);
@@ -430,11 +431,11 @@ public class BoMScreen extends Screen {
 	private void renderPlans(EmiDrawContext context) {
 		List<CraftingPlan> plans = groupTree == null ? CraftingPlans.all() : List.of();
 		int visible = Math.max(0, (height - top - 50) / 23);
-		planScroll = MathHelper.clamp(planScroll, 0, Math.max(0, plans.size() - visible));
+		planScroll = Mth.clamp(planScroll, 0, Math.max(0, plans.size() - visible));
 		for (int i = planScroll; i < Math.min(plans.size(), planScroll + visible); i++) {
 			int y = top + 27 + (i - planScroll) * 23;
 			if (plans.get(i) == plan()) context.fill(2, y - 2, leftWidth - 4, 22, 0xff384966);
-			context.drawText(EmiPort.literal(textRenderer.trimToWidth(plans.get(i).name, leftWidth - 10)), 5, y + 4);
+			context.drawText(EmiPort.literal(font.plainSubstrByWidth(plans.get(i).name, leftWidth - 10)), 5, y + 4);
 		}
 	}
 
@@ -450,15 +451,15 @@ public class BoMScreen extends Screen {
 			context.fill(Math.min(x1, x2), middle, Math.abs(x2 - x1) + 1, 1, color);
 			context.fill(x2, middle, 1, Math.max(1, y2 - middle), color);
 		}
-		String query = search == null ? "" : search.getText().toLowerCase(Locale.ROOT);
+		String query = search == null ? "" : search.getValue().toLowerCase(Locale.ROOT);
 		for (Visual v : visuals) {
 			boolean match = !query.isBlank() && matches(v.entry, query);
 			int border = match ? 0xffffcc55 : v.entry.cycle || v.entry.truncated ? 0xffdb8457 : useInventory && v.entry.needed == 0 ? 0xff58b783 : 0xff8299bd;
 			context.fill(v.x - 1, v.y - 1, v.width + 2, 42, border);
 			context.fill(v.x, v.y, v.width, 40, 0xff20242e);
 			v.entry.ingredient.render(context.raw(), v.x + 4, v.y + 4, delta, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
-			context.drawText(EmiPort.literal(textRenderer.trimToWidth(label(v.entry.ingredient), v.width - 28)), v.x + 24, v.y + 5);
-			Text quantity = EmiRenderHelper.getAmountText(v.entry.ingredient, useInventory ? v.entry.needed : v.entry.total);
+			context.drawText(EmiPort.literal(font.plainSubstrByWidth(label(v.entry.ingredient), v.width - 28)), v.x + 24, v.y + 5);
+			Component quantity = EmiRenderHelper.getAmountText(v.entry.ingredient, useInventory ? v.entry.needed : v.entry.total);
 			if (v.entry.chance != 1) quantity = EmiPort.literal("≈" + quantity.getString());
 			context.drawText(quantity, v.x + 24, v.y + 18, border);
 			if (v.entry.recipe != null) {
@@ -478,18 +479,18 @@ public class BoMScreen extends Screen {
 			int y = top + 4 + (i - statScroll) * 22;
 			if (row.ingredient != null) {
 				row.ingredient.render(context.raw(), x + 4, y, delta, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
-				context.drawText(EmiPort.literal(textRenderer.trimToWidth(row.text.getString(), rightWidth - 28)), x + 24, y + 5);
-			} else context.drawText(EmiPort.literal(textRenderer.trimToWidth(row.text.getString(), rightWidth - 10)), x + 5, y + 5, 0xffb6c7e8);
+				context.drawText(EmiPort.literal(font.plainSubstrByWidth(row.text.getString(), rightWidth - 28)), x + 24, y + 5);
+			} else context.drawText(EmiPort.literal(font.plainSubstrByWidth(row.text.getString(), rightWidth - 10)), x + 5, y + 5, 0xffb6c7e8);
 		}
 	}
 
 	private void drawEntryTooltip(EmiDrawContext context, Entry e, int mx, int my) {
-		List<TooltipComponent> tooltip = new ArrayList<>(e.ingredient.getTooltip());
-		tooltip.add(TooltipComponent.of(tr("quantity", e.total, e.needed).asOrderedText()));
-		tooltip.add(TooltipComponent.of(tr("node_help").asOrderedText()));
-		if (e.cycle) tooltip.add(TooltipComponent.of(tr("cycle").asOrderedText()));
-		if (e.truncated) tooltip.add(TooltipComponent.of(tr("truncated").asOrderedText()));
-		if (e.catalyst) tooltip.add(TooltipComponent.of(tr("catalyst").asOrderedText()));
+		List<ClientTooltipComponent> tooltip = new ArrayList<>(e.ingredient.getTooltip());
+		tooltip.add(ClientTooltipComponent.create(tr("quantity", e.total, e.needed).getVisualOrderText()));
+		tooltip.add(ClientTooltipComponent.create(tr("node_help").getVisualOrderText()));
+		if (e.cycle) tooltip.add(ClientTooltipComponent.create(tr("cycle").getVisualOrderText()));
+		if (e.truncated) tooltip.add(ClientTooltipComponent.create(tr("truncated").getVisualOrderText()));
+		if (e.catalyst) tooltip.add(ClientTooltipComponent.create(tr("catalyst").getVisualOrderText()));
 		if (e.recipe != null) tooltip.add(new RecipeTooltipComponent(e.recipe));
 		EmiRenderHelper.drawTooltip(this, context, tooltip, mx, my);
 	}
@@ -508,8 +509,8 @@ public class BoMScreen extends Screen {
 	}
 
 	private void find(boolean backwards) {
-		if (model == null || search.getText().isBlank()) return;
-		List<Entry> matches = model.entries.stream().filter(e -> matches(e, search.getText().toLowerCase(Locale.ROOT))).toList();
+		if (model == null || search.getValue().isBlank()) return;
+		List<Entry> matches = model.entries.stream().filter(e -> matches(e, search.getValue().toLowerCase(Locale.ROOT))).toList();
 		if (matches.isEmpty()) { notice = tr("no_matches"); return; }
 		searchIndex = searchIndex < 0 ? (backwards ? matches.size() - 1 : 0) : Math.floorMod(searchIndex + (backwards ? -1 : 1), matches.size());
 		Entry target = matches.get(searchIndex);
@@ -533,9 +534,9 @@ public class BoMScreen extends Screen {
 		if (uses) EmiApi.displayUses(ingredient);
 		else {
 			EmiApi.displayRecipes(ingredient);
-			if (groupTree == null && client.currentScreen instanceof RecipeScreen rs) {
+			if (groupTree == null && minecraft.screen instanceof RecipeScreen rs) {
 				rs.setResolutionTarget(ingredient);
-				rs.init(client, rs.width, rs.height);
+				rs.init(minecraft, rs.width, rs.height);
 				if (recipe != null) EmiApi.focusRecipe(recipe);
 			}
 		}
@@ -558,7 +559,7 @@ public class BoMScreen extends Screen {
 			int index = statScroll + ((int) mouseY - top - 4) / 22;
 			if (index < stats.size() && stats.get(index).ingredient != null) {
 				StatRow row = stats.get(index);
-				if (button == 0) { search.setText(label(row.ingredient)); find(EmiInput.isShiftDown()); }
+				if (button == 0) { search.setValue(label(row.ingredient)); find(EmiInput.isShiftDown()); }
 				else if (button == 1) recipes(row.ingredient, row.recipe, false);
 			}
 			return true;
@@ -593,7 +594,7 @@ public class BoMScreen extends Screen {
 		scrollAcc -= steps;
 		if (steps == 0) return true;
 		if (mouseX < leftWidth && mouseY >= top) { planScroll -= steps; return true; }
-		if (showStats && mouseX >= width - rightWidth && mouseY >= top) { statScroll = MathHelper.clamp(statScroll - steps, 0, Math.max(0, stats.size() - statRows())); return true; }
+		if (showStats && mouseX >= width - rightWidth && mouseY >= top) { statScroll = Mth.clamp(statScroll - steps, 0, Math.max(0, stats.size() - statRows())); return true; }
 		if (groupTree == null && tree() != null && (mouseY > canvas.bottom() && mouseY < height - 10 || EmiInput.isControlDown() && hovered(mouseX, mouseY) != null && hovered(mouseX, mouseY).entry == model.entries.get(0))) {
 			long change = steps * (EmiInput.isShiftDown() ? 16L : 1L);
 			tree().batches = change > 0 ? addSaturated(tree().batches, change) : Math.max(1, tree().batches + change);
@@ -609,7 +610,7 @@ public class BoMScreen extends Screen {
 		}
 		if (!canvas.contains((int) mouseX, (int) mouseY)) return false;
 		float oldZoom = zoom;
-		zoom = MathHelper.clamp(zoom * (float) Math.pow(1.2, steps), 0.15f, 4f);
+		zoom = Mth.clamp(zoom * (float) Math.pow(1.2, steps), 0.15f, 4f);
 		double x = mouseX - canvas.x() - canvas.width() / 2.0;
 		double y = mouseY - canvas.y();
 		panX = x - (x - panX) * zoom / oldZoom;
@@ -637,7 +638,7 @@ public class BoMScreen extends Screen {
 			pressedNode = null;
 			if (activate) {
 				if (groupTree == null && EmiInput.isShiftDown()) {
-					EmiRecipe recipe = EmiUtil.getRecipeResolution(clicked.entry.ingredient, EmiPlayerInventory.of(client.player));
+					EmiRecipe recipe = EmiUtil.getRecipeResolution(clicked.entry.ingredient, EmiPlayerInventory.of(minecraft.player));
 					if (recipe != null) { BoM.addResolution(clicked.entry.ingredient, recipe); recalculateTree(); remember(); }
 				} else if (!stackAction(clicked, bind -> bind.matchesMouse(button))) recipes(clicked.entry.ingredient, clicked.entry.recipe, false);
 			}
@@ -650,7 +651,7 @@ public class BoMScreen extends Screen {
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 			if (search.isFocused() || name.isFocused()) { search.setFocused(false); name.setFocused(false); return true; }
-			close(); return true;
+			onClose(); return true;
 		}
 		if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
 			if (name.isFocused()) action("save"); else find(EmiInput.isShiftDown());
@@ -661,7 +662,7 @@ public class BoMScreen extends Screen {
 		if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_F) { setFocused(search); search.setFocused(true); return true; }
 		if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_S) { action("save"); return true; }
 		if (EmiConfig.back.matchesKey(keyCode, scanCode)) { remember(); EmiHistory.pop(); return true; }
-		if (client.options.inventoryKey.matchesKey(keyCode, scanCode)) { close(); return true; }
+		if (minecraft.options.keyInventory.matches(keyCode, scanCode)) { onClose(); return true; }
 		Visual v = hovered(lastMouseX, lastMouseY);
 		return v != null && stackAction(v, bind -> bind.matchesKey(keyCode, scanCode));
 	}
@@ -677,12 +678,12 @@ public class BoMScreen extends Screen {
 		if (model == null || visuals.isEmpty()) return;
 		int imageWidth = graphWidth + (showStats ? 240 : 0) + 32;
 		int imageHeight = Math.max(graphHeight + 55, showStats ? stats.size() * 22 + 32 : 1);
-		int scale = EmiConfig.recipeScreenshotScale < 1 ? EmiPort.getGuiScale(client) : EmiConfig.recipeScreenshotScale;
+		int scale = EmiConfig.recipeScreenshotScale < 1 ? EmiPort.getGuiScale(minecraft) : EmiConfig.recipeScreenshotScale;
 		// Guard before allocating GPU/CPU storage. Oversized trees remain fully editable.
 		long pixels = (long) imageWidth * imageHeight * scale * scale;
 		if (imageWidth * (long) scale > 8192 || imageHeight * (long) scale > 8192 || pixels > 16_777_216L) { notice = tr("image_too_large"); return; }
 		EmiScreenshotRecorder.saveScreenshot("emi/trees/plan", imageWidth, imageHeight, () -> {
-			DrawContext raw = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
+			GuiGraphics raw = new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
 			EmiDrawContext context = EmiDrawContext.wrap(raw);
 			context.fill(0, 0, imageWidth, imageHeight, 0xff171b24);
 			context.drawText(title, 12, 8);
@@ -694,14 +695,14 @@ public class BoMScreen extends Screen {
 				StatRow row = stats.get(i);
 				int x = graphWidth + 26, y = 24 + i * 22;
 				if (row.ingredient != null) row.ingredient.render(raw, x, y, 0, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
-				context.drawText(EmiPort.literal(textRenderer.trimToWidth(row.text.getString(), 202)), x + (row.ingredient == null ? 0 : 22), y + 4);
+				context.drawText(EmiPort.literal(font.plainSubstrByWidth(row.text.getString(), 202)), x + (row.ingredient == null ? 0 : 22), y + 4);
 			}
-			raw.draw();
+			raw.flush();
 		});
 	}
 
-	@Override public boolean shouldPause() { return false; }
-	@Override public void close() { remember(); client.setScreen(returnScreen); }
+	@Override public boolean isPauseScreen() { return false; }
+	@Override public void onClose() { remember(); minecraft.setScreen(returnScreen); }
 
 	private class Visual {
 		final Entry entry;
@@ -709,8 +710,8 @@ public class BoMScreen extends Screen {
 		int x, y;
 		Visual(Entry entry) {
 			this.entry = entry;
-			width = Math.max(90, Math.min(170, textRenderer.getWidth(label(entry.ingredient)) + 32));
+			width = Math.max(90, Math.min(170, font.width(label(entry.ingredient)) + 32));
 		}
 	}
-	private record StatRow(Text text, EmiIngredient ingredient, EmiRecipe recipe) {}
+	private record StatRow(Component text, EmiIngredient ingredient, EmiRecipe recipe) {}
 }

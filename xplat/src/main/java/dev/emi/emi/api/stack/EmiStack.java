@@ -2,7 +2,15 @@ package dev.emi.emi.api.stack;
 
 import java.util.List;
 import java.util.function.Function;
-
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.material.FlowingFluid;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
@@ -10,15 +18,6 @@ import com.google.common.collect.Lists;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.registry.EmiComparisonDefaults;
 import dev.emi.emi.screen.tooltip.RemainderTooltipComponent;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.fluid.FlowableFluid;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 /**
  * An abstract representation of a resource in EMI.
@@ -80,7 +79,7 @@ public abstract class EmiStack implements EmiIngredient {
 		return this;
 	}
 
-	public abstract NbtCompound getNbt();
+	public abstract CompoundTag getNbt();
 
 	public boolean hasNbt() {
 		return getNbt() != null;
@@ -97,7 +96,7 @@ public abstract class EmiStack implements EmiIngredient {
 		return null;
 	}
 
-	public abstract Identifier getId();
+	public abstract ResourceLocation getId();
 
 	public ItemStack getItemStack() {
 		return ItemStack.EMPTY;
@@ -120,17 +119,17 @@ public abstract class EmiStack implements EmiIngredient {
 		return getKey().equals(stack.getKey()) && comparison.compare(this, stack);
 	}
 
-	public abstract List<Text> getTooltipText();
+	public abstract List<Component> getTooltipText();
 
-	public List<TooltipComponent> getTooltip() {
-		List<TooltipComponent> list = Lists.newArrayList();
+	public List<ClientTooltipComponent> getTooltip() {
+		List<ClientTooltipComponent> list = Lists.newArrayList();
 		if (!getRemainder().isEmpty()) {
 			list.add(new RemainderTooltipComponent(this));
 		}
 		return list;
 	}
 
-	public abstract Text getName();
+	public abstract Component getName();
 
 	@Override
 	public boolean equals(Object obj) {
@@ -150,7 +149,7 @@ public abstract class EmiStack implements EmiIngredient {
 	@Override
 	public String toString() {
 		String s = "" + getKey();
-		NbtCompound nbt = getNbt();
+		CompoundTag nbt = getNbt();
 		if (nbt != null) {
 			s += nbt;
 		}
@@ -171,19 +170,19 @@ public abstract class EmiStack implements EmiIngredient {
 		return new ItemEmiStack(stack, amount);
 	}
 
-	public static EmiStack of(ItemConvertible item) {
-		return of(item.asItem().getDefaultStack(), 1);
+	public static EmiStack of(ItemLike item) {
+		return of(item.asItem().getDefaultInstance(), 1);
 	}
 
-	public static EmiStack of(ItemConvertible item, long amount) {
-		return of(item.asItem().getDefaultStack(), amount);
+	public static EmiStack of(ItemLike item, long amount) {
+		return of(item.asItem().getDefaultInstance(), amount);
 	}
 
-	public static EmiStack of(ItemConvertible item, NbtCompound nbt) {
+	public static EmiStack of(ItemLike item, CompoundTag nbt) {
 		return of(item, nbt, 1);
 	}
 
-	public static EmiStack of(ItemConvertible item, NbtCompound nbt, long amount) {
+	public static EmiStack of(ItemLike item, CompoundTag nbt, long amount) {
 		return new ItemEmiStack(item.asItem(), nbt, amount);
 	}
 
@@ -195,13 +194,13 @@ public abstract class EmiStack implements EmiIngredient {
 		return of(fluid, EmiPort.emptyExtraData(), amount);
 	}
 
-	public static EmiStack of(Fluid fluid, NbtCompound nbt) {
+	public static EmiStack of(Fluid fluid, CompoundTag nbt) {
 		return of(fluid, nbt, 0);
 	}
 
-	public static EmiStack of(Fluid fluid, NbtCompound nbt, long amount) {
-		if (fluid instanceof FlowableFluid ff && ff.getStill() != Fluids.EMPTY) {
-			fluid = ff.getStill();
+	public static EmiStack of(Fluid fluid, CompoundTag nbt, long amount) {
+		if (fluid instanceof FlowingFluid ff && ff.getSource() != Fluids.EMPTY) {
+			fluid = ff.getSource();
 		}
 		if (fluid == Fluids.EMPTY) {
 			return EmiStack.EMPTY;

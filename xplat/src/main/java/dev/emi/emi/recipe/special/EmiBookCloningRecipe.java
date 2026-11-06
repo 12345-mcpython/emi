@@ -4,18 +4,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
-
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.WrittenBookItem;
 import dev.emi.emi.api.recipe.EmiPatternCraftingRecipe;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.GeneratedSlotWidget;
 import dev.emi.emi.api.widget.SlotWidget;
 import dev.emi.emi.platform.EmiAgnos;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.WrittenBookItem;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
 
 public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 	// TODO more book stuff
@@ -52,7 +51,7 @@ public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 	private static final EmiStack BOOK_AND_QUILL = EmiStack.of(Items.WRITABLE_BOOK);
 	private static final EmiStack WRITTEN_BOOK = EmiStack.of(Items.WRITTEN_BOOK);
 
-	public EmiBookCloningRecipe(Identifier id) {
+	public EmiBookCloningRecipe(ResourceLocation id) {
 		super(List.of(WRITTEN_BOOK, BOOK_AND_QUILL), WRITTEN_BOOK.copy().setAmount(2), id);
 	}
 
@@ -73,22 +72,22 @@ public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 	
 	private EmiStack getWrittenBook(Random random, boolean copy) {
 		ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-		NbtCompound tag = new NbtCompound();
+		CompoundTag tag = new CompoundTag();
 		String title = TEMPLATES.get(random.nextInt(TEMPLATES.size())).resolve(random);
 		if (title.length() > 0) {
 			title = Character.toUpperCase(title.charAt(0)) + title.substring(1, title.length());
 		}
-		tag.putString(WrittenBookItem.TITLE_KEY, title);
+		tag.putString(WrittenBookItem.TAG_TITLE, title);
 		String author;
 		if (random.nextInt(20) < 5) {
 			author = MOD_AUTHORS.get(random.nextInt(MOD_AUTHORS.size()));
 		} else {
 			author = AUTHORS.get(random.nextInt(AUTHORS.size()));
 		}
-		tag.putString(WrittenBookItem.AUTHOR_KEY, author);
-		tag.putInt(WrittenBookItem.GENERATION_KEY, (copy ? 1 : 0) + random.nextInt(2));
-		tag.put("pages", new NbtList());
-		stack.setNbt(tag);
+		tag.putString(WrittenBookItem.TAG_AUTHOR, author);
+		tag.putInt(WrittenBookItem.TAG_GENERATION, (copy ? 1 : 0) + random.nextInt(2));
+		tag.put("pages", new ListTag());
+		stack.setTag(tag);
 		return EmiStack.of(stack);
 	}
 

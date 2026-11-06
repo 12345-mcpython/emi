@@ -4,39 +4,37 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.Renderable;
+import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.emi.emi.EmiPort;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.AbstractParentElement;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.screen.narration.NarrationPart;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
 
 /**
  * Shamelessly modified vanilla lists to support variable width.
  * This is the lesser of two evils, at least this way I have vanilla compat.
  */
-public class ListWidget extends AbstractParentElement implements Drawable, Selectable {
-	protected final MinecraftClient client;
+public class ListWidget extends AbstractContainerEventHandler implements Renderable, NarratableEntry {
+	protected final Minecraft client;
 	private final List<Entry> children = Lists.newArrayList();
 	protected int width;
 	protected int height;
@@ -51,7 +49,7 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 	private Entry hoveredEntry;
 	public int padding = 4;
 
-	public ListWidget(MinecraftClient client, int width, int height, int top, int bottom) {
+	public ListWidget(Minecraft client, int width, int height, int top, int bottom) {
 		this.client = client;
 		this.width = width;
 		this.height = height;
@@ -119,7 +117,7 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 		int mid = this.left + this.width / 2;
 		int rowLeft = mid - rowWidth;
 		int rowRight = mid + rowWidth;
-		int m = MathHelper.floor(y - (double)this.top) + (int)this.getScrollAmount() - 4;
+		int m = Mth.floor(y - (double)this.top) + (int)this.getScrollAmount() - 4;
 		if (x < this.getScrollbarPositionX() && x >= rowLeft && x <= rowRight && m >= 0) {
 			int h = 0;
 			for (int i = 0; i < this.getEntryCount(); i++) {
@@ -152,38 +150,38 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 	}
 
 	@Override
-	public void render(DrawContext draw, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics draw, int mouseX, int mouseY, float delta) {
 		int o;
 		int n;
 		int m;
 		int i = this.getScrollbarPositionX();
 		int j = i + 6;
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.getBuffer();
-		RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+		Tesselator tessellator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tessellator.getBuilder();
+		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
 
 		{	// Render background
-			RenderSystem.setShaderTexture(0, Screen.OPTIONS_BACKGROUND_TEXTURE);
+			RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferBuilder.vertex((double)this.left, (double)this.bottom, 0.0)
-				.texture((float)this.left / 32.0F, (float)(this.bottom + (int)this.getScrollAmount()) / 32.0F)
+				.uv((float)this.left / 32.0F, (float)(this.bottom + (int)this.getScrollAmount()) / 32.0F)
 				.color(32, 32, 32, 255)
-				.next();
+				.endVertex();
 			bufferBuilder.vertex((double)this.right, (double)this.bottom, 0.0)
-				.texture((float)this.right / 32.0F, (float)(this.bottom + (int)this.getScrollAmount()) / 32.0F)
+				.uv((float)this.right / 32.0F, (float)(this.bottom + (int)this.getScrollAmount()) / 32.0F)
 				.color(32, 32, 32, 255)
-				.next();
+				.endVertex();
 			bufferBuilder.vertex((double)this.right, (double)this.top, 0.0)
-				.texture((float)this.right / 32.0F, (float)(this.top + (int)this.getScrollAmount()) / 32.0F)
+				.uv((float)this.right / 32.0F, (float)(this.top + (int)this.getScrollAmount()) / 32.0F)
 				.color(32, 32, 32, 255)
-				.next();
+				.endVertex();
 			bufferBuilder.vertex((double)this.left, (double)this.top, 0.0)
-				.texture((float)this.left / 32.0F, (float)(this.top + (int)this.getScrollAmount()) / 32.0F)
+				.uv((float)this.left / 32.0F, (float)(this.top + (int)this.getScrollAmount()) / 32.0F)
 				.color(32, 32, 32, 255)
-				.next();
-			tessellator.draw();
+				.endVertex();
+			tessellator.end();
 		}
 		
 		int k = this.getRowLeft();
@@ -192,71 +190,71 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 
 
 		{	// Render horizontal shadows
-			RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
-			RenderSystem.setShaderTexture(0, Screen.OPTIONS_BACKGROUND_TEXTURE);
+			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+			RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
 			RenderSystem.enableDepthTest();
 			RenderSystem.depthFunc(519);
-			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-			bufferBuilder.vertex((double)this.left, (double)this.top, -100.0).texture(0.0F, (float)this.top / 32.0F).color(64, 64, 64, 255).next();
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+			bufferBuilder.vertex((double)this.left, (double)this.top, -100.0).uv(0.0F, (float)this.top / 32.0F).color(64, 64, 64, 255).endVertex();
 			bufferBuilder.vertex((double)(this.left + this.width), (double)this.top, -100.0)
-				.texture((float)this.width / 32.0F, (float)this.top / 32.0F)
+				.uv((float)this.width / 32.0F, (float)this.top / 32.0F)
 				.color(64, 64, 64, 255)
-				.next();
-			bufferBuilder.vertex((double)(this.left + this.width), 0.0, -100.0).texture((float)this.width / 32.0F, 0.0F).color(64, 64, 64, 255).next();
-			bufferBuilder.vertex((double)this.left, 0.0, -100.0).texture(0.0F, 0.0F).color(64, 64, 64, 255).next();
-			bufferBuilder.vertex((double)this.left, (double)this.height, -100.0).texture(0.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).next();
+				.endVertex();
+			bufferBuilder.vertex((double)(this.left + this.width), 0.0, -100.0).uv((float)this.width / 32.0F, 0.0F).color(64, 64, 64, 255).endVertex();
+			bufferBuilder.vertex((double)this.left, 0.0, -100.0).uv(0.0F, 0.0F).color(64, 64, 64, 255).endVertex();
+			bufferBuilder.vertex((double)this.left, (double)this.height, -100.0).uv(0.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
 			bufferBuilder.vertex((double)(this.left + this.width), (double)this.height, -100.0)
-				.texture((float)this.width / 32.0F, (float)this.height / 32.0F)
+				.uv((float)this.width / 32.0F, (float)this.height / 32.0F)
 				.color(64, 64, 64, 255)
-				.next();
+				.endVertex();
 			bufferBuilder.vertex((double)(this.left + this.width), (double)this.bottom, -100.0)
-				.texture((float)this.width / 32.0F, (float)this.bottom / 32.0F)
+				.uv((float)this.width / 32.0F, (float)this.bottom / 32.0F)
 				.color(64, 64, 64, 255)
-				.next();
-			bufferBuilder.vertex((double)this.left, (double)this.bottom, -100.0).texture(0.0F, (float)this.bottom / 32.0F).color(64, 64, 64, 255).next();
-			tessellator.draw();
+				.endVertex();
+			bufferBuilder.vertex((double)this.left, (double)this.bottom, -100.0).uv(0.0F, (float)this.bottom / 32.0F).color(64, 64, 64, 255).endVertex();
+			tessellator.end();
 			RenderSystem.depthFunc(515);
 			RenderSystem.disableDepthTest();
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(
-				GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ZERO, GlStateManager.DstFactor.ONE
+				GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE
 			);
-			RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			n = 4;
-			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-			bufferBuilder.vertex((double)this.left, (double)(this.top + 4), 0.0).color(0, 0, 0, 0).next();
-			bufferBuilder.vertex((double)this.right, (double)(this.top + 4), 0.0).color(0, 0, 0, 0).next();
-			bufferBuilder.vertex((double)this.right, (double)this.top, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex((double)this.left, (double)this.top, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex((double)this.left, (double)this.bottom, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex((double)this.right, (double)this.bottom, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex((double)this.right, (double)(this.bottom - 4), 0.0).color(0, 0, 0, 0).next();
-			bufferBuilder.vertex((double)this.left, (double)(this.bottom - 4), 0.0).color(0, 0, 0, 0).next();
-			tessellator.draw();
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.vertex((double)this.left, (double)(this.top + 4), 0.0).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.right, (double)(this.top + 4), 0.0).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.right, (double)this.top, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.left, (double)this.top, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.left, (double)this.bottom, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.right, (double)this.bottom, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex((double)this.right, (double)(this.bottom - 4), 0.0).color(0, 0, 0, 0).endVertex();
+			bufferBuilder.vertex((double)this.left, (double)(this.bottom - 4), 0.0).color(0, 0, 0, 0).endVertex();
+			tessellator.end();
 		}
 
 		if ((o = this.getMaxScroll()) > 0) {
-			RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			m = (int)((float)((this.bottom - this.top) * (this.bottom - this.top)) / (float)this.getMaxPosition());
-			m = MathHelper.clamp(m, 32, this.bottom - this.top - 8);
+			m = Mth.clamp(m, 32, this.bottom - this.top - 8);
 			n = (int)this.getScrollAmount() * (this.bottom - this.top - m) / o + this.top;
 			if (n < this.top) {
 				n = this.top;
 			}
-			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-			bufferBuilder.vertex(i, this.bottom, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex(j, this.bottom, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex(j, this.top, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex(i, this.top, 0.0).color(0, 0, 0, 255).next();
-			bufferBuilder.vertex(i, n + m, 0.0).color(128, 128, 128, 255).next();
-			bufferBuilder.vertex(j, n + m, 0.0).color(128, 128, 128, 255).next();
-			bufferBuilder.vertex(j, n, 0.0).color(128, 128, 128, 255).next();
-			bufferBuilder.vertex(i, n, 0.0).color(128, 128, 128, 255).next();
-			bufferBuilder.vertex(i, n + m - 1, 0.0).color(192, 192, 192, 255).next();
-			bufferBuilder.vertex(j - 1, n + m - 1, 0.0).color(192, 192, 192, 255).next();
-			bufferBuilder.vertex(j - 1, n, 0.0).color(192, 192, 192, 255).next();
-			bufferBuilder.vertex(i, n, 0.0).color(192, 192, 192, 255).next();
-			tessellator.draw();
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+			bufferBuilder.vertex(i, this.bottom, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex(j, this.bottom, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex(j, this.top, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex(i, this.top, 0.0).color(0, 0, 0, 255).endVertex();
+			bufferBuilder.vertex(i, n + m, 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex(j, n + m, 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex(j, n, 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex(i, n, 0.0).color(128, 128, 128, 255).endVertex();
+			bufferBuilder.vertex(i, n + m - 1, 0.0).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex(j - 1, n + m - 1, 0.0).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex(j - 1, n, 0.0).color(192, 192, 192, 255).endVertex();
+			bufferBuilder.vertex(i, n, 0.0).color(192, 192, 192, 255).endVertex();
+			tessellator.end();
 		}
 		RenderSystem.disableBlend();
 	}
@@ -293,7 +291,7 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 	}
 
 	public void setScrollAmount(double amount) {
-		this.scrollAmount = MathHelper.clamp(amount, 0.0, (double)this.getMaxScroll());
+		this.scrollAmount = Mth.clamp(amount, 0.0, (double)this.getMaxScroll());
 	}
 
 	public int getMaxScroll() {
@@ -310,18 +308,18 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 
 	public void unfocusTextField() {
 		for (Entry e : this.children) {
-			for (Element el : e.children()) {
-				if (el instanceof TextFieldWidget tfw) {
+			for (GuiEventListener el : e.children()) {
+				if (el instanceof EditBox tfw) {
 					EmiPort.focus(tfw, false);
 				}
 			}
 		}
 	}
 
-	public TextFieldWidget getFocusedTextField() {
+	public EditBox getFocusedTextField() {
 		for (Entry e : this.children) {
-			for (Element el : e.children()) {
-				if (el instanceof TextFieldWidget tfw) {
+			for (GuiEventListener el : e.children()) {
+				if (el instanceof EditBox tfw) {
 					if (tfw.isFocused()) {
 						return tfw;
 					}
@@ -349,7 +347,7 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 		Entry entry = this.getEntryAtPosition(mouseX, mouseY);
 		if (entry != null) {
 			if (entry.mouseClicked(mouseX, mouseY, button)) {
-				this.setFocused((Element)entry);
+				this.setFocused((GuiEventListener)entry);
 				this.setDragging(true);
 				return true;
 			}
@@ -380,7 +378,7 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 		} else {
 			double d = Math.max(1, this.getMaxScroll());
 			int i = this.bottom - this.top;
-			int j = MathHelper.clamp((int)((float)(i * i) / (float)this.getMaxPosition()), 32, i - 8);
+			int j = Mth.clamp((int)((float)(i * i) / (float)this.getMaxPosition()), 32, i - 8);
 			double e = Math.max(1.0, d / (double)(i - j));
 			this.setScrollAmount(this.getScrollAmount() + deltaY * e);
 		}
@@ -432,7 +430,7 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 		if (!this.children().isEmpty()) {
 			int k;
 			int j = this.children().indexOf(this.getSelectedOrNull());
-			while (j != (k = MathHelper.clamp(j + i, 0, this.getEntryCount() - 1))) {
+			while (j != (k = Mth.clamp(j + i, 0, this.getEntryCount() - 1))) {
 				Entry entry = (Entry)this.children().get(k);
 				if (predicate.test(entry)) {
 					this.setSelected(entry);
@@ -449,10 +447,10 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 		return mouseY >= (double)this.top && mouseY <= (double)this.bottom && mouseX >= (double)this.left && mouseX <= (double)this.right;
 	}
 
-	protected void renderList(DrawContext draw, int x, int y, int mouseX, int mouseY, float delta) {
+	protected void renderList(GuiGraphics draw, int x, int y, int mouseX, int mouseY, float delta) {
 		int i = this.getEntryCount();
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.getBuffer();
+		Tesselator tessellator = Tesselator.getInstance();
+		BufferBuilder bufferBuilder = tessellator.getBuilder();
 		for (int j = 0; j < i; ++j) {
 			int p;
 			int k = this.getRowTop(j);
@@ -469,22 +467,22 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 			if (this.renderSelection && this.isSelectedEntry(j)) {
 				p = this.left + this.width / 2 - o / 2;
 				int q = this.left + this.width / 2 + o / 2;
-				RenderSystem.setShader(GameRenderer::getPositionProgram);
+				RenderSystem.setShader(GameRenderer::getPositionShader);
 				float f = this.isFocused() ? 1.0f : 0.5f;
 				RenderSystem.setShaderColor(f, f, f, 1.0f);
-				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-				bufferBuilder.vertex(p, m + n + 2, 0.0).next();
-				bufferBuilder.vertex(q, m + n + 2, 0.0).next();
-				bufferBuilder.vertex(q, m - 2, 0.0).next();
-				bufferBuilder.vertex(p, m - 2, 0.0).next();
-				tessellator.draw();
+				bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+				bufferBuilder.vertex(p, m + n + 2, 0.0).endVertex();
+				bufferBuilder.vertex(q, m + n + 2, 0.0).endVertex();
+				bufferBuilder.vertex(q, m - 2, 0.0).endVertex();
+				bufferBuilder.vertex(p, m - 2, 0.0).endVertex();
+				tessellator.end();
 				RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
-				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-				bufferBuilder.vertex(p + 1, m + n + 1, 0.0).next();
-				bufferBuilder.vertex(q - 1, m + n + 1, 0.0).next();
-				bufferBuilder.vertex(q - 1, m - 1, 0.0).next();
-				bufferBuilder.vertex(p + 1, m - 1, 0.0).next();
-				tessellator.draw();
+				bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+				bufferBuilder.vertex(p + 1, m + n + 1, 0.0).endVertex();
+				bufferBuilder.vertex(q - 1, m + n + 1, 0.0).endVertex();
+				bufferBuilder.vertex(q - 1, m - 1, 0.0).endVertex();
+				bufferBuilder.vertex(p + 1, m - 1, 0.0).endVertex();
+				tessellator.end();
 			}
 			p = this.getRowLeft();
 			((Entry)entry).render(draw, j, k, p, o - 3, n, mouseX, mouseY, Objects.equals(this.hoveredEntry, entry), delta);
@@ -528,14 +526,14 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 	}
 
 	@Override
-	public Selectable.SelectionType getType() {
+	public NarratableEntry.NarrationPriority narrationPriority() {
 		if (this.isFocused()) {
-			return Selectable.SelectionType.FOCUSED;
+			return NarratableEntry.NarrationPriority.FOCUSED;
 		}
 		if (this.hoveredEntry != null) {
-			return Selectable.SelectionType.HOVERED;
+			return NarratableEntry.NarrationPriority.HOVERED;
 		}
-		return Selectable.SelectionType.NONE;
+		return NarratableEntry.NarrationPriority.NONE;
 	}
 
 	@Nullable
@@ -547,11 +545,11 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 		entry.parentList = this;
 	}
 
-	protected void appendNarrations(NarrationMessageBuilder builder, Entry entry) {
+	protected void appendNarrations(NarrationElementOutput builder, Entry entry) {
 		int i;
 		List<Entry> list = this.children();
 		if (list.size() > 1 && (i = list.indexOf(entry)) != -1) {
-			builder.put(NarrationPart.POSITION, (Text)EmiPort.translatable("narrator.position.list", i + 1, list.size()));
+			builder.add(NarratedElementType.POSITION, (Component)EmiPort.translatable("narrator.position.list", i + 1, list.size()));
 		}
 	}
 
@@ -567,13 +565,13 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 	}
 
 	@Override
-	public void appendNarrations(NarrationMessageBuilder var1) {
+	public void updateNarration(NarrationElementOutput var1) {
 	}
 
-	public static abstract class Entry extends AbstractParentElement {
+	public static abstract class Entry extends AbstractContainerEventHandler {
 		public ListWidget parentList;
 
-		public abstract void render(DrawContext draw, int index, int y, int x, int width, int height, int mouseX, int mouseY,
+		public abstract void render(GuiGraphics draw, int index, int y, int x, int width, int height, int mouseX, int mouseY,
 			boolean hovered, float delta);
 
 		@Override
@@ -581,7 +579,7 @@ public class ListWidget extends AbstractParentElement implements Drawable, Selec
 			return Objects.equals(this.parentList.getEntryAtPosition(mouseX, mouseY), this);
 		}
 
-		public List<TooltipComponent> getTooltip(int mouseX, int mouseY) {
+		public List<ClientTooltipComponent> getTooltip(int mouseX, int mouseY) {
 			return List.of();
 		}
 

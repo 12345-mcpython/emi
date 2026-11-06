@@ -15,8 +15,8 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 
 public class EmiMainFabric implements ModInitializer {
 
@@ -26,7 +26,7 @@ public class EmiMainFabric implements ModInitializer {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registry, env) -> EmiCommands.registerCommands(dispatcher));
 
 		EmiNetwork.initServer((player, packet) -> {
-			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+			FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 			packet.write(buf);
 			ServerPlayNetworking.send(player, packet.getId(), buf);
 		});
@@ -40,7 +40,7 @@ public class EmiMainFabric implements ModInitializer {
 		});
 	}
 
-	private void registerPacketReader(Identifier id, Function<PacketByteBuf, EmiPacket> create) {
+	private void registerPacketReader(ResourceLocation id, Function<FriendlyByteBuf, EmiPacket> create) {
 		ServerPlayNetworking.registerGlobalReceiver(id, (server, player, networkHandler, buf, sender) -> {
 			EmiPacket packet = create.apply(buf);
 			server.execute(() -> {

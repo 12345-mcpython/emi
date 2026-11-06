@@ -1,10 +1,10 @@
 package dev.emi.emi.network;
 
 import dev.emi.emi.runtime.EmiLog;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class CreateItemC2SPacket implements EmiPacket {
 	private final int mode;
@@ -15,37 +15,37 @@ public class CreateItemC2SPacket implements EmiPacket {
 		this.stack = stack;
 	}
 
-	public CreateItemC2SPacket(PacketByteBuf buf) {
-		this(buf.readByte(), buf.readItemStack());
+	public CreateItemC2SPacket(FriendlyByteBuf buf) {
+		this(buf.readByte(), buf.readItem());
 	}
 
 	@Override
-	public void write(PacketByteBuf buf) {
+	public void write(FriendlyByteBuf buf) {
 		buf.writeByte(mode);
-		buf.writeItemStack(stack);
+		buf.writeItem(stack);
 	}
 
 	@Override
-	public void apply(PlayerEntity player) {
-		if ((player.hasPermissionLevel(2) || player.isCreative()) && player.currentScreenHandler != null) {
+	public void apply(Player player) {
+		if ((player.hasPermissions(2) || player.isCreative()) && player.containerMenu != null) {
 			if (stack.isEmpty()) {
-				if (mode == 1 && !player.currentScreenHandler.getCursorStack().isEmpty()) {
-					EmiLog.info(player.getEntityName() + " deleted " + player.currentScreenHandler.getCursorStack());
-					player.currentScreenHandler.setCursorStack(stack);
+				if (mode == 1 && !player.containerMenu.getCarried().isEmpty()) {
+					EmiLog.info(player.getScoreboardName() + " deleted " + player.containerMenu.getCarried());
+					player.containerMenu.setCarried(stack);
 				}
 			} else {
-				EmiLog.info(player.getEntityName() + " cheated in " + stack);
+				EmiLog.info(player.getScoreboardName() + " cheated in " + stack);
 				if (mode == 0) {
-					player.getInventory().offerOrDrop(stack);
+					player.getInventory().placeItemBackInInventory(stack);
 				} else if (mode == 1) {
-					player.currentScreenHandler.setCursorStack(stack);
+					player.containerMenu.setCarried(stack);
 				}
 			}
 		}
 	}
 
 	@Override
-	public Identifier getId() {
+	public ResourceLocation getId() {
 		return EmiNetwork.CREATE_ITEM;
 	}
 }

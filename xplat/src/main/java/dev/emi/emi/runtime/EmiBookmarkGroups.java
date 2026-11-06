@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Items;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -28,8 +29,6 @@ import dev.emi.emi.bom.MaterialTree;
 import dev.emi.emi.bom.MaterialNode;
 import dev.emi.emi.config.BookmarkViewMode;
 import dev.emi.emi.config.EmiConfig;
-import net.minecraft.item.Items;
-import net.minecraft.util.Identifier;
 
 /** Presentation metadata for the existing ordered favorites, never a separate plan list. */
 public final class EmiBookmarkGroups {
@@ -638,7 +637,7 @@ public final class EmiBookmarkGroups {
 	private static EmiRecipe effectiveRecipe(EmiRecipe original, EmiFavorite anchor) {
 		return new EmiRecipe() {
 			public EmiRecipeCategory getCategory() { return original.getCategory(); }
-			public Identifier getId() { return original.getId(); }
+			public ResourceLocation getId() { return original.getId(); }
 			public List<EmiIngredient> getInputs() { return original.getInputs().stream().map(i -> chosen(anchor, i)).toList(); }
 			public List<EmiStack> getOutputs() { return original.getOutputs(); }
 			public List<EmiIngredient> getCatalysts() { return original.getCatalysts(); }
@@ -686,7 +685,7 @@ public final class EmiBookmarkGroups {
 		}
 		EmiRecipe root = new EmiRecipe() {
 			public EmiRecipeCategory getCategory() { return selected.keySet().iterator().next().getCategory(); }
-			public Identifier getId() { return null; }
+			public ResourceLocation getId() { return null; }
 			public List<EmiIngredient> getInputs() { return goals; }
 			public List<EmiStack> getOutputs() { return List.of(EmiStack.of(Items.BARRIER)); }
 			public int getDisplayWidth() { return 0; }

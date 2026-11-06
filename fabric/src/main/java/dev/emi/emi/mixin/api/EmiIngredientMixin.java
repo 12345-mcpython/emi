@@ -1,13 +1,12 @@
 package dev.emi.emi.mixin.api;
 
 import java.text.DecimalFormat;
-
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.mixinsupport.annotation.AdditionalField;
-import net.minecraft.text.Text;
 
 /**
  * Making EmiIngredients mutable introduced several necessary methods for mutation
@@ -21,9 +20,9 @@ public interface EmiIngredientMixin {
 	default DecimalFormat copyTextFormat() { throw new AbstractMethodError(); }
 
 	@AdditionalField(value = "EMPTY_TEXT", owner = "dev/emi/emi/EmiRenderHelper", name = "EMPTY_TEXT")
-	default Text copyEmptyText() { throw new AbstractMethodError(); }
+	default Component copyEmptyText() { throw new AbstractMethodError(); }
 
-	default Text getAmountText(double amount) {
+	default Component getAmountText(double amount) {
 		return EmiRenderHelper.getAmountText((EmiIngredient) (Object) this, amount);
 	}
 

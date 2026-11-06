@@ -5,7 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.recipe.EmiRecipe;
@@ -30,9 +34,6 @@ import dev.emi.emi.runtime.EmiFavorites;
 import dev.emi.emi.screen.EmiScreenManager.ScreenSpace;
 import dev.emi.emi.screen.EmiScreenManager.SidebarPanel;
 import dev.emi.emi.screen.tooltip.BookmarkChainTooltipComponent;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.TooltipComponent;
-import net.minecraft.util.Formatting;
 
 /** The bookmark grid lives in the native favorites sidebar, including its row gutter. */
 public final class BookmarkSidebar {
@@ -224,15 +225,15 @@ public final class BookmarkSidebar {
         }
     }
 
-    public List<TooltipComponent> tooltip(int mx, int my) {
+    public List<ClientTooltipComponent> tooltip(int mx, int my) {
         layout();
         if (!header(mx, my) && !gutter(mx, my)) return List.of();
         Group group = groupAt(mx, my);
-        if (group == null) return List.of(TooltipComponent.of(EmiPort.translatable("emi.bookmarks.drag_group").asOrderedText()));
+        if (group == null) return List.of(ClientTooltipComponent.create(EmiPort.translatable("emi.bookmarks.drag_group").getVisualOrderText()));
         ensureChain(group);
-        List<TooltipComponent> result = new ArrayList<>();
-        result.add(TooltipComponent.of(EmiPort.translatable("emi.bookmarks.chain.title")
-            .formatted(Formatting.GOLD).asOrderedText()));
+        List<ClientTooltipComponent> result = new ArrayList<>();
+        result.add(ClientTooltipComponent.create(EmiPort.translatable("emi.bookmarks.chain.title")
+            .withStyle(ChatFormatting.GOLD).getVisualOrderText()));
         if (!chainOutputs.isEmpty()) {
             result.add(chainLabel("outputs"));
             result.add(new BookmarkChainTooltipComponent(chainOutputs, false));
@@ -258,9 +259,9 @@ public final class BookmarkSidebar {
         return result;
     }
 
-    private static TooltipComponent chainLabel(String key) {
-        return TooltipComponent.of(EmiPort.translatable("emi.bookmarks.chain." + key)
-            .formatted(Formatting.GRAY).asOrderedText());
+    private static ClientTooltipComponent chainLabel(String key) {
+        return ClientTooltipComponent.create(EmiPort.translatable("emi.bookmarks.chain." + key)
+            .withStyle(ChatFormatting.GRAY).getVisualOrderText());
     }
 
     private void ensureChain(Group group) {
@@ -343,17 +344,17 @@ public final class BookmarkSidebar {
     private static long saturatedAdd(long a, long b) {
         return a > Long.MAX_VALUE - b ? Long.MAX_VALUE : a + b;
     }
-    private static TooltipComponent tip(String key, Object... args) { return TooltipComponent.of(EmiPort.translatable("emi.bookmarks." + key, args).asOrderedText()); }
-    private static TooltipComponent quantityTip() { return tip("quantity", EmiConfig.getBookmarkQuantityStep()); }
-    private static TooltipComponent treeTip() { return tip("group_tree", EmiConfig.viewBookmarkGroup.getBindText()); }
-    private static TooltipComponent takeTip() { return tip("take_tip", EmiConfig.takeBookmarkGroup.getBindText()); }
-    private static TooltipComponent craftTip() { return tip("group_craft", EmiConfig.craftBookmarkGroup.getBindText()); }
-    private static void addCraftStatus(List<TooltipComponent> result) {
+    private static ClientTooltipComponent tip(String key, Object... args) { return ClientTooltipComponent.create(EmiPort.translatable("emi.bookmarks." + key, args).getVisualOrderText()); }
+    private static ClientTooltipComponent quantityTip() { return tip("quantity", EmiConfig.getBookmarkQuantityStep()); }
+    private static ClientTooltipComponent treeTip() { return tip("group_tree", EmiConfig.viewBookmarkGroup.getBindText()); }
+    private static ClientTooltipComponent takeTip() { return tip("take_tip", EmiConfig.takeBookmarkGroup.getBindText()); }
+    private static ClientTooltipComponent craftTip() { return tip("group_craft", EmiConfig.craftBookmarkGroup.getBindText()); }
+    private static void addCraftStatus(List<ClientTooltipComponent> result) {
         BookmarkCrafting.Status craft = BookmarkCrafting.status();
         BookmarkMaterialTransfer.Status transfer = BookmarkMaterialTransfer.status();
-        TooltipComponent craftTip = tip("craft_status", EmiPort.translatable("emi.bookmarks.status." + craft.result()),
+        ClientTooltipComponent craftTip = tip("craft_status", EmiPort.translatable("emi.bookmarks.status." + craft.result()),
             EmiPort.translatable("emi.bookmarks.reason." + craft.reason()), craft.completed(), craft.operations());
-        TooltipComponent transferTip = tip("transfer_status", EmiPort.translatable("emi.bookmarks.status." + transfer.result()),
+        ClientTooltipComponent transferTip = tip("transfer_status", EmiPort.translatable("emi.bookmarks.status." + transfer.result()),
             EmiPort.translatable("emi.bookmarks.reason." + transfer.reason()), transfer.completed(), transfer.operations());
         // Put the active transfer before an idle crafting runner.
         if (transfer.running()) { result.add(transferTip); result.add(craftTip); }
@@ -361,8 +362,8 @@ public final class BookmarkSidebar {
     }
     private static void showTransferStatus() {
         BookmarkMaterialTransfer.Status status = BookmarkMaterialTransfer.status();
-        var client = net.minecraft.client.MinecraftClient.getInstance();
-        if (client.inGameHud != null) client.inGameHud.setOverlayMessage(EmiPort.translatable("emi.bookmarks.transfer_status",
+        var client = net.minecraft.client.Minecraft.getInstance();
+        if (client.gui != null) client.gui.setOverlayMessage(EmiPort.translatable("emi.bookmarks.transfer_status",
             EmiPort.translatable("emi.bookmarks.status." + status.result()),
             EmiPort.translatable("emi.bookmarks.reason." + status.reason()), status.completed(), status.operations()), false);
     }
@@ -383,7 +384,7 @@ public final class BookmarkSidebar {
             startRow = endRow = header(mx, my) ? -1 : absoluteRow(my);
             pressButton = button;
             moved = false;
-            pressedAt = net.minecraft.util.Util.getMeasuringTimeMs();
+            pressedAt = net.minecraft.Util.getMillis();
             edgeDirection = 0;
             movingGroup = EmiInput.isShiftDown() && button == 0 && pressedGroup != null
                 && pressedGroup != EmiBookmarkGroups.defaultGroup();
@@ -392,7 +393,7 @@ public final class BookmarkSidebar {
         }
         if (cell != null && cell.item != null && !cell.item.input && button == 0 && EmiInput.isShiftDown()) {
             pressedCell = cell; moved = false; pressButton = button;
-            pressedAt = net.minecraft.util.Util.getMeasuringTimeMs();
+            pressedAt = net.minecraft.Util.getMillis();
             edgeDirection = 0;
             return true;
         }
@@ -407,7 +408,7 @@ public final class BookmarkSidebar {
     }
     private void updateDrag(int mx, int my) {
         if (pressedCell == null && pressedGroup == null && startRow < 0) return;
-        long now = net.minecraft.util.Util.getMeasuringTimeMs();
+        long now = net.minecraft.Util.getMillis();
         ScreenSpace space = panel.space;
         if (pressedCell != null) moved |= cellAt(mx, my) != pressedCell || now - pressedAt >= DRAG_THRESHOLD_MS;
         else if (startRow >= 0) moved |= !space.contains(mx, my) || absoluteRow(my) != startRow || now - pressedAt >= DRAG_THRESHOLD_MS;
@@ -590,8 +591,8 @@ public final class BookmarkSidebar {
                 BookmarkCrafting.start(group, EmiInput.isControlDown());
             }
             BookmarkCrafting.Status status = BookmarkCrafting.status();
-            var client = net.minecraft.client.MinecraftClient.getInstance();
-            if (client.inGameHud != null) client.inGameHud.setOverlayMessage(EmiPort.translatable("emi.bookmarks.craft_status",
+            var client = net.minecraft.client.Minecraft.getInstance();
+            if (client.gui != null) client.gui.setOverlayMessage(EmiPort.translatable("emi.bookmarks.craft_status",
                 EmiPort.translatable("emi.bookmarks.status." + status.result()),
                 EmiPort.translatable("emi.bookmarks.reason." + status.reason()), status.completed(), status.operations()), false);
             return true;
@@ -623,7 +624,7 @@ public final class BookmarkSidebar {
             return Math.max(0, shift ? row.remainingAmount
                 : control && !row.group.crafting ? row.explicitAmount : row.calculatedAmount);
         }
-        @Override public void render(DrawContext raw, int x, int y, float delta, int flags) {
+        @Override public void render(GuiGraphics raw, int x, int y, float delta, int flags) {
             EmiDrawContext context = EmiDrawContext.wrap(raw);
             context.enableBlend();
             stack.render(raw, x, y, delta, flags & ~EmiIngredient.RENDER_AMOUNT);
@@ -633,7 +634,7 @@ public final class BookmarkSidebar {
                 boolean fluid = !stack.getEmiStacks().isEmpty() && stack.getEmiStacks().get(0) instanceof FluidEmiStack;
                 long amount = displayAmount();
                 var text = fluid ? EmiConfig.fluidUnit.translate(amount) : EmiPort.literal(compactAmount(amount));
-                int width = net.minecraft.client.MinecraftClient.getInstance().textRenderer.getWidth(text);
+                int width = net.minecraft.client.Minecraft.getInstance().font.width(text);
                 float scale = Math.min(1f, 17f / Math.max(1, width));
                 context.push();
                 context.matrices().translate(x + 17, y + 17, 300);
@@ -652,25 +653,25 @@ public final class BookmarkSidebar {
             long tenth = divisor == 1 ? 0 : (amount % divisor) / (divisor / 10);
             return whole + (unit > 0 && whole < 100 && tenth > 0 ? "." + tenth : "") + units[unit];
         }
-        private TooltipComponent amountTip(String key, long amount) {
+        private ClientTooltipComponent amountTip(String key, long amount) {
             amount = Math.max(0, amount);
             boolean fluid = !stack.getEmiStacks().isEmpty() && stack.getEmiStacks().get(0) instanceof FluidEmiStack;
             return tip(key, fluid ? EmiConfig.fluidUnit.translate(amount)
                 : amount == 0 ? EmiPort.literal("0") : EmiRenderHelper.getAmountText(stack, amount));
         }
-        @Override public List<TooltipComponent> getTooltip() {
+        @Override public List<ClientTooltipComponent> getTooltip() {
             return getTooltip(EmiInput.isAltDown());
         }
-        private List<TooltipComponent> getTooltip(boolean alt) {
+        private List<ClientTooltipComponent> getTooltip(boolean alt) {
             if (!alt) return stack.getTooltip();
-            List<TooltipComponent> result = new ArrayList<>(super.getTooltip());
+            List<ClientTooltipComponent> result = new ArrayList<>(super.getTooltip());
             String role = switch (row.role) { case RESULT -> "result"; case REMAINDER -> "remainder"; case INGREDIENT -> "ingredient"; };
-            result.add(TooltipComponent.of(EmiPort.translatable("emi.bookmarks." + role).formatted(Formatting.GRAY).asOrderedText()));
+            result.add(ClientTooltipComponent.create(EmiPort.translatable("emi.bookmarks." + role).withStyle(ChatFormatting.GRAY).getVisualOrderText()));
             result.add(amountTip("explicit_amount", row.explicitAmount));
             result.add(amountTip("calculated_amount", row.calculatedAmount));
             result.add(amountTip("remaining_amount", row.remainingAmount));
             result.add(tip("display_amounts"));
-            result.add(TooltipComponent.of(EmiPort.translatable("emi.bookmarks.batches", row.batches).formatted(Formatting.GRAY).asOrderedText()));
+            result.add(ClientTooltipComponent.create(EmiPort.translatable("emi.bookmarks.batches", row.batches).withStyle(ChatFormatting.GRAY).getVisualOrderText()));
             result.add(quantityTip());
             if (!row.input) { result.add(treeTip()); result.add(takeTip()); result.add(craftTip()); addCraftStatus(result); }
             if (row.input && row.source.getEmiStacks().size() > 1) result.add(tip("cycle_ingredient"));

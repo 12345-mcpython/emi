@@ -1,7 +1,11 @@
 package dev.emi.emi.recipe.special;
 
 import java.util.Random;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.SmithingRecipe;
 import dev.emi.emi.EmiUtil;
 import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.render.EmiTooltipComponents;
@@ -10,11 +14,6 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import dev.emi.emi.recipe.EmiSmithingRecipe;
 import dev.emi.emi.runtime.ProxyRecipeManager;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.SmithingRecipe;
 
 public class EmiSmithingTrimRecipe extends EmiSmithingRecipe {
 	private final SmithingRecipe recipe;
@@ -42,12 +41,12 @@ public class EmiSmithingTrimRecipe extends EmiSmithingRecipe {
 	private EmiStack getStack(Random r, int i) {
 		EmiStack input = this.input.getEmiStacks().get(r.nextInt(this.input.getEmiStacks().size()));
 		EmiStack addition = this.addition.getEmiStacks().get(r.nextInt(this.addition.getEmiStacks().size()));
-		Inventory inv = new SimpleInventory(template.getEmiStacks().get(0).getItemStack(), input.getItemStack(), addition.getItemStack(), ItemStack.EMPTY);
-		MinecraftClient client = MinecraftClient.getInstance();
+		Container inv = new SimpleContainer(template.getEmiStacks().get(0).getItemStack(), input.getItemStack(), addition.getItemStack(), ItemStack.EMPTY);
+		Minecraft client = Minecraft.getInstance();
 		return new EmiStack[] {
 			input,
 			addition,
-			EmiStack.of(recipe.craft(inv, client.world.getRegistryManager()))
+			EmiStack.of(recipe.assemble(inv, client.level.registryAccess()))
 		}[i];
 	}
 }

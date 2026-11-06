@@ -9,9 +9,9 @@ import dev.emi.emi.network.CreateItemC2SPacket;
 import dev.emi.emi.network.EmiChessPacket;
 import dev.emi.emi.network.FillRecipeC2SPacket;
 import dev.emi.emi.network.PingS2CPacket;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -19,7 +19,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 public class EmiPacketHandler {
 	public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-		new Identifier("emi:emi"), () -> "0", NetworkRegistry.acceptMissingOr("0"), NetworkRegistry.acceptMissingOr("0"));
+		new ResourceLocation("emi:emi"), () -> "0", NetworkRegistry.acceptMissingOr("0"), NetworkRegistry.acceptMissingOr("0"));
 	
 	public static void init() {
 		int i = 0;
@@ -38,7 +38,7 @@ public class EmiPacketHandler {
 			clientHandler(EmiChessPacket.S2C::apply), Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 	}
 
-	private static <T> BiConsumer<T, Supplier<NetworkEvent.Context>> serverHandler(BiConsumer<T, PlayerEntity> handler) {
+	private static <T> BiConsumer<T, Supplier<NetworkEvent.Context>> serverHandler(BiConsumer<T, Player> handler) {
 		return (t, context) -> {
 			context.get().enqueueWork(() -> {
 				handler.accept(t, context.get().getSender());
@@ -47,10 +47,10 @@ public class EmiPacketHandler {
 		};
 	}
 
-	private static <T> BiConsumer<T, Supplier<NetworkEvent.Context>> clientHandler(BiConsumer<T, PlayerEntity> handler) {
+	private static <T> BiConsumer<T, Supplier<NetworkEvent.Context>> clientHandler(BiConsumer<T, Player> handler) {
 		return (t, context) -> {
 			context.get().enqueueWork(() -> {
-				MinecraftClient client = MinecraftClient.getInstance();
+				Minecraft client = Minecraft.getInstance();
 				handler.accept(t, client.player);
 				context.get().setPacketHandled(true);
 			});

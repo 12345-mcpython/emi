@@ -2,67 +2,65 @@ package dev.emi.emi.runtime;
 
 import java.util.List;
 import java.util.stream.Stream;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeManager;
-import net.minecraft.recipe.RecipeType;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
-
 public class ProxyRecipeManager {
-	private static final MinecraftClient client = MinecraftClient.getInstance();
+	private static final Minecraft client = Minecraft.getInstance();
 	
 	public static boolean isAvailable() {
 		return getRaw() != null;
 	}
 
 	public static RecipeManager getRaw() {
-		World world = client.world;
+		Level world = client.level;
 		if (world == null) {
 			return null;
 		}
 		return world.getRecipeManager();
 	}
 
-	public static Identifier getId(Recipe<?> recipe) {
+	public static ResourceLocation getId(Recipe<?> recipe) {
 		return recipe.getId();
 	}
 
-	public static boolean hasId(Identifier id) {
+	public static boolean hasId(ResourceLocation id) {
 		RecipeManager raw = getRaw();
-		return raw.get(id).isPresent();
+		return raw.byKey(id).isPresent();
 	}
 
-	public static @Nullable Recipe<?> getRecipe(Identifier id) {
+	public static @Nullable Recipe<?> getRecipe(ResourceLocation id) {
 		RecipeManager raw = getRaw();
 		if (raw == null || id == null) {
 			return null;
 		}
-		return raw.get(id).orElse(null);
+		return raw.byKey(id).orElse(null);
 	}
 
-	public static <I extends Inventory, T extends Recipe<I>> Stream<T> streamMatches(RecipeType<T> type, I inventory) {
+	public static <I extends Container, T extends Recipe<I>> Stream<T> streamMatches(RecipeType<T> type, I inventory) {
 		RecipeManager raw = getRaw();
 		if (raw == null) {
 			return Stream.empty();
 		}
-		return raw.getAllMatches(type, inventory, client.world).stream();
+		return raw.getRecipesFor(type, inventory, client.level).stream();
 	}
 
-	public static <I extends Inventory, T extends Recipe<I>> List<T> getMatches(RecipeType<T> type, I inventory) {
+	public static <I extends Container, T extends Recipe<I>> List<T> getMatches(RecipeType<T> type, I inventory) {
 		return streamMatches(type, inventory).toList();
 	}
 
-	public static <I extends Inventory, T extends Recipe<I>> @Nullable T getFirst(RecipeType<T> type, I inventory) {
+	public static <I extends Container, T extends Recipe<I>> @Nullable T getFirst(RecipeType<T> type, I inventory) {
 		RecipeManager raw = getRaw();
 		if (raw == null) {
 			return null;
 		}
-		return raw.getFirstMatch(type, inventory, client.world).orElse(null);
+		return raw.getRecipeFor(type, inventory, client.level).orElse(null);
 	}
 
 	public static void bakeIds() {

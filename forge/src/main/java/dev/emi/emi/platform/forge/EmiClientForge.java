@@ -13,9 +13,9 @@ import dev.emi.emi.screen.ConfigScreen;
 import dev.emi.emi.screen.EmiScreenBase;
 import dev.emi.emi.screen.EmiScreenManager;
 import dev.emi.emi.screen.StackBatcher;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.ForgeRenderTypes;
@@ -49,7 +49,7 @@ public class EmiClientForge {
 
 	@SubscribeEvent
 	public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		EmiTags.registerTagModels(client.getResourceManager(), event::register);
 	}
 
@@ -68,14 +68,14 @@ public class EmiClientForge {
 
 	public static void renderScreenForeground(ContainerScreenEvent.Render.Foreground event) {
 		EmiDrawContext context = EmiDrawContext.wrap(event.getGuiGraphics());
-		HandledScreen<?> screen = event.getContainerScreen();
+		AbstractContainerScreen<?> screen = event.getContainerScreen();
 		EmiScreenBase base = EmiScreenBase.of(screen);
 		if (base != null) {
-			MinecraftClient client = MinecraftClient.getInstance();
+			Minecraft client = Minecraft.getInstance();
 			context.push();
 			context.translate(-screen.getGuiLeft(), -screen.getGuiTop());
 			EmiPort.setPositionTexShader();
-			EmiScreenManager.render(context, event.getMouseX(), event.getMouseY(), client.getTickDelta());
+			EmiScreenManager.render(context, event.getMouseX(), event.getMouseY(), client.getFrameTime());
 			context.pop();
 		}
 	}
@@ -83,15 +83,15 @@ public class EmiClientForge {
 	public static void postRenderScreen(ScreenEvent.Render.Post event) {
 		EmiDrawContext context = EmiDrawContext.wrap(event.getGuiGraphics());
 		Screen screen = event.getScreen();
-		if (!(screen instanceof HandledScreen<?>)) {
+		if (!(screen instanceof AbstractContainerScreen<?>)) {
 			return;
 		}
 		EmiScreenBase base = EmiScreenBase.of(screen);
 		if (base != null) {
-			MinecraftClient client = MinecraftClient.getInstance();
+			Minecraft client = Minecraft.getInstance();
 			context.push();
 			EmiPort.setPositionTexShader();
-			EmiScreenManager.drawForeground(context, event.getMouseX(), event.getMouseY(), client.getTickDelta());
+			EmiScreenManager.drawForeground(context, event.getMouseX(), event.getMouseY(), client.getFrameTime());
 			context.pop();
 		}
 	}

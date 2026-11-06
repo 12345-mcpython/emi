@@ -1,7 +1,7 @@
 package dev.emi.emi.config;
 
 import dev.emi.emi.EmiPort;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 /**
  * Layout mode for a bookmark group. DEFAULT flows items through the grid;
@@ -25,7 +25,7 @@ public enum BookmarkViewMode implements ConfigEnum {
 	}
 
 	@Override
-	public Text getText() {
+	public Component getText() {
 		return EmiPort.translatable("emi.bookmark_view_mode." + name);
 	}
 

@@ -2,23 +2,20 @@ package dev.emi.emi.runtime;
 
 import java.io.File;
 import java.util.function.Consumer;
-
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import org.joml.Matrix4f;
-
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import com.mojang.blaze3d.pipeline.TextureTarget;
+import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.systems.VertexSorter;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.config.EmiConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.SimpleFramebuffer;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
 
 public class EmiScreenshotRecorder {
 	private static final String SCREENSHOTS_DIRNAME = "screenshots";
@@ -49,7 +46,7 @@ public class EmiScreenshotRecorder {
 	}
 
 	private static void saveScreenshotInner(String path, int width, int height, Runnable renderer) {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 
 		int scale;
 		if (EmiConfig.recipeScreenshotScale < 1) {
@@ -61,19 +58,19 @@ public class EmiScreenshotRecorder {
 		try {
 			NativeImage nativeImage = null;
 			try {
-				Framebuffer framebuffer = null;
-				MatrixStack view = RenderSystem.getModelViewStack();
+				RenderTarget framebuffer = null;
+				PoseStack view = RenderSystem.getModelViewStack();
 				boolean viewPushed = false;
 				boolean projectionBackedUp = false;
 				try {
-					framebuffer = new SimpleFramebuffer(width * scale, height * scale, true, MinecraftClient.IS_SYSTEM_MAC);
+					framebuffer = new TextureTarget(width * scale, height * scale, true, Minecraft.ON_OSX);
 					framebuffer.setClearColor(0f, 0f, 0f, 0f);
-					framebuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
-					framebuffer.beginWrite(true);
+					framebuffer.clear(Minecraft.ON_OSX);
+					framebuffer.bindWrite(true);
 
-					view.push();
+					view.pushPose();
 					viewPushed = true;
-					view.loadIdentity();
+					view.setIdentity();
 					view.translate(-1.0, 1.0, 0.0);
 					view.scale(2f / width, -2f / height, -1f / 1000f);
 					view.translate(0.0, 0.0, 10.0);
@@ -81,7 +78,7 @@ public class EmiScreenshotRecorder {
 
 					RenderSystem.backupProjectionMatrix();
 					projectionBackedUp = true;
-					RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorter.BY_Z);
+					RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorting.ORTHOGRAPHIC_Z);
 					renderer.run();
 					nativeImage = takeScreenshot(framebuffer);
 				} finally {
@@ -91,21 +88,21 @@ public class EmiScreenshotRecorder {
 					} finally {
 						try {
 							if (viewPushed) {
-								view.pop();
+								view.popPose();
 								EmiPort.applyModelViewMatrix();
 							}
 						} finally {
 							try {
-								if (framebuffer != null) framebuffer.delete();
+								if (framebuffer != null) framebuffer.destroyBuffers();
 							} finally {
-								client.getFramebuffer().beginWrite(true);
+								client.getMainRenderTarget().bindWrite(true);
 							}
 						}
 					}
 				}
 
-				saveScreenshotInner(client.runDirectory, path, nativeImage,
-					message -> client.execute(() -> client.inGameHud.getChatHud().addMessage(message)));
+				saveScreenshotInner(client.gameDirectory, path, nativeImage,
+					message -> client.execute(() -> client.gui.getChat().addMessage(message)));
 				// The IO worker owns the image only after submission succeeds.
 				nativeImage = null;
 			} finally {
@@ -116,7 +113,7 @@ public class EmiScreenshotRecorder {
 			try {
 				client.execute(() -> {
 					try {
-						client.inGameHud.getChatHud().addMessage(EmiPort.translatable("screenshot.failure", e.getMessage()));
+						client.gui.getChat().addMessage(EmiPort.translatable("screenshot.failure", e.getMessage()));
 					} catch (Throwable feedbackError) {
 						EmiLog.error("Failed to report screenshot error", feedbackError);
 					}
@@ -127,7 +124,7 @@ public class EmiScreenshotRecorder {
 		}
 	}
 
-	private static void saveScreenshotInner(File gameDirectory, String suggestedPath, NativeImage nativeImage, Consumer<Text> messageReceiver) {
+	private static void saveScreenshotInner(File gameDirectory, String suggestedPath, NativeImage nativeImage, Consumer<Component> messageReceiver) {
 
 		File screenshots = new File(gameDirectory, SCREENSHOTS_DIRNAME);
 		screenshots.mkdir();
@@ -140,12 +137,12 @@ public class EmiScreenshotRecorder {
 		File parent = file.getParentFile();
 		parent.mkdirs();
 
-		Util.getIoWorkerExecutor().execute(() -> {
+		Util.ioPool().execute(() -> {
 			try {
-				nativeImage.writeTo(file);
+				nativeImage.writeToFile(file);
 
-				Text text = EmiPort.literal(filename,
-					Style.EMPTY.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
+				Component text = EmiPort.literal(filename,
+					Style.EMPTY.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
 				messageReceiver.accept(EmiPort.translatable("screenshot.success", text));
 			} catch (Throwable e) {
 				EmiLog.error("Failed to write screenshot", e);
@@ -156,15 +153,15 @@ public class EmiScreenshotRecorder {
 		});
 	}
 
-	private static NativeImage takeScreenshot(Framebuffer framebuffer) {
-		int i = framebuffer.textureWidth;
-		int j = framebuffer.textureHeight;
+	private static NativeImage takeScreenshot(RenderTarget framebuffer) {
+		int i = framebuffer.width;
+		int j = framebuffer.height;
 		NativeImage nativeImage = new NativeImage(i, j, false);
 		boolean captured = false;
 		try {
-			RenderSystem.bindTexture(framebuffer.getColorAttachment());
-			nativeImage.loadFromTextureImage(0, false);
-			nativeImage.mirrorVertically();
+			RenderSystem.bindTexture(framebuffer.getColorTextureId());
+			nativeImage.downloadTexture(0, false);
+			nativeImage.flipY();
 			captured = true;
 			return nativeImage;
 		} finally {
