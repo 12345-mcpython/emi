@@ -23,6 +23,9 @@ public class ClientPlayNetworkHandlerMixin {
 
 	@Inject(at = @At("RETURN"), method = "handleLogin")
 	private void onGameJoin(CallbackInfo info) {
-		EmiLog.info("Joining server, EMI waiting for data from server...");
+		EmiLog.info("Joining server, EMI waiting for tag data from server...");
+		// Recipes are fetched lazily while reloading: from the integrated server in singleplayer and
+		// not at all on multiplayer, where the client has no recipe table on 1.21.2+.
+		EmiReloadManager.reloadRecipes();
 	}
 }

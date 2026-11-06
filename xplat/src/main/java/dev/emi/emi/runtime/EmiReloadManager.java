@@ -53,6 +53,14 @@ public class EmiReloadManager {
 		resourcesSynchronized(2);
 	}
 
+	/**
+	 * 1.21.2+ clients never receive a recipe table, so recipes can never synchronize on
+	 * multiplayer. Mark them as handled so the reload can run with whatever data exists.
+	 */
+	public static void recipesUnavailable() {
+		resourcesSynchronized(2);
+	}
+
 	private static synchronized void resourcesSynchronized(int resource) {
 		loadedResourcesMask |= resource;
 		resourcesReady = loadedResourcesMask == 3;
@@ -77,7 +85,7 @@ public class EmiReloadManager {
 	public static synchronized void tick() {
 		if (!synchronizedReloadPending || !resourcesReady || loadedResourcesMask != 0) return;
 		Minecraft client = Minecraft.getInstance();
-		if (client.level == null || client.player == null || !ProxyRecipeManager.isAvailable()) return;
+		if (client.level == null || client.player == null) return;
 		synchronizedReloadPending = false;
 		EmiLog.info("Initializing EMI on world entry without waiting for an inventory screen");
 		reload();
