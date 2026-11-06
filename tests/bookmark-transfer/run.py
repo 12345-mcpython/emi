@@ -33,5 +33,5 @@ with tempfile.TemporaryDirectory(prefix='emi-transfer-') as directory:
         target.write_text(text,encoding='utf-8')
     files = list(src.rglob('*.java')) + [root/'xplat/src/main/java/dev/emi/emi/runtime/BookmarkMaterialTransfer.java', root/'tests/bookmark-transfer/src/dev/emi/emi/runtime/BookmarkMaterialTransferChecks.java']
     classes=Path(directory)/'classes'
-    subprocess.run([str(a.java_home/'bin/javac.exe'),'--release','17','-encoding','UTF-8','-d',str(classes),*map(str,files)],check=True)
+    subprocess.run([str(a.java_home/'bin/javac.exe'),'--release','21','-encoding','UTF-8','-d',str(classes),*map(str,files)],check=True)
     subprocess.run([str(a.java_home/'bin/java.exe'),'-ea','-cp',str(classes),'dev.emi.emi.runtime.BookmarkMaterialTransferChecks'],check=True)

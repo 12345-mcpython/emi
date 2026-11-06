@@ -51,5 +51,5 @@ with tempfile.TemporaryDirectory(prefix='emi-bookmark-crafting-') as directory:
     annotation.write_text('package org.jetbrains.annotations; public class ApiStatus { public @interface Internal {} }', encoding='utf-8')
     files.append(annotation)
     classes = Path(directory) / 'classes'
-    subprocess.run([str(args.java_home/'bin/javac.exe'), '--release', '17', '-encoding', 'UTF-8', '-d', str(classes), *map(str, files)], check=True)
+    subprocess.run([str(args.java_home/'bin/javac.exe'), '--release', '21', '-encoding', 'UTF-8', '-d', str(classes), *map(str, files)], check=True)
     subprocess.run([str(args.java_home/'bin/java.exe'), '-ea', '-cp', str(classes), 'dev.emi.emi.runtime.BookmarkCraftingChecks'], check=True)

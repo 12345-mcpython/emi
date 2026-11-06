@@ -119,7 +119,7 @@ with tempfile.TemporaryDirectory(prefix='emi-bookmark-checks-') as temporary:
     put('dev/emi/emi/runtime/BookmarkGroupChecks.java',
         (Path(__file__).parent / 'BookmarkGroupChecks.java').read_text(encoding='utf-8'))
     classes = Path(temporary) / 'classes'
-    subprocess.run([str(java / f'javac{java_suffix}'), '--release', '17', '-encoding', 'UTF-8',
+    subprocess.run([str(java / f'javac{java_suffix}'), '--release', '21', '-encoding', 'UTF-8',
                     '-cp', str(gson), '-d', str(classes), *map(str, source.rglob('*.java'))], check=True)
     import os
     subprocess.run([str(java / f'java{java_suffix}'), '-ea', '-cp', f'{classes}{os.pathsep}{gson}',

@@ -23,7 +23,7 @@ import java.util.*; public class EmiStack implements EmiIngredient { public fina
 'dev/emi/emi/api/stack/serializer/EmiIngredientSerializer.java': '''package dev.emi.emi.api.stack.serializer;
 import com.google.gson.*; import dev.emi.emi.api.stack.*; public class EmiIngredientSerializer { public static JsonElement getSerialized(EmiIngredient i) { String id=((EmiStack)i).id; return id.startsWith("{") ? JsonParser.parseString(id) : new JsonPrimitive(id); } public static EmiIngredient getDeserialized(JsonElement j) { return new EmiStack(j==null || j.isJsonNull() ? "" : j.getAsString()); } }''',
 'dev/emi/emi/api/recipe/EmiRecipe.java': '''package dev.emi.emi.api.recipe; import java.util.*; import dev.emi.emi.api.stack.*; public interface EmiRecipe { String getId(); List<EmiStack> getOutputs(); default List<EmiIngredient> getInputs() { return List.of(); } }''',
-'dev/emi/emi/api/recipe/EmiResolutionRecipe.java': '''package dev.emi.emi.api.recipe; import java.util.*; import dev.emi.emi.api.stack.*; public class EmiResolutionRecipe implements EmiRecipe { public final EmiIngredient ingredient; public final EmiStack stack; public EmiResolutionRecipe(EmiIngredient i, EmiStack s) { ingredient=i; stack=s; } public String getId() { return null; } public List<EmiStack> getOutputs() { return List.of(stack); } }''',
+'dev/emi/emi/api/recipe/EmiResolutionRecipe.java': '''package dev.emi.emi.api.recipe; import java.util.*; import dev.emi.emi.api.stack.*; public record EmiResolutionRecipe(EmiIngredient ingredient, EmiStack stack) implements EmiRecipe { public String getId() { return null; } public List<EmiStack> getOutputs() { return List.of(stack); } }''',
 'dev/emi/emi/runtime/EmiLog.java': '''package dev.emi.emi.runtime; public class EmiLog { public static void error(String s, Throwable t) {} public static void warn(String s) {} }''',
 'dev/emi/emi/runtime/EmiPersistentData.java': '''package dev.emi.emi.runtime; import dev.emi.emi.bom.CraftingPlans; public class EmiPersistentData { public static int saves; public static void save() { if (++saves>10000) throw new AssertionError("recursive save"); CraftingPlans.save(); } }''',
 'dev/emi/emi/bom/BoM.java': '''package dev.emi.emi.bom; import java.util.*; import dev.emi.emi.api.stack.*; import dev.emi.emi.api.recipe.*; public class BoM { public static MaterialTree tree; public static boolean craftingMode; public static final Map<EmiIngredient,EmiRecipe> defaults=new HashMap<>(); public static void setGoal(EmiRecipe r) { CraftingPlans.setGoal(r); } }''',
@@ -109,7 +109,7 @@ with tempfile.TemporaryDirectory(prefix='emi-plan-checks-') as directory:
         target = source / f'dev/emi/emi/bom/{name}.java'
         target.write_text((root / f'xplat/src/main/java/dev/emi/emi/bom/{name}.java').read_text(encoding='utf-8'), encoding='utf-8')
     classes = temporary / 'classes'
-    subprocess.run([str(args.java_home / 'bin/javac.exe'), '--release', '17', '-encoding', 'UTF-8', '-cp', str(args.gson), '-d', str(classes), *map(str, source.rglob('*.java'))], check=True)
+    subprocess.run([str(args.java_home / 'bin/javac.exe'), '--release', '21', '-encoding', 'UTF-8', '-cp', str(args.gson), '-d', str(classes), *map(str, source.rglob('*.java'))], check=True)
     subprocess.run([str(args.java_home / 'bin/java.exe'), '-cp', f'{classes};{args.gson}', 'dev.emi.emi.bom.PlanChecks'], check=True)
 
     # Compile the real persistent-data lifecycle separately, so file I/O and early
@@ -145,5 +145,5 @@ public class LifecycleChecks {
     runtime_target = lifecycle_source / 'dev/emi/emi/runtime/EmiPersistentData.java'
     runtime_target.write_text((root / 'xplat/src/main/java/dev/emi/emi/runtime/EmiPersistentData.java').read_text(encoding='utf-8'), encoding='utf-8')
     lifecycle_classes = temporary / 'lifecycle-classes'
-    subprocess.run([str(args.java_home / 'bin/javac.exe'), '--release', '17', '-encoding', 'UTF-8', '-cp', str(args.gson), '-d', str(lifecycle_classes), *map(str, lifecycle_source.rglob('*.java'))], check=True)
+    subprocess.run([str(args.java_home / 'bin/javac.exe'), '--release', '21', '-encoding', 'UTF-8', '-cp', str(args.gson), '-d', str(lifecycle_classes), *map(str, lifecycle_source.rglob('*.java'))], check=True)
     subprocess.run([str(args.java_home / 'bin/java.exe'), '-cp', f'{lifecycle_classes};{args.gson}', 'dev.emi.emi.runtime.LifecycleChecks'], cwd=temporary, check=True)

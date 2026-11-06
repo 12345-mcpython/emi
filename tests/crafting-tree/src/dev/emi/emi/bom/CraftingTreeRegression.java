@@ -38,8 +38,8 @@ public class CraftingTreeRegression {
         equal(full.links.stream().filter(l -> l.child == entry(full, "component")).count(), 2, "two shared links");
         equal(entry(full, "component").total, 2, "shared total");
         for (CraftingTreeModel.Link link : full.links) check(link.child.depth > link.parent.depth, "topological depth");
-        equal(full.steps.get(0).batches, 1, "dependency step batches");
-        check(full.steps.get(0).recipe == component, "dependency first");
+        equal(full.steps.get(0).batches(), 1, "dependency step batches");
+        check(full.steps.get(0).recipe() == component, "dependency first");
         EmiStack stock = s("component", 1);
         CraftingTreeModel partial = new CraftingTreeModel(tree, new EmiPlayerInventory(List.of(stock)));
         equal(cost(partial.missing, "ore"), 3, "single intermediate inventory allocation");
@@ -66,7 +66,7 @@ public class CraftingTreeRegression {
         CraftingTreeModel model = new CraftingTreeModel(tree, null);
         equal(cost(model.required, "ore"), 4, "probabilistic production scales inputs");
         check(model.required.get(0) instanceof ChanceMaterialCost, "EMI chance class preserved");
-        equal(model.steps.get(0).batches, 2, "expected production batches");
+        equal(model.steps.get(0).batches(), 2, "expected production batches");
         BoM.recipes.clear();
         tree = new MaterialTree(recipe("goal", 1, s("ore", 2).setChance(.5f), s("ore", 2)));
         model = new CraftingTreeModel(tree, null);
@@ -164,13 +164,13 @@ public class CraftingTreeRegression {
         equal(cost(model.required,"a"),0,"nested co-product substitutes raw");
         equal(cost(model.leftovers,"a"),0,"nested co-product consumed");
         equal(cost(model.required,"ore"),1,"nested co-product inputs");
-        check(model.steps.get(0).recipe == nested,"nested producer executes first");
+        check(model.steps.get(0).recipe() == nested,"nested producer executes first");
         BoM.recipes.clear();
         Recipe multi = new Recipe(List.of(s("ore",1)),List.of(s("a",1),s("b",1)));
         BoM.recipes.put(s("a",1),multi); BoM.recipes.put(s("b",1),multi);
         model = new CraftingTreeModel(new MaterialTree(recipe("g",1,s("a",1),s("b",1))),null);
         equal(cost(model.required,"ore"),1,"one recipe shared across distinct outputs");
-        equal(model.steps.stream().filter(step -> step.recipe == multi).mapToLong(step -> step.batches).sum(),1,"shared production step");
+        equal(model.steps.stream().filter(step -> step.recipe() == multi).mapToLong(step -> step.batches()).sum(),1,"shared production step");
         BoM.recipes.clear();
         Recipe bootstrap = new Recipe(List.of(s("b",1)),List.of(s("a",1),s("b",1)));
         model = new CraftingTreeModel(new MaterialTree(bootstrap),null);
@@ -211,7 +211,7 @@ public class CraftingTreeRegression {
         tree = new MaterialTree(recipe("g",1,s("a",1).setChance(.5f)));
         model = new CraftingTreeModel(tree,null);
         equal(cost(model.required,"ore"),4,"chance input cannot execute fractional recipe");
-        equal(model.steps.stream().filter(step->step.recipe.getOutputs().get(0).equals(s("a",1))).mapToLong(step->step.batches).sum(),1,"chance input one whole step");
+        equal(model.steps.stream().filter(step->step.recipe().getOutputs().get(0).equals(s("a",1))).mapToLong(step->step.batches()).sum(),1,"chance input one whole step");
         tree = new MaterialTree(new Recipe(List.of(s("ore",1)),List.of(s("a",1).setChance(0))));
         model = new CraftingTreeModel(tree,null);
         equal(cost(model.required,"a"),1,"zero chance external requirement");
