@@ -20,19 +20,21 @@ How EMI gets added to your dependencies varies based on modloader and setup.
 The Gradle property `emi_version` should be something like `1.0.0+1.19.4` with EMI's version and Minecraft's version.
 Here are common dependency setups for different loaders and build systems.
 
+This branch targets Minecraft 1.21.1 with Fabric and NeoForge; Forge builds only exist for 1.20.1 and older.
+
 ```gradle
 dependencies {
 	// Fabric
 	modCompileOnly "dev.emi:emi-fabric:${emi_version}:api"
 	modLocalRuntime "dev.emi:emi-fabric:${emi_version}"
 
-	// Forge (see below block as well if you use Forge Gradle)
-	compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}:api")
-	runtimeOnly fg.deobf("dev.emi:emi-forge:${emi_version}") 
-
-	// NeoForge
+	// NeoForge (1.21.1 and newer)
 	compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-	runtimeOnly "dev.emi:emi-neoforge:${emi_version}" 
+	runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+
+	// Forge (1.20.1 and older, see below if you use Forge Gradle)
+	compileOnly fg.deobf("dev.emi:emi-forge:${emi_version}:api")
+	runtimeOnly fg.deobf("dev.emi:emi-forge:${emi_version}")
 
 	// Architectury
 	modCompileOnly "dev.emi:emi-xplat-intermediary:${emi_version}:api"
@@ -42,7 +44,7 @@ dependencies {
 }
 ```
 
-For Forge Gradle users, you will need to enable Mixin refmaps in your client sourceset. This can be done by adding 2 lines inside of your client runs, to look like below.
+For Forge Gradle users (1.20.1 and older), you will need to enable Mixin refmaps in your client sourceset. This can be done by adding 2 lines inside of your client runs, to look like below.
 
 ```gradle
 runs {
