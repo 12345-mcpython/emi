@@ -205,7 +205,7 @@ public class EmiRenderHelper {
 		context.enableDepthTest();
 		EmiPort.setPositionTexShader();
 		context.resetColor();
-		((DrawContextAccessor) context.raw()).invokeDrawTooltip(CLIENT.font, mutable, x, y, positioner);
+		((DrawContextAccessor) context.raw()).invokeDrawTooltip(CLIENT.font, mutable, x, y, positioner, null);
 	}
 
 	public static void drawSlotHightlight(EmiDrawContext context, int x, int y, int w, int h, int z) {

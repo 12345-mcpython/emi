@@ -17,10 +17,14 @@ dependencies {
 
 	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-	modCompileOnly("mezz.jei:${rootProject.jei_version}") {
-		transitive = false
-	}
+	// JEI has no 1.21.4 release, so the jemi integration is excluded for this checkpoint.
+	// modCompileOnly("mezz.jei:${rootProject.jei_version}") {
+	// 	transitive = false
+	// }
 }
+
+sourceSets.main.java.exclude 'dev/emi/emi/jemi/**'
+sourceSets.main.java.exclude 'dev/emi/emi/mixin/jei/**'
 
 processResources {
 	inputs.property "version", project(":fabric").version
@@ -29,6 +33,9 @@ processResources {
 		expand "version": project(":fabric").version
 	}
 }
+
+sourceSets.main.java.exclude 'dev/emi/emi/jemi/**'
+sourceSets.main.java.exclude 'dev/emi/emi/mixin/jei/**'
 
 afterEvaluate {
 	configurations.default.extendsFrom = [configurations.namedElements]
