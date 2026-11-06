@@ -79,18 +79,8 @@ public interface EmiIngredient extends EmiRenderable {
 		if (ingredient == null || ingredient.isEmpty()) {
 			return EmiStack.EMPTY;
 		}
-		ItemStack[] stacks = ingredient.items().toArray(ItemStack[]::new);
-		int amount = 1;
-		if (stacks.length != 0) {
-			amount = stacks[0].getCount();
-			for (int i = 1; i < stacks.length; i++) {
-				if (stacks[i].getCount() != amount) {
-					amount = 1;
-					break;
-				}
-			}
-		}
-		return of(ingredient, amount);
+		// 1.21.2+ ingredients carry item holders instead of stacks, so the default amount is used.
+		return of(ingredient, 1);
 	}
 
 	public static EmiIngredient of(Ingredient ingredient, long amount) {
