@@ -3,7 +3,7 @@
 只通过本目录的 init 脚本显式启用，不加入普通 build 或统一 Gradle 测试任务。生产文件不需为 fixture 新增测试开关、配方、物料或 `BookmarkCrafting.Access` 替身。
 
 ```powershell
-$env:JAVA_HOME = 'D:\java\zulu17.68.203-ca-jdk17.0.20.1-win_x64'
+$env:JAVA_HOME = 'D:\java\zulu21.52.203-ca-jdk21.0.12.1-win_x64'
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\gradlew.bat --offline -I tests/crafting-tree-smoke/world/init.gradle :fabric:craftingWorldSmokeClasses
 .\gradlew.bat --offline -I tests/crafting-tree-smoke/world/init.gradle :fabric:runClient
@@ -41,3 +41,5 @@ fabric/run/crafting-world-smoke/screenshots/crafting-world-smoke/emi-world-smoke
 只有 `PASS.txt` 和六场景权威库存 snapshot 才代表本 fixture 通过。此测试覆盖公开 `BookmarkCrafting.start` API 到真实 vanilla server handler/slot 同步的链，不声称物理 Ctrl/Alt、侧栏点击入口、独立远程服务器、Forge 游戏运行或其它机器 handler 已通过。
 
 2026年11月3日21:47实际验证：六场景全部通过，产物位于隔离目录 `screenshots/crafting-world-smoke/emi-world-smoke-1793713632747/`，Java17离线运行32秒正常退出。两主场景 `completed/operations` 分别2/2、3/3；birch2/2、自有grid1/1、vanilla clientFill1/1；foreign grid明确拒绝且服务器物料不变。已读回 PASS.txt，人工查看工作台截图确认唯一箱子与空grid。左书签若干图标呈白块的视觉问题尚待另查；此 PASS 不代表所有视觉细节完美。较早的两主场景通过产物 `emi-world-smoke-1793713234432/` 仅覆盖旧两场景，不混用为六场景证据。
+
+2026年11月5日：以上为 1.20.1 记录。本 fixture 的元数据已随代码更新到 1.21.1（Java 21、`:fabric:`），但移植后尚未重新编译，也未在 1.21.1 客户端重跑世界场景；固定键位/界面 API 若有变化需在首次运行时修正。

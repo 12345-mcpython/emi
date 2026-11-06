@@ -94,6 +94,8 @@ EMI 组链合成使用独立可配置绑定 `EmiConfig.craftBookmarkGroup`（`ke
 
 ## 验证状态
 
+### 1.20.1 记录
+
 2026年11月3日：主agent在Java17下重新执行独立回归，合成模型79、收藏分组62、自动合成调度59、计划290、生命周期7，共497项通过（包含普通无配方收藏的executionRows空recipe回归）；transfer checks亦通过，但本轮未提供可引用的断言总数。隔离fixtures验证当前生产源码逻辑，不等于Minecraft网络测试。最后标准文字渲染修改后的Fabric／Forge离线构建也已通过，主agent确认两包生产类、mixin及可选smoke隔离；本次文档编辑未运行Gradle。
 
 最新严格真实Fabric标题页／RecipeScreen smoke已通过，证据为 `fabric/run/crafting-tree-smoke/screenshots/crafting-tree-smoke/1793715023124/PASS.txt`、13张PNG及roundtrip JSON。真实manager Ctrl滚轮和Alt整组折叠／展开再次通过；Win32前台HWND与GLFW窗口相等，Robot键由native callback与`EmiInput`轮询确认。`RowFavorite` 数量改用标准Minecraft文字阴影、紧凑单位与17px范围缩放；已人工查看 `08-bookmarks-todo.png`，白块消失且1、4、8、12、3数量清晰可见，未修改原版MicroTextRenderer。较早 `1793714081752` 严格PASS与 `1793711344599`／`1793713444210` 严格FAIL保留历史：后者OS已按Ctrl但实际前台HWND不同，`GLFW_FOCUSED`缓存true不足以证明前台。旧 `1793711650627` 模型模式仅属旧版；另已读回新版 `1793714208968/PASS-MODEL-MODIFIERS.txt`，公开模型API数量／折叠及其它正常UI阶段通过，但明确 `CtrlAltUI UNVERIFIED`，不能代替最新严格输入PASS。
@@ -101,3 +103,7 @@ EMI 组链合成使用独立可配置绑定 `EmiConfig.craftBookmarkGroup`（`ke
 最新真实Fabric整合服务器七场景全部通过，证据为 `fabric/run/crafting-world-smoke/screenshots/crafting-world-smoke/emi-world-smoke-1793714835690/PASS.txt`及截图／权威库存snapshot：玩家2×2链2/2、工作台3×3链3/3、显式birch且oak不动2/2、foreign grid拒绝且服务端不变、自有非空grid恰一批1/1、临时 `EmiClient.onServer=false` 的真实vanilla clientFill／ClickSlot路径1/1，以及EMI服务端精确取料64取3（源61、玩家3、光标0，`completed=3/operations=1`）。vanilla标记仅选择真实填充路径，不等于卸载服务端EMI。旧 `emi-world-smoke-1793713632747` 六场景证据保留历史，最新运行已重跑六项并加取料。
 
 尚无独立远程服务器、Forge游戏运行或其它机器handler验证；vanilla无服务端EMI的取料路径、跨页长按拖动与完整计划导入／导出仍未由上述世界场景覆盖。严格物理输入PASS与整合世界API／packet ack PASS范围互补，不覆盖物理侧栏启动合成／取料键。
+
+### 1.21.1 移植
+
+2026年11月5日：代码已移植到 1.21.1（Fabric / NeoForge），`:fabric:build` 与独立回归（算量79、收藏分组141、自动合成59、计划290、生命周期7、transfer）通过，mixin refmap 解析正常。NeoForge 构建因无法拉取依赖未执行，游戏内验证尚未进行。

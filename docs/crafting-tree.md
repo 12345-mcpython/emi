@@ -4,7 +4,7 @@
 
 ## 范围与实现原则
 
-本功能面向 Minecraft 1.20.1 的 Fabric 与 Forge。它借鉴 NEI 合成树的交互与规划概念，在 EMI 的配方、材料和填充接口上独立重写；不是复用或套用旧补丁。界面及编译适配仍可能调整，具体控件和行为以最终 UI 为准。
+本功能面向 Minecraft 1.21.1 的 Fabric 与 NeoForge。它借鉴 NEI 合成树的交互与规划概念，在 EMI 的配方、材料和填充接口上独立重写；不是复用或套用旧补丁。界面及编译适配仍可能调整，具体控件和行为以最终 UI 为准。
 
 合成树用于查看依赖、安排制作步骤和估算材料。它不负责机器自动化，也不提供 GT 旧版本耐久机制的专用桥接。工作站统计按 EMI 配方类别汇总执行批数，不代表并行机器台数、运行时间、能耗或自动化生产线。
 
@@ -67,7 +67,7 @@ GTNH NEI 截图中的绿色括号和逐行配方属于左侧书签栏。当前 E
 
 以下是完整验收清单；已完成的检查与未覆盖范围另见下方“验证结果”，不能把清单本身当作全部通过。
 
-1. **编译与加载**：分别按项目现有构建流程编译 1.20.1 Fabric 和 Forge，进入游戏后打开合成树，确认入口、容器返回和界面重开正常。
+1. **编译与加载**：分别按项目现有构建流程编译 1.21.1 Fabric 和 NeoForge，进入游戏后打开合成树，确认入口、容器返回和界面重开正常。
 2. **语言覆盖**：在英文与简体中文间切换，检查全部按钮、窗口标题、提示与七种统计分组；库存开关及折叠三态都必须显示译文，不能露出 `emi.tree.*` 或 `screen.emi.recipe_tree`。
 3. **JSON 静态检查**：将两份语言资源作为标准 JSON 解析；检查重复 key、空译文及格式占位符。提取最终新 UI 中的 `tr("...")` 与动作按钮列表，另显式展开 `inventory_on/off`、`fold_0/1/2` 及 `section.needed/available/crafting/ready/results/leftovers/machines`，逐项与两份语言文件比较。
 4. **默认配方与公用账本**：选择含共享中间材料的配方，核对批数、基础材料及剩余产物；设置 EMI 默认配方或树内替代配方后检查依赖变化。特别检查同一种库存或余料没有在多个分支重复抵扣。
@@ -78,7 +78,7 @@ GTNH NEI 截图中的绿色括号和逐行配方属于左侧书签栏。当前 E
 9. **计划与剪贴板**：保存、重命名、切换、删除计划；复制 JSON 后导入；用无效 JSON 验证失败提示。再次打开计划检查配方选择、批数、折叠与库存模式。
 10. **完整布局图片与保护**：平移或放大到只看到一小片区域后导出，确认仍包含当前完整可见图及当前分组全部统计；再测试折叠和隐藏统计。构造超过单边 8192 或总计 16M 像素的导出，确认先提示拒绝且界面仍可编辑。
 
-## 验证结果（2026年11月3日）
+## 验证结果（2026年11月3日，1.20.1）
 
 - 主agent已在Java17下重新执行独立生产源码回归：算量79、收藏分组62、runner59、计划290、生命周期7，共497项通过（包含普通无配方收藏的executionRows空recipe回归）；包括保存时不把预算截断冻结为永久原料终止。transfer checks亦通过，本轮没有可引用的断言总数。fixtures不验证真实网络。
 - 最终构建：最后标准文字渲染修改后的Java17离线 `:fabric:build :forge:build` 已通过；主agent检查两包生产类、mixin及可选smoke隔离。本次文档更新未运行Gradle。
@@ -86,5 +86,13 @@ GTNH NEI 截图中的绿色括号和逐行配方属于左侧书签栏。当前 E
 - 最新严格模式再次通过真实manager Ctrl滚轮、Alt整组折叠及根结果展开：Win32前台HWND等于GLFW窗口，真实native callback和`EmiInput`轮询收到Robot按键。`RowFavorite`数量使用标准Minecraft文字阴影、紧凑单位和17px范围缩放；已人工查看 `08-bookmarks-todo.png`，原白块消失、1／4／8／12／3可见，MicroTextRenderer保持原版。较早 `1793714081752` 严格PASS和前台不匹配的严格FAIL为历史；旧 `1793711650627` 模型模式仅属旧版。新版 `1793714208968/PASS-MODEL-MODIFIERS.txt` 已读回，模型API数量／折叠及其它UI阶段通过，但明确 `CtrlAltUI UNVERIFIED`，不能代替最新严格PASS。
 - 最新真实Fabric整合世界七场景通过，证据为 `fabric/run/crafting-world-smoke/screenshots/crafting-world-smoke/emi-world-smoke-1793714835690/PASS.txt`及server权威snapshot：2×2链2/2、3×3链3/3、birch候选且oak不动2/2、foreign grid拒绝且服务端不变、自有非空grid恰一批1/1、`EmiClient.onServer=false` 的真实vanilla clientFill／ClickSlot一批1/1、EMI服务端精确取料64取3（源61、玩家3、光标0，`completed=3/operations=1`）。最新运行重跑旧六项并增加取料，旧 `emi-world-smoke-1793713632747` 保留历史。vanilla标记仅选择真实填充路径，不是卸载服务端EMI；世界API／rawpacket证据不替代物理侧栏启动键或远程服务器验证。
 - 仍待验证：独立远程服务器、Forge游戏运行、其它机器handler、vanilla无服务端EMI的取料路径、跨页长按拖动及完整计划导入／导出流程。标题页与整合世界PASS各有范围；已检查白块修复截图不等于全部字体、布局和GPU组合都已覆盖。
+
+## 1.21.1 移植状态（2026年11月5日）
+
+- `:fabric:compileJava`、`:fabric:build` 通过，`emi-xplat-refmap.json` 已生成，`BookmarkInventorySyncMixin`、`MinecraftClientMixin`（含新的 `reloadResources(ZLnet/minecraft/client/MinecraftClient$LoadingContext;)` 签名）注入点均已解析。
+- 独立回归全部通过：算量79、收藏分组141、自动合成调度59、计划290、生命周期7、transfer checks。
+- 1.21 适配：`ScreenHandlerSlotUpdateS2CPacket#getItemStack` → `#getStack`、`ItemStack.canCombine` → `ItemStack.areItemsAndComponentsEqual`、`BoMScreen` 改用 `renderDarkening` 与四参数 `mouseScrolled`、截图改用 `Matrix4fStack`。
+- NeoForge 构建未能在本机执行（无法拉取 neoforge maven 依赖），游戏内验证待做。
+- 可选 smoke fixture（`tests/crafting-tree-smoke`）只更新了版本元数据，移植后尚未重新编译或运行。
 
 本说明依据新编写的合成树 UI、需求与本次已确认的验证结果整理，未参考根目录旧补丁、备份或历史日志。

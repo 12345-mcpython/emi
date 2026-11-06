@@ -1,10 +1,10 @@
 # 可选 Fabric 客户端合成树与原生收藏侧栏视觉 smoke
 
-该测试仅用于 Minecraft 1.20.1/Fabric 开发客户端，使用项目现有的 Fabric API、EMI 及本地 Minecraft 资源。没有修改生产代码或任何现有 Gradle 文件，也不会在普通 `build` 中自动编译、加载或运行。测试目录不是发布模组的一部分。
+该测试仅用于 Minecraft 1.21.1/Fabric 开发客户端，使用项目现有的 Fabric API、EMI 及本地 Minecraft 资源。没有修改生产代码或任何现有 Gradle 文件，也不会在普通 `build` 中自动编译、加载或运行。测试目录不是发布模组的一部分。
 
 ## 启动
 
-在仓库根目录使用项目所需的 Java 17 环境执行：
+在仓库根目录使用项目所需的 Java 21 环境执行：
 
 ```powershell
 .\gradlew.bat --offline -I tests/crafting-tree-smoke/init.gradle :fabric:runClient
