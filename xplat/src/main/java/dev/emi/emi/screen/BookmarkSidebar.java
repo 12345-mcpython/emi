@@ -422,8 +422,7 @@ public final class BookmarkSidebar {
             edgeDirection = direction;
             edgeSince = now;
         } else if (now - edgeSince >= PAGE_SCROLL_DELAY_MS) {
-            int next = Math.clamp(panel.page + direction, 0, pages - 1);
-            panel.page = next;
+            panel.page = Math.clamp(panel.page + direction, 0, pages - 1);
             edgeSince = now;
         }
         if (movingGroup) {
