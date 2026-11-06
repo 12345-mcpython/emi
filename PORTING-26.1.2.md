@@ -7,7 +7,7 @@ Status: **1.21.4 checkpoint delivered** (builds + regression harnesses green). T
 | Branch | Contents |
 | --- | --- |
 | `1.21` | last fully featured release line (Minecraft 1.21.1) |
-| `26.1.2-port` | the port line, currently parked on the working 1.21.4 checkpoint (`29f78d4`) |
+| `1.21.4-port` | the working 1.21.4 checkpoint (`b49d133`, tag `1.21.4-port`); the next hops continue from here |
 | `1.21.5-wip` | version bump to 1.21.5 plus the blocker inventory; does not compile yet |
 
 ## Checkpoint plan
