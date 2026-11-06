@@ -21,8 +21,8 @@ import dev.emi.emi.screen.EmiScreenManager;
 
 public class EmiSidebars {
 	public static List<EmiIngredient> craftables = List.of();
-	public static List<EmiIngredient> lookupHistory = Lists.newArrayList();
-	public static List<EmiIngredient> craftHistory = Lists.newArrayList();
+	public static final List<EmiIngredient> lookupHistory = Lists.newArrayList();
+	public static final List<EmiIngredient> craftHistory = Lists.newArrayList();
 
 	public static List<? extends EmiIngredient> getStacks(SidebarType type) {
 		return switch (type) {
@@ -31,15 +31,15 @@ public class EmiSidebars {
 			case FAVORITES -> EmiFavorites.favoriteSidebar;
 			case LOOKUP_HISTORY -> lookupHistory;
 			case CRAFT_HISTORY -> craftHistory;
-			case EMPTY -> List.of();
 			case CHESS -> EmiChess.SIDEBAR;
+			case EMPTY -> List.of();
 			default -> List.of();
 		};
 	}
 
 	public static void lookup(EmiIngredient stack) {
 		if (!stack.isEmpty()) {
-			if (lookupHistory.size() >= 1 && lookupHistory.get(0).equals(stack)) {
+			if (!lookupHistory.isEmpty() && lookupHistory.get(0).equals(stack)) {
 				return;
 			}
 			lookupHistory.remove(stack);
@@ -51,7 +51,7 @@ public class EmiSidebars {
 
 	public static void craft(EmiRecipe recipe) {
 		if (!recipe.getOutputs().isEmpty()) {
-			if (craftHistory.size() >= 1 && EmiApi.getRecipeContext(craftHistory.get(0)).equals(recipe)) {
+			if (!craftHistory.isEmpty() && EmiApi.getRecipeContext(craftHistory.get(0)).equals(recipe)) {
 				return;
 			}
 			EmiIngredient stack = new EmiFavorite.Craftable(recipe);

@@ -34,7 +34,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 public class EmiPlayerInventory {
 	private final Comparison none = Comparison.DEFAULT_COMPARISON;
 	private final Comparison strict = EmiPort.compareStrict();
-	public Map<EmiStack, EmiStack> inventory = Maps.newHashMap();
+	public final Map<EmiStack, EmiStack> inventory = Maps.newHashMap();
 	
 	@Deprecated
 	@ApiStatus.Internal
@@ -128,7 +128,7 @@ public class EmiPlayerInventory {
 		for (EmiStack stack : inventory.keySet()) {
 			set.addAll(EmiApi.getRecipeManager().getRecipesByInput(stack));
 		}
-		return set.stream().filter(r -> !r.hideCraftable() && predicate.test(r) && r.getOutputs().size() > 0)
+		return set.stream().filter(r -> !r.hideCraftable() && predicate.test(r) && !r.getOutputs().isEmpty())
 			.map(r -> new EmiFavorite.Craftable(r))
 			.sorted((a, b) -> {
 				int i = Integer.compare(

@@ -22,7 +22,7 @@ public enum FluidUnit implements ConfigEnum {
 	private final Component translation;
 	private final Double2ObjectFunction<Component> translator;
 
-	private FluidUnit(String name, Double2ObjectFunction<Component> translator) {
+	FluidUnit(String name, Double2ObjectFunction<Component> translator) {
 		this.name = name;
 		translation = EmiPort.translatable("emi.unit." + name);
 		this.translator = translator;

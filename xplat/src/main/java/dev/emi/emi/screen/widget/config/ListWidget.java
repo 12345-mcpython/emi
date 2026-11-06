@@ -52,7 +52,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 	private boolean scrolling;
 	private Entry selected;
 	private Entry hoveredEntry;
-	public int padding = 4;
+	public final int padding = 4;
 
 	public ListWidget(Minecraft client, int width, int height, int top, int bottom) {
 		this.client = client;
@@ -247,7 +247,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 	}
 
 	public void setScrollAmount(double amount) {
-		this.scrollAmount = Mth.clamp(amount, 0.0, (double)this.getMaxScroll());
+		this.scrollAmount = Mth.clamp(amount, 0.0, this.getMaxScroll());
 	}
 
 	public int getMaxScroll() {
@@ -303,7 +303,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		Entry entry = this.getEntryAtPosition(mouseX, mouseY);
 		if (entry != null) {
 			if (entry.mouseClicked(mouseX, mouseY, button)) {
-				this.setFocused((GuiEventListener)entry);
+				this.setFocused(entry);
 				this.setDragging(true);
 				return true;
 			}
@@ -387,7 +387,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			int k;
 			int j = this.children().indexOf(this.getSelectedOrNull());
 			while (j != (k = Mth.clamp(j + i, 0, this.getEntryCount() - 1))) {
-				Entry entry = (Entry)this.children().get(k);
+				Entry entry = this.children().get(k);
 				if (predicate.test(entry)) {
 					this.setSelected(entry);
 					this.ensureVisible(entry);
@@ -440,7 +440,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 				BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 			}
 			p = this.getRowLeft();
-			((Entry)entry).render(draw, j, k, p, o - 3, n, mouseX, mouseY, Objects.equals(this.hoveredEntry, entry), delta);
+			entry.render(draw, j, k, p, o - 3, n, mouseX, mouseY, Objects.equals(this.hoveredEntry, entry), delta);
 		}
 	}
 
@@ -504,7 +504,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		int i;
 		List<Entry> list = this.children();
 		if (list.size() > 1 && (i = list.indexOf(entry)) != -1) {
-			builder.add(NarratedElementType.POSITION, (Component)EmiPort.translatable("narrator.position.list", i + 1, list.size()));
+			builder.add(NarratedElementType.POSITION, EmiPort.translatable("narrator.position.list", i + 1, list.size()));
 		}
 	}
 
@@ -541,9 +541,9 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		public abstract int getHeight();
 	}
 
-	protected static enum MoveDirection {
+	protected enum MoveDirection {
 		UP,
-		DOWN;
+		DOWN
 
-	}
+    }
 }

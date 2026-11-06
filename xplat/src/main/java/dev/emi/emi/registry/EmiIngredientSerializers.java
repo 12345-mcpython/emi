@@ -71,7 +71,7 @@ public class EmiIngredientSerializers {
 					type = "tag";
 				}
 			}
-			return ((EmiIngredientSerializer) BY_TYPE.get(type)).deserialize(element);
+			return BY_TYPE.get(type).deserialize(element);
 		} catch (Exception e) {
 			EmiLog.error("Exception deserializing stack " + element, e);
 			return EmiStack.EMPTY;

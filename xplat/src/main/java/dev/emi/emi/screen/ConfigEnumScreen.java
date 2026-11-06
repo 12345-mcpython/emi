@@ -79,7 +79,7 @@ public class ConfigEnumScreen<T> extends Screen {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
-	public static record Entry<T>(T value, Component name, List<ClientTooltipComponent> tooltip) {
+	public record Entry<T>(T value, Component name, List<ClientTooltipComponent> tooltip) {
 	}
 
 	public static class SelectionWidget<T> extends ListWidget.Entry {

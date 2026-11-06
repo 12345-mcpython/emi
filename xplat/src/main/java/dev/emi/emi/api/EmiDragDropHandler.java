@@ -38,7 +38,7 @@ public interface EmiDragDropHandler<T extends Screen> {
 	 * A simple, bounds based drag drop handler.
 	 * Bounds are rendered while a stack is dragged.
 	 */
-	public static class BoundsBased<T extends Screen> implements EmiDragDropHandler<T> {
+    class BoundsBased<T extends Screen> implements EmiDragDropHandler<T> {
 		private final Function<T, Map<Bounds, Consumer<EmiIngredient>>> bounds;
 
 		public BoundsBased(Function<T, Map<Bounds, Consumer<EmiIngredient>>> bounds) {
@@ -78,14 +78,14 @@ public interface EmiDragDropHandler<T extends Screen> {
 	 * A simple, slot based drag drop handler.
 	 * Slots render a highlight while a stack is dragged.
 	 */
-	public static class SlotBased<T extends AbstractContainerScreen<?>> extends BoundsBased<T> {
+    class SlotBased<T extends AbstractContainerScreen<?>> extends BoundsBased<T> {
 		
 		/**
 		 * @param slots A function to get a list of slot targets given a screen
 		 * @param consumer A consumer for dropped stacks
 		 */
 		public SlotBased(Function<T, Collection<Slot>> slots, TriConsumer<T, Slot, EmiIngredient> consumer) {
-			super(t -> SlotBased.<T>map(t, slots, consumer));
+			super(t -> SlotBased.map(t, slots, consumer));
 		}
 
 		/**
@@ -93,7 +93,7 @@ public interface EmiDragDropHandler<T extends Screen> {
 		 * @param consumer A consumer for dropped stacks
 		 */
 		public SlotBased(BiPredicate<T, Slot> slotFilter, TriConsumer<T, Slot, EmiIngredient> consumer) {
-			super(t -> SlotBased.<T>map(t, screen -> filter(screen, slotFilter), consumer));
+			super(t -> SlotBased.map(t, screen -> filter(screen, slotFilter), consumer));
 		}
 
 		private static <T extends AbstractContainerScreen<?>> Collection<Slot> filter(T t, BiPredicate<T, Slot> slotFilter) {
@@ -117,7 +117,7 @@ public interface EmiDragDropHandler<T extends Screen> {
 			return map;
 		}
 
-		public static interface TriConsumer<A, B, C> {
+		public interface TriConsumer<A, B, C> {
 			void accept(A a, B b, C c);
 		}
 	}

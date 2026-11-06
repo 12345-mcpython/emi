@@ -13,7 +13,7 @@ public enum SidebarSide implements ConfigEnum {
 
 	private final String name;
 
-	private SidebarSide(String name) {
+	SidebarSide(String name) {
 		this.name = name;
 	}
 

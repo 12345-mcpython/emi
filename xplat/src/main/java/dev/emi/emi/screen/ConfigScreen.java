@@ -2,6 +2,7 @@ package dev.emi.emi.screen;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -60,14 +61,14 @@ import dev.emi.emi.search.EmiSearch;
 
 public class ConfigScreen extends Screen {
 	private static final int maxWidth = 240;
-	private Screen last;
+	private final Screen last;
 	private ConfigSearch search;
 	public ListWidget list;
 	public EmiBind activeBind;
 	public int activeBindOffset;
 	public int activeModifiers;
 	public int lastModifier;
-	public String originalConfig;
+	public final String originalConfig;
 	public Button resetButton;
 
 	public ConfigScreen(Screen last) {
@@ -90,17 +91,16 @@ public class ConfigScreen extends Screen {
 		Minecraft.getInstance().setScreen(last);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static List<ClientTooltipComponent> getFieldTooltip(Field field) {
 		List<ClientTooltipComponent> text;
 		ConfigValue annot = field.getAnnotation(ConfigValue.class);
 		String key = "config.emi.tooltip." + annot.value().replace('-', '_');
 		Comment comment = field.getAnnotation(Comment.class);
 		if (I18n.exists(key)) {
-			text = (List<ClientTooltipComponent>) (Object) Arrays.stream(I18n.get(key).split("\n"))
+			text = Arrays.stream(I18n.get(key).split("\n"))
 				.map(EmiPort::literal).map(EmiTooltipComponents::of).toList();
 		} else if (comment != null) {
-			text = (List<ClientTooltipComponent>) (Object) Arrays.stream(comment.value().split("\n"))
+			text = Arrays.stream(comment.value().split("\n"))
 				.map(EmiPort::literal).map(EmiTooltipComponents::of).toList();
 		} else {
 			text = null;
@@ -153,11 +153,9 @@ public class ConfigScreen extends Screen {
 		this.addRenderableWidget(new SizedButtonWidget(x + w - 20, height - 52, 20, 20, 164, 0, () -> true, widget -> {
 			EmiConfig.setGlobalState(!EmiConfig.useGlobalConfig);
 			ConfigScreen.this.resize(minecraft, width, height);
-		}, () -> (EmiConfig.useGlobalConfig ? 40 : 0), () -> {
-			return (List<Component>) (Object) Arrays.stream(I18n.get("tooltip.emi.config.global").split("\n"))
-				.map(s -> minecraft.font.getSplitter().splitLines(FormattedText.of(s), maxWidth, Style.EMPTY))
-				.flatMap(l -> l.stream()).map(v -> EmiPort.literal(v.getString())).toList();
-		}));
+		}, () -> (EmiConfig.useGlobalConfig ? 40 : 0), () -> (List<Component>) (Object) Arrays.stream(I18n.get("tooltip.emi.config.global").split("\n"))
+            .map(s -> minecraft.font.getSplitter().splitLines(FormattedText.of(s), maxWidth, Style.EMPTY))
+            .flatMap(Collection::stream).map(v -> EmiPort.literal(v.getString())).toList()));
 		this.addRenderableWidget(resetButton);
 		this.addWidget(search.field);
 

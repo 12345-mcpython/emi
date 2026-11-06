@@ -20,10 +20,10 @@ import mezz.jei.api.gui.widgets.ITextWidget;
 import net.minecraft.network.chat.FormattedText;
 
 public class JemiRecipeExtrasBuilder implements IRecipeExtrasBuilder {
-	public IRecipeSlotDrawablesView slots;
-	public List<IJeiInputHandler> inputHandlers = Lists.newArrayList();
-	public List<IJeiGuiEventListener> eventListeners = Lists.newArrayList();
-	public List<JemiWidgetBuilder> widgets = Lists.newArrayList();
+	public final IRecipeSlotDrawablesView slots;
+	public final List<IJeiInputHandler> inputHandlers = Lists.newArrayList();
+	public final List<IJeiGuiEventListener> eventListeners = Lists.newArrayList();
+	public final List<JemiWidgetBuilder> widgets = Lists.newArrayList();
 
 	public JemiRecipeExtrasBuilder(IRecipeSlotDrawablesView slots) {
 		this.slots = slots;

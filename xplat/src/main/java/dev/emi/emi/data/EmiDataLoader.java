@@ -63,7 +63,7 @@ public class EmiDataLoader<T> extends SimplePreparableReloadListener<T>
 		return id;
 	}
 
-	public static interface DataConsumer<T> {
+	public interface DataConsumer<T> {
 		void accept(T t, JsonObject json, ResourceLocation id);
 	}
 }

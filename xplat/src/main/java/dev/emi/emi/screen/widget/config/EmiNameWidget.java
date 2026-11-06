@@ -17,8 +17,8 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class EmiNameWidget implements Renderable {
-	private static Minecraft client = Minecraft.getInstance();
-	private List<String[]> NAMES = Lists.<String[]>newArrayList(
+	private static final Minecraft client = Minecraft.getInstance();
+	private final List<String[]> NAMES = Lists.newArrayList(
 		"Emi Memy Imi".split(" "),
 		"Exhaustively Many Ingredients".split(" "),
 		"Explicitly Mandated Items".split(" "),
@@ -41,7 +41,8 @@ public class EmiNameWidget implements Renderable {
 		"Exploring Modified: Iridescent".split(" "),
 		"E M I".split(" ")
 	);
-	public int x, y;
+	public final int x;
+    public final int y;
 
 	public EmiNameWidget(int x, int y) {
 		this.x = x;
@@ -54,7 +55,7 @@ public class EmiNameWidget implements Renderable {
 			ints.add(i);
 		}
 		for (int i = 0; i < portion; i++) {
-			if (ints.size() == 0) {
+			if (ints.isEmpty()) {
 				break;
 			}
 			ints.removeInt(rand.nextInt(ints.size()));

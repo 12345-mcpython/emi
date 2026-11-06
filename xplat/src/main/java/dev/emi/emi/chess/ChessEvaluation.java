@@ -74,9 +74,8 @@ class ChessEvaluation {
 				score += mod * switch (piece.type()) {
 					case PAWN -> 100;
 					case ROOK -> 500;
-					case KNIGHT -> 300;
-					case BISHOP -> 300;
-					case QUEEN -> 900;
+					case KNIGHT, BISHOP -> 300;
+                    case QUEEN -> 900;
 					case KING -> 69000;
 				};
 				int loc = i;

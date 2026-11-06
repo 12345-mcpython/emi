@@ -49,51 +49,51 @@ public class EmiConfig {
 	/** Use {@link dev.emi.emi.api.EmiApi#isCheatMode EmiApi.isCheatMode()} to get the boolean value. */
 	@Comment("Whether cheating in items is enabled.")
 	@ConfigValue("general.cheat-mode")
-	public static CheatMode cheatMode = CheatMode.CREATIVE;
+	public static final CheatMode cheatMode = CheatMode.CREATIVE;
 
 	@Comment("How much EMI should use tooltips and popups to show controls and information.")
 	@ConfigValue("general.help-level")
-	public static HelpLevel helpLevel = HelpLevel.NORMAL;
+	public static final HelpLevel helpLevel = HelpLevel.NORMAL;
 
 	@Comment("Where EMI should pull stacks from to populate the index.")
 	@ConfigValue("general.index-source")
-	public static IndexSource indexSource = IndexSource.CREATIVE;
+	public static final IndexSource indexSource = IndexSource.CREATIVE;
 
 	@ConfigGroup("general.search")
 	@Comment("Which sidebar should be searched using the search bar.")
 	@ConfigValue("general.search-sidebar")
-	public static SidebarSide searchSidebar = SidebarSide.RIGHT;
+	public static final SidebarSide searchSidebar = SidebarSide.RIGHT;
 
 	@Comment("Whether normal search queries should include the tooltip.")
 	@ConfigValue("general.search-tooltip-by-default")
-	public static boolean searchTooltipByDefault = true;
+	public static final boolean searchTooltipByDefault = true;
 
 	@Comment("Whether normal search queries should include the mod name.")
 	@ConfigValue("general.search-mod-name-by-default")
-	public static boolean searchModNameByDefault = false;
+	public static final boolean searchModNameByDefault = false;
 
 	@ConfigGroupEnd
 	@Comment("Whether normal search queries should include the stack's tags.")
 	@ConfigValue("general.search-tags-by-default")
-	public static boolean searchTagsByDefault = false;
+	public static final boolean searchTagsByDefault = false;
 
 	// UI
 	@Comment("Which action should be performed when clicking the recipe book.")
 	@ConfigValue("ui.recipe-book-action")
-	public static RecipeBookAction recipeBookAction = RecipeBookAction.TOGGLE_CRAFTABLES;
+	public static final RecipeBookAction recipeBookAction = RecipeBookAction.TOGGLE_CRAFTABLES;
 
 	@Comment("Where to display status effects in the inventory.")
 	@ConfigValue("ui.effect-location")
-	public static EffectLocation effectLocation = EffectLocation.TOP;
+	public static final EffectLocation effectLocation = EffectLocation.TOP;
 
 	@Comment("Whether to display a gray overlay when hovering over a stack.")
 	@ConfigValue("ui.show-hover-overlay")
-	public static boolean showHoverOverlay = true;
+	public static final boolean showHoverOverlay = true;
 
 	@ConfigGroup("ui.mod-id")
 	@Comment("Whether to add mod name to tooltips")
 	@ConfigValue("ui.append-mod-id")
-	public static boolean appendModId = true;
+	public static final boolean appendModId = true;
 
 	@ConfigGroupEnd
 	@Comment("Whether to add mod name to item tooltips, in case another mod provides behavior")
@@ -102,16 +102,16 @@ public class EmiConfig {
 
 	@Comment("Prevents recipes being quick crafted from shifting around under the cursor.")
 	@ConfigValue("ui.miscraft-prevention")
-	public static boolean miscraftPrevention = true;
+	public static final boolean miscraftPrevention = true;
 
 	@Comment("The unit to display fluids as.")
 	@ConfigValue("ui.fluid-unit")
-	public static FluidUnit fluidUnit = EmiAgnos.isForge() ? FluidUnit.MILLIBUCKETS : FluidUnit.LITERS;
+	public static final FluidUnit fluidUnit = EmiAgnos.isForge() ? FluidUnit.MILLIBUCKETS : FluidUnit.LITERS;
 
 	@Comment("Whether to use the batched render system. Batching is faster, but may have incompatibilities"
 		+ " with shaders or other mods.")
 	@ConfigValue("ui.use-batched-renderer")
-	public static boolean useBatchedRenderer = true;
+	public static final boolean useBatchedRenderer = true;
 
 	@Comment("The bookmark quantity step used by Ctrl + Alt + scroll. Minimum: 1.")
 	@ConfigValue("ui.bookmark-quantity-step")
@@ -120,7 +120,7 @@ public class EmiConfig {
 	@Comment("Initial layout for new bookmark groups. DEFAULT flows items through the grid;"
 		+ " TODO puts each result/item on its own row. The group header still toggles this per group.")
 	@ConfigValue("ui.bookmark-view-mode")
-	public static BookmarkViewMode bookmarkViewMode = BookmarkViewMode.DEFAULT;
+	public static final BookmarkViewMode bookmarkViewMode = BookmarkViewMode.DEFAULT;
 
 	/** Clamp on use as the config UI can assign integer fields directly. */
 	public static int getBookmarkQuantityStep() {
@@ -129,10 +129,10 @@ public class EmiConfig {
 
 	@Comment("Whether to have the search bar in the center of the screen, instead of to the side.")
 	@ConfigValue("ui.center-search-bar")
-	public static boolean centerSearchBar = true;
+	public static final boolean centerSearchBar = true;
 
 	@ConfigFilter("ui.search-sidebar-focus")
-	private static Predicate<SidebarType> searchSidebarFocusFilter = type -> {
+	private static final Predicate<SidebarType> searchSidebarFocusFilter = type -> {
 		return type != SidebarType.CHESS;
 	};
 
@@ -141,7 +141,7 @@ public class EmiConfig {
 	public static SidebarType searchSidebarFocus = SidebarType.INDEX;
 
 	@ConfigFilter("ui.empty-search-sidebar-focus")
-	private static Predicate<SidebarType> emptySearchSidebarFocusFilter = type -> {
+	private static final Predicate<SidebarType> emptySearchSidebarFocusFilter = type -> {
 		return type != SidebarType.CHESS;
 	};
 
@@ -151,79 +151,79 @@ public class EmiConfig {
 
 	@Comment("Whether the EMI config button should be visible.")
 	@ConfigValue("ui.emi-config-button-visibility")
-	public static ButtonVisibility emiConfigButtonVisibility = ButtonVisibility.SHOWN;
+	public static final ButtonVisibility emiConfigButtonVisibility = ButtonVisibility.SHOWN;
 
 	@Comment("Whether the recipe tree button should be visible.")
 	@ConfigValue("ui.recipe-tree-button-visibility")
-	public static ButtonVisibility recipeTreeButtonVisibility = ButtonVisibility.AUTO;
+	public static final ButtonVisibility recipeTreeButtonVisibility = ButtonVisibility.AUTO;
 
 	@ConfigGroup("ui.recipe-screen")
 	@Comment("The maximum height the recipe screen will grow to be if space is available in pixels.")
 	@ConfigValue("ui.maximum-recipe-screen-height")
-	public static int maximumRecipeScreenHeight = 256;
+	public static final int maximumRecipeScreenHeight = 256;
 
 	@Comment("The minimum width of the recipe screen in pixels. "
 		+ "Controls how many tabs there can be, and where the page switching buttons go. "
 		+ "The default is 176, the width of most screens.")
 	@ConfigValue("ui.minimum-recipe-screen-width")
-	public static int minimumRecipeScreenWidth = 176;
+	public static final int minimumRecipeScreenWidth = 176;
 
 	@Comment("The amount of vertical margin to give in the recipe screen.")
 	@ConfigValue("ui.vertical-margin")
-	public static int verticalMargin = 20;
+	public static final int verticalMargin = 20;
 
 	@ConfigFilter("ui.workstation-location")
-	private static Predicate<SidebarSide> workstationLocationFilter = side -> {
+	private static final Predicate<SidebarSide> workstationLocationFilter = side -> {
 		return side != SidebarSide.TOP;
 	};
 	@Comment("Where to show workstations in the recipe screen")
 	@ConfigValue("ui.workstation-location")
-	public static SidebarSide workstationLocation = SidebarSide.BOTTOM;
+	public static final SidebarSide workstationLocation = SidebarSide.BOTTOM;
 
 	@ConfigGroupEnd()
 	@Comment("Display cost per batch when hovering a recipe output")
 	@ConfigValue("ui.show-cost-per-batch")
-	public static boolean showCostPerBatch = true;
+	public static final boolean showCostPerBatch = true;
 
 	@ConfigGroup("ui.recipe-buttons")
 	@Comment("Whether recipes should have a button to set as default.")
 	@ConfigValue("ui.recipe-default-button")
-	public static boolean recipeDefaultButton = true;
+	public static final boolean recipeDefaultButton = true;
 
 	@Comment("Whether recipes should have a button to show the recipe tree.")
 	@ConfigValue("ui.recipe-tree-button")
-	public static boolean recipeTreeButton = true;
+	public static final boolean recipeTreeButton = true;
 
 	@Comment("Whether recipes should have a button to fill the ingredients in a handler.")
 	@ConfigValue("ui.recipe-fill-button")
-	public static boolean recipeFillButton = true;
+	public static final boolean recipeFillButton = true;
 
 	@Comment("Whether recipes should have a button to take a screenshot of the recipe.")
 	@ConfigValue("ui.recipe-screenshot-button")
-	public static boolean recipeScreenshotButton = false;
+	public static final boolean recipeScreenshotButton = false;
 
 	@ConfigGroupEnd
 	@Comment("The GUI scale at which recipe screenshots are saved. Use 0 to use the current GUI scale.")
 	@ConfigValue("ui.recipe-screenshot-scale")
-	public static int recipeScreenshotScale = 0;
+	public static final int recipeScreenshotScale = 0;
 
 	// Left sidebar
 
 	@ConfigGroup("ui.left-sidebar")
 	@Comment("The pages in the left sidebar")
 	@ConfigValue("ui.left-sidebar-pages")
-	public static SidebarPages leftSidebarPages = new SidebarPages(List.of(
+	public static final SidebarPages leftSidebarPages = new SidebarPages(List.of(
 		new SidebarPages.SidebarPage(SidebarType.FAVORITES)
 	), SidebarSettings.LEFT);
 
 	@Comment("The subpanels in the left sidebar")
 	@ConfigValue("ui.left-sidebar-subpanels")
-	public static SidebarSubpanels leftSidebarSubpanels = new SidebarSubpanels(List.of(
+	public static final SidebarSubpanels leftSidebarSubpanels = new SidebarSubpanels(List.of(
 	), SidebarSettings.LEFT);
 	
 	@Comment("How many columns and rows of ingredients to limit the left sidebar to")
 	@ConfigValue("ui.left-sidebar-size")
-	public static IntGroup leftSidebarSize = new IntGroup(
+	public static final IntGroup leftSidebarSize = new IntGroup(
 		"emi.sidebar.size.",
 		List.of("columns", "rows"),
 		IntList.of(12, 100)
@@ -231,7 +231,7 @@ public class EmiConfig {
 
 	@Comment("How much space to maintain between the left sidebar and obstructions, in pixels")
 	@ConfigValue("ui.left-sidebar-margins")
-	public static Margins leftSidebarMargins = new Margins(2, 2, 2, 2);
+	public static final Margins leftSidebarMargins = new Margins(2, 2, 2, 2);
 
 	@Comment("Where to position the left sidebar")
 	@ConfigValue("ui.left-sidebar-align")
@@ -252,19 +252,19 @@ public class EmiConfig {
 	@ConfigGroup("ui.right-sidebar")
 	@Comment("The pages in the right sidebar")
 	@ConfigValue("ui.right-sidebar-pages")
-	public static SidebarPages rightSidebarPages = new SidebarPages(List.of(
+	public static final SidebarPages rightSidebarPages = new SidebarPages(List.of(
 		new SidebarPages.SidebarPage(SidebarType.INDEX),
 		new SidebarPages.SidebarPage(SidebarType.CRAFTABLES)
 	), SidebarSettings.RIGHT);
 
 	@Comment("The subpanels in the right sidebar")
 	@ConfigValue("ui.right-sidebar-subpanels")
-	public static SidebarSubpanels rightSidebarSubpanels = new SidebarSubpanels(List.of(
+	public static final SidebarSubpanels rightSidebarSubpanels = new SidebarSubpanels(List.of(
 	), SidebarSettings.RIGHT);
 
 	@Comment("How many columns and rows of ingredients to limit the right sidebar to")
 	@ConfigValue("ui.right-sidebar-size")
-	public static IntGroup rightSidebarSize = new IntGroup(
+	public static final IntGroup rightSidebarSize = new IntGroup(
 		"emi.sidebar.size.",
 		List.of("columns", "rows"),
 		IntList.of(12, 100)
@@ -272,7 +272,7 @@ public class EmiConfig {
 
 	@Comment("How much space to maintain between the right sidebar and obstructions, in pixels")
 	@ConfigValue("ui.right-sidebar-margins")
-	public static Margins rightSidebarMargins = new Margins(2, 2, 2, 2);
+	public static final Margins rightSidebarMargins = new Margins(2, 2, 2, 2);
 
 	@Comment("Where to position the right sidebar")
 	@ConfigValue("ui.right-sidebar-align")
@@ -292,17 +292,17 @@ public class EmiConfig {
 	@ConfigGroup("ui.top-sidebar")
 	@Comment("The pages in the top sidebar")
 	@ConfigValue("ui.top-sidebar-pages")
-	public static SidebarPages topSidebarPages = new SidebarPages(List.of(
+	public static final SidebarPages topSidebarPages = new SidebarPages(List.of(
 	), SidebarSettings.TOP);
 
 	@Comment("The subpanels in the top sidebar")
 	@ConfigValue("ui.top-sidebar-subpanels")
-	public static SidebarSubpanels topSidebarSubpanels = new SidebarSubpanels(List.of(
+	public static final SidebarSubpanels topSidebarSubpanels = new SidebarSubpanels(List.of(
 	), SidebarSettings.TOP);
 
 	@Comment("How many columns and rows of ingredients to limit the top sidebar to")
 	@ConfigValue("ui.top-sidebar-size")
-	public static IntGroup topSidebarSize = new IntGroup(
+	public static final IntGroup topSidebarSize = new IntGroup(
 		"emi.sidebar.size.",
 		List.of("columns", "rows"),
 		IntList.of(9, 9)
@@ -310,7 +310,7 @@ public class EmiConfig {
 
 	@Comment("How much space to maintain between the top sidebar and obstructions, in pixels")
 	@ConfigValue("ui.top-sidebar-margins")
-	public static Margins topSidebarMargins = new Margins(2, 2, 2, 2);
+	public static final Margins topSidebarMargins = new Margins(2, 2, 2, 2);
 
 	@Comment("Where to position the top sidebar")
 	@ConfigValue("ui.top-sidebar-align")
@@ -330,17 +330,17 @@ public class EmiConfig {
 	@ConfigGroup("ui.bottom-sidebar")
 	@Comment("The pages in the bottom sidebar")
 	@ConfigValue("ui.bottom-sidebar-pages")
-	public static SidebarPages bottomSidebarPages = new SidebarPages(List.of(
+	public static final SidebarPages bottomSidebarPages = new SidebarPages(List.of(
 	), SidebarSettings.BOTTOM);
 
 	@Comment("The subpanels in the bottom sidebar")
 	@ConfigValue("ui.bottom-sidebar-subpanels")
-	public static SidebarSubpanels bottomSidebarSubpanels = new SidebarSubpanels(List.of(
+	public static final SidebarSubpanels bottomSidebarSubpanels = new SidebarSubpanels(List.of(
 	), SidebarSettings.BOTTOM);
 
 	@Comment("How many columns and rows of ingredients to limit the bottom sidebar to")
 	@ConfigValue("ui.bottom-sidebar-size")
-	public static IntGroup bottomSidebarSize = new IntGroup(
+	public static final IntGroup bottomSidebarSize = new IntGroup(
 		"emi.sidebar.size.",
 		List.of("columns", "rows"),
 		IntList.of(9, 9)
@@ -348,193 +348,193 @@ public class EmiConfig {
 
 	@Comment("How much space to maintain between the bottom sidebar and obstructions, in pixels")
 	@ConfigValue("ui.bottom-sidebar-margins")
-	public static Margins bottomSidebarMargins = new Margins(2, 2, 2, 2);
+	public static final Margins bottomSidebarMargins = new Margins(2, 2, 2, 2);
 
 	@Comment("Where to position the bottom sidebar")
 	@ConfigValue("ui.bottom-sidebar-align")
-	public static ScreenAlign bottomSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.CENTER, ScreenAlign.Vertical.CENTER);
+	public static final ScreenAlign bottomSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.CENTER, ScreenAlign.Vertical.CENTER);
 
 	@Comment("Whether to render the header buttons and page count for the bottom sidebar")
 	@ConfigValue("ui.bottom-sidebar-header")
-	public static HeaderType bottomSidebarHeader = HeaderType.VISIBLE;
+	public static final HeaderType bottomSidebarHeader = HeaderType.VISIBLE;
 	
 	@ConfigGroupEnd
 	@Comment("Which theme to use for the bottom sidebar")
 	@ConfigValue("ui.bottom-sidebar-theme")
-	public static SidebarTheme bottomSidebarTheme = SidebarTheme.TRANSPARENT;
+	public static final SidebarTheme bottomSidebarTheme = SidebarTheme.TRANSPARENT;
 
 	// Binds
 	@Comment("Toggle the visibility of EMI.")
 	@ConfigValue("binds.toggle-visibility")
-	public static EmiBind toggleVisibility = new EmiBind("key.emi.toggle_visibility", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_O);
+	public static final EmiBind toggleVisibility = new EmiBind("key.emi.toggle_visibility", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_O);
 
 	@Comment("Focuses the search bar.")
 	@ConfigValue("binds.focus-search")
-	public static EmiBind focusSearch = new EmiBind("key.emi.focus_search", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_F);
+	public static final EmiBind focusSearch = new EmiBind("key.emi.focus_search", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_F);
 
 	@Comment("Clears the search bar.")
 	@ConfigValue("binds.clear-search")
-	public static EmiBind clearSearch = new EmiBind("key.emi.clear_search", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind clearSearch = new EmiBind("key.emi.clear_search", InputConstants.UNKNOWN.getValue());
 
 	@Comment("Display all recipes in the game.")
 	@ConfigValue("binds.display-all-recipes")
-	public static EmiBind displayAllRecipes = new EmiBind("key.emi.display_all_recipes", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_Y);
+	public static final EmiBind displayAllRecipes = new EmiBind("key.emi.display_all_recipes", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_Y);
 
 	@Comment("Display the recipes for creating a stack.")
 	@ConfigValue("binds.view-recipes")
-	public static EmiBind viewRecipes = new EmiBind("key.emi.view_recipes",
+	public static final EmiBind viewRecipes = new EmiBind("key.emi.view_recipes",
 		new EmiBind.ModifiedKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_R), 0),
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
 
 	@Comment("Display the recipes that can be created using a stack.")
 	@ConfigValue("binds.view-uses")
-	public static EmiBind viewUses = new EmiBind("key.emi.view_uses",
+	public static final EmiBind viewUses = new EmiBind("key.emi.view_uses",
 		new EmiBind.ModifiedKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_U), 0),
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(1), 0));
 
 	@Comment("Favorite the item to display on the side of the screen opposite of recipies for quick access.")
 	@ConfigValue("binds.favorite")
-	public static EmiBind favorite = new EmiBind("key.emi.favorite", GLFW.GLFW_KEY_A);
+	public static final EmiBind favorite = new EmiBind("key.emi.favorite", GLFW.GLFW_KEY_A);
 
 	@Comment("Open the hovered bookmark group's temporary recipe tree without replacing the current plan.")
 	@ConfigValue("binds.view-bookmark-group")
-	public static EmiBind viewBookmarkGroup = new EmiBind("key.emi.view_bookmark_group", GLFW.GLFW_KEY_T);
+	public static final EmiBind viewBookmarkGroup = new EmiBind("key.emi.view_bookmark_group", GLFW.GLFW_KEY_T);
 
 	@Comment("Take the bookmark group's item materials from ordinary storage; add Shift to subtract inventory.")
 	@ConfigValue("binds.take-bookmark-group")
-	public static EmiBind takeBookmarkGroup = new EmiBind("key.emi.take_bookmark_group", GLFW.GLFW_KEY_V);
+	public static final EmiBind takeBookmarkGroup = new EmiBind("key.emi.take_bookmark_group", GLFW.GLFW_KEY_V);
 
 	@Comment("Craft the selected bookmark group in the current supported crafting container.")
 	@ConfigValue("binds.craft-bookmark-group")
-	public static EmiBind craftBookmarkGroup = new EmiBind("key.emi.craft_bookmark_group", EmiInput.SHIFT_MASK, GLFW.GLFW_KEY_C);
+	public static final EmiBind craftBookmarkGroup = new EmiBind("key.emi.craft_bookmark_group", EmiInput.SHIFT_MASK, GLFW.GLFW_KEY_C);
 
 	@Comment("Set the default recipe for a given stack in the output of a recipe to that recipe.")
 	@ConfigValue("binds.default-stack")
-	public static EmiBind defaultStack = new EmiBind("key.emi.default_stack",
+	public static final EmiBind defaultStack = new EmiBind("key.emi.default_stack",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
 
 	@Comment("Display the recipe tree for a given stack.")
 	@ConfigValue("binds.view-stack-tree")
-	public static EmiBind viewStackTree = new EmiBind("key.emi.view_stack_tree", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind viewStackTree = new EmiBind("key.emi.view_stack_tree", InputConstants.UNKNOWN.getValue());
 
 	@Comment("Display the recipe tree.")
 	@ConfigValue("binds.view-tree")
-	public static EmiBind viewTree = new EmiBind("key.emi.view_tree", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind viewTree = new EmiBind("key.emi.view_tree", InputConstants.UNKNOWN.getValue());
 
 	@Comment("Return to the previous page in EMI.")
 	@ConfigValue("binds.back")
-	public static EmiBind back = new EmiBind("key.emi.back", GLFW.GLFW_KEY_BACKSPACE);
+	public static final EmiBind back = new EmiBind("key.emi.back", GLFW.GLFW_KEY_BACKSPACE);
 
 	@Comment("Return to the next page in EMI after going back.")
 	@ConfigValue("binds.forward")
-	public static EmiBind forward = new EmiBind("key.emi.forward", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind forward = new EmiBind("key.emi.forward", InputConstants.UNKNOWN.getValue());
 
 	@ConfigGroup("binds.crafts")
 	@Comment("When on a stack with an associated recipe:\n"
 		+ "Move ingredients for a single result.")
 	@ConfigValue("binds.craft-one")
-	public static EmiBind craftOne = new EmiBind("key.emi.craft_one",
+	public static final EmiBind craftOne = new EmiBind("key.emi.craft_one",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
 
 	@Comment("When on a stack with an associated recipe:\n"
 		+ "Move ingredients for as many results as possible.")
 	@ConfigValue("binds.craft-all")
-	public static EmiBind craftAll = new EmiBind("key.emi.craft_all", 
+	public static final EmiBind craftAll = new EmiBind("key.emi.craft_all",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.SHIFT_MASK));
 
 	@Comment("When on a stack with an associated recipe:\n"
 		+ "Move ingredients for a single result and put in inventory if possible.")
 	@ConfigValue("binds.craft-one-to-inventory")
-	public static EmiBind craftOneToInventory = new EmiBind("key.emi.craft_one_to_inventory", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind craftOneToInventory = new EmiBind("key.emi.craft_one_to_inventory", InputConstants.UNKNOWN.getValue());
 
 	@Comment("When on a stack with an associated recipe:\n"
 		+ "Move ingredients for as many results as possible and put in inventory if possible.")
 	@ConfigValue("binds.craft-all-to-inventory")
-	public static EmiBind craftAllToInventory = new EmiBind("key.emi.craft_all_to_inventory", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind craftAllToInventory = new EmiBind("key.emi.craft_all_to_inventory", InputConstants.UNKNOWN.getValue());
 
 	@Comment("When on a stack with an associated recipe:\n"
 		+ "Move ingredients for a single result and put in cursor if possible.")
 	@ConfigValue("binds.craft-one-to-cursor")
-	public static EmiBind craftOneToCursor = new EmiBind("key.emi.craft_one_to_cursor", 
+	public static final EmiBind craftOneToCursor = new EmiBind("key.emi.craft_one_to_cursor",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
 
 	@ConfigGroupEnd
 	@Comment("Display the recipe that will be used to craft on a stack with no recipe context.")
 	@ConfigValue("binds.show-craft")
-	public static EmiBind showCraft = new EmiBind("key.emi.show_craft", GLFW.GLFW_KEY_LEFT_SHIFT);
+	public static final EmiBind showCraft = new EmiBind("key.emi.show_craft", GLFW.GLFW_KEY_LEFT_SHIFT);
 
 	@ConfigGroup("binds.cheats")
 	@Comment("Cheat in one of an item into the inventory.")
 	@ConfigValue("binds.cheat-one-to-inventory")
-	public static EmiBind cheatOneToInventory = new EmiBind("key.emi.cheat_one_to_inventory",
+	public static final EmiBind cheatOneToInventory = new EmiBind("key.emi.cheat_one_to_inventory",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(1), EmiInput.CONTROL_MASK));
 
 	@Comment("Cheat in a stack of an item into the inventory.")
 	@ConfigValue("binds.cheat-stack-to-inventory")
-	public static EmiBind cheatStackToInventory = new EmiBind("key.emi.cheat_stack_to_inventory",
+	public static final EmiBind cheatStackToInventory = new EmiBind("key.emi.cheat_stack_to_inventory",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
 	
 	@Comment("Cheat in one of an item into the cursor.")
 	@ConfigValue("binds.cheat-one-to-cursor")
-	public static EmiBind cheatOneToCursor = new EmiBind("key.emi.cheat_one_to_cursor",
+	public static final EmiBind cheatOneToCursor = new EmiBind("key.emi.cheat_one_to_cursor",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(2), EmiInput.CONTROL_MASK));
 	
 	@Comment("Cheat in a stack of an item into the cursor.")
 	@ConfigValue("binds.cheat-stack-to-cursor")
-	public static EmiBind cheatStackToCursor = new EmiBind("key.emi.cheat_stack_to_cursor", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind cheatStackToCursor = new EmiBind("key.emi.cheat_stack_to_cursor", InputConstants.UNKNOWN.getValue());
 	
 	@ConfigGroupEnd
 	@Comment("Delete the stack in the cursor when hovering the index")
 	@ConfigValue("binds.delete-cursor-stack")
-	public static EmiBind deleteCursorStack = new EmiBind("key.emi.delete_cursor_stack",
+	public static final EmiBind deleteCursorStack = new EmiBind("key.emi.delete_cursor_stack",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
 
 	@Comment("Copies the hovered recipe's ID to the clipboard")
 	@ConfigValue("binds.copy-recipe-id")
-	public static EmiBind copyId = new EmiBind("key.emi.copy_recipe_id", InputConstants.UNKNOWN.getValue());
+	public static final EmiBind copyId = new EmiBind("key.emi.copy_recipe_id", InputConstants.UNKNOWN.getValue());
 
 	@Comment("In edit mode, hide the hovered stack")
 	@ConfigValue("binds.hide-stack")
-	public static EmiBind hideStack = new EmiBind("key.emi.hide_stack",
+	public static final EmiBind hideStack = new EmiBind("key.emi.hide_stack",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
 
 	@Comment("In edit mode, hide stacks with the hovered stack's id")
 	@ConfigValue("binds.hide-stack-by-id")
-	public static EmiBind hideStackById = new EmiBind("key.emi.hide_stack_by_id",
+	public static final EmiBind hideStackById = new EmiBind("key.emi.hide_stack_by_id",
 		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK | EmiInput.SHIFT_MASK));
 	
 	// Dev
 	@Comment("Whether development functions should be enabled. Not recommended for general play.")
 	@ConfigValue("dev.dev-mode")
-	public static boolean devMode = EmiAgnos.isDevelopmentEnvironment();
+	public static final boolean devMode = EmiAgnos.isDevelopmentEnvironment();
 
 	@Comment("Whether editing the index is enabled")
 	@ConfigValue("dev.edit-mode")
-	public static boolean editMode = false;
+	public static final boolean editMode = false;
 
 	@Comment("Whether to log untranslated tags as warnings.")
 	@ConfigValue("dev.log-untranslated-tags")
-	public static boolean logUntranslatedTags = EmiAgnos.isDevelopmentEnvironment();
+	public static final boolean logUntranslatedTags = EmiAgnos.isDevelopmentEnvironment();
 
 	@Comment("Whether to log ingredients that don't have a representative tag as warnings.")
 	@ConfigValue("dev.log-non-tag-ingredients")
-	public static boolean logNonTagIngredients = false;
+	public static final boolean logNonTagIngredients = false;
 
 	@Comment("Whether hovering the output of a recipe should show the recipe's EMI ID.")
 	@ConfigValue("dev.show-recipe-ids")
-	public static boolean showRecipeIds = false;
+	public static final boolean showRecipeIds = false;
 
 	@Comment("Whether to display additional widgets added to recipes from other mods.\nThese are typically developer facing and compatibility related, and not useful for players.")
 	@ConfigValue("dev.show-recipe-decorators")
-	public static boolean showRecipeDecorators = EmiAgnos.isDevelopmentEnvironment();
+	public static final boolean showRecipeDecorators = EmiAgnos.isDevelopmentEnvironment();
 
 	@Comment("Whether stacks in the index should display a highlight if they have a recipe default.")
 	@ConfigValue("dev.highlight-defaulted")
-	public static boolean highlightDefaulted = false;
+	public static final boolean highlightDefaulted = false;
 
 	@Comment("Whether to display exclusion areas")
 	@ConfigValue("dev.highlight-exclusion-areas")
-	public static boolean highlightExclusionAreas = false;
+	public static final boolean highlightExclusionAreas = false;
 
 	// Persistent (currently empty)
 
@@ -853,42 +853,42 @@ public class EmiConfig {
 	
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface ConfigValue {
-		public String value();
+	public @interface ConfigValue {
+		String value();
 	}
 
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface ConfigFilter {
-		public String value();
+	public @interface ConfigFilter {
+		String value();
 	}
 	
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface Comment {
-		public String value();
+	public @interface Comment {
+		String value();
 	}
 	
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface ConfigGroup {
-		public String value();
+	public @interface ConfigGroup {
+		String value();
 	}
 	
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface ConfigGroupEnd {
+	public @interface ConfigGroupEnd {
 	}
 
-	private static interface Setter {
+	private interface Setter {
 		void setValue(QDCSS css, String annot, Field field) throws IllegalAccessException ;
 	}
 
-	private static interface Writer<T> {
+	private interface Writer<T> {
 		String writeValue(T value);
 	}
 
-	private static interface MultiWriter<T> {
+	private interface MultiWriter<T> {
 		List<String> writeValue(T value);
 	}
 }

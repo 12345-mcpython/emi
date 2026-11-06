@@ -15,7 +15,7 @@ public enum EffectLocation implements ConfigEnum {
 	public final String name;
 	public final boolean compressed;
 
-	private EffectLocation(String name, boolean compressed) {
+	EffectLocation(String name, boolean compressed) {
 		this.name = name;
 		this.compressed = compressed;
 	}

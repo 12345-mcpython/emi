@@ -65,9 +65,7 @@ public class JemiUtil {
 		} else if (stack.getKey() instanceof Fluid f) {
 			return JemiPlugin.runtime.getIngredientManager().createTypedIngredient(getFluidType(), getFluidHelper().create(f.builtInRegistryHolder(), stack.getAmount() == 0 ? 1000 : stack.getAmount(), stack.getComponentChanges()));
 		} else if (stack instanceof JemiStack js) {
-			return JemiPlugin.runtime.getIngredientManager().getIngredientTypeChecked(js.ingredient)
-				.map(t -> (Optional) JemiPlugin.runtime.getIngredientManager().createTypedIngredient(t, js.ingredient))
-				.orElse(Optional.empty());
+			return JemiPlugin.runtime.getIngredientManager().getIngredientTypeChecked(js.ingredient).flatMap(t -> (Optional) JemiPlugin.runtime.getIngredientManager().createTypedIngredient(t, js.ingredient));
 		}
 		return (Optional) JemiPlugin.runtime.getIngredientManager().createTypedIngredient(VanillaTypes.ITEM_STACK, stack.getItemStack());
 	}

@@ -29,7 +29,7 @@ public class EmiChess {
 	public MoveGenerator generator = new StandardMoveGenerator(PieceColor.BLACK);
 	public PieceColor turn = PieceColor.WHITE;
 	public int lastChecked = -1;
-	public IntSet targets = new IntOpenHashSet();
+	public final IntSet targets = new IntOpenHashSet();
 	public int promotionStart = -1;
 	public int pendingPromotion = -1;
 

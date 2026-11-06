@@ -167,12 +167,12 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 
 @EmiEntrypoint
 public class VanillaPlugin implements EmiPlugin {
-	public static EmiRecipeCategory TAG = new EmiRecipeCategory(EmiPort.id("emi:tag"),
+	public static final EmiRecipeCategory TAG = new EmiRecipeCategory(EmiPort.id("emi:tag"),
 		EmiStack.of(Items.NAME_TAG), simplifiedRenderer(240, 208), EmiRecipeSorting.none());
 	
-	public static EmiRecipeCategory INGREDIENT = new EmiRecipeCategory(EmiPort.id("emi:ingredient"),
+	public static final EmiRecipeCategory INGREDIENT = new EmiRecipeCategory(EmiPort.id("emi:ingredient"),
 		EmiStack.of(Items.COMPASS), simplifiedRenderer(240, 208));
-	public static EmiRecipeCategory RESOLUTION = new EmiRecipeCategory(EmiPort.id("emi:resolution"),
+	public static final EmiRecipeCategory RESOLUTION = new EmiRecipeCategory(EmiPort.id("emi:resolution"),
 		EmiStack.of(Items.COMPASS), simplifiedRenderer(240, 208));
 
 	static {
@@ -289,7 +289,7 @@ public class VanillaPlugin implements EmiPlugin {
 						if (EmiConfig.effectLocation == EffectLocation.TOP) {
 							int size = collection.size();
 							top = ((HandledScreenAccessor) inv).getY() - 34;
-							if (((Object) screen) instanceof CreativeModeInventoryScreen) {
+							if (screen instanceof CreativeModeInventoryScreen) {
 								top -= 28;
 								if (EmiAgnos.isForge()) {
 									top -= 22;

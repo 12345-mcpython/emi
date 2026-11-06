@@ -3,7 +3,7 @@ package dev.emi.emi.bom;
 import dev.emi.emi.api.stack.EmiIngredient;
 
 public class FlatMaterialCost {
-	public EmiIngredient ingredient;
+	public final EmiIngredient ingredient;
 	public long amount;
 
 	public FlatMaterialCost(EmiIngredient ingredient, long amount) {

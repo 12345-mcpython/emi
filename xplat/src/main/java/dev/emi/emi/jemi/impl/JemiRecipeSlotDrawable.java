@@ -22,7 +22,7 @@ import net.minecraft.network.chat.Component;
 
 public class JemiRecipeSlotDrawable implements IRecipeSlotDrawable {
 	public JemiSlotWidget widget;
-	public List<IIngredientConsumer> overrides = Lists.newArrayList();
+	public final List<IIngredientConsumer> overrides = Lists.newArrayList();
 
 	@Override
 	public Stream<ITypedIngredient<?>> getAllIngredients() {

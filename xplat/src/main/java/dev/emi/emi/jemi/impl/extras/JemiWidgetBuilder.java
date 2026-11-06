@@ -3,7 +3,7 @@ package dev.emi.emi.jemi.impl.extras;
 import dev.emi.emi.api.widget.WidgetHolder;
 
 public class JemiWidgetBuilder extends JemiPlaceable<JemiWidgetBuilder> {
-	public WidgetConstructor constructor;
+	public final WidgetConstructor constructor;
 
 	public JemiWidgetBuilder(int width, int height, WidgetConstructor constructor) {
 		super(width, height);
@@ -14,7 +14,7 @@ public class JemiWidgetBuilder extends JemiPlaceable<JemiWidgetBuilder> {
 		constructor.accept(this, holder);
 	}
 	
-	public static interface WidgetConstructor {
+	public interface WidgetConstructor {
 
 		void accept(JemiWidgetBuilder builder, WidgetHolder holder);
 	}

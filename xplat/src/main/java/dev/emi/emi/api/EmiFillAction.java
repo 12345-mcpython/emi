@@ -21,7 +21,7 @@ public enum EmiFillAction {
 
 	public final int id;
 
-	private EmiFillAction(int id) {
+	EmiFillAction(int id) {
 		this.id = id;
 	}
 }

@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 
 public class SidebarSubpanels {
 	public final SidebarSettings settings;
-	public List<Subpanel> subpanels = Lists.newArrayList();
+	public final List<Subpanel> subpanels = Lists.newArrayList();
 
 	public SidebarSubpanels(List<Subpanel> subpanels, SidebarSettings settings) {
 		this.subpanels.addAll(subpanels);

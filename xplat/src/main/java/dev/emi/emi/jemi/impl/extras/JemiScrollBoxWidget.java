@@ -10,8 +10,10 @@ import net.minecraft.network.chat.FormattedText;
 
 public class JemiScrollBoxWidget implements IScrollBoxWidget {
 	private static final int SCROLL_BAR_WIDTH = 18;
-	public int x, y;
-	public int width, height;
+	public final int x;
+    public final int y;
+	public final int width;
+    public final int height;
 
 	public JemiScrollBoxWidget(int x, int y, int width, int height) {
 		this.x = x;

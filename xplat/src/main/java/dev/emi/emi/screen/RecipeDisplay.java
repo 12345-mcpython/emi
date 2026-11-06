@@ -24,8 +24,8 @@ public class RecipeDisplay {
 	public static final int DISPLAY_PADDING = 8;
 	public final EmiRecipe recipe;
 	private final int width, height;
-	private List<ButtonType> rightButtons = Lists.newArrayList();
-	private List<ButtonType> leftButtons = Lists.newArrayList();
+	private final List<ButtonType> rightButtons = Lists.newArrayList();
+	private final List<ButtonType> leftButtons = Lists.newArrayList();
 	private int leftWidth = 0, rightWidth = 0;
 	private int rows = 0;
 	public Throwable exception;
@@ -142,7 +142,7 @@ public class RecipeDisplay {
 		return height;
 	}
 
-	private static enum ButtonType {
+	private enum ButtonType {
 		FILL,
 		TREE,
 		DEFAULT,

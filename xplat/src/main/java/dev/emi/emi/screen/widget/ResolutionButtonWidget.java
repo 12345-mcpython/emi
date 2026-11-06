@@ -17,8 +17,8 @@ import dev.emi.emi.runtime.EmiHistory;
 import dev.emi.emi.widget.RecipeDefaultButtonWidget;
 
 public class ResolutionButtonWidget extends Button {
-	public Supplier<Widget> hoveredWidget;
-	public EmiIngredient stack;
+	public final Supplier<Widget> hoveredWidget;
+	public final EmiIngredient stack;
 
 	public ResolutionButtonWidget(int x, int y, int width, int height, EmiIngredient stack, Supplier<Widget> hoveredWidget) {
 		super(x, y, width, height, EmiPort.literal(""), button -> {

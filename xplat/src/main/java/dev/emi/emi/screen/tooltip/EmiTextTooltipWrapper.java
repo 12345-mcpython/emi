@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
 import net.minecraft.util.FormattedCharSequence;
 
 public class EmiTextTooltipWrapper extends ClientTextTooltip {
-	public EmiIngredient stack;
+	public final EmiIngredient stack;
 
 	public EmiTextTooltipWrapper(EmiIngredient stack, FormattedCharSequence text) {
 		super(text);

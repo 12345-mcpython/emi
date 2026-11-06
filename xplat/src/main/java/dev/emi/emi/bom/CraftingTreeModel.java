@@ -53,13 +53,13 @@ public class CraftingTreeModel {
 
 	public static class Entry {
 		public final EmiIngredient ingredient;
-		public EmiRecipe recipe;
+		public final EmiRecipe recipe;
 		public long total, needed;
 		public int depth;
 		public boolean catalyst, cycle, truncated;
 		public float chance = 1;
 		public long totalBatches, neededBatches;
-		public List<Entry> children = new ArrayList<>();
+		public final List<Entry> children = new ArrayList<>();
 		private final MaterialNode node;
 		private final List<Link> outgoing = new ArrayList<>();
 

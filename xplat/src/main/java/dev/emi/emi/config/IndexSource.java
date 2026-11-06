@@ -11,7 +11,7 @@ public enum IndexSource implements ConfigEnum {
 
 	public final String name;
 
-	private IndexSource(String name) {
+	IndexSource(String name) {
 		this.name = name;
 	}
 

@@ -47,12 +47,12 @@ public class RecipeScreen extends Screen {
 		resolutionTarget = ingredient;
 		resolve = ingredient;
 	}
-	private Map<EmiRecipeCategory, List<EmiRecipe>> recipes;
-	public AbstractContainerScreen<?> old;
-	private List<RecipeTab> tabs = Lists.newArrayList();
+	private final Map<EmiRecipeCategory, List<EmiRecipe>> recipes;
+	public final AbstractContainerScreen<?> old;
+	private final List<RecipeTab> tabs = Lists.newArrayList();
 	private int tabPageSize = 6;
 	private int tabPage = 0, tab = 0, page = 0;
-	private List<SizedButtonWidget> arrows;
+	private final List<SizedButtonWidget> arrows;
 	private List<WidgetGroup> currentPage = Lists.newArrayList();
 	private int buttonOff = 0, tabOff = 0;
 	private Widget hoveredWidget = null, pressedSlot = null;
@@ -107,7 +107,7 @@ public class RecipeScreen extends Screen {
 		}
 		if (recipes != null) {
 			EmiRecipe current = null;
-			if (tab < tabs.size() && page < tabs.get(tab).getPageCount() && tabs.get(tab).getPage(page).size() > 0) {
+			if (tab < tabs.size() && page < tabs.get(tab).getPageCount() && !tabs.get(tab).getPage(page).isEmpty()) {
 				current = tabs.get(tab).getPage(page).get(0).recipe;
 			}
 			tabs.clear();

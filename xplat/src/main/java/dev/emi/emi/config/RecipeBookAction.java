@@ -11,7 +11,7 @@ public enum RecipeBookAction implements ConfigEnum {
 
 	public final String name;
 
-	private RecipeBookAction(String name) {
+	RecipeBookAction(String name) {
 		this.name = name;
 	}
 

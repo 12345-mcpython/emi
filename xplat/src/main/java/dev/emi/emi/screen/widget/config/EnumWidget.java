@@ -17,7 +17,7 @@ import dev.emi.emi.screen.ConfigScreen.Mutator;
 
 public class EnumWidget extends ConfigEntryWidget {
 	private final Mutator<ConfigEnum> mutator;
-	private Button button;
+	private final Button button;
 
 	public EnumWidget(Component name, List<ClientTooltipComponent> tooltip, Supplier<String> search, Mutator<ConfigEnum> mutator, Predicate<ConfigEnum> filter) {
 		super(name, tooltip, search, 20);

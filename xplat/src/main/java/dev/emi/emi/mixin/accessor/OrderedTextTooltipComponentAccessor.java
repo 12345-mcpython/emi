@@ -9,5 +9,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface OrderedTextTooltipComponentAccessor {
 	
 	@Accessor("text")
-    public FormattedCharSequence getText();
+    FormattedCharSequence getText();
 }

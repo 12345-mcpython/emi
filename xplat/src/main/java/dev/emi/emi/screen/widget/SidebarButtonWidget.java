@@ -18,7 +18,7 @@ public class SidebarButtonWidget extends SizedButtonWidget {
 
 	public SidebarButtonWidget(int x, int y, int width, int height, SidebarPanel panel) {
 		super(x, y, width, height, 0, 0, () -> {
-			return panel.pages.pages.size() > 0;
+			return !panel.pages.pages.isEmpty();
 		}, null, () -> 0, () -> {
 			List<Component> list = Lists.newArrayList();
 			list.add(panel.getType().getText());

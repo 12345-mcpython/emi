@@ -27,7 +27,7 @@ import dev.emi.emi.search.QueryType;
 
 public class EmiSearchWidget extends EditBox {
 	private static final Pattern ESCAPE = Pattern.compile("\\\\.");
-	private List<String> searchHistory = Lists.newArrayList();
+	private final List<String> searchHistory = Lists.newArrayList();
 	private int searchHistoryIndex = 0;
 	private List<Tuple<Integer, Style>> styles;
 	private long lastClick = 0;
@@ -53,7 +53,7 @@ public class EmiSearchWidget extends EditBox {
 				int end = style.getA();
 				if (end > stringStart) {
 					if (end - stringStart >= string.length()) {
-						text = EmiPort.literal(string.substring(0, string.length()), style.getB());
+						text = EmiPort.literal(string, style.getB());
 						// Skip second loop
 						s = styles.size();
 						break;
@@ -68,7 +68,7 @@ public class EmiSearchWidget extends EditBox {
 				Tuple<Integer, Style> style = styles.get(s);
 				int end = style.getA();
 				if (end - stringStart >= string.length()) {
-					EmiPort.append(text, EmiPort.literal(string.substring(last, string.length()), style.getB()));
+					EmiPort.append(text, EmiPort.literal(string.substring(last), style.getB()));
 					break;
 				}
 				EmiPort.append(text, EmiPort.literal(string.substring(last, end - stringStart), style.getB()));

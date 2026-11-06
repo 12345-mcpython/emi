@@ -63,20 +63,20 @@ public class Comparison {
 		return 0;
 	}
 
-	public static interface Predicate {
+	public interface Predicate {
 
 		/**
 		 * @return Whether the two stacks should be treated as equivalent
 		 */
-		public boolean test(EmiStack a, EmiStack b);
+        boolean test(EmiStack a, EmiStack b);
 	}
 
-	public static interface HashFunction {
+	public interface HashFunction {
 
 		/**
 		 * @return The hash for the data being compared in the comparison
 		 */
-		public int hash(EmiStack stack);
+        int hash(EmiStack stack);
 	}
 
 	static class Builder {

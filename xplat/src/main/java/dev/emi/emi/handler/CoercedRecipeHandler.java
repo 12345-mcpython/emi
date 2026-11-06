@@ -15,8 +15,8 @@ import dev.emi.emi.api.recipe.handler.StandardRecipeHandler;
 import dev.emi.emi.mixin.accessor.CraftingResultSlotAccessor;
 
 public class CoercedRecipeHandler<T extends AbstractContainerMenu> implements StandardRecipeHandler<T> {
-	private ResultSlot output;
-	private CraftingContainer inv;
+	private final ResultSlot output;
+	private final CraftingContainer inv;
 
 	public CoercedRecipeHandler(ResultSlot output) {
 		this.output = output;

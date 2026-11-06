@@ -41,13 +41,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class JemiRecipe<T> implements EmiRecipe {
-	public List<EmiIngredient> inputs = Lists.newArrayList();
-	public List<EmiIngredient> catalysts = Lists.newArrayList();
-	public List<EmiStack> outputs = Lists.newArrayList();
-	public EmiRecipeCategory recipeCategory;
-	public ResourceLocation originalId, id;
-	public IRecipeCategory<T> category;
-	public T recipe;
+	public final List<EmiIngredient> inputs = Lists.newArrayList();
+	public final List<EmiIngredient> catalysts = Lists.newArrayList();
+	public final List<EmiStack> outputs = Lists.newArrayList();
+	public final EmiRecipeCategory recipeCategory;
+	public final ResourceLocation originalId;
+    public ResourceLocation id;
+	public final IRecipeCategory<T> category;
+	public final T recipe;
 	public boolean allowTree = true;
 
 	public JemiRecipe(EmiRecipeCategory recipeCategory, IRecipeCategory<T> category, T recipe) {

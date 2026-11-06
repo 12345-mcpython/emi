@@ -38,7 +38,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements EmiRecipeHandler<T> {
 	private final RecipeType<R> type;
 	//private IRecipeCategory<R> category;
-	public IRecipeTransferHandler<T, R> handler;
+	public final IRecipeTransferHandler<T, R> handler;
 
 	public JemiRecipeHandler(IRecipeTransferHandler<T, R> handler) {
 		this.handler = handler;
@@ -241,10 +241,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 			IIngredientAcceptor acceptor = builder.addSlot(role, x, y);
 			for (EmiStack stack : ing.getEmiStacks()) {
 				Optional<ITypedIngredient<?>> opt = JemiUtil.getTyped(stack);
-				if (opt.isPresent()) {
-					ITypedIngredient<?> typed = opt.get();
-					acceptor.addIngredient((IIngredientType) typed.getType(), typed.getIngredient());
-				}
+                opt.ifPresent(typed -> acceptor.addIngredient(typed.getType(), typed.getIngredient()));
 			}
 		}
 	}

@@ -83,7 +83,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 	private static final Map<EmiRecipeCategory, IRecipeCategory<?>> CATEGORY_MAP = Maps.newHashMap();
 	private static ISubtypeManager subtypeManager;
 	public static IJeiRuntime runtime;
-	public static BiPredicate<IIngredientTypeWithSubtypes<? extends Object, ? extends Object>, Object> hasSubtype = (a, b) -> true;
+	public static BiPredicate<IIngredientTypeWithSubtypes<?, ?>, Object> hasSubtype = (a, b) -> true;
 
 	@Override
 	public ResourceLocation getPluginUid() {

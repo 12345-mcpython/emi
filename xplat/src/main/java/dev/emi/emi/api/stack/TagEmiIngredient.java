@@ -38,7 +38,7 @@ import dev.emi.emi.screen.tooltip.TagTooltipComponent;
 @ApiStatus.Internal
 public class TagEmiIngredient implements EmiIngredient {
 	private final ResourceLocation id;
-	private List<EmiStack> stacks;
+	private final List<EmiStack> stacks;
 	public final TagKey<?> key;
 	private final EmiTagKey<?> tagKey;
 	private long amount;
@@ -118,7 +118,7 @@ public class TagEmiIngredient implements EmiIngredient {
 
 		if ((flags & RENDER_ICON) != 0) {
 			if (!tagKey.hasCustomModel()) {
-				if (stacks.size() > 0) {
+				if (!stacks.isEmpty()) {
 					stacks.get(0).render(context.raw(), x, y, delta, -1 ^ RENDER_AMOUNT);
 				}
 			} else {

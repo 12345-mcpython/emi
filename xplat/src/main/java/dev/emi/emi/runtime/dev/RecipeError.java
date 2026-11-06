@@ -5,7 +5,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 
 public record RecipeError(Severity severity, List<ClientTooltipComponent> tooltip) {
 	
-	public static enum Severity {
+	public enum Severity {
 		ERROR,
 		WARNING
 	}

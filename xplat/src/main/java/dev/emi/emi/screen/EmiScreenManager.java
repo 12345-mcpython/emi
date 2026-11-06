@@ -92,12 +92,12 @@ public class EmiScreenManager {
 	private static final int PADDING_SIZE = 1;
 	private static final int ENTRY_SIZE = 16 + PADDING_SIZE * 2;
 	private static final int SUBPANEL_SEPARATOR_SIZE = 3;
-	private static Minecraft client = Minecraft.getInstance();
+	private static final Minecraft client = Minecraft.getInstance();
 	private static List<? extends EmiIngredient> searchedStacks = List.of();
 	private static int lastWidth, lastHeight;
 	private static List<Bounds> lastExclusion;
-	private static StackBatcher.ClaimedCollection batchers = new StackBatcher.ClaimedCollection();
-	private static List<SidebarPanel> panels = List.of(
+	private static final StackBatcher.ClaimedCollection batchers = new StackBatcher.ClaimedCollection();
+	private static final List<SidebarPanel> panels = List.of(
 			new SidebarPanel(SidebarSide.LEFT, EmiConfig.leftSidebarPages),
 			new SidebarPanel(SidebarSide.RIGHT, EmiConfig.rightSidebarPages),
 			new SidebarPanel(SidebarSide.TOP, EmiConfig.topSidebarPages),
@@ -120,11 +120,11 @@ public class EmiScreenManager {
 	private static int lastHoveredCraftableOffset = -1;
 	private static double scrollAcc = 0;
 
-	public static EmiSearchWidget search = new EmiSearchWidget(client.font, 0, 0, 160, 18);
-	public static SizedButtonWidget emi = new SizedButtonWidget(0, 0, 20, 20, 204, 0,
+	public static final EmiSearchWidget search = new EmiSearchWidget(client.font, 0, 0, 160, 18);
+	public static final SizedButtonWidget emi = new SizedButtonWidget(0, 0, 20, 20, 204, 0,
 			() -> true, (w) -> client.setScreen(new ConfigScreen(client.screen)),
 			List.of(EmiPort.translatable("tooltip.emi.config", EmiRenderHelper.getEmiText())));
-	public static SizedButtonWidget tree = new SizedButtonWidget(0, 0, 20, 20, 184, 0,
+	public static final SizedButtonWidget tree = new SizedButtonWidget(0, 0, 20, 20, 184, 0,
 			() -> true, (w) -> EmiApi.viewRecipeTree(),
 			List.of(EmiPort.translatable("tooltip.emi.recipe_tree")));
 
@@ -917,7 +917,7 @@ public class EmiScreenManager {
 				}
 			}
 			List<Bounds> exclusions = EmiExclusionAreas.getExclusion(base);
-			if (exclusions.size() == 0) {
+			if (exclusions.isEmpty()) {
 				return;
 			}
 			for (int i = 0; i < exclusions.size(); i++) {
@@ -1423,7 +1423,7 @@ public class EmiScreenManager {
 				}
 				int amount = all ? Integer.MAX_VALUE : 1;
 				if (ingredient instanceof RowFavorite favorite) {
-					amount = (int) Math.min((long) amount, Math.max(0L, favorite.row.batches));
+					amount = (int) Math.min(amount, Math.max(0L, favorite.row.batches));
 				}
 				if (stack.getStack() instanceof EmiFavorite.Synthetic syn) {
 					long batches = Math.max(0L, syn.batches);
@@ -1433,7 +1433,7 @@ public class EmiScreenManager {
 							batches /= oc;
 						}
 					}
-					amount = (int) Math.min((long) amount, batches);
+					amount = (int) Math.min(amount, batches);
 				}
 				if (amount <= 0) {
 					return true;
@@ -1451,7 +1451,7 @@ public class EmiScreenManager {
 		if (recipe == null) {
 			return false;
 		}
-		if (matchesFavorite(function) && recipe.getOutputs().size() > 0) {
+		if (matchesFavorite(function) && !recipe.getOutputs().isEmpty()) {
 			if (EmiInput.isShiftDown()) {
 				EmiBookmarkGroups.addRecipe(recipe, true);
 			} else {
@@ -1787,7 +1787,7 @@ public class EmiScreenManager {
 			if (getType() == SidebarType.CHESS && (space.tw != 8 || space.th != 8)) {
 				return false;
 			}
-			return !isDisabled() && space.pageSize > 0 && pages.pages.size() > 0;
+			return !isDisabled() && space.pageSize > 0 && !pages.pages.isEmpty();
 		}
 
 		public void updateWidgetVisibility() {

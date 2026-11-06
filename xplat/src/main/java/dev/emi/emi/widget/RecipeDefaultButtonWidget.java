@@ -43,7 +43,7 @@ public class RecipeDefaultButtonWidget extends RecipeButtonWidget {
 						stacks.add(stack);
 					}
 				}
-				if (stacks.size() > 0) {
+				if (!stacks.isEmpty()) {
 					list.add(ClientTooltipComponent.create(EmiPort.ordered(EmiPort.translatable("tooltip.emi.set_default"))));
 					list.add(ClientTooltipComponent.create(EmiPort.ordered(EmiPort.translatable("tooltip.emi.current_defaults"))));
 					list.add(new IngredientTooltipComponent(stacks));

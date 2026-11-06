@@ -14,10 +14,10 @@ import dev.emi.emi.config.SidebarType;
 import dev.emi.emi.screen.ConfigScreen.Mutator;
 
 public class SidebarSubpanelsWidget extends ConfigEntryWidget {
-	private List<Button> buttons = Lists.newArrayList();
-	private List<AbstractWidget> raws = Lists.newArrayList();
-	private List<IntEdit> rows = Lists.newArrayList();
-	private Mutator<SidebarSubpanels> mutator;
+	private final List<Button> buttons = Lists.newArrayList();
+	private final List<AbstractWidget> raws = Lists.newArrayList();
+	private final List<IntEdit> rows = Lists.newArrayList();
+	private final Mutator<SidebarSubpanels> mutator;
 
 	public SidebarSubpanelsWidget(Component name, List<ClientTooltipComponent> tooltip, Supplier<String> search, Mutator<SidebarSubpanels> mutator) {
 		super(name, tooltip, search, 0);

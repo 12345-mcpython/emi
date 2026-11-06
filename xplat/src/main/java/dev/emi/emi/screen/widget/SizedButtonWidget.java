@@ -20,8 +20,9 @@ public class SizedButtonWidget extends Button {
 	private final BooleanSupplier isActive;
 	private final IntSupplier vOffset;
 	protected ResourceLocation texture = EmiRenderHelper.BUTTONS;
-	protected Supplier<List<Component>> text;
-	protected int u, v;
+	protected final Supplier<List<Component>> text;
+	protected final int u;
+    protected int v;
 
 	public SizedButtonWidget(int x, int y, int width, int height, int u, int v, BooleanSupplier isActive, OnPress action) {
 		this(x, y, width, height, u, v, isActive, action, () -> 0);

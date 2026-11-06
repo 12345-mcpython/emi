@@ -15,7 +15,7 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.runtime.EmiDrawContext;
 
 public class RemainderTooltipComponent implements EmiTooltipComponent {
-	public List<Remainder> remainders = Lists.newArrayList();
+	public final List<Remainder> remainders = Lists.newArrayList();
 
 	public RemainderTooltipComponent(EmiIngredient ingredient) {
 		Map<Integer, List<EmiStack>> tools = Maps.newHashMap();

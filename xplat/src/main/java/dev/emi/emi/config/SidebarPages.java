@@ -8,7 +8,7 @@ import com.google.common.collect.Sets;
 
 public class SidebarPages {
 	public final SidebarSettings settings;
-	public List<SidebarPage> pages = Lists.newArrayList();
+	public final List<SidebarPage> pages = Lists.newArrayList();
 
 	public SidebarPages(List<SidebarPage> pages, SidebarSettings settings) {
 		this.pages.addAll(pages);

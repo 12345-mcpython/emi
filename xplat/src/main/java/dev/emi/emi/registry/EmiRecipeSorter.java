@@ -11,8 +11,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 
 public class EmiRecipeSorter {
-	private static Map<EmiRecipe, IntList> inputCache = Maps.newIdentityHashMap();
-	private static Map<EmiRecipe, IntList> outputCache = Maps.newIdentityHashMap();
+	private static final Map<EmiRecipe, IntList> inputCache = Maps.newIdentityHashMap();
+	private static final Map<EmiRecipe, IntList> outputCache = Maps.newIdentityHashMap();
 
 	public static IntList getInput(EmiRecipe recipe) {
 		IntList list = inputCache.get(recipe);

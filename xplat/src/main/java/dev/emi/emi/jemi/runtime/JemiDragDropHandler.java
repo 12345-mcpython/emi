@@ -20,7 +20,7 @@ public class JemiDragDropHandler implements EmiDragDropHandler<Screen> {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public boolean dropStack(Screen screen, EmiIngredient stack, int x, int y) {
 		try {
-			return this.<Object>drop(screen, (Optional<ITypedIngredient<Object>>) (Optional) JemiUtil.getTyped(stack.getEmiStacks().get(0)), x, y);
+			return this.drop(screen, (Optional<ITypedIngredient<Object>>) (Optional) JemiUtil.getTyped(stack.getEmiStacks().get(0)), x, y);
 		} catch (Exception e) {
 			return false;
 		}
@@ -30,7 +30,7 @@ public class JemiDragDropHandler implements EmiDragDropHandler<Screen> {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void render(Screen screen, EmiIngredient dragged, GuiGraphics raw, int mouseX, int mouseY, float delta) {
 		try {
-			this.<Object>render(screen, EmiDrawContext.wrap(raw), (Optional<ITypedIngredient<Object>>) (Optional) JemiUtil.getTyped(dragged.getEmiStacks().get(0)));
+			this.render(screen, EmiDrawContext.wrap(raw), (Optional<ITypedIngredient<Object>>) (Optional) JemiUtil.getTyped(dragged.getEmiStacks().get(0)));
 		} catch (Exception e) {
 		}
 	}

@@ -23,14 +23,14 @@ import dev.emi.emi.registry.EmiStackList;
 
 public class EmiHidden {
 	// Data loaded
-	public static Set<EmiIngredient> disabledStacks = Sets.newHashSet();
-	public static List<IndexStackData.Filter> disabledFilters = Lists.newArrayList();
-	public static Map<String, Boolean> disabledFilterLookup = Maps.newHashMap();
+	public static final Set<EmiIngredient> disabledStacks = Sets.newHashSet();
+	public static final List<IndexStackData.Filter> disabledFilters = Lists.newArrayList();
+	public static final Map<String, Boolean> disabledFilterLookup = Maps.newHashMap();
 	// Plugin defined
-	public static Set<EmiIngredient> pluginDisabledStacks = Sets.newHashSet();
-	public static List<Predicate<EmiStack>> pluginDisabledFilters = Lists.newArrayList();
+	public static final Set<EmiIngredient> pluginDisabledStacks = Sets.newHashSet();
+	public static final List<Predicate<EmiStack>> pluginDisabledFilters = Lists.newArrayList();
 	// User edited
-	public static Set<EmiIngredient> hiddenStacks = new LinkedHashSet<>();
+	public static final Set<EmiIngredient> hiddenStacks = new LinkedHashSet<>();
 
 	public static void clear() {
 		disabledStacks.clear();

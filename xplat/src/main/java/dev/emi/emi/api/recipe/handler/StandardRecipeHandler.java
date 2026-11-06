@@ -90,7 +90,7 @@ public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends 
 	}
 
 	@ApiStatus.Internal
-	public static void renderMissing(EmiRecipe recipe, EmiPlayerInventory inv, List<Widget> widgets, GuiGraphics draw) {
+    static void renderMissing(EmiRecipe recipe, EmiPlayerInventory inv, List<Widget> widgets, GuiGraphics draw) {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);
 		context.enableDepthTest();
 		Map<EmiIngredient, Boolean> availableForCrafting = getAvailable(recipe, inv);

@@ -42,15 +42,15 @@ import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 public class EmiRecipes {
 	public static volatile Worker activeWorker = null;
 	public static EmiRecipeManager manager = Manager.EMPTY;
-	public static List<Consumer<Consumer<EmiRecipe>>> lateRecipes = Lists.newArrayList();
-	public static List<Predicate<EmiRecipe>> invalidators = Lists.newArrayList();
+	public static final List<Consumer<Consumer<EmiRecipe>>> lateRecipes = Lists.newArrayList();
+	public static final List<Predicate<EmiRecipe>> invalidators = Lists.newArrayList();
 
-	public static List<EmiRecipeCategory> categories = Lists.newArrayList();
-	private static Map<EmiRecipeCategory, List<EmiIngredient>> workstations = Maps.newHashMap();
-	private static List<EmiRecipe> recipes = Lists.newArrayList();
+	public static final List<EmiRecipeCategory> categories = Lists.newArrayList();
+	private static final Map<EmiRecipeCategory, List<EmiIngredient>> workstations = Maps.newHashMap();
+	private static final List<EmiRecipe> recipes = Lists.newArrayList();
 
-	public static Map<EmiStack, List<EmiRecipe>> byWorkstation = Maps.newHashMap();
-	public static List<EmiRecipeDecorator> decorators = Lists.newArrayList();
+	public static final Map<EmiStack, List<EmiRecipe>> byWorkstation = Maps.newHashMap();
+	public static final List<EmiRecipeDecorator> decorators = Lists.newArrayList();
 	
 	public static void clear() {
 		setWorker(null);
@@ -124,10 +124,10 @@ public class EmiRecipes {
 		private final List<EmiRecipeCategory> categories;
 		private final Map<EmiRecipeCategory, List<EmiIngredient>> workstations;
 		private final List<EmiRecipe> recipes;
-		private Map<EmiStack, List<EmiRecipe>> byInput = new Object2ObjectOpenCustomHashMap<>(new EmiStackList.ComparisonHashStrategy());
-		private Map<EmiStack, List<EmiRecipe>> byOutput = new Object2ObjectOpenCustomHashMap<>(new EmiStackList.ComparisonHashStrategy());
-		private Map<EmiRecipeCategory, List<EmiRecipe>> byCategory = Maps.newHashMap();
-		private Map<ResourceLocation, EmiRecipe> byId = Maps.newHashMap();
+		private final Map<EmiStack, List<EmiRecipe>> byInput = new Object2ObjectOpenCustomHashMap<>(new EmiStackList.ComparisonHashStrategy());
+		private final Map<EmiStack, List<EmiRecipe>> byOutput = new Object2ObjectOpenCustomHashMap<>(new EmiStackList.ComparisonHashStrategy());
+		private final Map<EmiRecipeCategory, List<EmiRecipe>> byCategory = Maps.newHashMap();
+		private final Map<ResourceLocation, EmiRecipe> byId = Maps.newHashMap();
 
 		private Manager() {
 			this.categories = List.of();
@@ -282,9 +282,9 @@ public class EmiRecipes {
 	}
 
 	private static class Worker implements Runnable {
-		private List<EmiRecipeCategory> categories;
-		private Map<EmiRecipeCategory, List<EmiIngredient>> workstations;
-		private List<EmiRecipe> recipes;
+		private final List<EmiRecipeCategory> categories;
+		private final Map<EmiRecipeCategory, List<EmiIngredient>> workstations;
+		private final List<EmiRecipe> recipes;
 
 		public Worker(List<EmiRecipeCategory> categories, Map<EmiRecipeCategory, List<EmiIngredient>> workstations, List<EmiRecipe> recipes) {
 			this.categories = categories;

@@ -11,7 +11,8 @@ import dev.emi.emi.screen.ConfigScreen.Mutator;
 
 public class ScreenAlignWidget extends ConfigEntryWidget {
 	private final Mutator<ScreenAlign> mutator;
-	private Button horizontal, vertical;
+	private final Button horizontal;
+    private final Button vertical;
 
 	public ScreenAlignWidget(Component name, List<ClientTooltipComponent> tooltip, Supplier<String> search, Mutator<ScreenAlign> mutator) {
 		super(name, tooltip, search, 20);

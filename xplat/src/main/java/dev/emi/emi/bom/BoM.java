@@ -28,8 +28,8 @@ public class BoM {
 	private static RecipeDefaults defaults = new RecipeDefaults();
 	public static MaterialTree tree;
 	public static Map<EmiIngredient, EmiRecipe> defaultRecipes = Maps.newHashMap();
-	public static Map<EmiIngredient, EmiRecipe> addedRecipes = Maps.newHashMap();
-	public static Set<EmiRecipe> disabledRecipes = Sets.newHashSet();
+	public static final Map<EmiIngredient, EmiRecipe> addedRecipes = Maps.newHashMap();
+	public static final Set<EmiRecipe> disabledRecipes = Sets.newHashSet();
 	public static boolean craftingMode = false;
 
 	public static void setDefaults(RecipeDefaults defaults) {
@@ -235,7 +235,7 @@ public class BoM {
 		}
 	}
 
-	public static enum DefaultStatus {
+	public enum DefaultStatus {
 		EMPTY,
 		PARTIAL,
 		FULL

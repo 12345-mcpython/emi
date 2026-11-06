@@ -55,7 +55,7 @@ public class ButtonWidget extends Widget {
 		return true;
 	}
 
-	public static interface ClickAction {
+	public interface ClickAction {
 
 		void click(double mouseX, double mouseY, int button);
 	}

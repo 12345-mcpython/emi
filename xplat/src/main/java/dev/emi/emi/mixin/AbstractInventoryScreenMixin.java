@@ -29,7 +29,7 @@ import dev.emi.emi.runtime.EmiDrawContext;
 @Mixin(EffectRenderingInventoryScreen.class)
 public abstract class AbstractInventoryScreenMixin<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
 	@Unique
-	private static boolean hasInventoryTabs = EmiAgnos.isModLoaded("inventorytabs");
+	private static final boolean hasInventoryTabs = EmiAgnos.isModLoaded("inventorytabs");
 	
 	private AbstractInventoryScreenMixin() { super(null, null, null); }
 

@@ -12,7 +12,7 @@ public enum SidebarTheme implements ConfigEnum {
 	private final String name;
 	public final int horizontalPadding, verticalPadding;
 
-	private SidebarTheme(String name, int horizontalPadding, int verticalPadding) {
+	SidebarTheme(String name, int horizontalPadding, int verticalPadding) {
 		this.name = name;
 		this.horizontalPadding = horizontalPadding;
 		this.verticalPadding = verticalPadding;

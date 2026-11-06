@@ -27,9 +27,9 @@ import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 
 public class EmiFavorites {
-	public static List<EmiFavorite> favorites = Lists.newArrayList();
-	public static List<EmiFavorite.Synthetic> syntheticFavorites = Lists.newArrayList();
-	public static List<EmiFavorite> favoriteSidebar = new CompoundList<>(favorites, syntheticFavorites);
+	public static final List<EmiFavorite> favorites = Lists.newArrayList();
+	public static final List<EmiFavorite.Synthetic> syntheticFavorites = Lists.newArrayList();
+	public static final List<EmiFavorite> favoriteSidebar = new CompoundList<>(favorites, syntheticFavorites);
 
 	public static JsonArray save() {
 		JsonArray arr = new JsonArray();
@@ -275,7 +275,8 @@ public class EmiFavorites {
 	}
 
 	private static class CompoundList<T> extends AbstractList<T> {
-		private List<? extends T> a, b;
+		private final List<? extends T> a;
+        private final List<? extends T> b;
 
 		public CompoundList(List<? extends T> a, List<? extends T> b) {
 			this.a = a;

@@ -10,7 +10,7 @@ public enum HeaderType implements ConfigEnum {
 
 	private final String name;
 
-	private HeaderType(String name) {
+	HeaderType(String name) {
 		this.name = name;
 	}
 

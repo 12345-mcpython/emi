@@ -59,7 +59,7 @@ public class EmiClientFabric implements ClientModInitializer {
 			});
 		});
 
-		PreparableModelLoadingPlugin.<List<ResourceLocation>>register((manager, executor) -> {
+		PreparableModelLoadingPlugin.register((manager, executor) -> {
 			return CompletableFuture.supplyAsync(() -> {
 				List<ResourceLocation> ids = Lists.newArrayList();
 				EmiTags.registerTagModels(manager, id -> ids.add(id.id()), "");

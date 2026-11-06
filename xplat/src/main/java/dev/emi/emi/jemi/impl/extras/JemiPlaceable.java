@@ -4,7 +4,8 @@ import mezz.jei.api.gui.placement.IPlaceable;
 
 public class JemiPlaceable<T extends IPlaceable<T>> implements IPlaceable<T> {
 	public int x = 0, y = 0;
-	public int width, height;
+	public final int width;
+    public final int height;
 
 	public JemiPlaceable(int width, int height) {
 		this.width = width;

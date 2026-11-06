@@ -38,7 +38,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 public class EmiRecipeFiller {
-	public static Map<MenuType<?>, List<EmiRecipeHandler<?>>> handlers = Maps.newHashMap();
+	public static final Map<MenuType<?>, List<EmiRecipeHandler<?>>> handlers = Maps.newHashMap();
 	public static BiFunction<AbstractContainerMenu, EmiRecipe, EmiRecipeHandler<?>> extraHandlers = (h, r) -> null;
 
 	public static void clear() {
@@ -241,7 +241,7 @@ public class EmiRecipeFiller {
 		List<EmiIngredient> inputs = recipe.getInputs();
 		List<ItemStack> stacks = Lists.newArrayList();
 		Slot output = handler.getOutputSlot(screen.getMenu());
-		if (output != null && !output.getItem().isEmpty() && recipe.getOutputs().size() > 0
+		if (output != null && !output.getItem().isEmpty() && !recipe.getOutputs().isEmpty()
 				&& !ItemStack.matches(output.getItem(), recipe.getOutputs().get(0).getItemStack())) {
 			return 0;
 		}
@@ -351,8 +351,8 @@ public class EmiRecipeFiller {
 
 	private static class DiscoveredItem {
 		private static final Comparison COMPARISON = Comparison.DEFAULT_COMPARISON;
-		public EmiStack ingredient;
-		public ItemStack stack;
+		public final EmiStack ingredient;
+		public final ItemStack stack;
 		public int consumed;
 		public int amount;
 		public int max;

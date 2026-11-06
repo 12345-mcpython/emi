@@ -11,8 +11,8 @@ import dev.emi.emi.api.EmiDragDropHandler;
 import dev.emi.emi.api.stack.EmiIngredient;
 
 public class EmiDragDropHandlers {
-	public static Map<Class<?>, List<EmiDragDropHandler<?>>> fromClass = Maps.newHashMap();
-	public static List<EmiDragDropHandler<?>> generic = Lists.newArrayList();
+	public static final Map<Class<?>, List<EmiDragDropHandler<?>>> fromClass = Maps.newHashMap();
+	public static final List<EmiDragDropHandler<?>> generic = Lists.newArrayList();
 
 	public static void clear() {
 		fromClass.clear();

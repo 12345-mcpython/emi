@@ -6,7 +6,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 class StandardMoveGenerator extends MoveGenerator {
-	public ChessEvaluation eval = new ChessEvaluation();
+	public final ChessEvaluation eval = new ChessEvaluation();
 	public ChessMove chosenMove;
 	public Thread worker;
 
@@ -62,7 +62,7 @@ class StandardMoveGenerator extends MoveGenerator {
 	}
 	
 	class Worker implements Runnable {
-		private ChessBoard board;
+		private final ChessBoard board;
 
 		public Worker(ChessBoard board) {
 			this.board = board;

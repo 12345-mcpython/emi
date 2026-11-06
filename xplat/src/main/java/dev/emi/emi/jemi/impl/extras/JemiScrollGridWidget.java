@@ -11,10 +11,12 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 
 public class JemiScrollGridWidget implements IScrollGridWidget {
 	private static final int SCROLL_BAR_WIDTH = 18;
-	public List<IRecipeSlotDrawable> slots;
+	public final List<IRecipeSlotDrawable> slots;
 	public int x, y;
-	public int gridWidth, gridHeight;
-	public int width, height;
+	public final int gridWidth;
+    public final int gridHeight;
+	public final int width;
+    public final int height;
 
 	public JemiScrollGridWidget(List<IRecipeSlotDrawable> slots, int x, int y, int gridWidth, int gridHeight) {
 		this.slots = slots;

@@ -76,7 +76,7 @@ public class EmiTags {
 				map.put((T) stack.getKey(), stack);
 			}
 		}
-		if (map.size() == 0) {
+		if (map.isEmpty()) {
 			return EmiStack.EMPTY;
 		} else if (map.size() == 1) {
 			return map.values().stream().toList().get(0).copy().setAmount(amount);
@@ -109,7 +109,7 @@ public class EmiTags {
 					break;
 				}
 			}
-			CACHED_TAGS.put((Set) original, (List) keys);
+			CACHED_TAGS.put(original, (List) keys);
 		}
 
 		if (keys == null || keys.isEmpty()) {

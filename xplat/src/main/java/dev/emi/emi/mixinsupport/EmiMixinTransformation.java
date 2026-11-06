@@ -21,8 +21,8 @@ import dev.emi.emi.mixinsupport.annotation.Transform;
 import dev.emi.emi.runtime.EmiLog;
 
 public class EmiMixinTransformation {
-	private static int VISIBILITY_MASK = ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED);
-	private static Map<String, Set<String>> cache = Maps.newHashMap();
+	private static final int VISIBILITY_MASK = ~(Opcodes.ACC_PRIVATE | Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED);
+	private static final Map<String, Set<String>> cache = Maps.newHashMap();
 	public static boolean speakTheGoodWord = false;
 
 	private static void dictate(String targetClassName, Set<String> tainters) {

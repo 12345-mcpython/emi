@@ -13,8 +13,8 @@ import dev.emi.emi.config.SidebarType;
 import dev.emi.emi.screen.ConfigScreen.Mutator;
 
 public class SidebarPagesWidget extends ConfigEntryWidget {
-	private List<Button> buttons = Lists.newArrayList();
-	private Mutator<SidebarPages> mutator;
+	private final List<Button> buttons = Lists.newArrayList();
+	private final Mutator<SidebarPages> mutator;
 
 	public SidebarPagesWidget(Component name, List<ClientTooltipComponent> tooltip, Supplier<String> search, Mutator<SidebarPages> mutator) {
 		super(name, tooltip, search, 0);

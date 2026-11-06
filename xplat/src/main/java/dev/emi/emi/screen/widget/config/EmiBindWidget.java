@@ -14,8 +14,8 @@ import dev.emi.emi.screen.ConfigScreen;
 
 public class EmiBindWidget extends ConfigEntryWidget {
 	private final ConfigScreen screen;
-	private EmiBind bind;
-	private List<Button> buttons = Lists.newArrayList();
+	private final EmiBind bind;
+	private final List<Button> buttons = Lists.newArrayList();
 
 	public EmiBindWidget(ConfigScreen screen, List<ClientTooltipComponent> tooltip, Supplier<String> search, EmiBind bind) {
 		super(EmiPort.translatable(bind.translationKey), tooltip, search, 0);

@@ -12,7 +12,7 @@ public class ScreenAlign {
 		this.vertical = vertical;
 	}
 	
-	public static enum Horizontal implements ConfigEnum {
+	public enum Horizontal implements ConfigEnum {
 		LEFT("left"),
 		CENTER("center"),
 		RIGHT("right"),
@@ -20,7 +20,7 @@ public class ScreenAlign {
 
 		private final String name;
 
-		private Horizontal(String name) {
+		Horizontal(String name) {
 			this.name = name;
 		}
 
@@ -44,7 +44,7 @@ public class ScreenAlign {
 		}
 	}
 	
-	public static enum Vertical implements ConfigEnum {
+	public enum Vertical implements ConfigEnum {
 		TOP("top"),
 		CENTER("center"),
 		BOTTOM("bottom"),
@@ -52,7 +52,7 @@ public class ScreenAlign {
 
 		private final String name;
 
-		private Vertical(String name) {
+		Vertical(String name) {
 			this.name = name;
 		}
 

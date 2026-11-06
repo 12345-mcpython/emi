@@ -15,11 +15,11 @@ public interface EmiIngredientSerializer<T extends EmiIngredient> {
 
 	JsonElement serialize(T stack);
 
-	public static @Nullable JsonElement getSerialized(EmiIngredient ingredient) {
+	static @Nullable JsonElement getSerialized(EmiIngredient ingredient) {
 		return EmiIngredientSerializers.serialize(ingredient);
 	}
 
-	public static EmiIngredient getDeserialized(JsonElement element) {
+	static EmiIngredient getDeserialized(JsonElement element) {
 		return EmiIngredientSerializers.deserialize(element);
 	}
 }

@@ -51,7 +51,7 @@ public class EmiCraftContext<T extends AbstractContainerMenu> {
 		return amount;
 	}
 	
-	public static enum Type {
+	public enum Type {
 		/**
 		 * A fill from the recipe screen's fill button
 		 */
@@ -62,7 +62,7 @@ public class EmiCraftContext<T extends AbstractContainerMenu> {
 		CRAFTABLE
 	}
 
-	public static enum Destination {
+	public enum Destination {
 		/**
 		 * No output, simply move the ingredients to where they belong.
 		 */

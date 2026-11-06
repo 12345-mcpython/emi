@@ -37,7 +37,7 @@ public interface EmiTooltipComponent extends ClientTooltipComponent {
 		drawTooltipText(new TextRenderData(textRenderer, x, y, matrix, vertexConsumers));
 	}
 
-	public static class TextRenderData {
+	class TextRenderData {
 		private final Matrix4f matrix;
 		private final BufferSource vertexConsumers;
 		public final Font renderer;
@@ -60,7 +60,7 @@ public interface EmiTooltipComponent extends ClientTooltipComponent {
 		}
 	}
 
-	public static class TooltipRenderData {
+	class TooltipRenderData {
 		public final Font text;
 		public final ItemRenderer item;
 		public final int x, y;

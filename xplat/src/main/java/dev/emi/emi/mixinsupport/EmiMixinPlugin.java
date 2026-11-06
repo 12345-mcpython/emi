@@ -178,7 +178,7 @@ public class EmiMixinPlugin implements IMixinConfigPlugin {
 		}
 	}
 
-	private static record InvokeTargetInfo(String owner, String name, int type, String desc) {
+	private record InvokeTargetInfo(String owner, String name, int type, String desc) {
 	}
 
 	// Helpers to remove the AnnotationNode upon retrieval, to avoid transformations being applied

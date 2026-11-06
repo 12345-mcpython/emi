@@ -44,7 +44,7 @@ public class DrawableWidget extends Widget implements WidgetTooltipHolder<Drawab
 		context.pop();
 	}
 
-	public static interface DrawableWidgetConsumer {
+	public interface DrawableWidgetConsumer {
 
 		void render(GuiGraphics draw, int mouseX, int mouseY, float delta);
 	}

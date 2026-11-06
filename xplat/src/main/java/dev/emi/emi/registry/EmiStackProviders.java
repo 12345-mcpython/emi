@@ -24,8 +24,8 @@ import dev.emi.emi.mixin.accessor.HandledScreenAccessor;
 import dev.emi.emi.runtime.ProxyRecipeManager;
 
 public class EmiStackProviders {
-	public static Map<Class<?>, List<EmiStackProvider<?>>> fromClass = Maps.newHashMap();
-	public static List<EmiStackProvider<?>> generic = Lists.newArrayList();
+	public static final Map<Class<?>, List<EmiStackProvider<?>>> fromClass = Maps.newHashMap();
+	public static final List<EmiStackProvider<?>> generic = Lists.newArrayList();
 
 	public static void clear() {
 		fromClass.clear();

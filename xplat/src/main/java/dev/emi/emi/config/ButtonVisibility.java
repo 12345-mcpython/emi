@@ -11,7 +11,7 @@ public enum ButtonVisibility implements ConfigEnum {
 
 	private final String name;
 
-	private ButtonVisibility(String name) {
+	ButtonVisibility(String name) {
 		this.name = name;
 	}
 

@@ -9,12 +9,12 @@ import com.google.gson.JsonElement;
 /** A saved tree snapshot. Recipe references are resolved only when opening it. */
 public class CraftingPlan {
 	public String name;
-	public Set<String> folded = new LinkedHashSet<>();
+	public final Set<String> folded = new LinkedHashSet<>();
 	public boolean useInventory = true;
 	public long batches = 1;
 
 	long goalAmount;
-	JsonElement recipe;
+	final JsonElement recipe;
 	JsonArray resolutions = new JsonArray();
 
 	CraftingPlan(String name, JsonElement recipe) {

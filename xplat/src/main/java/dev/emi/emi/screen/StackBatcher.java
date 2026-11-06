@@ -226,8 +226,8 @@ public class StackBatcher {
 
 	// Apparently BufferBuilder leaks memory in vanilla. Go figure
 	public static class ClaimedCollection {
-		private Set<StackBatcher> claimed = Sets.newHashSet();
-		private List<StackBatcher> unclaimed = Lists.newArrayList();
+		private final Set<StackBatcher> claimed = Sets.newHashSet();
+		private final List<StackBatcher> unclaimed = Lists.newArrayList();
 
 		/** Allocate at most one reusable CPU buffer set per call; never disturb claimed renderers. */
 		public boolean preallocate(int target) {

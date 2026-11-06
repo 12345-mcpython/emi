@@ -19,9 +19,9 @@ import dev.emi.emi.config.EmiConfig;
 import dev.emi.emi.data.EmiRecipeCategoryProperties;
 
 public class EmiRecipeCategory implements EmiRenderable {
-	public ResourceLocation id;
+	public final ResourceLocation id;
 	public EmiRenderable icon, simplified;
-	public Comparator<EmiRecipe> sorter;
+	public final Comparator<EmiRecipe> sorter;
 	
 	/**
 	 * A constructor to use only a single renderable for both the icon and simplified icon.

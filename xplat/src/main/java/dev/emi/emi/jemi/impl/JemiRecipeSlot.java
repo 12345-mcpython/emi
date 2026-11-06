@@ -118,12 +118,12 @@ public class JemiRecipeSlot implements IRecipeSlotView {
 		this.highlight = color;
 	}
 
-	public static record OffsetDrawable(IDrawable drawable, int xOff, int yOff){
+	public record OffsetDrawable(IDrawable drawable, int xOff, int yOff){
 	}
 
-	public static record IngredientRenderer<T>(IIngredientType<T> type, IIngredientRenderer<T> renderer){
+	public record IngredientRenderer<T>(IIngredientType<T> type, IIngredientRenderer<T> renderer){
 	}
 
-	public static record TankInfo(int width, int height, long capacity, boolean showCapacity) {
+	public record TankInfo(int width, int height, long capacity, boolean showCapacity) {
 	}
 }

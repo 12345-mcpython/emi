@@ -10,9 +10,9 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 
 public class MaterialTree {
-	public MaterialNode goal;
-	public TreeCost cost = new TreeCost();
-	public Map<EmiIngredient, EmiRecipe> resolutions = Maps.newHashMap();
+	public final MaterialNode goal;
+	public final TreeCost cost = new TreeCost();
+	public final Map<EmiIngredient, EmiRecipe> resolutions = Maps.newHashMap();
 	public long batches = 1;
 
 	public MaterialTree(EmiRecipe recipe) {

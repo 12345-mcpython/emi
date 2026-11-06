@@ -12,7 +12,7 @@ class RandomMoveGenerator extends MoveGenerator {
 	@Override
 	public void ponderMove(ChessBoard board) {
 		List<ChessMove> moves = board.getLegal(board.getAllMoves(color));
-		if (moves.size() > 0) {
+		if (!moves.isEmpty()) {
 			move = moves.get(RANDOM.nextInt(moves.size()));
 		} else {
 			move = null;

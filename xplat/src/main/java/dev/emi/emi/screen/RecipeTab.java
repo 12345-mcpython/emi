@@ -14,7 +14,7 @@ public class RecipeTab {
 	private static final int RECIPE_PADDING = 10;
 	private final List<RecipeDisplay> displays;
 	private final int width;
-	private List<List<RecipeDisplay>> pages = Lists.newArrayList();
+	private final List<List<RecipeDisplay>> pages = Lists.newArrayList();
 	public final EmiRecipeCategory category;
 
 	public RecipeTab(EmiRecipeCategory category, List<EmiRecipe> recipes) {

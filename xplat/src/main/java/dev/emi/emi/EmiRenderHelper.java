@@ -305,8 +305,7 @@ public class EmiRenderHelper {
 		context.matrices().translate(0, 0, 200);
 		context.drawTexture(WIDGETS, x + 12, y, 12, 252, 4, 4);
 		context.pop();
-		return;
-	}
+    }
 
 	public static void renderRecipeFavorite(EmiIngredient ingredient, EmiDrawContext context, int x, int y) {
 		context.push();
@@ -314,8 +313,7 @@ public class EmiRenderHelper {
 		context.enableDepthTest();
 		context.drawTexture(WIDGETS, x + 12, y, 16, 252, 4, 4);
 		context.pop();
-		return;
-	}
+    }
 
 	public static void renderRecipeBackground(EmiRecipe recipe, EmiDrawContext context, int x, int y) {
 		context.resetColor();

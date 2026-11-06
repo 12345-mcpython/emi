@@ -11,7 +11,7 @@ import dev.emi.emi.screen.ConfigScreen.Mutator;
 
 public class BooleanWidget extends ConfigEntryWidget {
 	private final Mutator<Boolean> mutator;
-	private Button button;
+	private final Button button;
 
 	public BooleanWidget(Component name, List<ClientTooltipComponent> tooltip, Supplier<String> search, Mutator<Boolean> mutator) {
 		super(name, tooltip, search, 20);

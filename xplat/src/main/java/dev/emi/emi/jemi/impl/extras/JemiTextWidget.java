@@ -14,7 +14,7 @@ public class JemiTextWidget extends JemiPlaceable<ITextWidget> implements ITextW
 	public int spacing = 0;
 	public HorizontalAlignment horizontal = HorizontalAlignment.LEFT;
 	public VerticalAlignment vertical = VerticalAlignment.TOP;
-	public List<FormattedText> text;
+	public final List<FormattedText> text;
 
 	public JemiTextWidget(List<FormattedText> text, int width, int height) {
 		super(width, height);

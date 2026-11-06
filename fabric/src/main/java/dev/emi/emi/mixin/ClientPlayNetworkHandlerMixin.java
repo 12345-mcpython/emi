@@ -21,7 +21,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateRecipesPacket;
 @Mixin(ClientPacketListener.class)
 public class ClientPlayNetworkHandlerMixin {
 	@Unique
-	private int infoMask = 0;
+	private final int infoMask = 0;
 
 	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/world/item/crafting/RecipeManager.replaceRecipes(Ljava/lang/Iterable;)V",
 		shift = Shift.AFTER), method = "handleUpdateRecipes")

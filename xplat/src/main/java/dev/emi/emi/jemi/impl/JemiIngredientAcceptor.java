@@ -137,10 +137,7 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public JemiIngredientAcceptor addOptionalTypedIngredients(List<Optional<ITypedIngredient<?>>> ingredients) {
 		for (Optional<ITypedIngredient<?>> opt : ingredients) {
-			if (opt.isPresent()) {
-				ITypedIngredient<?> i = opt.get();
-				addIngredient(((IIngredientType) i.getType()), i.getIngredient());
-			}
+            opt.ifPresent(i -> addIngredient(((IIngredientType) i.getType()), i.getIngredient()));
 		}
 		return this;
 	}

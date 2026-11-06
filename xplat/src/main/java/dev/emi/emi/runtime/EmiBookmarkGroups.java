@@ -178,7 +178,7 @@ public final class EmiBookmarkGroups {
 		EmiIngredient current = chosen(row.sourceAnchor, row.source);
 		int index = 0;
 		for (int i = 0; i < candidates.size(); i++) if (EmiIngredient.areEqual(current, candidates.get(i))) { index = i; break; }
-		int next = (int) Math.floorMod((long) index + delta, candidates.size());
+		int next = Math.floorMod((long) index + delta, candidates.size());
 		ingredientChoices.computeIfAbsent(key(row.sourceAnchor), ignored -> new LinkedHashMap<>())
 			.put(ingredientKey(row.source), ingredientKey(candidates.get(next)));
 		changed();

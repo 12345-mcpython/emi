@@ -11,7 +11,7 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 
 public class JemiRecipeSlotsView implements IRecipeSlotsView {
-	private List<IRecipeSlotView> slots = Lists.newArrayList();
+	private final List<IRecipeSlotView> slots = Lists.newArrayList();
 
 	public JemiRecipeSlotsView(List<JemiRecipeSlot> slots) {
 		this.slots.addAll(slots);

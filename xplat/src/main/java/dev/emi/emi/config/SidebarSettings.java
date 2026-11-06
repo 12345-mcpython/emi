@@ -39,13 +39,13 @@ public class SidebarSettings {
 		() -> EmiConfig.bottomSidebarHeader,
 		() -> EmiConfig.bottomSidebarTheme
 	);
-	private Supplier<SidebarPages> pages;
-	private Supplier<SidebarSubpanels> subpanels;
-	private Supplier<IntGroup> size;
-	private Supplier<Margins> margins;
-	private Supplier<ScreenAlign> align;
-	private Supplier<HeaderType> header;
-	private Supplier<SidebarTheme> theme;
+	private final Supplier<SidebarPages> pages;
+	private final Supplier<SidebarSubpanels> subpanels;
+	private final Supplier<IntGroup> size;
+	private final Supplier<Margins> margins;
+	private final Supplier<ScreenAlign> align;
+	private final Supplier<HeaderType> header;
+	private final Supplier<SidebarTheme> theme;
 
 	public SidebarSettings(Supplier<SidebarPages> pages, Supplier<SidebarSubpanels> subpanels,
 			Supplier<IntGroup> size, Supplier<Margins> margins, Supplier<ScreenAlign> align,

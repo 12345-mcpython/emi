@@ -46,8 +46,8 @@ public class EmiStackList {
 	private static final TagKey<Item> ITEM_HIDDEN = TagKey.create(EmiPort.getItemRegistry().key(), EmiTags.HIDDEN_FROM_RECIPE_VIEWERS);
 	private static final TagKey<Block> BLOCK_HIDDEN = TagKey.create(EmiPort.getBlockRegistry().key(), EmiTags.HIDDEN_FROM_RECIPE_VIEWERS);
 	private static final TagKey<Fluid> FLUID_HIDDEN = TagKey.create(EmiPort.getFluidRegistry().key(), EmiTags.HIDDEN_FROM_RECIPE_VIEWERS);
-	public static List<EmiAlias.Baked> registryAliases = Lists.newArrayList();
-	public static List<Predicate<EmiStack>> invalidators = Lists.newArrayList();
+	public static final List<EmiAlias.Baked> registryAliases = Lists.newArrayList();
+	public static final List<Predicate<EmiStack>> invalidators = Lists.newArrayList();
 	public static List<EmiStack> stacks = List.of();
 	public static List<EmiStack> filteredStacks = List.of();
 	private static final Object2IntMap<EmiStack> strictIndices = new Object2IntOpenCustomHashMap<>(new StrictHashStrategy());
@@ -279,8 +279,8 @@ public class EmiStackList {
 	}
 
 	public static class IndexGroup {
-		public List<EmiStack> stacks = Lists.newArrayList();
-		public Set<IndexGroup> suppressedBy = Sets.newHashSet();
+		public final List<EmiStack> stacks = Lists.newArrayList();
+		public final Set<IndexGroup> suppressedBy = Sets.newHashSet();
 
 		public boolean shouldDisplay() {
 			for (IndexGroup suppressor : suppressedBy) {

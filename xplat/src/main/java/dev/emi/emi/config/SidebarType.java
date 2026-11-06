@@ -18,7 +18,7 @@ public enum SidebarType implements ConfigEnum {
 	private final String name;
 	public final int u, v;
 
-	private SidebarType(String name, int u, int v) {
+	SidebarType(String name, int u, int v) {
 		this.name = name;
 		this.u = u;
 		this.v = v;

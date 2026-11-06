@@ -14,8 +14,8 @@ public enum QueryType {
 	public final Style color, slashColor, regexColor, escapeColor;
 	public final Function<String, Query> queryConstructor, regexQueryConstructor;
 
-	private QueryType(String prefix, int color, int slashColor, int regexColor, int escapeColor,
-			Function<String, Query> queryConstructor, Function<String, Query> regexQueryConstructor) {
+	QueryType(String prefix, int color, int slashColor, int regexColor, int escapeColor,
+              Function<String, Query> queryConstructor, Function<String, Query> regexQueryConstructor) {
 		this.prefix = prefix;
 		this.color = Style.EMPTY.withColor(color);
 		this.slashColor = Style.EMPTY.withColor(slashColor);

@@ -21,7 +21,7 @@ public abstract class ConfigEntryWidget extends Entry {
 	public ConfigGroup group;
 	public boolean endGroup = false;
 	private List<? extends GuiEventListener> children = List.of();
-	public List<GroupNameWidget> parentGroups = Lists.newArrayList();
+	public final List<GroupNameWidget> parentGroups = Lists.newArrayList();
 	
 	public ConfigEntryWidget(Component name, List<ClientTooltipComponent> tooltip, Supplier<String> search, int height) {
 		this.name = name;

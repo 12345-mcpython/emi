@@ -12,7 +12,7 @@ enum PieceType {
 	public final char abbreviation;
 	public final int u;
 
-	private PieceType(char abbreviation, int u) {
+	PieceType(char abbreviation, int u) {
 		this.abbreviation = abbreviation;
 		this.u = u;
 	}

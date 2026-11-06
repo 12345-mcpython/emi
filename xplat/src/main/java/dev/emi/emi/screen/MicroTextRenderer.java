@@ -172,9 +172,9 @@ public class MicroTextRenderer {
 		return total;
 	}
 
-	private static record MicroChar(char c, int width, int u, int v) {
+	private record MicroChar(char c, int width, int u, int v) {
 	}
 
-	private static record UnitScale(String unit, int shift) {
+	private record UnitScale(String unit, int shift) {
 	}
 }

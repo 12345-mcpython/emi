@@ -11,7 +11,7 @@ public enum HelpLevel implements ConfigEnum {
 
 	public final String name;
 
-	private HelpLevel(String name) {
+	HelpLevel(String name) {
 		this.name = name;
 	}
 

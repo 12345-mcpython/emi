@@ -23,7 +23,7 @@ public class RegexTagQuery extends Query {
 			valid = Set.of();
 		} else {
 			final Pattern pat = p;
-			valid = Stream.<EmiTagKey<?>>concat(
+			valid = Stream.concat(
 				EmiTags.TAGS.stream(),
 				EmiTagKey.fromRegistry(EmiPort.getBlockRegistry())
 			).filter(t -> {

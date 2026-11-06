@@ -49,7 +49,7 @@ public class EmiMainFabric implements ModInitializer {
 		PayloadTypeRegistry.playC2S().register(id, StreamCodec.of((buf, v) -> v.write(buf), decode));
 		ServerPlayNetworking.registerGlobalReceiver(id, (payload, context) -> {
 			context.player().getServer().execute(() -> {
-				((EmiPacket)payload).apply(context.player());
+				payload.apply(context.player());
 			});
 		});
 	}

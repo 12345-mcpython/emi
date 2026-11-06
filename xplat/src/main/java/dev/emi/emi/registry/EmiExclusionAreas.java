@@ -14,8 +14,8 @@ import dev.emi.emi.screen.EmiScreenBase;
 import dev.emi.emi.screen.EmiScreenManager;
 
 public class EmiExclusionAreas {
-	public static Map<Class<?>, List<EmiExclusionArea<?>>> fromClass = Maps.newHashMap();
-	public static List<EmiExclusionArea<?>> generic = Lists.newArrayList();
+	public static final Map<Class<?>, List<EmiExclusionArea<?>>> fromClass = Maps.newHashMap();
+	public static final List<EmiExclusionArea<?>> generic = Lists.newArrayList();
 
 	public static void clear() {
 		fromClass.clear();

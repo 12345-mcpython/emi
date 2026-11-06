@@ -12,7 +12,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.network.chat.Component;
 
 public class JemiCategory extends EmiRecipeCategory {
-	public IRecipeCategory<?> category;
+	public final IRecipeCategory<?> category;
 
 	public JemiCategory(IRecipeCategory<?> category) {
 		super(category.getRecipeType().getUid(), (raw, x, y, delta) -> {});

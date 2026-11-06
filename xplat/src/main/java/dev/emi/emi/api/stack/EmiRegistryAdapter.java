@@ -29,7 +29,7 @@ public interface EmiRegistryAdapter<T> {
 	/**
 	 * Convenience method for creating an {@link EmiRegistryAdapter}.
 	 */
-	public static <T> EmiRegistryAdapter<T> simple(Class<T> clazz, Registry<T> registry, StackConstructor<T> constructor) {
+	static <T> EmiRegistryAdapter<T> simple(Class<T> clazz, Registry<T> registry, StackConstructor<T> constructor) {
 		return new EmiRegistryAdapter<T>() {
 
 			@Override
@@ -49,7 +49,7 @@ public interface EmiRegistryAdapter<T> {
 		};
 	}
 
-	public static interface StackConstructor<T> {
+	interface StackConstructor<T> {
 		EmiStack of(T t, DataComponentPatch componentChanges, long amount);
 	}
 }

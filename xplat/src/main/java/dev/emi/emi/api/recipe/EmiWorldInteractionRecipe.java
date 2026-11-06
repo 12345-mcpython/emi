@@ -21,9 +21,15 @@ public class EmiWorldInteractionRecipe implements EmiRecipe {
 	private final List<EmiStack> outputs;
 	private final boolean supportsRecipeTree;
 	private final int slotHeight;
-	private int width = 125, height;
-	private int totalSize, leftSize, rightSize, outputSize;
-	private int leftHeight, rightHeight, outputHeight;
+	private int width = 125;
+    private final int height;
+	private final int totalSize;
+    private final int leftSize;
+    private final int rightSize;
+    private final int outputSize;
+	private final int leftHeight;
+    private final int rightHeight;
+    private final int outputHeight;
 
 	protected EmiWorldInteractionRecipe(Builder builder) {
 		this.id = builder.id;
@@ -252,6 +258,6 @@ public class EmiWorldInteractionRecipe implements EmiRecipe {
 		}
 	}
 
-	private static record WorldIngredient(EmiIngredient stack, boolean catalyst, Function<SlotWidget, SlotWidget> mutator) {
+	private record WorldIngredient(EmiIngredient stack, boolean catalyst, Function<SlotWidget, SlotWidget> mutator) {
 	}
 }

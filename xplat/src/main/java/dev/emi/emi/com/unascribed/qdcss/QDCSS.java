@@ -215,7 +215,7 @@ public class QDCSS {
 
 	private <T> Optional<T> getParsed(String key, Function<String, ? extends T> parser, Supplier<String> error) throws BadValueException {
 		Optional<String> s = get(key);
-		if (!s.isPresent()) return Optional.empty();
+		if (s.isEmpty()) return Optional.empty();
 		try {
 			return Optional.of(parser.apply(s.get()));
 		} catch (IllegalArgumentException e) {

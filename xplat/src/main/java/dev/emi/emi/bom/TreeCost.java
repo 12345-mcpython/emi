@@ -12,10 +12,10 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 
 public class TreeCost {
-	public Map<EmiIngredient, FlatMaterialCost> costs = Maps.newHashMap();
-	public Map<EmiIngredient, ChanceMaterialCost> chanceCosts = Maps.newHashMap();
-	public Map<EmiStack, FlatMaterialCost> remainders = Maps.newHashMap();
-	public Map<EmiStack, ChanceMaterialCost> chanceRemainders = Maps.newHashMap();
+	public final Map<EmiIngredient, FlatMaterialCost> costs = Maps.newHashMap();
+	public final Map<EmiIngredient, ChanceMaterialCost> chanceCosts = Maps.newHashMap();
+	public final Map<EmiStack, FlatMaterialCost> remainders = Maps.newHashMap();
+	public final Map<EmiStack, ChanceMaterialCost> chanceRemainders = Maps.newHashMap();
 
 	public void calculate(MaterialNode node, long batches) {
 		costs.clear();
