@@ -1,5 +1,6 @@
 package dev.emi.emi.data;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
@@ -73,16 +74,16 @@ public class RecipeDefaults {
 		for (Tag t : tags) {
 			EmiIngredient tag = EmiIngredientSerializer.getDeserialized(t.tag);
 			EmiIngredient stack = EmiIngredientSerializer.getDeserialized(t.stack);
-			if (!tag.isEmpty() && !stack.isEmpty() && stack.getEmiStacks().size() == 1 && tag.getEmiStacks().containsAll(stack.getEmiStacks())) {
-				map.put(tag, new EmiResolutionRecipe(tag, stack.getEmiStacks().get(0)));
+			if (!tag.isEmpty() && !stack.isEmpty() && stack.getEmiStacks().size() == 1 && new HashSet<>(tag.getEmiStacks()).containsAll(stack.getEmiStacks())) {
+				map.put(tag, new EmiResolutionRecipe(tag, stack.getEmiStacks().getFirst()));
 			}
 		}
 		return map;
 	}
 
-	public static record Resolution(ResourceLocation recipe, List<JsonElement> stacks) {
+	public record Resolution(ResourceLocation recipe, List<JsonElement> stacks) {
 	}
 
-	public static record Tag(JsonElement tag, JsonElement stack) {
+	public record Tag(JsonElement tag, JsonElement stack) {
 	}
 }

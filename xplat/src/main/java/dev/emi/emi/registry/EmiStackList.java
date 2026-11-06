@@ -50,8 +50,8 @@ public class EmiStackList {
 	public static List<Predicate<EmiStack>> invalidators = Lists.newArrayList();
 	public static List<EmiStack> stacks = List.of();
 	public static List<EmiStack> filteredStacks = List.of();
-	private static Object2IntMap<EmiStack> strictIndices = new Object2IntOpenCustomHashMap<>(new StrictHashStrategy());
-	private static Object2IntMap<Object> keyIndices = new Object2IntOpenHashMap<>();
+	private static final Object2IntMap<EmiStack> strictIndices = new Object2IntOpenCustomHashMap<>(new StrictHashStrategy());
+	private static final Object2IntMap<Object> keyIndices = new Object2IntOpenHashMap<>();
 
 	public static void clear() {
 		invalidators.clear();

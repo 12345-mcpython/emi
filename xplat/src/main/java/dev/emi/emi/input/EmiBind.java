@@ -31,12 +31,12 @@ public class EmiBind {
 	public EmiBind(String translationKey, ModifiedKey... defaultKeys) {
 		this.translationKey = translationKey;
 		this.defaultKeys = Arrays.asList(defaultKeys);
-		this.boundKeys = this.defaultKeys.stream().collect(Collectors.toCollection(ArrayList::new));
+		this.boundKeys = new ArrayList<>(this.defaultKeys);
 		updateBinds();
 	}
 
 	public void updateBinds() {
-		if (boundKeys.size() == 0) {
+		if (boundKeys.isEmpty()) {
 			boundKeys.add(new ModifiedKey(InputConstants.UNKNOWN, 0));
 		}
 		for (int i = 0; i < boundKeys.size() - 1; i++) {
@@ -45,20 +45,20 @@ public class EmiBind {
 				i--;
 			}
 		}
-		if (!boundKeys.get(boundKeys.size() - 1).isUnbound() && boundKeys.size() < MAX_BINDS) {
+		if (!boundKeys.getLast().isUnbound() && boundKeys.size() < MAX_BINDS) {
 			boundKeys.add(new ModifiedKey(InputConstants.UNKNOWN, 0));
 		}
 	}
 
 	public boolean isBound() {
-		return boundKeys.size() > 0 && !boundKeys.get(0).isUnbound();
+		return !boundKeys.isEmpty() && !boundKeys.getFirst().isUnbound();
 	}
 
 	public Component getBindText() {
 		if (!isBound()) {
 			return EmiPort.literal("[]", ChatFormatting.GOLD);
 		} else {
-			ModifiedKey bind = boundKeys.get(0);
+			ModifiedKey bind = boundKeys.getFirst();
 			for (ModifiedKey key : boundKeys) {
 				if (key.key.getType() == InputConstants.Type.MOUSE) {
 					bind = key;
@@ -72,7 +72,7 @@ public class EmiBind {
 	}
 
 	public void setToDefault() {
-		this.boundKeys = this.defaultKeys.stream().collect(Collectors.toCollection(ArrayList::new));
+		this.boundKeys = new ArrayList<>(this.defaultKeys);
 		updateBinds();
 	}
 
@@ -138,13 +138,11 @@ public class EmiBind {
 			if (parts.length > 0) {
 				key = InputConstants.getKey(parts[parts.length - 1]);
 				for (int i = 0; i < parts.length - 1; i++) {
-					if (parts[i].equals("ctrl") || parts[i].equals("control")) {
-						modifiers |= EmiInput.CONTROL_MASK;
-					} else if (parts[i].equals("alt")) {
-						modifiers |= EmiInput.ALT_MASK;
-					} else if (parts[i].equals("shift")) {
-						modifiers |= EmiInput.SHIFT_MASK;
-					}
+                    switch (parts[i]) {
+                        case "ctrl", "control" -> modifiers |= EmiInput.CONTROL_MASK;
+                        case "alt" -> modifiers |= EmiInput.ALT_MASK;
+                        case "shift" -> modifiers |= EmiInput.SHIFT_MASK;
+                    }
 				}
 			}
 			modifiedKeys.add(new ModifiedKey(key, modifiers));
@@ -153,7 +151,7 @@ public class EmiBind {
 		updateBinds();
 	}
 
-	public static record ModifiedKey(InputConstants.Key key, int modifiers) {
+	public record ModifiedKey(InputConstants.Key key, int modifiers) {
 
 		public static ModifiedKey of(int code, int modifiers) {
 			return new ModifiedKey(InputConstants.Type.KEYSYM.getOrCreate(code), modifiers);
