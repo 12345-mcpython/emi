@@ -19,7 +19,7 @@ import net.minecraft.world.level.material.Fluid;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JemiIngredientConsumer implements IIngredientConsumer {
-	public List<EmiIngredient> stacks = Lists.newArrayList();
+	public final List<EmiIngredient> stacks = Lists.newArrayList();
 
 	@Override
 	public <I> IIngredientConsumer addIngredients(IIngredientType<I> ingredientType, List<@Nullable I> ingredients) {
@@ -54,10 +54,7 @@ public class JemiIngredientConsumer implements IIngredientConsumer {
 	@Override
 	public IIngredientConsumer addOptionalTypedIngredients(List<Optional<ITypedIngredient<?>>> ingredients) {
 		for (Optional<ITypedIngredient<?>> i : ingredients) {
-			if (i.isPresent()) {
-				ITypedIngredient t = i.get();
-				addIngredient(t.getType(), t.getIngredient());
-			}
+            i.ifPresent(t -> addIngredient((mezz.jei.api.ingredients.IIngredientType) t.getType(), t.getIngredient()));
 		}
 		return this;
 	}

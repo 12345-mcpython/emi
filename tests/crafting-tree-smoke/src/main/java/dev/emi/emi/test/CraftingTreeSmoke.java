@@ -36,13 +36,14 @@ import org.slf4j.LoggerFactory;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.emi.emi.api.recipe.EmiRecipe;
+import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.registry.Registries;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
@@ -52,16 +53,16 @@ import dev.emi.emi.config.EmiConfig;
 import dev.emi.emi.screen.BoMScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.util.ScreenshotRecorder;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.Screenshot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 /** Optional real-client smoke test. Never registered without the external init script. */
 public final class CraftingTreeSmoke implements ClientModInitializer {
@@ -120,17 +121,17 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(this::tick);
 	}
 
-	private void tick(MinecraftClient client) {
+	private void tick(Minecraft client) {
 		if (ended) return;
 		try {
 			if (++waitTicks > 1200) throw new IllegalStateException("Smoke timed out waiting for title screen or export");
 			if (screen == null) {
-				if (!(client.currentScreen instanceof TitleScreen) || client.getOverlay() != null) return;
+				if (!(client.screen instanceof TitleScreen) || client.getOverlay() != null) return;
 				open(client);
 				return;
 			}
-			check(client.currentScreen == (bookmarkScreen == null ? screen : bookmarkScreen), "Test screen was replaced unexpectedly");
-			check(client.player == null && client.world == null, "Smoke must run without a world/player");
+			check(client.screen == (bookmarkScreen == null ? screen : bookmarkScreen), "Test screen was replaced unexpectedly");
+			check(client.player == null && client.level == null, "Smoke must run without a world/player");
 			// Ticks can catch up without a render. Freeze the scenario until a real
 			// RecipeScreen frame has completed, then read that normal framebuffer.
 			if (pendingBookmarkCapture != null) {
@@ -173,7 +174,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 					click("fit");
 					int x = (int) (screen.width * 0.55);
 					int y = (int) (screen.height * 0.7);
-					check(screen.mouseScrolled(x, y, 1), "Zoom event not consumed");
+					check(screen.mouseScrolled(x, y, 0, 1), "Zoom event not consumed");
 					check(screen.mouseClicked(x, y, 2), "Pan press not consumed");
 					check(screen.mouseDragged(x + 20, y + 10, 2, 20, 10), "Pan drag not consumed");
 					check(screen.mouseReleased(x + 20, y + 10, 2), "Pan release not consumed");
@@ -217,7 +218,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 							+ modifierEvidence + "\n", StandardCharsets.UTF_8);
 					LOGGER.info("SMOKE {}: {}; captures at {}; real tree export at screenshots/emi/trees", marker, modifierEvidence, output.toAbsolutePath());
 					ended = true;
-					client.scheduleStop();
+					client.stop();
 				} else if (age > 260) {
 					throw new IllegalStateException("No nonempty full-layout PNG appeared within 200 ticks of export");
 				}
@@ -235,18 +236,18 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 			} catch (Exception writeError) {
 				LOGGER.error("Could not write failure marker", writeError);
 			}
-			client.scheduleStop();
+			client.stop();
 		}
 	}
 
-	private void open(MinecraftClient client) throws Exception {
-		check(client.player == null && client.world == null, "Expected a title screen without a player");
+	private void open(Minecraft client) throws Exception {
+		check(client.player == null && client.level == null, "Expected a title screen without a player");
 		start = System.currentTimeMillis();
-		output = client.runDirectory.toPath().resolve("screenshots/crafting-tree-smoke/" + start);
+		output = client.gameDirectory.toPath().resolve("screenshots/crafting-tree-smoke/" + start);
 		Files.createDirectories(output);
 		// Vanilla EMI categories are registered during recipe reload, which has not run at title.
-		category = new EmiRecipeCategory(new Identifier("emi_tree_smoke", "crafting"), EmiStack.of(Items.CRAFTING_TABLE)) {
-			@Override public Text getName() { return Text.literal("Smoke Crafting"); }
+		category = new EmiRecipeCategory(EmiPort.id("emi_tree_smoke", "crafting"), EmiStack.of(Items.CRAFTING_TABLE)) {
+			@Override public Component getName() { return Component.literal("Smoke Crafting"); }
 		};
 		checkResolutionNavigation(client);
 		// Real vanilla Items, intentionally synthetic recipe relationships for deterministic visuals.
@@ -267,13 +268,12 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		long shared = model.links.stream().filter(link -> link.child.ingredient.getEmiStacks().stream()
 			.anyMatch(EmiStack.of(Items.OAK_PLANKS)::isEqual)).count();
 		check(shared == 2, "Expected two links into shared planks, found " + shared);
-		EmiConfig.recipeScreenshotScale = 1;
 		screen = new BoMScreen(null);
 		client.setScreen(screen);
 		LOGGER.info("Opened real BoMScreen: entries={}, links={}, batches={}, null player; wait 10 ticks", model.entries.size(), model.links.size(), BoM.tree.batches);
 	}
 
-	private void checkResolutionNavigation(MinecraftClient client) {
+	private void checkResolutionNavigation(Minecraft client) {
 		var original = new dev.emi.emi.screen.RecipeScreen(null, java.util.Map.of());
 		EmiIngredient target = EmiStack.of(Items.OAK_PLANKS);
 		original.setResolutionTarget(target);
@@ -286,10 +286,10 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		LOGGER.info("RecipeScreen independent and restored resolution targets passed");
 	}
 
-	private void openBookmarks(MinecraftClient client) throws Exception {
+	private void openBookmarks(Minecraft client) throws Exception {
 		// Group mutations save emi.json. Fail before the first mutation unless both paths
 		// are inside the opt-in Loom runDir, including process-relative persistence.
-		Path run = client.runDirectory.toPath().toRealPath();
+		Path run = client.gameDirectory.toPath().toRealPath();
 		check(run.endsWith(Path.of("run", "crafting-tree-smoke")), "Smoke runDirectory is not isolated: " + run);
 		check(EmiPersistentData.FILE.toPath().toAbsolutePath().normalize().getParent().toRealPath().equals(run),
 			"Process-relative emi.json would escape isolated runDir");
@@ -347,7 +347,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		check(bookmarkGroup.anchors().size() == 4 && bookmarkGroup.anchors().stream().allMatch(EmiBookmarkGroups::isFullRecipe),
 			"Recipe anchors were not grouped as full recipes");
 		bookmarkScreen = new RecipeScreen(null, Map.of(category, bookmarkRecipes)) {
-			@Override public void render(DrawContext raw, int mouseX, int mouseY, float delta) {
+			@Override public void render(GuiGraphics raw, int mouseX, int mouseY, float delta) {
 				super.render(raw, mouseX, mouseY, delta);
 				// Observation only: production screen/mixin render path owns projection,
 				// framebuffer binding, manager rendering and final buffer flush.
@@ -368,21 +368,21 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 			"Run with default mouse bindings (left recipe/craft, right uses)");
 		if (!MODEL_MODIFIERS) {
 			robot = new Robot();
-			GLFW.glfwFocusWindow(client.getWindow().getHandle());
+			GLFW.glfwFocusWindow(client.getWindow().getWindow());
 		} else {
 			LOGGER.warn("MODEL MODIFIERS explicitly enabled: CtrlAltUI UNVERIFIED; model APIs replace only modifier actions");
 		}
 		LOGGER.info("Opened real RecipeScreen + native LEFT/FAVORITES; borrowed reload status {} -> 2", savedReloadStatus);
 	}
 
-	private void checkLocalGroupTree(MinecraftClient client) throws Exception {
+	private void checkLocalGroupTree(Minecraft client) throws Exception {
 		var globalTree = BoM.tree;
 		var currentPlan = dev.emi.emi.bom.CraftingPlans.current();
 		boolean globalMode = BoM.craftingMode;
 		BoMScreen original = screen;
 		check(dev.emi.emi.runtime.BookmarkGroupActions.openTree(bookmarkGroup), "Group tree helper rejected real group");
-		check(client.currentScreen instanceof BoMScreen, "Group helper did not open real BoMScreen");
-		screen = (BoMScreen) client.currentScreen;
+		check(client.screen instanceof BoMScreen, "Group helper did not open real BoMScreen");
+		screen = (BoMScreen) client.screen;
 		try {
 			Field model = BoMScreen.class.getDeclaredField("model");
 			model.setAccessible(true);
@@ -396,15 +396,15 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 			click("inventory_on");
 			check(BoM.tree == globalTree && dev.emi.emi.bom.CraftingPlans.current() == currentPlan && BoM.craftingMode == globalMode,
 				"Group controls changed active global plan state");
-			screen.close();
-			check(client.currentScreen == bookmarkScreen, "Group tree did not return original RecipeScreen identity");
+			screen.onClose();
+			check(client.screen == bookmarkScreen, "Group tree did not return original RecipeScreen identity");
 			LOGGER.info("Local group tree snapshot/disabled persistence/inventory isolation/return-screen assertions passed");
 		} finally {
 			screen = original;
 		}
 	}
 
-	private void checkBookmarkTodo(MinecraftClient client) throws Exception {
+	private void checkBookmarkTodo(Minecraft client) throws Exception {
 		List<Row> rows = EmiBookmarkGroups.rows(bookmarkGroup, EmiScreenManager.lastPlayerInventory);
 		Method displayAmount = RowFavorite.class.getDeclaredMethod("displayAmount");
 		displayAmount.setAccessible(true);
@@ -457,12 +457,12 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		check(hovered.getStack() instanceof RowFavorite && hovered.getRecipeContext() == null,
 			"Group input leaked its parent recipe into native hovered interaction");
 		managerClick(inputPoint, 0);
-		check(client.currentScreen == bookmarkScreen, "Terminal group input opened parent recipe screen");
+		check(client.screen == bookmarkScreen, "Terminal group input opened parent recipe screen");
 		renderBookmarkCapture(client, "08-bookmarks-todo", true);
 		LOGGER.info("Native todo rows: first-column results + adjacent inputs; shared logs=3; terminal input has no recipe context");
 	}
 
-	private void checkBookmarkCompact(MinecraftClient client) throws Exception {
+	private void checkBookmarkCompact(Minecraft client) throws Exception {
 		managerClick(gutterPoint(resultPoint), 0);
 		check(!bookmarkGroup.todo && bookmarkGroup.crafting, "Gutter left-click did not toggle todo off");
 		List<Row> rows = EmiBookmarkGroups.rows(bookmarkGroup, EmiScreenManager.lastPlayerInventory);
@@ -474,7 +474,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		});
 	}
 
-	private void checkBookmarkCrafting(MinecraftClient client) throws Exception {
+	private void checkBookmarkCrafting(Minecraft client) throws Exception {
 		resultPoint = bookmarkPoint(f -> !f.row.input && f.row.recipe == bookmarkRecipes.get(0));
 		managerClick(gutterPoint(resultPoint), 1);
 		check(!bookmarkGroup.crafting, "Gutter right-click did not disable crafting");
@@ -505,7 +505,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		releaseModifier();
 	}
 
-	private void checkBookmarkCollapsed(MinecraftClient client) throws Exception {
+	private void checkBookmarkCollapsed(Minecraft client) throws Exception {
 		if (MODEL_MODIFIERS) EmiBookmarkGroups.toggleCollapsed(bookmarkGroup);
 		else {
 			check(EmiInput.isAltDown(), "Robot Alt was not observed by GLFW; keep the client focused");
@@ -521,18 +521,18 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 				check(EmiInput.isAltDown(), "Alt released before collapsed frame capture");
 				managerClick(bookmarkPoint(f -> !f.row.input), 0);
 			}
-			check(!bookmarkGroup.collapsed && client.currentScreen == bookmarkScreen, "Collapsed group root cannot expand safely");
+			check(!bookmarkGroup.collapsed && client.screen == bookmarkScreen, "Collapsed group root cannot expand safely");
 			releaseModifier();
 		});
 	}
 
-	private void checkBookmarkExpanded(MinecraftClient client) throws Exception {
+	private void checkBookmarkExpanded(Minecraft client) throws Exception {
 		check(!EmiInput.isAltDown() && !EmiInput.isControlDown(), "Synthetic modifiers were not released");
 		check(EmiBookmarkGroups.rows(bookmarkGroup, EmiScreenManager.lastPlayerInventory).size() == 9, "Expanded todo rows did not return");
 		renderBookmarkCapture(client, "12-bookmarks-expanded", true);
 	}
 
-	private void checkBookmarkDragAndPersistence(MinecraftClient client) throws Exception {
+	private void checkBookmarkDragAndPersistence(Minecraft client) throws Exception {
 		// A second standalone group guarantees a real multi-row gutter selection.
 		EmiBookmarkGroups.addRecipe(recipe("bookmark_extra", Items.FURNACE, 1, EmiStack.of(Items.COBBLESTONE, 8)), false);
 		List<EmiFavorite> all = new ArrayList<>(EmiFavorites.favorites);
@@ -704,8 +704,8 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 	private void holdModifier(int key) {
 		if (MODEL_MODIFIERS) return;
 		releaseModifier();
-		MinecraftClient client = MinecraftClient.getInstance();
-		long window = client.getWindow().getHandle();
+		Minecraft client = Minecraft.getInstance();
+		long window = client.getWindow().getWindow();
 		int[] x = new int[1], y = new int[1];
 		int[] left = new int[1], top = new int[1], right = new int[1], bottom = new int[1];
 		GLFW.glfwGetWindowPos(window, x, y);
@@ -740,8 +740,8 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 			GLFW.glfwGetWindowAttrib(window, GLFW.GLFW_FOCUSED));
 	}
 
-	private boolean pollModifier(MinecraftClient client) {
-		long window = client.getWindow().getHandle();
+	private boolean pollModifier(Minecraft client) {
+		long window = client.getWindow().getWindow();
 		boolean focused = GLFW.glfwGetWindowAttrib(window, GLFW.GLFW_FOCUSED) == GLFW.GLFW_TRUE;
 		boolean foreground = true;
 		if (System.getProperty("os.name", "").startsWith("Windows")) {
@@ -784,14 +784,14 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		previousKeyCallback = GLFW.glfwSetKeyCallback(window, diagnosticKeyCallback);
 	}
 
-	private void logModifierDiagnostics(MinecraftClient client, String phase) {
-		long window = client.getWindow().getHandle();
+	private void logModifierDiagnostics(Minecraft client, String phase) {
+		long window = client.getWindow().getWindow();
 		StringBuilder data = new StringBuilder(phase).append(" os.name=").append(System.getProperty("os.name"))
-			.append(" isMac=").append(MinecraftClient.IS_SYSTEM_MAC)
+			.append(" isMac=").append(Minecraft.ON_OSX)
 			.append(" focused=").append(GLFW.glfwGetWindowAttrib(window, GLFW.GLFW_FOCUSED));
 		for (int code : new int[] {341, 345, 342, 346, 343, 347}) data.append(" glfw[").append(code).append("]=").append(GLFW.glfwGetKey(window, code));
-		data.append(" Screen.ctrl=").append(net.minecraft.client.gui.screen.Screen.hasControlDown())
-			.append(" InputUtil.leftCtrl=").append(net.minecraft.client.util.InputUtil.isKeyPressed(window, 341))
+		data.append(" Screen.ctrl=").append(net.minecraft.client.gui.screens.Screen.hasControlDown())
+			.append(" InputUtil.leftCtrl=").append(com.mojang.blaze3d.platform.InputConstants.isKeyDown(window, 341))
 			.append(" EmiInput.ctrl=").append(EmiInput.isControlDown());
 		if (System.getProperty("os.name", "").startsWith("Windows")) {
 			try {
@@ -813,7 +813,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 	private void releaseModifier() {
 		if (heldModifier != 0 && robot != null) robot.keyRelease(heldModifier);
 		if (diagnosticKeyCallback != null) {
-			GLFW.glfwSetKeyCallback(MinecraftClient.getInstance().getWindow().getHandle(), previousKeyCallback);
+			GLFW.glfwSetKeyCallback(Minecraft.getInstance().getWindow().getWindow(), previousKeyCallback);
 			diagnosticKeyCallback.free();
 			diagnosticKeyCallback = previousKeyCallback = null;
 		}
@@ -821,30 +821,30 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		modifierPressed = false;
 	}
 
-	private void renderBookmarkCapture(MinecraftClient client, String stage, boolean green) {
+	private void renderBookmarkCapture(Minecraft client, String stage, boolean green) {
 		renderBookmarkCapture(client, stage, green, () -> {});
 	}
 
-	private void renderBookmarkCapture(MinecraftClient client, String stage, boolean green, Runnable afterCapture) {
+	private void renderBookmarkCapture(Minecraft client, String stage, boolean green, Runnable afterCapture) {
 		check(pendingBookmarkCapture == null, "Previous native bookmark capture is still pending");
 		pendingBookmarkCapture = new PendingBookmarkCapture(stage, bookmarkGroup.id, green, bookmarkRenderedFrames, afterCapture);
 		LOGGER.info("Queued normal RecipeScreen frame capture: {} after frame={}", stage, bookmarkRenderedFrames);
 	}
 
-	private void captureNormalBookmarkFrame(MinecraftClient client, PendingBookmarkCapture pending) throws Exception {
+	private void captureNormalBookmarkFrame(Minecraft client, PendingBookmarkCapture pending) throws Exception {
 		check(RenderSystem.isOnRenderThread(), "Native sidebar capture must run on render thread");
-		check(client.currentScreen == bookmarkScreen, "Normal bookmark frame screen changed");
-		try (NativeImage pixels = ScreenshotRecorder.takeScreenshot(client.getFramebuffer())) {
+		check(client.screen == bookmarkScreen, "Normal bookmark frame screen changed");
+		try (NativeImage pixels = Screenshot.takeScreenshot(client.getMainRenderTarget())) {
 			int[] point = bookmarkPoint(f -> f.row.group.id.equals(pending.groupId()));
 			int row = (point[1] - bookmarkPanel.space.ty) / 18;
 			int gx = bookmarkPanel.space.getX(0, row) + 1;
 			int gy = bookmarkPanel.space.ty + row * 18 + 8;
 			double sx = (double) pixels.getWidth() / bookmarkScreen.width;
 			double sy = (double) pixels.getHeight() / bookmarkScreen.height;
-			int argb = pixels.getColor((int) ((gx + 0.5) * sx), (int) ((gy + 0.5) * sy));
+			int argb = pixels.getPixelRGBA((int) ((gx + 0.5) * sx), (int) ((gy + 0.5) * sy));
 			int rgb = ((argb & 255) << 16) | (argb & 0xff00) | ((argb >>> 16) & 255); // NativeImage ABGR -> RGB
 			Path image = output.resolve(pending.stage() + ".png");
-			pixels.writeTo(image.toFile());
+			pixels.writeToFile(image.toFile());
 			check(Files.size(image) > 0, "Empty native sidebar screenshot");
 			check(rgb == (pending.green() ? 0x45a967 : 0x999999), "Native FAVORITES bracket pixel color: " + Integer.toHexString(rgb)
 				+ " at GUI " + gx + "," + gy + " (capture saved: " + image + ")");
@@ -884,7 +884,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		@Override public List<EmiIngredient> getWorkstations(EmiRecipeCategory ignored) { return List.of(); }
 		@Override public List<EmiRecipe> getRecipes() { return recipes; }
 		@Override public List<EmiRecipe> getRecipes(EmiRecipeCategory value) { return value == category ? recipes : List.of(); }
-		@Override public EmiRecipe getRecipe(Identifier id) { return recipes.stream().filter(r -> id.equals(r.getId())).findFirst().orElse(null); }
+		@Override public EmiRecipe getRecipe(ResourceLocation id) { return recipes.stream().filter(r -> id.equals(r.getId())).findFirst().orElse(null); }
 		@Override public List<EmiRecipe> getRecipesByInput(EmiStack stack) {
 			return recipes.stream().filter(r -> r.getInputs().stream().flatMap(i -> i.getEmiStacks().stream()).anyMatch(stack::isEqual)).toList();
 		}
@@ -893,28 +893,28 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		}
 	}
 
-	private TextFieldWidget nameField() {
-		return screen.children().stream().filter(TextFieldWidget.class::isInstance).map(TextFieldWidget.class::cast)
+	private EditBox nameField() {
+		return screen.children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast)
 			.filter(field -> field.getY() != 5).findFirst().orElseThrow();
 	}
 
-	private void checkNameDraft(MinecraftClient client) {
+	private void checkNameDraft(Minecraft client) {
 		String draft = "Unsaved smoke draft";
-		TextFieldWidget name = nameField();
+		EditBox name = nameField();
 		screen.mouseClicked(name.getX() + 3, name.getY() + 3, 0);
 		for (char c : draft.toCharArray()) check(screen.charTyped(c, 0), "Name character rejected");
 		click("refresh");
-		check(draft.equals(nameField().getText()), "Refresh erased unsaved name draft");
+		check(draft.equals(nameField().getValue()), "Refresh erased unsaved name draft");
 		int width = screen.width, height = screen.height;
 		screen.resize(client, Math.max(320, width - 30), Math.max(240, height - 20));
-		check(draft.equals(nameField().getText()), "Resize erased unsaved name draft");
+		check(draft.equals(nameField().getValue()), "Resize erased unsaved name draft");
 		screen.resize(client, width, height);
-		check(draft.equals(nameField().getText()), "Restoring size erased unsaved name draft");
+		check(draft.equals(nameField().getValue()), "Restoring size erased unsaved name draft");
 		LOGGER.info("Unsaved name draft survives refresh and resize");
 	}
 
 	private void checkFirstReverseSearch() throws Exception {
-		searchField().setText("minecraft:");
+		searchField().setValue("minecraft:");
 		// Shift is polled from physical GLFW key state; invoke only the direction seam,
 		// then observe its private cursor rather than pretending modifiers press a key.
 		Method find = BoMScreen.class.getDeclaredMethod("find", boolean.class);
@@ -923,14 +923,14 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		Field cursor = BoMScreen.class.getDeclaredField("searchIndex");
 		cursor.setAccessible(true);
 		check(cursor.getInt(screen) == 4, "First reverse search did not choose final match");
-		searchField().setText("");
+		searchField().setValue("");
 		click("fit");
 		LOGGER.info("First reverse search selects last of five matches");
 	}
 
-	private void checkTruncatedTooltip(MinecraftClient client) throws Exception {
+	private void checkTruncatedTooltip(Minecraft client) throws Exception {
 		List<Item> items = new ArrayList<>();
-		for (Item item : Registries.ITEM) if (item != Items.AIR && items.size() < 132) items.add(item);
+		for (Item item : BuiltInRegistries.ITEM) if (item != Items.AIR && items.size() < 132) items.add(item);
 		check(items.size() == 132, "Not enough registered vanilla items for depth guard test");
 		EmiRecipe goal = recipe("depth_0", items.get(0), 1, EmiStack.of(items.get(1)));
 		BoM.setGoal(goal);
@@ -943,7 +943,7 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		var cut = model.entries.stream().filter(entry -> entry.truncated).findFirst().orElseThrow(() -> new IllegalStateException("128-depth guard did not truncate"));
 		check(!model.required.isEmpty(), "Truncated external material missing from costs");
 		screen.recalculateTree();
-		searchField().setText(cut.ingredient.getEmiStacks().get(0).getId().toString());
+		searchField().setValue(cut.ingredient.getEmiStacks().get(0).getId().toString());
 		Method find = BoMScreen.class.getDeclaredMethod("find", boolean.class);
 		find.setAccessible(true);
 		find.invoke(screen, false);
@@ -963,42 +963,42 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		entry.setAccessible(true);
 		check(((CraftingTreeModel.Entry) entry.get(visual)).truncated, "Tooltip target is not truncated");
 		String key = "emi.tree.truncated";
-		check(!Text.translatable(key).getString().equals(key), "Truncation translation missing");
-		DrawContext draw = new DrawContext(client, client.getBufferBuilders().getEntityVertexConsumers());
+		check(!Component.translatable(key).getString().equals(key), "Truncation translation missing");
+		GuiGraphics draw = new GuiGraphics(client, client.renderBuffers().bufferSource());
 		screen.render(draw, mx, my, 0);
-		draw.draw();
+		draw.flush();
 		capture(client, "07-truncated-tooltip");
 		truncatedTooltipChecked = true;
 		LOGGER.info("Actual depth-limited tree tooltip rendered; unexpanded external material retained");
 	}
 
 	private void search(String query) {
-		TextFieldWidget field = searchField();
+		EditBox field = searchField();
 		check(screen.mouseClicked(field.getX() + 4, field.getY() + 4, 0), "Search field click not consumed");
 		for (char c : query.toCharArray()) check(screen.charTyped(c, 0), "Search char not consumed: " + c);
-		check(query.equals(field.getText()), "Search text mismatch");
+		check(query.equals(field.getValue()), "Search text mismatch");
 		check(screen.keyPressed(GLFW.GLFW_KEY_ENTER, 0, 0), "Search Enter not consumed");
 	}
 
-	private TextFieldWidget searchField() {
-		return screen.children().stream().filter(TextFieldWidget.class::isInstance).map(TextFieldWidget.class::cast)
+	private EditBox searchField() {
+		return screen.children().stream().filter(EditBox.class::isInstance).map(EditBox.class::cast)
 			.filter(field -> field.getY() == 5).findFirst().orElseThrow(() -> new IllegalStateException("Search field missing"));
 	}
 
 	private void clearSearch() {
-		searchField().setText("");
+		searchField().setValue("");
 		screen.keyPressed(GLFW.GLFW_KEY_ESCAPE, 0, 0); // Removes focus; does not close the screen.
 	}
 
-	private ButtonWidget button(String suffix) {
-		String label = Text.translatable("emi.tree." + suffix).getString();
-		return screen.children().stream().filter(ButtonWidget.class::isInstance).map(ButtonWidget.class::cast)
+	private Button button(String suffix) {
+		String label = Component.translatable("emi.tree." + suffix).getString();
+		return screen.children().stream().filter(Button.class::isInstance).map(Button.class::cast)
 			.filter(button -> button.getMessage().getString().equals(label)).findFirst()
 			.orElseThrow(() -> new IllegalStateException("Toolbar button missing: " + suffix + " / " + label));
 	}
 
 	private void click(String suffix) {
-		ButtonWidget button = button(suffix);
+		Button button = button(suffix);
 		check(button.active, "Toolbar button inactive: " + suffix);
 		double x = button.getX() + button.getWidth() / 2.0;
 		double y = button.getY() + button.getHeight() / 2.0;
@@ -1007,18 +1007,18 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 		LOGGER.info("Clicked toolbar {}", suffix);
 	}
 
-	private void capture(MinecraftClient client, String stage) throws Exception {
+	private void capture(Minecraft client, String stage) throws Exception {
 		check(RenderSystem.isOnRenderThread(), "Framebuffer capture must run on render thread");
 		Path image = output.resolve(stage + ".png");
-		try (NativeImage pixels = ScreenshotRecorder.takeScreenshot(client.getFramebuffer())) {
-			pixels.writeTo(image.toFile());
+		try (NativeImage pixels = Screenshot.takeScreenshot(client.getMainRenderTarget())) {
+			pixels.writeToFile(image.toFile());
 		}
 		check(Files.size(image) > 0, "Empty framebuffer capture: " + image);
 		LOGGER.info("Framebuffer capture saved: {}", image.toAbsolutePath());
 	}
 
-	private boolean hasExport(MinecraftClient client) throws Exception {
-		Path directory = client.runDirectory.toPath().resolve("screenshots/emi/trees");
+	private boolean hasExport(Minecraft client) throws Exception {
+		Path directory = client.gameDirectory.toPath().resolve("screenshots/emi/trees");
 		if (!Files.isDirectory(directory)) return false;
 		try (Stream<Path> files = Files.list(directory)) {
 			return files.anyMatch(path -> {
@@ -1037,12 +1037,12 @@ public final class CraftingTreeSmoke implements ClientModInitializer {
 	}
 
 	private EmiRecipe recipe(String id, Item item, long amount, EmiIngredient... inputs) {
-		return new TestRecipe(category, new Identifier("emi_tree_smoke", "/" + id), List.of(inputs), List.of(EmiStack.of(item, amount)));
+		return new TestRecipe(category, EmiPort.id("emi_tree_smoke", "/" + id), List.of(inputs), List.of(EmiStack.of(item, amount)));
 	}
 
-	private record TestRecipe(EmiRecipeCategory category, Identifier id, List<EmiIngredient> inputs, List<EmiStack> outputs) implements EmiRecipe {
+	private record TestRecipe(EmiRecipeCategory category, ResourceLocation id, List<EmiIngredient> inputs, List<EmiStack> outputs) implements EmiRecipe {
 		@Override public EmiRecipeCategory getCategory() { return category; }
-		@Override public Identifier getId() { return id; }
+		@Override public ResourceLocation getId() { return id; }
 		@Override public List<EmiIngredient> getInputs() { return inputs; }
 		@Override public List<EmiStack> getOutputs() { return outputs; }
 		@Override public int getDisplayWidth() { return 134; }

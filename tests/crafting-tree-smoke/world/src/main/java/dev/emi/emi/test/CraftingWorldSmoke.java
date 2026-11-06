@@ -20,29 +20,29 @@ import dev.emi.emi.runtime.EmiFavorites;
 import dev.emi.emi.runtime.EmiReloadManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.gui.screen.ingame.CraftingScreen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.util.ScreenshotRecorder;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.inventory.CraftingScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.Screenshot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameMode;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.gen.GeneratorOptions;
-import net.minecraft.world.gen.WorldPresets;
-import net.minecraft.world.level.LevelInfo;
-import net.minecraft.resource.DataConfiguration;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
 
 /** Only real vanilla recipes, menus, server slots and packets; no Access seam or status overrides. */
 public final class CraftingWorldSmoke implements ClientModInitializer {
@@ -69,7 +69,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
         LOGGER.info("WORLD SMOKE armed: isolated flat survival integrated server, real inventory/table ack");
     }
 
-    private void tick(MinecraftClient client) {
+    private void tick(Minecraft client) {
         if (stage == Stage.DONE) return;
         try {
             ticks++;
@@ -78,14 +78,14 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
             client.options.pauseOnLostFocus = false;
             switch (stage) {
                 case TITLE -> {
-                    if (!(client.currentScreen instanceof TitleScreen) || client.getOverlay() != null) return;
-                    Path run = client.runDirectory.toPath().toAbsolutePath().normalize();
+                    if (!(client.screen instanceof TitleScreen) || client.getOverlay() != null) return;
+                    Path run = client.gameDirectory.toPath().toAbsolutePath().normalize();
                     check(run.endsWith(Path.of("run", "crafting-world-smoke")), "Unsafe run directory " + run);
                     check(Path.of("").toAbsolutePath().normalize().equals(run), "Process directory differs from isolated runDir");
                     worldName = "emi-world-smoke-" + System.currentTimeMillis();
                     output = run.resolve("screenshots/crafting-world-smoke/" + worldName);
                     Files.createDirectories(output);
-                    check(client.world == null && client.player == null, "Startup preparation must not require a world");
+                    check(client.level == null && client.player == null, "Startup preparation must not require a world");
                     var startup = dev.emi.emi.screen.EmiScreenManager.class.getDeclaredField("startupPrepared");
                     startup.setAccessible(true);
                     check(startup.getBoolean(null), "Title screen appeared before EMI interface preparation");
@@ -116,20 +116,20 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     EmiReloadManager.clear();
                     check(!pending.getBoolean(null), "Second disconnect retained pending initialization");
                     record("Entry scheduler: both synchronization orders queue once; missing world defers; disconnect cancels pending work");
-                    check(!Files.exists(client.getLevelStorage().getSavesDirectory().resolve(worldName)), "World already exists");
+                    check(!Files.exists(client.getLevelSource().getBaseDir().resolve(worldName)), "World already exists");
                     stage = Stage.LOADING; // loader can recursively pump tasks
                     GameRules rules = new GameRules();
-                    rules.get(GameRules.DO_MOB_SPAWNING).set(false, null);
-                    rules.get(GameRules.DO_DAYLIGHT_CYCLE).set(false, null);
-                    client.createIntegratedServerLoader().createAndStart(worldName,
-                        new LevelInfo(worldName, GameMode.SURVIVAL, false, Difficulty.PEACEFUL, false, rules, DataConfiguration.SAFE_MODE),
-                        new GeneratorOptions(473921L, false, false),
-                        registries -> registries.get(RegistryKeys.WORLD_PRESET).get(WorldPresets.FLAT).createDimensionsRegistryHolder());
+                    rules.getRule(GameRules.RULE_DOMOBSPAWNING).set(false, null);
+                    rules.getRule(GameRules.RULE_DODAYLIGHTCYCLE).set(false, null);
+                    client.createWorldOpenFlows().createFreshLevel(worldName,
+                        new LevelSettings(worldName, GameType.SURVIVAL, false, Difficulty.PEACEFUL, false, rules, WorldDataConfiguration.SAFE_MODE),
+                        new WorldOptions(473921L, false, false),
+                        registries -> registries.get(Registries.WORLD_PRESET).get(WorldPresets.FLAT).createDimensionsRegistryHolder(), null);
                 }
                 case LOADING -> {
-                    if (client.world == null || client.player == null || client.getServer() == null || !EmiReloadManager.isLoaded()) return;
-                    check(client.interactionManager != null && !client.player.isCreative(), "Expected real survival player");
-                    check(!(client.currentScreen instanceof net.minecraft.client.gui.screen.ingame.HandledScreen<?>),
+                    if (client.level == null || client.player == null || client.getSingleplayerServer() == null || !EmiReloadManager.isLoaded()) return;
+                    check(client.gameMode != null && !client.player.isCreative(), "Expected real survival player");
+                    check(!(client.screen instanceof net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>),
                         "Inventory opened before natural world-entry initialization completed");
                     var queued = EmiReloadManager.class.getDeclaredField("synchronizedReloadPending");
                     queued.setAccessible(true);
@@ -137,7 +137,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     record("World entry initialized EMI without opening any inventory screen");
                     record("Loaded real flat survival world; EMI naturally loaded " + EmiApi.getRecipeManager().getRecipes().size() + " recipes");
                     serverSetup(client, player -> {
-                        player.changeGameMode(GameMode.SURVIVAL);
+                        player.changeGameMode(GameType.SURVIVAL);
                         player.getInventory().clear();
                         player.getInventory().setStack(0, new ItemStack(Items.OAK_LOG));
                         player.playerScreenHandler.syncState();
@@ -149,7 +149,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     var ready = dev.emi.emi.screen.EmiScreenManager.class.getDeclaredField("warmupComplete");
                     ready.setAccessible(true);
                     if (!ready.getBoolean(null)) return;
-                    check(client.currentScreen == null, "Prewarm must finish without opening an inventory");
+                    check(client.screen == null, "Prewarm must finish without opening an inventory");
                     var poolField = dev.emi.emi.screen.EmiScreenManager.class.getDeclaredField("batchers");
                     poolField.setAccessible(true);
                     Object pool = poolField.get(null);
@@ -168,7 +168,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                 }
                 case INVENTORY_READY -> {
                     if (ticks - runStarted < 10) return;
-                    check(client.currentScreen instanceof InventoryScreen, "Not real InventoryScreen");
+                    check(client.screen instanceof InventoryScreen, "Not real InventoryScreen");
                     check(client.player.currentScreenHandler == client.player.playerScreenHandler, "Not real player 2x2 menu");
                     Group displayGroup = group("crafting_table", "oak_planks");
                     var tableAnchor = displayGroup.anchors().get(0);
@@ -186,7 +186,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     EmiFavorites.favorites.clear();
                     EmiBookmarkGroups.load(null);
                     for (String id : List.of("crafting_table", "oak_planks"))
-                        EmiBookmarkGroups.addRecipe(EmiApi.getRecipeManager().getRecipe(new Identifier("minecraft", id)), false);
+                        EmiBookmarkGroups.addRecipe(EmiApi.getRecipeManager().getRecipe(new ResourceLocation("minecraft", id)), false);
                     EmiBookmarkGroups.group(List.copyOf(EmiFavorites.favorites));
                     displayGroup = EmiBookmarkGroups.groupOf(EmiFavorites.favorites.get(0));
                     EmiBookmarkGroups.toggleView(displayGroup);
@@ -195,9 +195,9 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     var rawRows = EmiBookmarkGroups.rows(displayGroup, dev.emi.emi.api.recipe.EmiPlayerInventory.of(client.player));
                     check(rawRows.stream().noneMatch(row -> row.ingredient.isEmpty() || row.source.isEmpty()), "Unselected tag leaked empty slots");
                     check(rawRows.stream().noneMatch(row -> row.role == EmiBookmarkGroups.Role.REMAINDER), "Consumed plank output mislabeled as remainder");
-                    check(rawRows.stream().anyMatch(row -> row.recipe.getId().equals(new Identifier("minecraft", "oak_planks"))
+                    check(rawRows.stream().anyMatch(row -> row.recipe.getId().equals(new ResourceLocation("minecraft", "oak_planks"))
                         && row.role == EmiBookmarkGroups.Role.RESULT && row.calculatedAmount == 40), "Ten-table group failed to scale its plank producer to forty");
-                    check(rawRows.stream().anyMatch(row -> row.input && row.recipe.getId().equals(new Identifier("minecraft", "oak_planks"))
+                    check(rawRows.stream().anyMatch(row -> row.input && row.recipe.getId().equals(new ResourceLocation("minecraft", "oak_planks"))
                         && row.calculatedAmount == 10), "Ten-table group failed to scale raw logs to ten");
                     check(EmiBookmarkGroups.effectiveRecipe(displayGroup, displayGroup.anchors().get(0).getRecipe()).getInputs().stream()
                         .filter(input -> !input.isEmpty()).allMatch(input -> input.getEmiStacks().size() == 1
@@ -220,7 +220,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     if (BookmarkCrafting.isRunning()) return;
                     checkCompleted(2);
                     check(count(client, Items.CRAFTING_TABLE) == 1, "Client did not receive crafted table; " + inventory(client));
-                    pending = client.getServer().submit(() -> snapshot(client, false));
+                    pending = client.getSingleplayerServer().submit(() -> snapshot(client, false));
                     stage = Stage.INVENTORY_ACK;
                 }
                 case INVENTORY_ACK -> {
@@ -243,8 +243,8 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     stage = Stage.SETUP_TABLE;
                 }
                 case SETUP_TABLE -> {
-                    if (!complete() || !(client.currentScreen instanceof CraftingScreen) || count(client, Items.OAK_LOG) != 2) return;
-                    check(client.player.currentScreenHandler instanceof CraftingScreenHandler, "Missing real table handler");
+                    if (!complete() || !(client.screen instanceof CraftingScreen) || count(client, Items.OAK_LOG) != 2) return;
+                    check(client.player.currentScreenHandler instanceof CraftingMenu, "Missing real table handler");
                     stage = Stage.TABLE_READY;
                     runStarted = ticks;
                 }
@@ -259,7 +259,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     if (BookmarkCrafting.isRunning()) return;
                     checkCompleted(3);
                     check(count(client, Items.CHEST) == 1, "Client did not receive crafted chest; " + inventory(client));
-                    pending = client.getServer().submit(() -> snapshot(client, true));
+                    pending = client.getSingleplayerServer().submit(() -> snapshot(client, true));
                     stage = Stage.TABLE_ACK;
                 }
                 case TABLE_ACK -> {
@@ -276,7 +276,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                 }
                 case EXTRA_SETUP -> {
                     if (!complete()) return;
-                    if (!(client.currentScreen instanceof CraftingScreen)) return;
+                    if (!(client.screen instanceof CraftingScreen)) return;
                     stage = Stage.EXTRA_READY;
                     runStarted = ticks;
                 }
@@ -305,8 +305,8 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     if (BookmarkCrafting.isRunning()) return;
                     if (extra != 1) checkCompleted(extra == 0 ? 2 : 1);
                     var uuid = client.player.getUuid();
-                    pending = client.getServer().submit(() -> {
-                        var player = client.getServer().getPlayerManager().getPlayer(uuid);
+                    pending = client.getSingleplayerServer().submit(() -> {
+                        var player = client.getSingleplayerServer().getPlayerManager().getPlayer(uuid);
                         String ack = "extra=" + extra + " oakLog=" + count(player.getInventory(), Items.OAK_LOG)
                             + " birchLog=" + count(player.getInventory(), Items.BIRCH_LOG) + " planks=" + count(player.getInventory(), Items.OAK_PLANKS)
                             + " birchPlanks=" + count(player.getInventory(), Items.BIRCH_PLANKS) + " table=" + count(player.getInventory(), Items.CRAFTING_TABLE)
@@ -331,17 +331,17 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     client.player.closeHandledScreen();
                     serverSetup(client, player -> {
                         player.getInventory().clear();
-                        var chest = new net.minecraft.inventory.SimpleInventory(27);
+                        var chest = new net.minecraft.world.SimpleContainer(27);
                         chest.setStack(0, new ItemStack(Items.COBBLESTONE, 64));
-                        player.openHandledScreen(new net.minecraft.screen.SimpleNamedScreenHandlerFactory(
-                            (syncId, inventory, entity) -> net.minecraft.screen.GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, chest),
-                            net.minecraft.text.Text.literal("Smoke exact withdrawal")));
+                        player.openHandledScreen(new net.minecraft.world.SimpleMenuProvider(
+                            (syncId, inventory, entity) -> net.minecraft.world.inventory.ChestMenu.createGeneric9x3(syncId, inventory, chest),
+                            net.minecraft.network.chat.Component.literal("Smoke exact withdrawal")));
                         player.currentScreenHandler.syncState();
                     });
                     stage = Stage.MATERIAL_SETUP;
                 }
                 case MATERIAL_SETUP -> {
-                    if (!complete() || !(client.player.currentScreenHandler instanceof net.minecraft.screen.GenericContainerScreenHandler)) return;
+                    if (!complete() || !(client.player.currentScreenHandler instanceof net.minecraft.world.inventory.ChestMenu)) return;
                     stage = Stage.MATERIAL_READY;
                     runStarted = ticks;
                 }
@@ -360,8 +360,8 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                     check(ticks - runStarted < 240, "Material transfer did not stop");
                     if (dev.emi.emi.runtime.BookmarkMaterialTransfer.isRunning()) return;
                     var uuid = client.player.getUuid();
-                    pending = client.getServer().submit(() -> {
-                        var player = client.getServer().getPlayerManager().getPlayer(uuid);
+                    pending = client.getSingleplayerServer().submit(() -> {
+                        var player = client.getSingleplayerServer().getPlayerManager().getPlayer(uuid);
                         return "source=" + player.currentScreenHandler.slots.get(0).getStack().getCount()
                             + " player=" + count(player.getInventory(), Items.COBBLESTONE)
                             + " cursor=" + player.currentScreenHandler.getCursorStack().getCount();
@@ -380,7 +380,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
                         + "\nScope: BookmarkCrafting.start API, real vanilla handlers, real packet/slot ack. OS Ctrl/Alt and sidebar start click NOT covered.\n", StandardCharsets.UTF_8);
                     LOGGER.info("WORLD SMOKE PASS: {}", output);
                     stage = Stage.DONE;
-                    client.scheduleStop();
+                    client.stop();
                 }
                 default -> { }
             }
@@ -391,11 +391,11 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
             try {
                 if (output != null) Files.writeString(output.resolve("FAIL.txt"), error + "\n" + String.join("\n", evidence), StandardCharsets.UTF_8);
             } catch (Exception writeError) { LOGGER.error("Could not write FAIL marker", writeError); }
-            client.scheduleStop();
+            client.stop();
         }
     }
 
-    private void setupExtra(MinecraftClient client) {
+    private void setupExtra(Minecraft client) {
         serverSetup(client, player -> {
             player.currentScreenHandler.slots.get(1).setStack(ItemStack.EMPTY);
             player.getInventory().clear();
@@ -412,7 +412,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
     private Group singleGroup(String recipeId) {
         EmiFavorites.favorites.clear();
         EmiBookmarkGroups.load(new com.google.gson.JsonObject());
-        EmiRecipe recipe = EmiApi.getRecipeManager().getRecipe(new Identifier("minecraft", recipeId));
+        EmiRecipe recipe = EmiApi.getRecipeManager().getRecipe(new ResourceLocation("minecraft", recipeId));
         check(recipe != null, "Missing recipe " + recipeId);
         EmiBookmarkGroups.addRecipe(recipe, false);
         return EmiBookmarkGroups.groupOf(EmiFavorites.favorites.get(0));
@@ -426,7 +426,7 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
         EmiFavorites.favorites.clear();
         EmiBookmarkGroups.load(new com.google.gson.JsonObject());
         for (String id : List.of(rootId, dependencyId)) {
-            EmiRecipe recipe = EmiApi.getRecipeManager().getRecipe(new Identifier("minecraft", id));
+            EmiRecipe recipe = EmiApi.getRecipeManager().getRecipe(new ResourceLocation("minecraft", id));
             check(recipe != null, "Missing loaded vanilla recipe minecraft:" + id);
             EmiBookmarkGroups.addRecipe(recipe, false);
         }
@@ -473,10 +473,10 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
             "Runner did not acknowledge every real batch: " + status);
     }
 
-    private void serverSetup(MinecraftClient client, Consumer<ServerPlayerEntity> action) {
+    private void serverSetup(Minecraft client, Consumer<ServerPlayer> action) {
         var uuid = client.player.getUuid();
-        pending = client.getServer().submit(() -> {
-            var player = client.getServer().getPlayerManager().getPlayer(uuid);
+        pending = client.getSingleplayerServer().submit(() -> {
+            var player = client.getSingleplayerServer().getPlayerManager().getPlayer(uuid);
             check(player != null, "Missing integrated-server player");
             action.accept(player);
         });
@@ -486,29 +486,29 @@ public final class CraftingWorldSmoke implements ClientModInitializer {
         pending.join();
         return true;
     }
-    private Snapshot snapshot(MinecraftClient client, boolean table) {
-        ServerPlayerEntity player = client.getServer().getPlayerManager().getPlayer(client.player.getUuid());
-        check(player != null && player.interactionManager.getGameMode() == GameMode.SURVIVAL, "Missing server survival player");
-        ScreenHandler handler = player.currentScreenHandler;
-        check(table ? handler instanceof CraftingScreenHandler : handler == player.playerScreenHandler, "Wrong authoritative menu");
+    private Snapshot snapshot(Minecraft client, boolean table) {
+        ServerPlayer player = client.getSingleplayerServer().getPlayerManager().getPlayer(client.player.getUuid());
+        check(player != null && player.interactionManager.getGameMode() == GameType.SURVIVAL, "Missing server survival player");
+        AbstractContainerMenu handler = player.currentScreenHandler;
+        check(table ? handler instanceof CraftingMenu : handler == player.playerScreenHandler, "Wrong authoritative menu");
         boolean empty = true;
         for (int i = 0; i < (table ? 10 : 5); i++) empty &= handler.slots.get(i).getStack().isEmpty();
         return new Snapshot(count(player.getInventory(), Items.OAK_LOG), count(player.getInventory(), Items.OAK_PLANKS),
             count(player.getInventory(), Items.CRAFTING_TABLE), count(player.getInventory(), Items.CHEST), handler.syncId, empty, handler.getCursorStack().isEmpty());
     }
     private record Snapshot(int logs, int planks, int table, int chest, int syncId, boolean emptyGrid, boolean emptyCursor) {}
-    private int count(MinecraftClient client, Item item) { return count(client.player.getInventory(), item); }
-    private int count(net.minecraft.inventory.Inventory inventory, Item item) {
+    private int count(Minecraft client, Item item) { return count(client.player.getInventory(), item); }
+    private int count(net.minecraft.world.Container inventory, Item item) {
         int count = 0;
         for (int i = 0; i < inventory.size(); i++) if (inventory.getStack(i).isOf(item)) count += inventory.getStack(i).getCount();
         return count;
     }
-    private String inventory(MinecraftClient client) {
+    private String inventory(Minecraft client) {
         return "logs=" + count(client, Items.OAK_LOG) + ", planks=" + count(client, Items.OAK_PLANKS)
             + ", table=" + count(client, Items.CRAFTING_TABLE) + ", chest=" + count(client, Items.CHEST);
     }
-    private void capture(MinecraftClient client, String name) throws Exception {
-        try (NativeImage image = ScreenshotRecorder.takeScreenshot(client.getFramebuffer())) { image.writeTo(output.resolve(name + ".png")); }
+    private void capture(Minecraft client, String name) throws Exception {
+        try (NativeImage image = Screenshot.takeScreenshot(client.getMainRenderTarget())) { image.writeToFile(output.resolve(name + ".png")); }
     }
     private void record(String text) { evidence.add(text); LOGGER.info("WORLD SMOKE {}", text); }
     private static void check(boolean condition, String message) { if (!condition) throw new IllegalStateException(message); }
