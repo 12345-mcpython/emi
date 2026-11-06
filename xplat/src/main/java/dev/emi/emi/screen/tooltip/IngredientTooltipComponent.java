@@ -27,7 +27,7 @@ public class IngredientTooltipComponent implements EmiTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(net.minecraft.client.gui.Font textRenderer) {
 		int s = ingredients.size();
 		if (s > MAX_DISPLAYED) {
 			s = MAX_DISPLAYED;

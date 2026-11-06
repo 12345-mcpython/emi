@@ -31,7 +31,7 @@ public class BookmarkChainTooltipComponent implements EmiTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(net.minecraft.client.gui.Font textRenderer) {
 		return entries.isEmpty() ? 0 : ((entries.size() - 1) / COLUMNS + 1) * SLOT;
 	}
 

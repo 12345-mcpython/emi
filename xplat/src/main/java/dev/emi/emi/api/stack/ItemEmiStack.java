@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
@@ -125,14 +126,14 @@ public class ItemEmiStack extends EmiStack implements Batchable {
 	
 	@Override
 	public boolean isSideLit() {
-		return client.getItemRenderer().getModel(getItemStack(), null, null, 0).usesBlockLight();
+		ItemStackRenderState state = new ItemStackRenderState();
+		client.getItemModelResolver().updateForTopItem(state, getItemStack(), ItemDisplayContext.GUI, false, client.level, null, 0);
+		return state.usesBlockLight();
 	}
 	
 	@Override
 	public boolean isUnbatchable() {
-		ItemStack stack = getItemStack();
-		return unbatchable || stack.hasFoil() || stack.isDamaged() || !EmiAgnos.canBatch(stack)
-			|| client.getItemRenderer().getModel(getItemStack(), null, null, 0).isCustomRenderer();
+		return true;
 	}
 	
 	@Override
@@ -142,19 +143,6 @@ public class ItemEmiStack extends EmiStack implements Batchable {
 	
 	@Override
 	public void renderForBatch(MultiBufferSource vcp, GuiGraphics draw, int x, int y, int z, float delta) {
-		EmiDrawContext context = EmiDrawContext.wrap(draw);
-		ItemStack stack = getItemStack();
-		ItemRenderer ir = client.getItemRenderer();
-		BakedModel model = ir.getModel(stack, null, null, 0);
-		context.push();
-		try {
-			context.matrices().translate(x, y, 100.0f + z + (model.isGui3d() ? 50 : 0));
-			context.translate(8, 8);
-			context.matrices().scale(16.0f, -16.0f, 16.0f);
-			ir.render(stack, ItemDisplayContext.GUI, false, context.matrices(), vcp, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, model);
-		} finally {
-			context.pop();
-		}
 	}
 
 	@Override

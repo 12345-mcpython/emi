@@ -28,7 +28,7 @@ public class TagTooltipComponent implements EmiTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(net.minecraft.client.gui.Font textRenderer) {
 		int s = stacks.size();
 		if (s > MAX_DISPLAYED) {
 			s = MAX_DISPLAYED;

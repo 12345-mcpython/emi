@@ -1471,7 +1471,7 @@ public class EmiScreenManager {
 		EmiConfig.enabled = !EmiConfig.enabled;
 		EmiConfig.writeConfig();
 		if (notify && !EmiConfig.enabled && EmiConfig.helpLevel.has(HelpLevel.VERBOSE)) {
-			client.getToasts().addToast(new DisabledToast());
+			client.getToastManager().addToast(new DisabledToast());
 		}
 		if (EmiConfig.enabled) {
 			forceRecalculate();

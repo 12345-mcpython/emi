@@ -6,6 +6,7 @@ import dev.emi.emi.runtime.EmiDrawContext;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
@@ -19,6 +20,10 @@ public class DisabledToast implements Toast {
 		raw.blitSprite(RenderType::guiTextured, TEXTURE, 0, 0, this.width(), this.height());
 		context.drawCenteredText(EmiPort.translatable("emi.disabled"), width() / 2, 7);
 		context.drawCenteredText(EmiConfig.toggleVisibility.getBindText(), width() / 2, 18);
+	}
+
+	@Override
+	public void update(ToastManager manager, long time) {
 	}
 
 	@Override

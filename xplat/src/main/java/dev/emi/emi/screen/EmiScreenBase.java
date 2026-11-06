@@ -85,12 +85,8 @@ public class EmiScreenBase {
 			HandledScreenAccessor hsa = (HandledScreenAccessor) hs;
 			AbstractContainerMenu sh = hs.getMenu();
 			if (sh.slots != null && !sh.slots.isEmpty()) {
+				// The recipe book no longer lives inside the container screen.
 				int extra = 0;
-				if (hs instanceof RecipeUpdateListener provider) {
-					if (provider.getRecipeBookComponent().isVisible()) {
-						extra = 177;
-					}
-				}
 				Bounds bounds = new Bounds(hsa.getX() - extra, hsa.getY(), hsa.getBackgroundWidth() + extra, hsa.getBackgroundHeight());
 				return new EmiScreenBase(screen, bounds);
 			}

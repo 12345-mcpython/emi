@@ -77,7 +77,7 @@ public class RecipeCostTooltipComponent implements EmiTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(net.minecraft.client.gui.Font textRenderer) {
 		if (!nodes.isEmpty()) {
 			return nodes.get(nodes.size() - 1).y + 18;
 		}

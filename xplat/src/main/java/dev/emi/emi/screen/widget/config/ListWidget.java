@@ -164,7 +164,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		int j = i + 6;
 		Tesselator tessellator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
 
 		{	// Render background
@@ -191,7 +190,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		}
 
 		if ((o = this.getMaxScroll()) > 0) {
-			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			m = (int)((float)((this.bottom - this.top) * (this.bottom - this.top)) / (float)this.getMaxPosition());
 			m = Mth.clamp(m, 32, this.bottom - this.top - 8);
 			n = (int)this.getScrollAmount() * (this.bottom - this.top - m) / o + this.top;
@@ -424,7 +422,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			if (this.renderSelection && this.isSelectedEntry(j)) {
 				p = this.left + this.width / 2 - o / 2;
 				int q = this.left + this.width / 2 + o / 2;
-				RenderSystem.setShader(GameRenderer::getPositionShader);
 				float f = this.isFocused() ? 1.0f : 0.5f;
 				RenderSystem.setShaderColor(f, f, f, 1.0f);
 				bufferBuilder.addVertex(p, m + n + 2, 0);

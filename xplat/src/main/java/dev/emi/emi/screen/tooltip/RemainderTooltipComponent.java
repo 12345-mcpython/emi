@@ -42,7 +42,7 @@ public class RemainderTooltipComponent implements EmiTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(net.minecraft.client.gui.Font textRenderer) {
 		return 18 * remainders.size();
 	}
 
