@@ -6,7 +6,6 @@
   "plugin": "dev.emi.emi.mixinsupport.EmiMixinPlugin",
   "client": [
     "accessor.AxeItemAccessor",
-    "accessor.BakedModelManagerAccessor",
     "accessor.BrewingRecipeRegistryAccessor",
     "accessor.CraftingResultSlotAccessor",
     "accessor.DrawContextAccessor",
@@ -17,7 +16,6 @@
     "accessor.ShovelItemAccessor",
     "accessor.SmithingTransformRecipeAccessor",
     "accessor.SmithingTrimRecipeAccessor",
-    "jei.PluginCallerMixin",
     "BookmarkInventorySyncMixin",
     "CraftingResultSlotMixin",
     "DrawContextMixin",
