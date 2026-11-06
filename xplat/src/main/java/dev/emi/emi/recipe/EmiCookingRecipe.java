@@ -28,7 +28,7 @@ public class EmiCookingRecipe implements EmiRecipe {
 	public EmiCookingRecipe(AbstractCookingRecipe recipe, EmiRecipeCategory category, int fuelMultiplier, boolean infiniBurn) {
 		this.id = ProxyRecipeManager.getId(recipe);
 		this.category = category;
-		input = EmiIngredient.of(recipe.getIngredients().get(0));
+		input = EmiIngredient.of(recipe.placementInfo().ingredients().get(0));
 		output = EmiStack.of(EmiPort.getOutput(recipe));
 		if (input.getEmiStacks().get(0).getItemStack().is(Items.WET_SPONGE)) {
 			input.getEmiStacks().get(0).setRemainder(EmiStack.of(Fluids.WATER, FluidUnit.BUCKET));
@@ -70,8 +70,8 @@ public class EmiCookingRecipe implements EmiRecipe {
 
 	@Override
 	public void addWidgets(WidgetHolder widgets) {
-		widgets.addFillingArrow(24, 5, 50 * recipe.getCookingTime()).tooltip((mx, my) -> {
-			return List.of(ClientTooltipComponent.create(EmiPort.ordered(EmiPort.translatable("emi.cooking.time", recipe.getCookingTime() / 20f))));
+		widgets.addFillingArrow(24, 5, 50 * recipe.cookingTime()).tooltip((mx, my) -> {
+			return List.of(ClientTooltipComponent.create(EmiPort.ordered(EmiPort.translatable("emi.cooking.time", recipe.cookingTime() / 20f))));
 		});
 		if (infiniBurn) {
 			widgets.addTexture(EmiTexture.FULL_FLAME, 1, 24);
@@ -79,7 +79,7 @@ public class EmiCookingRecipe implements EmiRecipe {
 			widgets.addTexture(EmiTexture.EMPTY_FLAME, 1, 24);
 			widgets.addAnimatedTexture(EmiTexture.FULL_FLAME, 1, 24, 4000 / fuelMultiplier, false, true, true);
 		}
-		widgets.addText(EmiPort.ordered(EmiPort.translatable("emi.cooking.experience", recipe.getExperience())), 26, 28, -1, true);
+		widgets.addText(EmiPort.ordered(EmiPort.translatable("emi.cooking.experience", recipe.experience())), 26, 28, -1, true);
 		widgets.addSlot(input, 0, 4);
 		widgets.addSlot(output, 56, 0).large(true).recipeContext(this);
 	}

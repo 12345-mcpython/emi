@@ -135,11 +135,10 @@ public final class EmiPort {
 	}
 
 	public static void setPositionTexShader() {
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		// Gui render types carry their pipeline now.
 	}
 
 	public static void setPositionColorTexShader() {
-		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 	}
 
 	public static Registry<Item> getItemRegistry() {
@@ -168,8 +167,21 @@ public final class EmiPort {
 	}
 
 	public static ItemStack getOutput(Recipe<?> recipe) {
-		Minecraft client = Minecraft.getInstance();
-		return recipe.getResultItem(client.level.registryAccess());
+		var displays = recipe.display();
+		if (displays.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
+		return displays.get(0).result().resolveForFirstStack(emptyContext());
+	}
+
+	public static net.minecraft.util.context.ContextMap emptyContext() {
+		try {
+			var ctor = net.minecraft.util.context.ContextMap.class.getDeclaredConstructor(java.util.Map.class);
+			ctor.setAccessible(true);
+			return ctor.newInstance(java.util.Map.of());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static void focus(EditBox widget, boolean focused) {
@@ -212,7 +224,7 @@ public final class EmiPort {
 	}
 
 	public static void applyModelViewMatrix() {
-		RenderSystem.applyModelViewMatrix();
+		// The gui pipelines read the pose stack directly.
 	}
 
 	public static void playClickSound() {

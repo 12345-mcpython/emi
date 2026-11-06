@@ -17,7 +17,7 @@ class ChessTooltipComponent implements EmiTooltipComponent {
 	}
 
 	@Override
-	public int getHeight() {
+	public int getHeight(Font textRenderer) {
 		return 30;
 	}
 

@@ -134,7 +134,7 @@ public class TagEmiIngredient implements EmiIngredient {
 				if (!model.usesBlockLight()) {
 					Lighting.setupForFlatItems();
 				}
-				MultiBufferSource.BufferSource immediate = context.raw().bufferSource();
+				MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
 				
 				((ItemRendererAccessor) client.getItemRenderer())
 					.invokeRenderBakedItemModel(model,

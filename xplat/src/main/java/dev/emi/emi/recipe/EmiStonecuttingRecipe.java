@@ -20,7 +20,7 @@ public class EmiStonecuttingRecipe implements EmiRecipe {
 	
 	public EmiStonecuttingRecipe(StonecutterRecipe recipe) {
 		this.id = ProxyRecipeManager.getId(recipe);
-		input = EmiIngredient.of(recipe.getIngredients().get(0));
+		input = EmiIngredient.of(recipe.placementInfo().ingredients().get(0));
 		output = EmiStack.of(EmiPort.getOutput(recipe));
 	}
 

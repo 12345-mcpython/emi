@@ -8,6 +8,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.render.EmiRenderable;
 import dev.emi.emi.registry.EmiTags;
 import dev.emi.emi.runtime.EmiTagKey;
@@ -96,7 +97,7 @@ public interface EmiIngredient extends EmiRenderable {
 		if (ingredient == null || ingredient.isEmpty()) {
 			return EmiStack.EMPTY;
 		}
-		return EmiTags.getIngredient(Item.class, ingredient.items().map(EmiStack::of).toList(), amount);
+		return EmiTags.getIngredient(Item.class, ingredient.display().resolveForStacks(EmiPort.emptyContext()).stream().map(EmiStack::of).toList(), amount);
 	}
 
 	public static EmiIngredient of(List<? extends EmiIngredient> list) {

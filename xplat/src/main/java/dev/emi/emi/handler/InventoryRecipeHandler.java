@@ -82,10 +82,9 @@ public class InventoryRecipeHandler implements StandardRecipeHandler<InventoryMe
 	@Override
 	public boolean canCraft(EmiRecipe recipe, EmiCraftContext<InventoryMenu> context) {
 		AbstractContainerMenu sh = context.getScreenHandler();
-		if (sh instanceof RecipeBookMenu<?, ?> arsh) {
+		if (sh instanceof RecipeBookMenu arsh) {
 			if (recipe instanceof EmiCraftingRecipe crafting) {
-				return crafting.canFit(arsh.getGridWidth(), arsh.getGridHeight())
-					&& StandardRecipeHandler.super.canCraft(recipe, context);
+				return StandardRecipeHandler.super.canCraft(recipe, context);
 			}
 		}
 		return false;
@@ -95,11 +94,9 @@ public class InventoryRecipeHandler implements StandardRecipeHandler<InventoryMe
 	public List<ClientTooltipComponent> getTooltip(EmiRecipe recipe, EmiCraftContext<InventoryMenu> context) {
 		if (!canCraft(recipe, context)) {
 			AbstractContainerMenu sh = context.getScreenHandler();
-			if (sh instanceof RecipeBookMenu<?, ?> arsh) {
+			if (sh instanceof RecipeBookMenu arsh) {
 				if (recipe instanceof EmiCraftingRecipe crafting) {
-					if (!crafting.canFit(arsh.getGridWidth(), arsh.getGridHeight())) {
-						return List.of(ClientTooltipComponent.create(EmiPort.ordered(TOO_SMALL)));
-					}
+					return List.of(ClientTooltipComponent.create(EmiPort.ordered(TOO_SMALL)));
 				}
 			}
 		}

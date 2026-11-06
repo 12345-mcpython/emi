@@ -93,7 +93,7 @@ public class StackBatcher {
 		assign(buffers, RenderType.translucent());
 		assign(buffers, Sheets.solidBlockSheet());
 		assign(buffers, Sheets.cutoutBlockSheet());
-		assign(buffers, Sheets.translucentCullBlockSheet());
+		assign(buffers, Sheets.translucentItemSheet());
 		assign(buffers, RenderType.glint());
 		//assign(buffers, RenderLayer.getDirectGlint());
 		assign(buffers, RenderType.entityGlint());

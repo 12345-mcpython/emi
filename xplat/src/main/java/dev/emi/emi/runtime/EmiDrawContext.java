@@ -53,12 +53,12 @@ public class EmiDrawContext {
 
 	public void drawTexture(ResourceLocation texture, int x, int y, int z, float u, float v, int width, int height, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
-		context.blit(RenderType::guiTextured, texture, x, y, z, u, v, width, height, textureWidth, textureHeight);
+		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight);
 	}
 
 	public void drawTexture(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
-		context.blit(RenderType::guiTextured, texture, x, y, width, height, u, v, regionWidth, regionHeight, textureWidth, textureHeight);
+		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
 	}
 
 	public void fill(int x, int y, int width, int height, int color) {
@@ -129,8 +129,29 @@ public class EmiDrawContext {
 		setColor(r, g, b, 1f);
 	}
 
+	private float colorR = 1f, colorG = 1f, colorB = 1f, colorA = 1f;
+
 	public void setColor(float r, float g, float b, float a) {
-		raw().setColor(r, g, b, a);
+		colorR = r;
+		colorG = g;
+		colorB = b;
+		colorA = a;
+	}
+
+	public float red() {
+		return colorR;
+	}
+
+	public float green() {
+		return colorG;
+	}
+
+	public float blue() {
+		return colorB;
+	}
+
+	public float alpha() {
+		return colorA;
 	}
 
 	public void drawStack(EmiIngredient stack, int x, int y) {
