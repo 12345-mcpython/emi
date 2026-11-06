@@ -25,8 +25,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.NeoForgeRenderTypes;
 import net.neoforged.neoforge.client.event.ContainerScreenEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
-import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
-import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
+import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
@@ -41,7 +40,6 @@ public class EmiClientNeoForge {
 		StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(f -> f.get()).toList());
 		EmiClient.init();
 		EmiNetwork.initClient(packet -> PacketDistributor.sendToServer(EmiPacketHandler.wrap(packet)));
-		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::recipesReloaded);
 		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::tagsReloaded);
 		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::renderScreenForeground);
 		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::postRenderScreen);
@@ -56,12 +54,8 @@ public class EmiClientNeoForge {
 	}
 
 	@SubscribeEvent
-	public static void registerResourceReloaders(RegisterClientReloadListenersEvent event) {
+	public static void registerResourceReloaders(AddClientReloadListenersEvent event) {
 		EmiData.init(reloader -> event.registerReloadListener(reloader));
-	}
-
-	public static void recipesReloaded(RecipesUpdatedEvent event) {
-		EmiReloadManager.reloadRecipes();
 	}
 
 	public static void tagsReloaded(TagsUpdatedEvent event) {

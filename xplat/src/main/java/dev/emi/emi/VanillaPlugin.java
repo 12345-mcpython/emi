@@ -58,6 +58,7 @@ import net.minecraft.world.item.crafting.BookCloningRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.FireworkRocketRecipe;
 import net.minecraft.world.item.crafting.FireworkStarFadeRecipe;
 import net.minecraft.world.item.crafting.FireworkStarRecipe;
@@ -346,9 +347,9 @@ public class VanillaPlugin implements EmiPlugin {
 				), 
 						EmiStack.of(Items.FILLED_MAP),
 						id, false), recipe);
-			} else if (recipe instanceof ShapedRecipe shaped && recipe.canCraftInDimensions(3, 3)) {
+			} else if (recipe instanceof ShapedRecipe shaped) {
 				addRecipeSafe(registry, () -> new EmiShapedRecipe(shaped), recipe);
-			} else if (recipe instanceof ShapelessRecipe shapeless && recipe.canCraftInDimensions(3, 3)) {
+			} else if (recipe instanceof ShapelessRecipe shapeless) {
 				addRecipeSafe(registry, () -> new EmiShapelessRecipe(shapeless), recipe);
 			} else if (recipe instanceof ArmorDyeRecipe dye) {
 				for (Item i : dyeableItems) {
@@ -361,15 +362,15 @@ public class VanillaPlugin implements EmiPlugin {
 			} else if (recipe instanceof BookCloningRecipe book) {
 				addRecipeSafe(registry, () -> new EmiBookCloningRecipe(id), recipe);
 			} else if (recipe instanceof TippedArrowRecipe tipped) {
-				EmiPort.getPotionRegistry().holders().forEach(entry -> {
+				EmiPort.getPotionRegistry().stream().forEach(potion -> {
 					EmiStack arrow = EmiStack.of(Items.ARROW);
 					addRecipeSafe(registry, () -> new EmiCraftingRecipe(List.of(
 							arrow, arrow, arrow, arrow,
-							EmiStack.of(EmiPort.setPotion(new ItemStack(Items.LINGERING_POTION), entry.value())),
+							EmiStack.of(EmiPort.setPotion(new ItemStack(Items.LINGERING_POTION), potion)),
 							arrow, arrow, arrow, arrow
 						),
-						EmiStack.of(EmiPort.setPotion(new ItemStack(Items.TIPPED_ARROW, 8), entry.value())),
-						synthetic("crafting/tipped_arrow", EmiUtil.subId(EmiPort.getPotionRegistry().getKey(entry.value()))),
+						EmiStack.of(EmiPort.setPotion(new ItemStack(Items.TIPPED_ARROW, 8), potion)),
+						synthetic("crafting/tipped_arrow", EmiUtil.subId(EmiPort.getPotionRegistry().getKey(potion))),
 						false), recipe);
 				});
 			} else if (recipe instanceof FireworkStarRecipe star) {
@@ -394,25 +395,12 @@ public class VanillaPlugin implements EmiPlugin {
 				addRecipeSafe(registry, () -> new EmiMapCloningRecipe(id), recipe);
 			} else if (!(recipe instanceof CustomRecipe)) {
 				try {
-					if (!recipe.getIngredients().isEmpty() && !EmiPort.getOutput(recipe).isEmpty() && recipe.canCraftInDimensions(3, 3)) {
-						boolean shapeless = recipe.canCraftInDimensions(1, recipe.getIngredients().size()) && recipe.canCraftInDimensions(recipe.getIngredients().size(), 1);
-						List<EmiIngredient> input;
-						if (shapeless) {
-							input = recipe.getIngredients().stream().map(EmiIngredient::of).toList();
-						} else {
-							int width = recipe.canCraftInDimensions(2, 3) ? recipe.canCraftInDimensions(1, 3) ? 1 : 2 : 3;
-							input = Lists.newArrayList();
-							for (int i = 0; i < recipe.getIngredients().size(); i++) {
-								input.add(EmiIngredient.of(recipe.getIngredients().get(i)));
-								if ((i + 1) % width == 0) {
-									for (int j = width; j < 3; j++) {
-										input.add(EmiStack.EMPTY);
-									}
-								}
-							}
-						}
+					List<Ingredient> ingredients = recipe.placementInfo().ingredients();
+					if (!ingredients.isEmpty() && !EmiPort.getOutput(recipe).isEmpty()) {
+						// 1.21.2+ no longer reports craft dimensions, so treat unknown layouts as shapeless.
+						List<EmiIngredient> input = ingredients.stream().map(EmiIngredient::of).toList();
 						EmiShapedRecipe.setRemainders(input, recipe);
-						addRecipeSafe(registry, () -> new EmiCraftingRecipe(input, EmiStack.of(EmiPort.getOutput(recipe)), id, shapeless));
+						addRecipeSafe(registry, () -> new EmiCraftingRecipe(input, EmiStack.of(EmiPort.getOutput(recipe)), id, true));
 					}
 				} catch (Exception e) {
 					EmiReloadLog.warn("Exception when parsing vanilla crafting recipe " + id, e);
@@ -436,11 +424,11 @@ public class VanillaPlugin implements EmiPlugin {
 			//addRecipeSafe(registry, () -> new EmiSmithingRecipe(recipe), recipe);
 			Minecraft client = Minecraft.getInstance();
 			if (recipe instanceof SmithingTransformRecipeAccessor stra) {
-				addRecipeSafe(registry, () -> new EmiSmithingRecipe(EmiIngredient.of(stra.getTemplate().orElse(Ingredient.EMPTY)), EmiIngredient.of(stra.getBase().orElse(Ingredient.EMPTY)),
-					EmiIngredient.of(stra.getAddition().orElse(Ingredient.EMPTY)), EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe)), recipe);
+				addRecipeSafe(registry, () -> new EmiSmithingRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), stra.getBase().map(EmiIngredient::of).orElse(EmiStack.EMPTY),
+					stra.getAddition().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe)), recipe);
 			} else if (recipe instanceof SmithingTrimRecipeAccessor stra) {
-				addRecipeSafe(registry, () -> new EmiSmithingTrimRecipe(EmiIngredient.of(stra.getTemplate().orElse(Ingredient.EMPTY)), EmiIngredient.of(stra.getBase().orElse(Ingredient.EMPTY)),
-					EmiIngredient.of(stra.getAddition().orElse(Ingredient.EMPTY)), EmiStack.of(EmiPort.getOutput(recipe)), recipe), recipe);
+				addRecipeSafe(registry, () -> new EmiSmithingTrimRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), stra.getBase().map(EmiIngredient::of).orElse(EmiStack.EMPTY),
+					stra.getAddition().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiStack.of(EmiPort.getOutput(recipe)), recipe), recipe);
 			}
 		}
 		for (StonecutterRecipe recipe : getRecipes(registry, RecipeType.STONECUTTING)) {
@@ -480,11 +468,7 @@ public class VanillaPlugin implements EmiPlugin {
 			}
 			try {
 				if (i.components().getOrDefault(DataComponents.MAX_DAMAGE, 0) > 0) {
-					if (i instanceof ArmorItem ai && ai.getMaterial() != null && ai.getMaterial().value().repairIngredient().get() != null
-							&& !ai.getMaterial().value().repairIngredient().get().isEmpty()) {
-						ResourceLocation id = synthetic("anvil/repairing/material", EmiUtil.subId(i) + "/" + EmiUtil.subId(ai.getMaterial().value().repairIngredient().get().items().findFirst().get().getItem()));
-						addRecipeSafe(registry, () -> new EmiAnvilRecipe(EmiStack.of(i), EmiIngredient.of(ai.getMaterial().value().repairIngredient().get()), id));
-					}
+					// Armour repair materials are data components now; the anvil material recipe needs a rework.
 				}
 				// TODO used to be isDamageable, the 20.1 impl of that method appears to just be maxDamage > 0 though
 				if (i.components().getOrDefault(DataComponents.MAX_DAMAGE, 0) > 0) {
@@ -504,8 +488,7 @@ public class VanillaPlugin implements EmiPlugin {
 				};
 				for (Enchantment e : targetedEnchantments) {
 					if (e.canEnchant(defaultStack) && defaultStack.isEnchantable()
-							&& defaultStack.getItem().isEnchantable(defaultStack)
-							&& EmiAgnos.isEnchantable(defaultStack, e)) {
+								&& EmiAgnos.isEnchantable(defaultStack, e)) {
 						consumer.accept(e);
 						acceptableEnchantments++;
 					}
@@ -698,8 +681,7 @@ public class VanillaPlugin implements EmiPlugin {
 			.output(EmiStack.of(Items.BASALT))
 			.build());
 
-		EmiPort.getFluidRegistry().holders().forEach(entry -> {
-			Fluid fluid = entry.value();
+		EmiPort.getFluidRegistry().stream().forEach(fluid -> {
 			Item bucket = fluid.getBucket();
 			if (fluid.isSource(fluid.defaultFluidState()) && !fluid.defaultFluidState().createLegacyBlock().isAir() && bucket != Items.AIR && fluid instanceof FlowingFluid) {
 				addRecipeSafe(registry, () -> basicWorld(EmiStack.of(Items.BUCKET), EmiStack.of(fluid, FluidUnit.BUCKET), EmiStack.of(bucket),
@@ -808,7 +790,8 @@ public class VanillaPlugin implements EmiPlugin {
 	}
 
 	private static <C extends RecipeInput, T extends Recipe<C>> Iterable<T> getRecipes(EmiRegistry registry, RecipeType<T> type) {
-		return registry.getRecipeManager().getAllRecipesFor(type).stream().map(e -> e.value())::iterator;
+		// See ProxyRecipeManager: the client has no recipe table on 1.21.2+.
+		return java.util.List.of();
 	}
 
 	private static void safely(String name, Runnable runnable) {

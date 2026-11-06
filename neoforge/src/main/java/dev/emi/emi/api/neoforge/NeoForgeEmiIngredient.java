@@ -14,7 +14,7 @@ public final class NeoForgeEmiIngredient {
     }
 
     public static EmiIngredient of(FluidIngredient ingredient) {
-        return EmiIngredient.of(Arrays.stream(ingredient.getStacks()).map(NeoForgeEmiStack::of).toList());
+        return EmiIngredient.of(ingredient.fluids().stream().map(holder -> NeoForgeEmiStack.of(new net.neoforged.neoforge.fluids.FluidStack(holder.value(), 1))).toList());
     }
 
     public static EmiIngredient of(SizedFluidIngredient ingredient) {

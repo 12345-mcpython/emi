@@ -16,6 +16,8 @@ public class FluidEmiStackSerializer implements EmiStackSerializer<FluidEmiStack
 
 	@Override
 	public EmiStack create(ResourceLocation id, DataComponentPatch componentChanges, long amount) {
-		return EmiStack.of(EmiPort.getFluidRegistry().get(id), componentChanges, amount);
+		return EmiPort.getFluidRegistry().get(id)
+			.map(holder -> EmiStack.of(holder.value(), componentChanges, amount))
+			.orElse(EmiStack.EMPTY);
 	}
 }

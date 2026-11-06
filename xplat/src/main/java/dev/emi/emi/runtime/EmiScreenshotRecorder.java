@@ -47,67 +47,25 @@ public class EmiScreenshotRecorder {
 
 	private static void saveScreenshotInner(String path, int width, int height, Runnable renderer) {
 		Minecraft client = Minecraft.getInstance();
-
-		int scale;
-		if (EmiConfig.recipeScreenshotScale < 1) {
-			scale = EmiPort.getGuiScale(client);
-		} else {
-			scale = EmiConfig.recipeScreenshotScale;
-		}
-
+		int scale = EmiConfig.recipeScreenshotScale < 1 ? EmiPort.getGuiScale(client) : EmiConfig.recipeScreenshotScale;
+		NativeImage nativeImage = null;
 		try {
-			NativeImage nativeImage = null;
+			RenderTarget framebuffer = new TextureTarget(width * scale, height * scale, true);
+			framebuffer.setClearColor(0f, 0f, 0f, 0f);
+			framebuffer.clear();
+			framebuffer.bindWrite(true);
 			try {
-				RenderTarget framebuffer = null;
-				Matrix4fStack view = RenderSystem.getModelViewStack();
-				boolean viewPushed = false;
-				boolean projectionBackedUp = false;
-				try {
-					framebuffer = new TextureTarget(width * scale, height * scale, true, Minecraft.ON_OSX);
-					framebuffer.setClearColor(0f, 0f, 0f, 0f);
-					framebuffer.clear(Minecraft.ON_OSX);
-					framebuffer.bindWrite(true);
-
-					view.pushMatrix();
-					viewPushed = true;
-					view.identity();
-					view.translate(-1.0f, 1.0f, 0.0f);
-					view.scale(2f / width, -2f / height, -1f / 1000f);
-					view.translate(0.0f, 0.0f, 10.0f);
-					EmiPort.applyModelViewMatrix();
-
-					RenderSystem.backupProjectionMatrix();
-					projectionBackedUp = true;
-					RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorting.ORTHOGRAPHIC_Z);
-					renderer.run();
-					nativeImage = takeScreenshot(framebuffer);
-				} finally {
-					// Each cleanup still runs if rendering, readback, or an earlier cleanup fails.
-					try {
-						if (projectionBackedUp) RenderSystem.restoreProjectionMatrix();
-					} finally {
-						try {
-							if (viewPushed) {
-								view.popMatrix();
-								EmiPort.applyModelViewMatrix();
-							}
-						} finally {
-							try {
-								if (framebuffer != null) framebuffer.destroyBuffers();
-							} finally {
-								client.getMainRenderTarget().bindWrite(true);
-							}
-						}
-					}
-				}
-
-				saveScreenshotInner(client.gameDirectory, path, nativeImage,
-					message -> client.execute(() -> client.gui.getChat().addMessage(message)));
-				// The IO worker owns the image only after submission succeeds.
-				nativeImage = null;
+				// TODO the 1.21.4 render pipeline needs its own projection setup here; screenshots render
+				// without the orthographic override until that is wired up.
+				renderer.run();
+				nativeImage = takeScreenshot(framebuffer);
 			} finally {
-				if (nativeImage != null) nativeImage.close();
+				framebuffer.destroyBuffers();
+				client.getMainRenderTarget().bindWrite(true);
 			}
+			saveScreenshotInner(client.gameDirectory, path, nativeImage,
+				message -> client.execute(() -> client.gui.getChat().addMessage(message)));
+			nativeImage = null;
 		} catch (Throwable e) {
 			EmiLog.error("Failed to capture screenshot", e);
 			try {
@@ -120,6 +78,10 @@ public class EmiScreenshotRecorder {
 				});
 			} catch (Throwable feedbackError) {
 				EmiLog.error("Failed to schedule screenshot error", feedbackError);
+			}
+		} finally {
+			if (nativeImage != null) {
+				nativeImage.close();
 			}
 		}
 	}

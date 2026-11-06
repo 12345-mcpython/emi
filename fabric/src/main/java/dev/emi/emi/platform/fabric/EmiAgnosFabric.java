@@ -20,7 +20,6 @@ import dev.emi.emi.api.FabricEmiStack;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.FluidEmiStack;
-import dev.emi.emi.jemi.JemiUtil;
 import dev.emi.emi.mixin.accessor.BrewingRecipeRegistryAccessor;
 import dev.emi.emi.platform.EmiAgnos;
 import dev.emi.emi.recipe.EmiBrewingRecipe;
@@ -29,9 +28,6 @@ import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.screen.FakeScreen;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
-import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
@@ -143,14 +139,15 @@ public class EmiAgnosFabric extends EmiAgnos {
 		PotionBrewing brewingRegistry = Minecraft.getInstance().level != null ? Minecraft.getInstance().level.potionBrewing() : PotionBrewing.EMPTY;
 		BrewingRecipeRegistryAccessor brewingRegistryAccess = (BrewingRecipeRegistryAccessor)brewingRegistry;
 		for (Ingredient ingredient : brewingRegistryAccess.getPotionTypes()) {
-			for (ItemStack stack : ingredient.items().toList()) {
+			for (var itemHolder : ingredient.items().toList()) {
+				ItemStack stack = new ItemStack(itemHolder.value());
 				String pid = EmiUtil.subId(stack.getItem());
 				for (PotionBrewing.Mix<Potion> recipe : brewingRegistryAccess.getPotionRecipes()) {
 					try {
 						Ingredient recipeIngredient = recipe.ingredient();
 						if (recipeIngredient.items().findAny().isPresent()) {
 							ResourceLocation id = EmiPort.id("emi", "/brewing/" + pid
-								+ "/" + EmiUtil.subId(recipeIngredient.items().findFirst().get().getItem())
+								+ "/" + EmiUtil.subId(recipeIngredient.items().findFirst().get().value())
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.from().value()))
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.to().value())));
 							registry.addRecipe(new EmiBrewingRecipe(
@@ -168,7 +165,7 @@ public class EmiAgnosFabric extends EmiAgnos {
 			try {
 				Ingredient recipeIngredient = recipe.ingredient();
 				if (recipeIngredient.items().findAny().isPresent()) {
-					String gid = EmiUtil.subId(recipeIngredient.items().findFirst().get().getItem());
+					String gid = EmiUtil.subId(recipeIngredient.items().findFirst().get().value());
 					String iid = EmiUtil.subId(recipe.from().value());
 					String oid = EmiUtil.subId(recipe.to().value());
 					Consumer<Holder<Potion>> potionRecipeGen = entry -> {
@@ -181,7 +178,7 @@ public class EmiAgnosFabric extends EmiAgnos {
 						}
 					};
 					if (recipe.from().value() instanceof PotionItem) {
-						EmiPort.getPotionRegistry().holders().forEach(potionRecipeGen);
+						EmiPort.getPotionRegistry().stream().map(EmiPort.getPotionRegistry()::wrapAsHolder).forEach(potionRecipeGen);
 					} else {
 						potionRecipeGen.accept(Potions.AWKWARD);
 					}
@@ -228,30 +225,19 @@ public class EmiAgnosFabric extends EmiAgnos {
 
 	@Override
 	protected EmiStack createFluidStackAgnos(Object object) {
-		if (object instanceof IJeiFluidIngredient fluid) {
-			return FabricEmiStack.of(fluid.getFluidVariant(), fluid.getAmount());
-		}
+		// JEI ingredient bridging is disabled while jemi is excluded on this checkpoint.
 		return EmiStack.EMPTY;
 	}
 
 	@Override
 	protected boolean canBatchAgnos(ItemStack stack) {
-		return ColorProviderRegistry.ITEM.get(stack.getItem()) == null;
+		return true;
 	}
 
 	@Override
 	protected Map<Item, Integer> getFuelMapAgnos() {
-		Object2IntMap<Item> fuelMap = new Object2IntOpenHashMap<>();
-		for (Item item : EmiPort.getItemRegistry()) {
-			if (FuelRegistry.INSTANCE.get(item) == null) {
-				continue;
-			}
-			int time = FuelRegistry.INSTANCE.get(item);
-			if (time > 0) {
-				fuelMap.put(item, time);
-			}
-		}
-		return fuelMap;
+		// TODO fabric fuel registry moved; rebuild from the fuel values once the api settles.
+		return Map.of();
 	}
 
 	@Override
