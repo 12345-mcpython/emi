@@ -24,9 +24,20 @@ public class EmiReloadLog {
 	}
 
 	public static void warn(String warning, Throwable t) {
-		pendingWarnings.add(warning);
-		EmiLog.error(warning, t);
+		String detail = warning + " (" + describe(t) + ")";
+		pendingWarnings.add(detail);
+		EmiLog.error(detail, t);
 		pendingWarningCount++;
+	}
+
+	/** Compact origin summary so the first frames survive log viewers that drop stack traces. */
+	public static String describe(Throwable t) {
+		StringBuilder sb = new StringBuilder(String.valueOf(t));
+		StackTraceElement[] frames = t.getStackTrace();
+		for (int i = 0; i < frames.length && i < 6; i++) {
+			sb.append(" <- ").append(frames[i]);
+		}
+		return sb.toString();
 	}
 
 	public static void info(String info) {
