@@ -790,8 +790,12 @@ public class VanillaPlugin implements EmiPlugin {
 	}
 
 	private static <C extends RecipeInput, T extends Recipe<C>> Iterable<T> getRecipes(EmiRegistry registry, RecipeType<T> type) {
-		// See ProxyRecipeManager: the client has no recipe table on 1.21.2+.
-		return java.util.List.of();
+		net.minecraft.world.item.crafting.RecipeManager raw = ProxyRecipeManager.getRaw();
+		if (raw == null) {
+			return java.util.List.of();
+		}
+		return raw.getRecipes().stream().filter(holder -> holder.value().getType() == type)
+			.map(holder -> (T) holder.value()).toList();
 	}
 
 	private static void safely(String name, Runnable runnable) {

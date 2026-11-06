@@ -3,6 +3,8 @@ package dev.emi.emi.runtime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
@@ -10,23 +12,32 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+
 /**
- * Recipe ids used to come from the client recipe manager. Since 1.21.2 the client no longer keeps
- * a recipe table at all: recipes are synchronized as {@code RecipeDisplay} entries, so this proxy
- * currently reports no recipes and the vanilla recipe categories stay empty until the display
- * pipeline is wired up.
+ * Recipe lookup for the 1.21.2+ client.
+ * <p>
+ * The client no longer keeps a recipe table, so recipes are read from the integrated server while a
+ * singleplayer world is open. Multiplayer still needs the {@code RecipeDisplay} pipeline: the server only
+ * synchronizes displays there.
  */
 public class ProxyRecipeManager {
+	private static final Minecraft client = Minecraft.getInstance();
 	private static Map<Recipe<?>, ResourceKey<Recipe<?>>> recipeIds = Map.of();
 
 	public static boolean isAvailable() {
-		return false;
+		return getRaw() != null;
 	}
 
 	public static @Nullable RecipeManager getRaw() {
-		return null;
+		IntegratedServer server = client.getSingleplayerServer();
+		if (server == null) {
+			return null;
+		}
+		return server.getRecipeManager();
 	}
 
 	public static @Nullable ResourceLocation getId(Recipe<?> recipe) {
@@ -49,22 +60,52 @@ public class ProxyRecipeManager {
 	}
 
 	public static @Nullable RecipeHolder<?> getRecipeEntry(ResourceLocation id) {
+		RecipeManager raw = getRaw();
+		if (raw == null || id == null) {
+			return null;
+		}
+		for (RecipeHolder<?> holder : raw.getRecipes()) {
+			if (holder.id().location().equals(id)) {
+				return holder;
+			}
+		}
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <I extends RecipeInput, T extends Recipe<I>> Stream<T> streamMatches(RecipeType<T> type, I inventory) {
-		return Stream.empty();
+		RecipeManager raw = getRaw();
+		Level level = client.level;
+		if (raw == null || level == null) {
+			return Stream.empty();
+		}
+		return raw.getRecipes().stream()
+			.filter(holder -> holder.value().getType() == type)
+			.filter(holder -> ((Recipe<I>) holder.value()).matches(inventory, level))
+			.map(holder -> (T) holder.value());
 	}
 
 	public static <I extends RecipeInput, T extends Recipe<I>> List<T> getMatches(RecipeType<T> type, I inventory) {
-		return List.of();
+		return streamMatches(type, inventory).toList();
 	}
 
 	public static <I extends RecipeInput, T extends Recipe<I>> @Nullable T getFirst(RecipeType<T> type, I inventory) {
-		return null;
+		RecipeManager raw = getRaw();
+		if (raw == null || client.level == null) {
+			return null;
+		}
+		return raw.getRecipeFor(type, inventory, client.level).map(RecipeHolder::value).orElse(null);
 	}
 
 	public static void bakeIds() {
-		recipeIds = Map.of();
+		RecipeManager raw = getRaw();
+		if (raw == null) {
+			return;
+		}
+		Map<Recipe<?>, ResourceKey<Recipe<?>>> ids = new Reference2ObjectOpenHashMap<>();
+		for (RecipeHolder<?> holder : raw.getRecipes()) {
+			ids.put(holder.value(), holder.id());
+		}
+		recipeIds = ids;
 	}
 }

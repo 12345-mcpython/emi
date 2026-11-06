@@ -49,8 +49,8 @@ select a loom API (`LoomInterface114`) that the published looms do not implement
 
 Started intentionally so the checkpoint could build; each has a TODO in the code.
 
-1. Recipe browsing is empty: the client has no recipe table any more, so `ProxyRecipeManager` reports none. Recipes have to be
-   collected from the 1.21.2+ `RecipeDisplay` / recipe-info payloads before the category browser works again.
+1. Recipe browsing only works in singleplayer: `ProxyRecipeManager` reads recipes from the integrated server. Multiplayer still has
+   to be served by the 1.21.2+ `RecipeDisplay` / recipe-info payloads, because the client keeps no recipe table there.
 2. jemi/JEI integration is excluded (no JEI build exists for 1.21.2-1.21.4).
 3. `StackBatcher` is a no-op shim, everything draws through `GuiGraphics`.
 4. Recipe screenshots render without the orthographic projection override.
