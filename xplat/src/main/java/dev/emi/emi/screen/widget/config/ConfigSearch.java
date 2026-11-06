@@ -15,7 +15,7 @@ public class ConfigSearch {
 
 		field = new ConfigSearchWidgetField(client.font, x, y, width, height, EmiPort.literal(""));
 		field.setResponder(s -> {
-			if (s.length() > 0) {
+			if (!s.isEmpty()) {
 				field.setSuggestion("");
 			} else {
 				field.setSuggestion(I18n.get("emi.search_config"));
@@ -32,7 +32,7 @@ public class ConfigSearch {
 		return field.getValue();
 	}
 	
-	private class ConfigSearchWidgetField extends EditBox {
+	private static class ConfigSearchWidgetField extends EditBox {
 
 		public ConfigSearchWidgetField(Font textRenderer, int x, int y, int width, int height, Component text) {
 			super(textRenderer, x, y, width, height, text);

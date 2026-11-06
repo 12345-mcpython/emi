@@ -87,15 +87,15 @@ public class EmiNameWidget implements Renderable {
 	}
 
 	public String transformString(Random rand, String string, float progress) {
-		String ret = "";
+		StringBuilder ret = new StringBuilder();
 		IntSet glitched = pruneSet(new Random(rand.nextLong()), string.length(), Math.round(string.length() * (1 - progress)));
 		for (int i = 0; i < string.length(); i++) {
 			if (glitched.contains(i)) {
-				ret += "§k";
+				ret.append("§k");
 			}
-			ret += string.charAt(i);
+			ret.append(string.charAt(i));
 		}
-		return ret;
+		return ret.toString();
 	}
 
 	public void render(GuiGraphics raw, int mouseX, int mouseY, float delta) {

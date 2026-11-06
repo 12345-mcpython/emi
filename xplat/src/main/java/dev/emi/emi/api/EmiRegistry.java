@@ -119,7 +119,7 @@ public interface EmiRegistry {
 	}
 
 	/**
-	 * @deprecated Use {@link EmiPlugin#initialize()} and {@link EmiInitRegistry#addIngredientSerializer()}
+	 * @deprecated Use {@link EmiPlugin#initialize(EmiInitRegistry)} and {@link EmiInitRegistry#addIngredientSerializer(Class, EmiIngredientSerializer)}
 	 */
 	@Deprecated
 	<T extends EmiIngredient> void addIngredientSerializer(Class<T> clazz, EmiIngredientSerializer<T> serializer);

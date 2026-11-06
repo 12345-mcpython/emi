@@ -631,17 +631,17 @@ public class EmiConfig {
 				String group = parts[0];
 				String key = parts[1];
 				Comment comment = field.getAnnotation(Comment.class);
-				String commentText = "";
+				StringBuilder commentText = new StringBuilder();
 				if (comment != null) {
-					commentText += "\t/**\n";
+					commentText.append("\t/**\n");
 					for (FormattedText line : wrapper.splitLines(comment.value(), 80, Style.EMPTY)) {
-						commentText += "\t * ";
-						commentText += line.getString();
-						commentText += "\n";
+						commentText.append("\t * ");
+						commentText.append(line.getString());
+						commentText.append("\n");
 					}
-					commentText += "\t */\n";
+					commentText.append("\t */\n");
 				}
-				String text = commentText;
+				String text = commentText.toString();
 				try {
 					text += writeField(key, field);
 				} catch (Exception e) {
@@ -659,20 +659,20 @@ public class EmiConfig {
 					+ value + ";\n");
 			}
 		}
-		String ret = "";
-		ret += "/** EMI Config */\n\n";
+		StringBuilder ret = new StringBuilder();
+		ret.append("/** EMI Config */\n\n");
 		boolean firstCategory = true;
 		for (Map.Entry<String, List<String>> category : unparsed.entrySet()) {
 			if (!firstCategory) {
-				ret += "\n";
+				ret.append("\n");
 			}
 			firstCategory = false;
 
-			ret += "#" + category.getKey() + " {\n";
-			ret += Strings.join(category.getValue(), "\n");
-			ret += "}\n";
+			ret.append("#").append(category.getKey()).append(" {\n");
+			ret.append(Strings.join(category.getValue(), "\n"));
+			ret.append("}\n");
 		}
-		return ret;
+		return ret.toString();
 	}
 
 	private static File getConfigFile() {
@@ -714,18 +714,18 @@ public class EmiConfig {
 
 	@SuppressWarnings("unchecked")
 	private static String writeField(String key, Field field) throws IllegalAccessException {
-		String text = "";
+		StringBuilder text = new StringBuilder();
 		Class<?> type = field.getType();
 		if (MULTI_WRITERS.containsKey(type)) {
 			for (String line : ((MultiWriter<Object>) MULTI_WRITERS.get(type)).writeValue(field.get(null))) {
-				text += "\t" + key + ": " + line + ";\n";
+				text.append("\t").append(key).append(": ").append(line).append(";\n");
 			}
 		} else if (WRITERS.containsKey(type)) {
-			text += "\t" + key + ": " + ((Writer<Object>) WRITERS.get(type)).writeValue(field.get(null)) + ";\n";
+			text.append("\t").append(key).append(": ").append(((Writer<Object>) WRITERS.get(type)).writeValue(field.get(null))).append(";\n");
 		} else if (ConfigEnum.class.isAssignableFrom(type)) {
-			text += "\t" + key + ": " + ((Writer<Object>) WRITERS.get(ConfigEnum.class)).writeValue(field.get(null)) + ";\n";
+			text.append("\t").append(key).append(": ").append(((Writer<Object>) WRITERS.get(ConfigEnum.class)).writeValue(field.get(null))).append(";\n");
 		}
-		return text;
+		return text.toString();
 	}
 
 	private static void defineType(Class<?> clazz, Setter setter, Writer<?> writer) {

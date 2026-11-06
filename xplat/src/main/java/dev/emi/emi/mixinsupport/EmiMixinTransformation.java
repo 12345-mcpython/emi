@@ -30,11 +30,11 @@ public class EmiMixinTransformation {
 			return;
 		}
 		if (speakTheGoodWord) {
-			String warning = targetClassName + " is tainted by";
+			StringBuilder warning = new StringBuilder(targetClassName + " is tainted by");
 			for (String tainter : tainters) {
-				warning += "\n\t * " + tainter;
+				warning.append("\n\t * ").append(tainter);
 			}
-			EmiLog.warn(warning);
+			EmiLog.warn(warning.toString());
 		}
 	}
 
@@ -60,14 +60,14 @@ public class EmiMixinTransformation {
 				}
 			}
 			if (!tainters.isEmpty()) {
-				String sinners = "Mixins:";
+				StringBuilder sinners = new StringBuilder("Mixins:");
 				for (String tainter : tainters) {
-					sinners += "\n\t\t * " + tainter;
+					sinners.append("\n\t\t * ").append(tainter);
 				}
-				sinners += "\n\t\t";
+				sinners.append("\n\t\t");
 				dictate(targetClassName, tainters);
-				targetClass.sourceFile = sinners;
-				targetClass.sourceDebug = sinners;
+				targetClass.sourceFile = sinners.toString();
+				targetClass.sourceDebug = sinners.toString();
 			}
 		}
 	}

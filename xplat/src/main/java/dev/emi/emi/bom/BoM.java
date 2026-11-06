@@ -1,5 +1,6 @@
 package dev.emi.emi.bom;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.client.Minecraft;
@@ -123,8 +124,8 @@ public class BoM {
 		for (String key : addedTags.keySet()) {
 			EmiIngredient tag = EmiIngredientSerializer.getDeserialized(new JsonPrimitive(key));
 			EmiIngredient stack = EmiIngredientSerializer.getDeserialized(addedTags.get(key));
-			if (!tag.isEmpty() && !stack.isEmpty() && stack.getEmiStacks().size() == 1 && tag.getEmiStacks().containsAll(stack.getEmiStacks())) {
-				addedRecipes.put(tag, new EmiResolutionRecipe(tag, stack.getEmiStacks().get(0)));
+			if (!tag.isEmpty() && !stack.isEmpty() && stack.getEmiStacks().size() == 1 && new HashSet<>(tag.getEmiStacks()).containsAll(stack.getEmiStacks())) {
+				addedRecipes.put(tag, new EmiResolutionRecipe(tag, stack.getEmiStacks().getFirst()));
 			}
 		}
 	}
@@ -134,7 +135,7 @@ public class BoM {
 	}
 
 	public static boolean isRecipeEnabled(EmiRecipe recipe) {
-		return !disabledRecipes.contains(recipe) && (defaultRecipes.values().contains(recipe) || addedRecipes.values().contains(recipe));
+		return !disabledRecipes.contains(recipe) && (defaultRecipes.containsValue(recipe) || addedRecipes.containsValue(recipe));
 	}
 
 	public static DefaultStatus getRecipeStatus(EmiRecipe recipe) {

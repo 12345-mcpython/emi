@@ -136,16 +136,18 @@ public class MicroTextRenderer {
 	}
 
 	private static String construct(String amount, int shift, int afterDecimal, String unit) {
-		while (amount.length() < shift) {
-			amount = "0" + amount;
+        StringBuilder amountBuilder = new StringBuilder(amount);
+        while (amountBuilder.length() < shift) {
+			amountBuilder.insert(0, "0");
 		}
-		int start = amount.length() - shift;
+        amount = amountBuilder.toString();
+        int start = amount.length() - shift;
 		String before = amount.substring(0, start);
 		if (afterDecimal <= 0) {
 			return before + unit;
 		}
 		String after = amount.substring(start, Math.min(start + afterDecimal, amount.length()));
-		while (after.length() > 0 && after.charAt(after.length() - 1) == '0') {
+		while (!after.isEmpty() && after.charAt(after.length() - 1) == '0') {
 			after = after.substring(0, after.length() - 1);
 		}
 		if (after.isEmpty()) {

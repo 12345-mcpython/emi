@@ -276,7 +276,10 @@ public class CraftingTreeModel {
 				EmiRecipe candidate = recipes.get(i);
 				boolean ready = true;
 				for (EmiRecipe dependency : plan.dependencies.getOrDefault(candidate, List.of())) {
-					if (batchesByRecipe.containsKey(dependency) && !emitted.contains(dependency)) ready = false;
+                    if (batchesByRecipe.containsKey(dependency) && !emitted.contains(dependency)) {
+                        ready = false;
+                        break;
+                    }
 				}
 				if (ready) { selected = i; break; }
 			}

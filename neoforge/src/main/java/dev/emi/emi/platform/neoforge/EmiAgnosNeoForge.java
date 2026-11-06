@@ -243,9 +243,9 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 			if (opt.isPresent()) {
 				Object obj = opt.get();
 				if (obj instanceof String authors) {
-					return Lists.newArrayList(authors.split("\\,")).stream().map(s -> s.trim());
+					return Lists.newArrayList(authors.split(",")).stream().map(String::trim);
 				} else if (obj instanceof List<?> list) {
-					if (list.size() > 0 && list.get(0) instanceof String) {
+					if (!list.isEmpty() && list.getFirst() instanceof String) {
 						List<String> authors = (List<String>) list;
 						return authors.stream();
 					}

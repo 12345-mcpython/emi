@@ -31,9 +31,9 @@ public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 		"Diamonds", "Pickaxes", "Planks", "Stone", "Slime", "Creepers", "Iron", "Redstone",
 		"Trinkets", "Fungiculture", "Floralisia", "Chime", "Yttr", "Mnemonics", "Quilt"
 	);
-	private static final List<String> OBJECT = Stream.concat(List.of(
+	private static final List<String> OBJECT = Stream.concat(Stream.of(
 		"Fighting Monsters"
-	).stream(), NOUN.stream()).toList();
+	), NOUN.stream()).toList();
 	private static final List<String> ADJECTIVE = List.of(
 		"Cool", "Introductory", "Diffused", "Wooden", "Slimey", "Dark", "Antimemetic", "Fun", "Fuzzy", "Tall",
 		"Rotund", "Jovial", "" // Lol blank adjective, leaving it
@@ -73,10 +73,9 @@ public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 	
 	private EmiStack getWrittenBook(Random random, boolean copy) {
 		ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-		CompoundTag tag = new CompoundTag();
-		String title = TEMPLATES.get(random.nextInt(TEMPLATES.size())).resolve(random);
-		if (title.length() > 0) {
-			title = Character.toUpperCase(title.charAt(0)) + title.substring(1, title.length());
+        String title = TEMPLATES.get(random.nextInt(TEMPLATES.size())).resolve(random);
+		if (!title.isEmpty()) {
+			title = Character.toUpperCase(title.charAt(0)) + title.substring(1);
 		}
 		String author;
 		if (random.nextInt(20) < 5) {
@@ -91,7 +90,7 @@ public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 	}
 
 	public static class Template {
-		private List<Object> parts;
+		private final List<Object> parts;
 
 		private Template(List<Object> parts) {
 			this.parts = parts;
@@ -102,11 +101,11 @@ public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 		}
 
 		public String resolve(Random random) {
-			String ret = resolvePart(random, parts.get(0));
+			StringBuilder ret = new StringBuilder(resolvePart(random, parts.getFirst()));
 			for (int i = 1; i < parts.size(); i++) {
-				ret += " " + resolvePart(random, parts.get(i));
+				ret.append(" ").append(resolvePart(random, parts.get(i)));
 			}
-			return ret;
+			return ret.toString();
 		}
 
 		private String resolvePart(Random random, Object part) {
