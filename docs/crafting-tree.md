@@ -89,10 +89,10 @@ GTNH NEI 截图中的绿色括号和逐行配方属于左侧书签栏。当前 E
 
 ## 1.21.1 移植状态（2026年11月5日）
 
-- `:fabric:compileJava`、`:fabric:build` 通过，`emi-xplat-refmap.json` 已生成，`BookmarkInventorySyncMixin`、`MinecraftClientMixin`（含新的 `reloadResources(ZLnet/minecraft/client/MinecraftClient$LoadingContext;)` 签名）注入点均已解析。
+- `:fabric:compileJava`、`:fabric:build`、`:neoforge:build` 均通过，`emi-xplat-refmap.json` 已生成，`BookmarkInventorySyncMixin`、`MinecraftClientMixin`（含新的 `reloadResources(ZLnet/minecraft/client/MinecraftClient$LoadingContext;)` 签名）注入点均已解析。
 - 独立回归全部通过：算量79、收藏分组141、自动合成调度59、计划290、生命周期7、transfer checks。
 - 1.21 适配：`ScreenHandlerSlotUpdateS2CPacket#getItemStack` → `#getStack`、`ItemStack.canCombine` → `ItemStack.areItemsAndComponentsEqual`、`BoMScreen` 改用 `renderDarkening` 与四参数 `mouseScrolled`、截图改用 `Matrix4fStack`。
-- NeoForge 构建未能在本机执行（无法拉取 neoforge maven 依赖），游戏内验证待做。
+- Fabric 与 NeoForge 构建均已通过，游戏内验证待做。
 - 可选 smoke fixture（`tests/crafting-tree-smoke`）只更新了版本元数据，移植后尚未重新编译或运行。
 
 本说明依据新编写的合成树 UI、需求与本次已确认的验证结果整理，未参考根目录旧补丁、备份或历史日志。

@@ -106,4 +106,4 @@ EMI 组链合成使用独立可配置绑定 `EmiConfig.craftBookmarkGroup`（`ke
 
 ### 1.21.1 移植
 
-2026年11月5日：代码已移植到 1.21.1（Fabric / NeoForge），`:fabric:build` 与独立回归（算量79、收藏分组141、自动合成59、计划290、生命周期7、transfer）通过，mixin refmap 解析正常。NeoForge 构建因无法拉取依赖未执行，游戏内验证尚未进行。
+2026年11月5日：代码已移植到 1.21.1（Fabric / NeoForge），`:fabric:build`、`:neoforge:build` 与独立回归（算量79、收藏分组141、自动合成59、计划290、生命周期7、transfer）通过，mixin refmap 解析正常。游戏内验证尚未进行。
