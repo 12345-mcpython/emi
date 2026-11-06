@@ -48,7 +48,7 @@ public class IngredientTooltipComponent implements EmiTooltipComponent {
 		}
 		if (ingredients.size() > MAX_DISPLAYED) {
 			context.resetColor();
-			context.drawTexture(TEXTURE, getWidth(render.text) - 14, getHeight() - 8, 0, 192, 9, 3);
+			context.drawTexture(TEXTURE, getWidth(render.text) - 14, getHeight(net.minecraft.client.Minecraft.getInstance().font) - 8, 0, 192, 9, 3);
 		}
 	}
 }

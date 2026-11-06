@@ -12,6 +12,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet.Named;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
@@ -50,25 +51,28 @@ public class EmiTagKey<T> {
 		return raw.location();
 	}
 
-	public Registry<T> registry() {
-		Minecraft client = Minecraft.getInstance();
-		return client.level.registryAccess().registry(raw.registry()).orElse(null);
+	public ResourceKey<? extends Registry<T>> registryKey() {
+		return raw.registry();
+	}
+
+	public ResourceLocation registryId() {
+		return raw.registry().location();
 	}
 
 	public Stream<T> stream() {
-		Registry<T> registry = registry();
-		Optional<Named<T>> opt = registry.getTag(raw);
-		if (opt.isEmpty()) {
+		Minecraft client = Minecraft.getInstance();
+		if (client.level == null) {
 			return Stream.of();
-		} else {
-			if (registry == EmiPort.getFluidRegistry()) {
-				return opt.get().stream().filter(o -> {
-					Fluid f = (Fluid) o.value();
-					return f.isSource(f.defaultFluidState());
-				}).map(Holder::value);
-			}
-			return opt.get().stream().map(Holder::value);
 		}
+		Stream<T> stream = client.level.registryAccess().lookupOrThrow(raw.registry())
+			.listElements().filter(h -> h.is(raw)).map(Holder::value);
+		if (raw.isFor(EmiPort.getFluidRegistry().key())) {
+			return stream.filter(o -> {
+				Fluid f = (Fluid) o;
+				return f.isSource(f.defaultFluidState());
+			});
+		}
+		return stream;
 	}
 
 	public List<T> getList() {
@@ -125,7 +129,7 @@ public class EmiTagKey<T> {
 	public @Nullable ResourceLocation getCustomModel() {
 		ResourceLocation rid = this.id();
 		if (rid.getNamespace().equals("forge") && !EmiTags.MODELED_TAGS.containsKey(raw())) {
-			return EmiTagKey.of(registry(), EmiPort.id("c", rid.getPath())).getCustomModel();
+			return EmiTagKey.of(TagKey.create(raw.registry(), EmiPort.id("c", rid.getPath()))).getCustomModel();
 		}
 		return EmiTags.MODELED_TAGS.get(raw());
 	}
@@ -154,7 +158,7 @@ public class EmiTagKey<T> {
 	}
 
 	public static <T> Stream<EmiTagKey<T>> fromRegistry(Registry<T> registry) {
-		return registry.getTagNames().map(EmiTagKey::of);
+		return registry.getTags().map(named -> EmiTagKey.of(named.key()));
 	}
 
 	public static void reload() {

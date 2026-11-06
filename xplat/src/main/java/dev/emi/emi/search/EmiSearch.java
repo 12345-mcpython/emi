@@ -86,7 +86,7 @@ public class EmiSearch {
 				}
 				if (stack.getItemStack().getItem() == Items.ENCHANTED_BOOK) {
 					for (Holder<Enchantment> e : stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).keySet()) {
-						ResourceLocation eid = EmiPort.getEnchantmentRegistry().getKey(e.value());
+						ResourceLocation eid = EmiPort.getEnchantmentId(e.value());
 						if (eid != null && !eid.getNamespace().equals("minecraft")) {
 							mods.add(searchStack, EmiUtil.getModName(eid.getNamespace()).toLowerCase());
 						}

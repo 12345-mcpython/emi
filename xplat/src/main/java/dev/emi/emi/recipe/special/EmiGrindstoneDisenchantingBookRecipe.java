@@ -78,7 +78,7 @@ public class EmiGrindstoneDisenchantingBookRecipe implements EmiRecipe {
 		ItemStack book = new ItemStack(Items.ENCHANTED_BOOK);
 
 		var enchBuilder = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
-		enchBuilder.upgrade(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), level);
+		enchBuilder.upgrade(EmiPort.getEnchantmentHolder(enchantment), level);
 		book.set(DataComponents.STORED_ENCHANTMENTS, enchBuilder.toImmutable());
 
 		return EmiStack.of(book);

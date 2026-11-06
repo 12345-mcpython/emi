@@ -92,23 +92,23 @@ public class EmiGrindstoneDisenchantingRecipe implements EmiRecipe {
 			}
 			
 			for (Enchantment e : list) {
-				if (e == enchantment || !Enchantment.areCompatible(EmiPort.getEnchantmentRegistry().wrapAsHolder(e), EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment))) {
+				if (e == enchantment || !Enchantment.areCompatible(EmiPort.getEnchantmentHolder(e), EmiPort.getEnchantmentHolder(enchantment))) {
 					continue outer;
 				}
 			}
 			list.add(enchantment);
 
-			if (EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment).is(EnchantmentTags.CURSE)) {
-				itemStack.enchant(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), lvl);
+			if (EmiPort.getEnchantmentHolder(enchantment).is(EnchantmentTags.CURSE)) {
+				itemStack.enchant(EmiPort.getEnchantmentHolder(enchantment), lvl);
 			} else if (enchanted) {
-				itemStack.enchant(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), lvl);
+				itemStack.enchant(EmiPort.getEnchantmentHolder(enchantment), lvl);
 			}
 		}
 		return EmiStack.of(itemStack);
 	}
 
 	private Enchantment getEnchantment(Random random){
-		List<Enchantment> enchantments = EmiPort.getEnchantmentRegistry().stream().filter(i -> i.canEnchant(tool.getDefaultInstance())).toList();
+		List<Enchantment> enchantments = EmiPort.getEnchantments().stream().map(net.minecraft.core.Holder.Reference::value).filter(i -> i.canEnchant(tool.getDefaultInstance())).toList();
 		int enchantment = random.nextInt(enchantments.size());
 		return enchantments.get(enchantment);
 	}

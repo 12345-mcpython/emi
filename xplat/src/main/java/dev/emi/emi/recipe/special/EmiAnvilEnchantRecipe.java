@@ -77,14 +77,14 @@ public class EmiAnvilEnchantRecipe implements EmiRecipe {
 
 	private ItemStack getTool() {
 		ItemStack itemStack = tool.getDefaultInstance();
-		itemStack.enchant(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), level);
+		itemStack.enchant(EmiPort.getEnchantmentHolder(enchantment), level);
 		return itemStack;
 	}
 
 	private EmiStack getBook() {
 		ItemStack item = new ItemStack(Items.ENCHANTED_BOOK);
 		var enchBuilder = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
-		enchBuilder.upgrade(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), level);
+		enchBuilder.upgrade(EmiPort.getEnchantmentHolder(enchantment), level);
 		item.set(DataComponents.STORED_ENCHANTMENTS, enchBuilder.toImmutable());
 		return EmiStack.of(item);
 	}

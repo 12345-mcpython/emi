@@ -32,6 +32,7 @@ import dev.emi.emi.util.InheritanceMap;
 public class EmiTags {
 	public static final InheritanceMap<EmiRegistryAdapter<?>> ADAPTERS_BY_CLASS = new InheritanceMap<>(Maps.newHashMap());
 	public static final Map<Registry<?>, EmiRegistryAdapter<?>> ADAPTERS_BY_REGISTRY = Maps.newHashMap();
+	public static final Map<ResourceLocation, EmiRegistryAdapter<?>> ADAPTERS_BY_ID = Maps.newHashMap();
 	public static final ResourceLocation HIDDEN_FROM_RECIPE_VIEWERS = EmiPort.id("c", "hidden_from_recipe_viewers");
 	public static final Map<TagKey<?>, ResourceLocation> MODELED_TAGS = Maps.newHashMap();
 	private static final Map<Set<?>, List<EmiTagKey<?>>> CACHED_TAGS = Maps.newHashMap();
@@ -43,7 +44,7 @@ public class EmiTags {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static <T> List<EmiStack> getValues(EmiTagKey<T> key) {
 		if (TAG_VALUES.containsKey(key)) {
-			EmiRegistryAdapter adapter = ADAPTERS_BY_REGISTRY.get(key.registry());
+			EmiRegistryAdapter adapter = ADAPTERS_BY_ID.get(key.registryId());
 			if (adapter != null) {
 				List<T> values = (List<T>) TAG_VALUES.getOrDefault(key, List.of());
 				return values.stream().map(t -> adapter.of(t, EmiPort.emptyExtraData(), 1)).toList();
@@ -57,7 +58,7 @@ public class EmiTags {
 		if (key.isOf(EmiPort.getBlockRegistry())) {
 			return key.stream().map(e -> EmiStack.of((Block) e)).toList();
 		}
-		EmiRegistryAdapter adapter = ADAPTERS_BY_REGISTRY.get(key.registry());
+		EmiRegistryAdapter adapter = ADAPTERS_BY_ID.get(key.registryId());
 		if (adapter != null) {
 			return key.stream().map(t -> adapter.of(t, EmiPort.emptyExtraData(), 1)).toList();
 		}
@@ -208,7 +209,7 @@ public class EmiTags {
 
 	@SuppressWarnings("unchecked")
 	private static <T> EmiStack stackFromKey(EmiTagKey<T> key, T t) {
-		EmiRegistryAdapter<T> adapter = (EmiRegistryAdapter<T>) ADAPTERS_BY_REGISTRY.get(key.registry());
+		EmiRegistryAdapter<T> adapter = (EmiRegistryAdapter<T>) ADAPTERS_BY_ID.get(key.registryId());
 		if (adapter != null) {
 			return adapter.of(t, EmiPort.emptyExtraData(), 1);
 		}

@@ -20,6 +20,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -104,8 +105,9 @@ public final class EmiPort {
 	}
 
 	public static BannerPatternLayers addRandomBanner(BannerPatternLayers patterns, Random random) {
-		var bannerRegistry = Minecraft.getInstance().level.registryAccess().registryOrThrow(Registries.BANNER_PATTERN);
-		return new BannerPatternLayers.Builder().addAll(patterns).add(bannerRegistry.getHolder(random.nextInt(bannerRegistry.size())).get(),
+		var lookup = Minecraft.getInstance().level.registryAccess().lookupOrThrow(Registries.BANNER_PATTERN);
+		var patternsList = lookup.listElements().toList();
+		return new BannerPatternLayers.Builder().addAll(patterns).add(patternsList.get(random.nextInt(patternsList.size())),
 			DyeColor.values()[random.nextInt(DyeColor.values().length)]).build();
 	}
 
@@ -157,9 +159,27 @@ public final class EmiPort {
 		return BuiltInRegistries.POTION;
 	}
 
-	public static Registry<Enchantment> getEnchantmentRegistry() {
+	public static List<Holder.Reference<Enchantment>> getEnchantments() {
 		Minecraft client = Minecraft.getInstance();
-		return client.level.registryAccess().registryOrThrow(Registries.ENCHANTMENT);
+		return client.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements().toList();
+	}
+
+	public static ResourceLocation getEnchantmentId(Enchantment enchantment) {
+		for (Holder.Reference<Enchantment> holder : getEnchantments()) {
+			if (holder.value() == enchantment) {
+				return holder.key().location();
+			}
+		}
+		return EmiPort.id("minecraft", "unknown");
+	}
+
+	public static Holder<Enchantment> getEnchantmentHolder(Enchantment enchantment) {
+		for (Holder.Reference<Enchantment> holder : getEnchantments()) {
+			if (holder.value() == enchantment) {
+				return holder;
+			}
+		}
+		return null;
 	}
 
 	public static Button newButton(int x, int y, int w, int h, Component name, OnPress action) {

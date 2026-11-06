@@ -29,6 +29,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.EnchantmentTags;
@@ -462,7 +463,8 @@ public class VanillaPlugin implements EmiPlugin {
 	private static void addRepair(EmiRegistry registry, Set<Item> hiddenItems) {
 		List<Enchantment> targetedEnchantments = Lists.newArrayList();
 		List<Enchantment> universalEnchantments = Lists.newArrayList();
-		for (Enchantment enchantment : EmiPort.getEnchantmentRegistry().stream().toList()) {
+		for (Holder.Reference<Enchantment> enchantmentHolder : EmiPort.getEnchantments()) {
+			Enchantment enchantment = enchantmentHolder.value();
 			try {
 				if (enchantment.canEnchant(ItemStack.EMPTY)) {
 					universalEnchantments.add(enchantment);
@@ -498,7 +500,7 @@ public class VanillaPlugin implements EmiPlugin {
 				Consumer<Enchantment> consumer = e -> {
 					int max = e.getMaxLevel();
 					addRecipeSafe(registry, () -> new EmiAnvilEnchantRecipe(i, e, max,
-						synthetic("anvil/enchanting", EmiUtil.subId(i) + "/" + EmiUtil.subId(EmiPort.getEnchantmentRegistry().getKey(e)) + "/" + max)));
+						synthetic("anvil/enchanting", EmiUtil.subId(i) + "/" + EmiUtil.subId(EmiPort.getEnchantmentId(e)) + "/" + max)));
 				};
 				for (Enchantment e : targetedEnchantments) {
 					if (e.canEnchant(defaultStack) && defaultStack.isEnchantable()
@@ -530,14 +532,15 @@ public class VanillaPlugin implements EmiPlugin {
 		addRecipeSafe(registry, () -> new EmiAnvilRecipe(EmiStack.of(Items.SHIELD), EmiIngredient.of(ItemTags.PLANKS),
 			synthetic("anvil/repairing/material", EmiUtil.subId(Items.SHIELD) + "/" + EmiUtil.subId(Items.OAK_PLANKS))));
 
-		for (Enchantment e : EmiPort.getEnchantmentRegistry().stream().toList()) {
-			if (!EmiPort.getEnchantmentRegistry().wrapAsHolder(e).is(EnchantmentTags.CURSE)) {
+		for (Holder.Reference<Enchantment> enchantmentHolder : EmiPort.getEnchantments()) {
+			Enchantment e = enchantmentHolder.value();
+			if (!EmiPort.getEnchantmentHolder(e).is(EnchantmentTags.CURSE)) {
 				int max = Math.min(10, e.getMaxLevel());
 				int min = e.getMinLevel();
 				while (min <= max) {
 					int level = min;
 					addRecipeSafe(registry, () -> new EmiGrindstoneDisenchantingBookRecipe(e, level,
-						synthetic("grindstone/disenchanting/book", EmiUtil.subId(EmiPort.getEnchantmentRegistry().getKey(e)) + "/" + level)));
+						synthetic("grindstone/disenchanting/book", EmiUtil.subId(EmiPort.getEnchantmentId(e)) + "/" + level)));
 					min++;
 				}
 			}
