@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -144,7 +143,7 @@ public class EmiTags {
 		return (List<EmiTagKey<T>>) (List) SORTED_TAGS.getOrDefault(registry.key().location(), List.of());
 	}
 
-	public static void registerTagModels(ResourceManager manager, Consumer<ModelResourceLocation> consumer, String variant) {
+	public static void registerTagModels(ResourceManager manager, Consumer<ResourceLocation> consumer) {
 		EmiTags.MODELED_TAGS.clear();
 		for (ResourceLocation id : EmiPort.findResources(manager, "models/tag", s -> s.endsWith(".json"))) {
 			String path = id.getPath();
@@ -154,7 +153,7 @@ public class EmiTags {
 				TagKey<?> key = TagKey.create(ResourceKey.createRegistryKey(EmiPort.id("minecraft", parts[0])), EmiPort.id(id.getNamespace(), path.substring(1 + parts[0].length())));
 				ResourceLocation mid = EmiPort.id(id.getNamespace(), "tag/" + path);
 				EmiTags.MODELED_TAGS.put(key, mid);
-				consumer.accept(new ModelResourceLocation(mid, variant));
+				consumer.accept(mid);
 			}
 		}
 		/*

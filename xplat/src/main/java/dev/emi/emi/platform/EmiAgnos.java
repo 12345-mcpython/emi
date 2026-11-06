@@ -4,7 +4,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -149,12 +148,6 @@ public abstract class EmiAgnos {
 	}
 
 	protected abstract Map<Item, Integer> getFuelMapAgnos();
-
-	public static BakedModel getBakedTagModel(ResourceLocation id) {
-		return delegate.getBakedTagModelAgnos(id);
-	}
-
-	protected abstract BakedModel getBakedTagModelAgnos(ResourceLocation id);
 
 	public static boolean isEnchantable(ItemStack stack, Enchantment enchantment) {
 		return delegate.isEnchantableAgnos(stack, enchantment);

@@ -40,7 +40,6 @@ import net.minecraft.world.inventory.BlastFurnaceMenu;
 import net.minecraft.world.inventory.FurnaceMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SmokerMenu;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
@@ -424,10 +423,10 @@ public class VanillaPlugin implements EmiPlugin {
 			//addRecipeSafe(registry, () -> new EmiSmithingRecipe(recipe), recipe);
 			Minecraft client = Minecraft.getInstance();
 			if (recipe instanceof SmithingTransformRecipeAccessor stra) {
-				addRecipeSafe(registry, () -> new EmiSmithingRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), stra.getBase().map(EmiIngredient::of).orElse(EmiStack.EMPTY),
+				addRecipeSafe(registry, () -> new EmiSmithingRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiIngredient.of(stra.getBase()),
 					stra.getAddition().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe)), recipe);
 			} else if (recipe instanceof SmithingTrimRecipeAccessor stra) {
-				addRecipeSafe(registry, () -> new EmiSmithingTrimRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), stra.getBase().map(EmiIngredient::of).orElse(EmiStack.EMPTY),
+				addRecipeSafe(registry, () -> new EmiSmithingTrimRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiIngredient.of(stra.getBase()),
 					stra.getAddition().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiStack.of(EmiPort.getOutput(recipe)), recipe), recipe);
 			}
 		}

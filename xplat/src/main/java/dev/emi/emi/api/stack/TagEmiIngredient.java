@@ -10,7 +10,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -25,7 +24,6 @@ import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.EmiUtil;
 import dev.emi.emi.api.render.EmiRender;
 import dev.emi.emi.config.EmiConfig;
-import dev.emi.emi.mixin.accessor.ItemRendererAccessor;
 import dev.emi.emi.platform.EmiAgnos;
 import dev.emi.emi.registry.EmiTags;
 import dev.emi.emi.runtime.EmiDrawContext;
@@ -115,41 +113,12 @@ public class TagEmiIngredient implements EmiIngredient {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);
 		Minecraft client = Minecraft.getInstance();
 
-		if ((flags & RENDER_ICON) != 0) {
-			if (!tagKey.hasCustomModel()) {
+			if ((flags & RENDER_ICON) != 0) {
 				if (stacks.size() > 0) {
 					stacks.get(0).render(context.raw(), x, y, delta, -1 ^ RENDER_AMOUNT);
 				}
-			} else {
-				BakedModel model = EmiAgnos.getBakedTagModel(tagKey.getCustomModel());
-
-				context.matrices().pushPose();
-				context.matrices().translate(x + 8, y + 8, 150);
-				context.matrices().mulPose(new Matrix4f().scaling(1.0f, -1.0f, 1.0f));
-				context.matrices().scale(16.0f, 16.0f, 16.0f);
-				
-				model.getTransforms().getTransform(ItemDisplayContext.GUI).apply(false, context.matrices());
-				context.matrices().translate(-0.5f, -0.5f, -0.5f);
-				
-				if (!model.usesBlockLight()) {
-					Lighting.setupForFlatItems();
-				}
-				MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-				
-				((ItemRendererAccessor) client.getItemRenderer())
-					.invokeRenderBakedItemModel(model,
-						new int[] { -1 }, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, context.matrices(),
-						ItemRenderer.getFoilBuffer(immediate,
-							Sheets.translucentItemSheet(), true, false));
-				immediate.endBatch();
-				
-				if (!model.usesBlockLight()) {
-					Lighting.setupFor3DItems();
-				}
-
-				context.matrices().popPose();
 			}
-		}
+
 		if ((flags & RENDER_AMOUNT) != 0 && !tagKey.isOf(EmiPort.getFluidRegistry())) {
 			String count = "";
 			if (amount != 1) {

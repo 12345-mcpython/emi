@@ -37,7 +37,6 @@ import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
@@ -240,10 +239,6 @@ public class EmiAgnosFabric extends EmiAgnos {
 		return Map.of();
 	}
 
-	@Override
-	protected BakedModel getBakedTagModelAgnos(ResourceLocation id) {
-		return Minecraft.getInstance().getModelManager().getModel(id);
-	}
 
 	@Override
 	protected boolean isEnchantableAgnos(ItemStack stack, Enchantment enchantment) {

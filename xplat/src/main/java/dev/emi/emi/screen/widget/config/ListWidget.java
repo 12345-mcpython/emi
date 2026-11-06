@@ -23,13 +23,6 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.emi.emi.EmiPort;
 
 /**
@@ -167,10 +160,8 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
 
 		{	// Render background
-			RenderSystem.enableBlend();
 			ResourceLocation identifier = this.client.level == null ? MENU_LIST_BACKGROUND_TEXTURE : INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
 			draw.blit(RenderType::guiTextured, identifier, left, top, right, bottom + (int)scrollAmount, right - left, bottom - top, 32, 32);
-			RenderSystem.disableBlend();
 		}
 
 		draw.enableScissor(left, top, right, bottom);
@@ -181,12 +172,10 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 
 
 		{	// Render header & footer separators
-			RenderSystem.enableBlend();
 			ResourceLocation identifier = this.client.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
 			ResourceLocation identifier2 = this.client.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
 			draw.blit(RenderType::guiTextured, identifier, left, top - 2, 0.0F, 0.0F, width, 2, 32, 2);
 			draw.blit(RenderType::guiTextured, identifier2, left, bottom, 0.0F, 0.0F, width, 2, 32, 2);
-			RenderSystem.disableBlend();
 		}
 
 		if ((o = this.getMaxScroll()) > 0) {
@@ -196,22 +185,10 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			if (n < this.top) {
 				n = this.top;
 			}
-			bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-			bufferBuilder.addVertex(i, this.bottom, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(j, this.bottom, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(j, this.top, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(i, this.top, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(i, n + m, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(j, n + m, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(j, n, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(i, n, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(i, n + m - 1, 0).setColor(192, 192, 192, 255);
-			bufferBuilder.addVertex(j - 1, n + m - 1, 0).setColor(192, 192, 192, 255);
-			bufferBuilder.addVertex(j - 1, n, 0).setColor(192, 192, 192, 255);
-			bufferBuilder.addVertex(i, n, 0).setColor(192, 192, 192, 255);
-			BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+			draw.fill(i, this.top, j, this.bottom, 0xFF000000);
+			draw.fill(i, n, j, n + m, 0xFF808080);
+			draw.fill(i, n, j - 1, n + m - 1, 0xFFC0C0C0);
 		}
-		RenderSystem.disableBlend();
 	}
 
 	public void centerScrollOn(Entry entry) {
@@ -404,8 +381,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 
 	protected void renderList(GuiGraphics draw, int x, int y, int mouseX, int mouseY, float delta) {
 		int i = this.getEntryCount();
-		Tesselator tessellator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 		for (int j = 0; j < i; ++j) {
 			int p;
 			int k = this.getRowTop(j);
@@ -423,19 +398,9 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 				p = this.left + this.width / 2 - o / 2;
 				int q = this.left + this.width / 2 + o / 2;
 				float f = this.isFocused() ? 1.0f : 0.5f;
-				RenderSystem.setShaderColor(f, f, f, 1.0f);
-				bufferBuilder.addVertex(p, m + n + 2, 0);
-				bufferBuilder.addVertex(q, m + n + 2, 0);
-				bufferBuilder.addVertex(q, m - 2, 0);
-				bufferBuilder.addVertex(p, m - 2, 0);
-				BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-				RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
-				bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-				bufferBuilder.addVertex(p + 1, m + n + 1, 0);
-				bufferBuilder.addVertex(q - 1, m + n + 1, 0);
-				bufferBuilder.addVertex(q - 1, m - 1, 0);
-				bufferBuilder.addVertex(p + 1, m - 1, 0);
-				BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+				int shade = (int) (f * 255f);
+				draw.fill(p, m - 2, q, m + n + 2, 0xFF000000 | (shade << 16) | (shade << 8) | shade);
+				draw.fill(p + 1, m - 1, q - 1, m + n + 1, 0xFF000000);
 			}
 			p = this.getRowLeft();
 			((Entry)entry).render(draw, j, k, p, o - 3, n, mouseX, mouseY, Objects.equals(this.hoveredEntry, entry), delta);

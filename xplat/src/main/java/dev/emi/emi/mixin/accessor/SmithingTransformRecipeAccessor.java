@@ -13,7 +13,7 @@ public interface SmithingTransformRecipeAccessor {
 	Optional<Ingredient> getTemplate();
 
 	@Accessor("base")
-	Optional<Ingredient> getBase();
+	Ingredient getBase();
 
 	@Accessor("addition")
 	Optional<Ingredient> getAddition();

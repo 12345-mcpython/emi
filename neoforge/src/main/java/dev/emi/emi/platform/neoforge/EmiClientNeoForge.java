@@ -50,7 +50,7 @@ public class EmiClientNeoForge {
 	@SubscribeEvent
 	public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
 		Minecraft client = Minecraft.getInstance();
-		EmiTags.registerTagModels(client.getResourceManager(), loc -> event.register(loc.id()), "standalone");
+		EmiTags.registerTagModels(client.getResourceManager(), loc -> event.register(loc));
 	}
 
 	@SubscribeEvent
