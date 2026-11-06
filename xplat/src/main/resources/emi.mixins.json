@@ -19,6 +19,7 @@
     "accessor.SmithingTrimRecipeAccessor",
     "jei.PluginCallerMixin",
     "AbstractInventoryScreenMixin",
+    "BookmarkInventorySyncMixin",
     "CraftingResultSlotMixin",
     "DrawContextMixin",
     "GlobalMixin",

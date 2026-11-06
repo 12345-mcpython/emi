@@ -34,7 +34,10 @@ public class MaterialTree {
 		resolutions.put(ingredient, recipe);
 		if (ingredient.equals(goal.ingredient)) {
 			goal.defineRecipe(recipe);
-			goal.amount = ingredient.getAmount();
+			// batches denotes recipe executions, so replacing the root keeps one batch's output.
+			if (recipe != null) {
+				goal.amount = goal.divisor;
+			}
 		}
 		recalculate();
 	}

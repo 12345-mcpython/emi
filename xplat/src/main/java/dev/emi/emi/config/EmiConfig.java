@@ -114,6 +114,20 @@ public class EmiConfig {
 	@ConfigValue("ui.use-batched-renderer")
 	public static boolean useBatchedRenderer = true;
 
+	@Comment("The bookmark quantity step used by Ctrl + Alt + scroll. Minimum: 1.")
+	@ConfigValue("ui.bookmark-quantity-step")
+	public static int bookmarkQuantityStep = 64;
+
+	@Comment("Initial layout for new bookmark groups. DEFAULT flows items through the grid;"
+		+ " TODO puts each result/item on its own row. The group header still toggles this per group.")
+	@ConfigValue("ui.bookmark-view-mode")
+	public static BookmarkViewMode bookmarkViewMode = BookmarkViewMode.DEFAULT;
+
+	/** Clamp on use as the config UI can assign integer fields directly. */
+	public static int getBookmarkQuantityStep() {
+		return Math.max(1, bookmarkQuantityStep);
+	}
+
 	@Comment("Whether to have the search bar in the center of the screen, instead of to the side.")
 	@ConfigValue("ui.center-search-bar")
 	public static boolean centerSearchBar = true;
@@ -383,6 +397,18 @@ public class EmiConfig {
 	@ConfigValue("binds.favorite")
 	public static EmiBind favorite = new EmiBind("key.emi.favorite", GLFW.GLFW_KEY_A);
 
+	@Comment("Open the hovered bookmark group's temporary recipe tree without replacing the current plan.")
+	@ConfigValue("binds.view-bookmark-group")
+	public static EmiBind viewBookmarkGroup = new EmiBind("key.emi.view_bookmark_group", GLFW.GLFW_KEY_T);
+
+	@Comment("Take the bookmark group's item materials from ordinary storage; add Shift to subtract inventory.")
+	@ConfigValue("binds.take-bookmark-group")
+	public static EmiBind takeBookmarkGroup = new EmiBind("key.emi.take_bookmark_group", GLFW.GLFW_KEY_V);
+
+	@Comment("Craft the selected bookmark group in the current supported crafting container.")
+	@ConfigValue("binds.craft-bookmark-group")
+	public static EmiBind craftBookmarkGroup = new EmiBind("key.emi.craft_bookmark_group", EmiInput.SHIFT_MASK, GLFW.GLFW_KEY_C);
+
 	@Comment("Set the default recipe for a given stack in the output of a recipe to that recipe.")
 	@ConfigValue("binds.default-stack")
 	public static EmiBind defaultStack = new EmiBind("key.emi.default_stack",
@@ -575,6 +601,7 @@ public class EmiConfig {
 					}
 				}
 			}
+			bookmarkQuantityStep = getBookmarkQuantityStep();
 			for (String key : css.keySet()) {
 				if (!consumed.contains(key)) {
 					unparsed.put(key, css.getAll(key));

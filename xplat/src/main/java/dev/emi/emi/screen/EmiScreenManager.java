@@ -43,6 +43,10 @@ import dev.emi.emi.config.SidebarSubpanels;
 import dev.emi.emi.config.SidebarTheme;
 import dev.emi.emi.config.SidebarType;
 import dev.emi.emi.input.EmiBind;
+import dev.emi.emi.input.EmiInput;
+import dev.emi.emi.runtime.BookmarkCrafting;
+import dev.emi.emi.runtime.EmiBookmarkGroups;
+import dev.emi.emi.screen.BookmarkSidebar.RowFavorite;
 import dev.emi.emi.mixin.accessor.HandledScreenAccessor;
 import dev.emi.emi.network.CreateItemC2SPacket;
 import dev.emi.emi.network.EmiNetwork;
@@ -124,11 +128,61 @@ public class EmiScreenManager {
 			() -> true, (w) -> EmiApi.viewRecipeTree(),
 			List.of(EmiPort.translatable("tooltip.emi.recipe_tree")));
 
+	private static Object warmupWorld;
+	private static boolean warmupComplete;
+	private static boolean resourcesReloading;
+	private static boolean startupPrepared;
+
+	/** CPU-only preparation before the title screen's first frame; no world data or GL uploads. */
+	public static void prepareStartup() {
+		if (startupPrepared || !EmiConfig.enabled) return;
+		long start = System.nanoTime();
+		if (StackBatcher.isEnabled()) {
+			// preallocate adds at most one batcher per call. Keep this bounded: it
+			// runs during title-screen init on the render thread.
+			for (int i = 0; i < 4 && !batchers.preallocate(4); i++) {
+			}
+		}
+		startupPrepared = true;
+		EmiLog.info("Prepared EMI interface buffers before title screen in "
+			+ ((System.nanoTime() - start) / 1_000_000) + "ms; world recipe index still waits for server synchronization");
+	}
+
+	/** Called on the client thread; never opens a screen or reloads recipe data. */
+	public static void warmupTick() {
+		if (resourcesReloading || !EmiReloadManager.isLoaded() || client.world == null || client.player == null) {
+			warmupWorld = null;
+			warmupComplete = false;
+			return;
+		}
+		if (warmupWorld != client.world) {
+			warmupWorld = client.world;
+			warmupComplete = false;
+		}
+		if (warmupComplete || !EmiConfig.enabled || client.currentScreen != null) return;
+		if (!StackBatcher.isEnabled() || batchers.preallocate(4)) {
+			warmupComplete = true;
+			EmiLog.info("Prepared EMI sidebar buffers before the first inventory screen");
+		}
+	}
+
+	public static void resetWarmup() {
+		warmupWorld = null;
+		warmupComplete = false;
+	}
+
+	public static void setResourcesReloading(boolean reloading) {
+		resourcesReloading = reloading;
+		resetWarmup();
+	}
+
 	public static boolean isDisabled() {
 		return !EmiReloadManager.isLoaded() || !EmiConfig.enabled;
 	}
 
 	public static void recalculate() {
+		BookmarkCrafting.tick();
+		dev.emi.emi.runtime.BookmarkMaterialTransfer.tick();
 		updateCraftables();
 		SidebarPanel searchPanel = getSearchPanel();
 		if (searchPanel != null && searchPanel.space != null) {
@@ -455,6 +509,38 @@ public class EmiScreenManager {
 		return null;
 	}
 
+	private static SidebarPanel getBookmarkPanel(int mouseX, int mouseY) {
+		EmiScreenBase base = EmiScreenBase.getCurrent();
+		if (base.isEmpty()) {
+			return null;
+		}
+		for (Bounds bounds : EmiExclusionAreas.getExclusion(base)) {
+			if (bounds.contains(mouseX, mouseY)) {
+				return null;
+			}
+		}
+		for (SidebarPanel panel : panels) {
+			if (panel.isVisible() && panel.getType() == SidebarType.FAVORITES
+					&& (panel.space.contains(mouseX, mouseY)
+						|| (panel.header && mouseX >= panel.space.tx && mouseX < panel.space.tx + panel.space.tw * ENTRY_SIZE
+							&& mouseY >= panel.space.ty - ENTRY_SIZE && mouseY < panel.space.ty))) {
+				return panel;
+			}
+		}
+		return null;
+	}
+
+	private static boolean bookmarkInput(Function<BookmarkSidebar, Boolean> input) {
+		for (SidebarPanel panel : panels) {
+			if (panel.isVisible() && panel.getType() == SidebarType.FAVORITES && input.apply(panel.bookmarks)) {
+				pressedStack = EmiStack.EMPTY;
+				draggedStack = EmiStack.EMPTY;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static boolean hasSidebarVisible(SidebarType type) {
 		for (SidebarPanel panel : panels) {
 			for (ScreenSpace space : panel.getSpaces()) {
@@ -477,6 +563,9 @@ public class EmiScreenManager {
 
 	public static void repopulatePanels(SidebarType type) {
 		for (SidebarPanel panel : panels) {
+			if (type == SidebarType.FAVORITES) {
+				panel.bookmarks.invalidate();
+			}
 			for (ScreenSpace space : panel.getSpaces()) {
 				if (space.getType() == type) {
 					space.batcher.repopulate();
@@ -539,6 +628,12 @@ public class EmiScreenManager {
 		if (!stack.isEmpty()) {
 			return stack;
 		}
+		SidebarPanel bookmarkPanel = getBookmarkPanel(mouseX, mouseY);
+		if (bookmarkPanel != null) {
+			EmiFavorite favorite = bookmarkPanel.bookmarks.hovered(mouseX, mouseY);
+			return favorite == null ? EmiStackInteraction.EMPTY
+				: new SidebarEmiStackInteraction(favorite, bookmarkPanel.space, favorite.getRecipe(), true);
+		}
 		if (!ignoreLastHoveredCraftable) {
 			if (lastHoveredCraftable != null) {
 				if (lastHoveredCraftable.getRecipeContext() == null
@@ -552,7 +647,10 @@ public class EmiScreenManager {
 		}
 		for (SidebarPanel panel : panels) {
 			for (ScreenSpace space : panel.getSpaces()) {
-				if (panel.isVisible() && space.pageSize > 0 && space.contains(mouseX, mouseY)
+				if (space == panel.space && panel.getType() == SidebarType.FAVORITES) {
+					continue;
+				}
+				if (panel.isVisible() && space.pageSize > 0 && space.containsNotExcluded(mouseX, mouseY)
 						&& mouseX >= space.tx && mouseY >= space.ty) {
 					int x = (mouseX - space.tx) / ENTRY_SIZE;
 					int y = (mouseY - space.ty) / ENTRY_SIZE;
@@ -705,29 +803,6 @@ public class EmiScreenManager {
 
 	private static void renderDraggedStack(EmiDrawContext context, int mouseX, int mouseY, float delta, EmiScreenBase base) {
 		if (!draggedStack.isEmpty()) {
-			SidebarPanel panel = getHoveredPanel(mouseX, mouseY);
-			if (panel != null) {
-				ScreenSpace space = panel.getHoveredSpace(mouseX, mouseY);
-				if (space != null && space.getType() == SidebarType.FAVORITES) {
-					int pageSize = space.pageSize;
-					int page = panel.page;
-					int index = space.getClosestEdge(mouseX, mouseY);
-					if (index + pageSize * page > EmiFavorites.favorites.size()) {
-						index = EmiFavorites.favorites.size() - pageSize * page;
-					}
-					if (index + pageSize * page > space.getStacks().size()) {
-						index = space.getStacks().size() - pageSize * page;
-					}
-					if (index >= 0) {
-						context.push();
-						context.matrices().translate(0, 0, 200);
-						int dx = space.getEdgeX(index);
-						int dy = space.getEdgeY(index);
-						context.fill(dx - 1, dy, 2, 18, 0xFF00FFFF);
-						context.pop();
-					}
-				}
-			}
 			context.push();
 			context.matrices().translate(0, 0, 400);
 			EmiDragDropHandlers.render(base.screen(), draggedStack, context.raw(), mouseX, mouseY, delta);
@@ -763,9 +838,13 @@ public class EmiScreenManager {
 						hov = sesi.getStack();
 						sidebar = sesi.getType();
 					}
+					SidebarPanel bookmarkPanel = getBookmarkPanel(mouseX, mouseY);
+					List<TooltipComponent> groupTooltip = bookmarkPanel == null ? List.of()
+						: bookmarkPanel.bookmarks.tooltip(mouseX, mouseY);
+					boolean groupHovered = !groupTooltip.isEmpty();
 					List<TooltipComponent> list = Lists.newArrayList();
-					list.addAll(hov.getTooltip());
-					if (EmiApi.getRecipeContext(hov) == null && EmiConfig.showCraft.isHeld()) {
+					list.addAll(groupHovered ? groupTooltip : hov.getTooltip());
+					if (!groupHovered && EmiApi.getRecipeContext(hov) == null && EmiConfig.showCraft.isHeld()) {
 						EmiRecipe recipe = EmiUtil.getPreferredRecipe(hov, lastPlayerInventory, false);
 						if (recipe != null) {
 							list.add(new RecipeTooltipComponent(recipe, true));
@@ -964,6 +1043,11 @@ public class EmiScreenManager {
 					return false;
 				}
 			}
+			SidebarPanel bookmarkPanel = getBookmarkPanel(mx, my);
+			if (bookmarkPanel != null && bookmarkInput(bookmarks -> bookmarks == bookmarkPanel.bookmarks
+					&& bookmarks.mouseScrolled(mx, my, sa))) {
+				return true;
+			}
 			panel.scroll(-sa);
 			return true;
 		}
@@ -974,6 +1058,15 @@ public class EmiScreenManager {
 		EmiScreenBase base = EmiScreenBase.getCurrent();
 		if (base.isEmpty()) {
 			return false;
+		}
+		if (!isDisabled()) {
+			recalculate();
+			SidebarPanel bookmarkPanel = getBookmarkPanel((int) mouseX, (int) mouseY);
+			if (bookmarkPanel != null && bookmarkInput(bookmarks -> bookmarks == bookmarkPanel.bookmarks
+					&& (bookmarks.mouseClicked((int) mouseX, (int) mouseY, button)
+						|| bookmarks.keyPressed((int) mouseX, (int) mouseY, bind -> bind.matchesMouse(button))))) {
+				return true;
+			}
 		}
 		if (search.mouseClicked(mouseX, mouseY, button)) {
 			return true;
@@ -1027,6 +1120,9 @@ public class EmiScreenManager {
 			int mx = (int) mouseX;
 			int my = (int) mouseY;
 			recalculate();
+			if (bookmarkInput(bookmarks -> bookmarks.mouseReleased(mx, my, button))) {
+				return true;
+			}
 			if (EmiApi.isCheatMode() && EmiConfig.deleteCursorStack.matchesMouse(button)) {
 				if (deleteCursor(mx, my)) {
 					// Returning false here makes the handled screen do something and removes a bug, oh well.
@@ -1042,17 +1138,12 @@ public class EmiScreenManager {
 				if (!draggedStack.isEmpty()) {
 					if (panel != null) {
 						ScreenSpace space = panel.getHoveredSpace(mx, my);
-						if (space != null && space.getType() == SidebarType.FAVORITES ) {
-							int page = panel.page;
-							int pageSize = space.pageSize;
-							int index = Math.min(space.getClosestEdge(mx, my), EmiFavorites.favorites.size());
-							if (index + pageSize * page > EmiFavorites.favorites.size()) {
-								index = EmiFavorites.favorites.size() - pageSize * page;
-							}
-							if (index >= 0) {
-								EmiFavorites.addFavoriteAt(draggedStack, index + pageSize * page);
-								space.batcher.repopulate();
-							}
+						if (getBookmarkPanel(mx, my) == panel && panel.bookmarks.drop(draggedStack, mx, my)) {
+							repopulatePanels(SidebarType.FAVORITES);
+							return true;
+						} else if (space != null && space.getType() == SidebarType.FAVORITES && space != panel.space) {
+							EmiFavorites.addFavoriteAt(draggedStack, EmiFavorites.favorites.size());
+							repopulatePanels(SidebarType.FAVORITES);
 							return true;
 						} else if (panel.getType() == SidebarType.CHESS) {
 							EmiChess.drop(draggedStack, getHoveredStack(mx, my, true).getStack());
@@ -1086,6 +1177,10 @@ public class EmiScreenManager {
 		}
 		if (isDisabled()) {
 			return false;
+		}
+		recalculate();
+		if (bookmarkInput(bookmarks -> bookmarks.mouseDragged((int) mouseX, (int) mouseY, button))) {
+			return true;
 		}
 		if (draggedStack.isEmpty() && button == 0) {
 			if (client.currentScreen instanceof HandledScreen<?> handled) {
@@ -1130,6 +1225,11 @@ public class EmiScreenManager {
 			return true;
 		} else {
 			recalculate();
+			SidebarPanel bookmarkPanel = getBookmarkPanel(lastMouseX, lastMouseY);
+			if (bookmarkPanel != null && bookmarkInput(bookmarks -> bookmarks == bookmarkPanel.bookmarks
+					&& bookmarks.keyPressed(lastMouseX, lastMouseY, bind -> bind.matchesKey(keyCode, scanCode)))) {
+				return true;
+			}
 			if (stackInteraction(getHoveredStack(lastMouseX, lastMouseY, true),
 					bind -> bind.matchesKey(keyCode, scanCode))) {
 				return true;
@@ -1192,6 +1292,21 @@ public class EmiScreenManager {
 		return false;
 	}
 
+	public static boolean matchesFavorite(Function<EmiBind, Boolean> function) {
+		if (function.apply(EmiConfig.favorite)) {
+			return true;
+		}
+		if (EmiInput.isShiftDown()) {
+			for (EmiBind.ModifiedKey key : EmiConfig.favorite.boundKeys) {
+				if (!key.isUnbound() && function.apply(new EmiBind(EmiConfig.favorite.translationKey,
+						new EmiBind.ModifiedKey(key.key(), key.modifiers() | EmiInput.SHIFT_MASK)))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public static boolean stackInteraction(EmiStackInteraction stack, Function<EmiBind, Boolean> function) {
 		EmiIngredient ingredient = stack.getStack();
 		EmiRecipe context = EmiApi.getRecipeContext(ingredient);
@@ -1234,8 +1349,18 @@ public class EmiScreenManager {
 			} else if (function.apply(EmiConfig.viewUses)) {
 				EmiApi.displayUses(ingredient);
 				return true;
-			} else if (function.apply(EmiConfig.favorite)) {
-				EmiFavorites.addFavorite(ingredient, stack.getRecipeContext());
+			} else if (matchesFavorite(function)) {
+				if (ingredient instanceof RowFavorite favorite) {
+					var row = favorite.row;
+					boolean folded = row.group.collapsed || row.recipe != null && row.recipe.getId() != null
+						&& row.group.collapsedRecipes.contains(row.recipe.getId().toString());
+					if (EmiInput.isShiftDown()) EmiBookmarkGroups.removeRepresented(row);
+					else if (!folded) EmiBookmarkGroups.remove(row.anchor);
+				} else if (EmiInput.isShiftDown() && stack.getRecipeContext() != null) {
+					EmiBookmarkGroups.addRecipe(stack.getRecipeContext(), true);
+				} else {
+					EmiFavorites.addFavorite(ingredient, stack.getRecipeContext());
+				}
 				repopulatePanels(SidebarType.FAVORITES);
 				return true;
 			} else if (function.apply(EmiConfig.viewStackTree) && stack.getRecipeContext() != null) {
@@ -1278,6 +1403,10 @@ public class EmiScreenManager {
 		}
 		if (destination != null) {
 			EmiRecipe context = contextSupplier.get();
+			if (ingredient instanceof RowFavorite favorite && favorite.row.input && context != null
+					&& (context == favorite.row.recipe || EmiUtil.getOutputCount(context, favorite.getStack()) <= 0)) {
+				return false;
+			}
 			if (context != null) {
 				if (EmiConfig.miscraftPrevention) {
 					ScreenSpace space = getHoveredSpace(lastMouseX, lastMouseY);
@@ -1293,15 +1422,21 @@ public class EmiScreenManager {
 					}
 				}
 				int amount = all ? Integer.MAX_VALUE : 1;
+				if (ingredient instanceof RowFavorite favorite) {
+					amount = (int) Math.min((long) amount, Math.max(0L, favorite.row.batches));
+				}
 				if (stack.getStack() instanceof EmiFavorite.Synthetic syn) {
-					int batches = (int) syn.batches;
+					long batches = Math.max(0L, syn.batches);
 					if (syn.getRecipe() == null) {
 						int oc = EmiUtil.getOutputCount(context, syn.getStack());
 						if (oc > 0) {
 							batches /= oc;
 						}
 					}
-					amount = Math.min(amount, batches);
+					amount = (int) Math.min((long) amount, batches);
+				}
+				if (amount <= 0) {
+					return true;
 				}
 				if (EmiRecipeFiller.performFill(context, EmiApi.getHandledScreen(), EmiCraftContext.Type.CRAFTABLE, destination, amount)) {
 					EmiPort.playClickSound();
@@ -1316,8 +1451,12 @@ public class EmiScreenManager {
 		if (recipe == null) {
 			return false;
 		}
-		if (function.apply(EmiConfig.favorite) && recipe.getOutputs().size() > 0) {
-			EmiFavorites.addFavorite(recipe.getOutputs().get(0), recipe);
+		if (matchesFavorite(function) && recipe.getOutputs().size() > 0) {
+			if (EmiInput.isShiftDown()) {
+				EmiBookmarkGroups.addRecipe(recipe, true);
+			} else {
+				EmiFavorites.addFavorite(recipe.getOutputs().get(0), recipe);
+			}
 			repopulatePanels(SidebarType.FAVORITES);
 			return true;
 		} else if (function.apply(EmiConfig.copyId)) {
@@ -1384,6 +1523,7 @@ public class EmiScreenManager {
 		public final SidebarButtonWidget cycle;
 		public final SidebarPages pages;
 		public final SidebarSide side;
+		public final BookmarkSidebar bookmarks;
 		public List<ScreenSpace> spaces;
 		public ScreenSpace space;
 		public SidebarTheme theme;
@@ -1394,6 +1534,7 @@ public class EmiScreenManager {
 		public SidebarPanel(SidebarSide side, SidebarPages pages) {
 			this.side = side;
 			this.pages = pages;
+			bookmarks = new BookmarkSidebar(this);
 			pageLeft = new SizedButtonWidget(0, 0, 16, 16, 224, 0, this::hasMultiplePages, (w) -> scroll(-1));
 			pageRight = new SizedButtonWidget(0, 0, 16, 16, 240, 0, this::hasMultiplePages, (w) -> scroll(1));
 			cycle = new SidebarButtonWidget(0, 0, 16, 16, this);
@@ -1402,6 +1543,7 @@ public class EmiScreenManager {
 		public void setSpaces(ScreenSpace main, List<ScreenSpace> subpanels) {
 			space = main;
 			spaces = Stream.concat(Stream.of(main), subpanels.stream()).toList();
+			bookmarks.invalidate();
 		}
 
 		public List<ScreenSpace> getSpaces() {
@@ -1442,6 +1584,7 @@ public class EmiScreenManager {
 			}
 			boolean forceRecalculate = getType() == SidebarType.CHESS;
 			this.sidebarPage = page;
+			bookmarks.invalidate();
 			forceRecalculate |= getType() == SidebarType.CHESS;
 			if (forceRecalculate) {
 				if (client.currentScreen != null) {
@@ -1497,11 +1640,13 @@ public class EmiScreenManager {
 					cycle.render(context.raw(), mouseX, mouseY, delta);
 					pageRight.render(context.raw(), mouseX, mouseY, delta);
 					context.pop();
-					int totalPages = (space.getStacks().size() - 1) / space.pageSize + 1;
+					int totalPages = totalPages();
 					wrapPage();
 					drawHeader(context, mouseX, mouseY, delta, page, totalPages);
 					for (ScreenSpace space : getSpaces()) {
-						if (space == this.space) {
+						if (space == this.space && getType() == SidebarType.FAVORITES) {
+							bookmarks.render(context, mouseX, mouseY, delta);
+						} else if (space == this.space) {
 							space.render(context, mouseX, mouseY, delta, space.pageSize * page);
 						} else {
 							space.render(context, mouseX, mouseY, delta, 0);
@@ -1581,6 +1726,9 @@ public class EmiScreenManager {
 		private void drawHeader(EmiDrawContext context, int mouseX, int mouseY, float delta, int page, int totalPages) {
 			if (header) {
 				Text text = EmiRenderHelper.getPageText(page + 1, totalPages, (space.tw - 3) * ENTRY_SIZE);
+				if (getType() == SidebarType.FAVORITES && EmiBookmarkGroups.defaultGroup().crafting) {
+					text = EmiPort.literal("[" + text.getString() + "]", Formatting.GREEN);
+				}
 				int x = space.tx + (space.tw * ENTRY_SIZE) / 2;
 				int maxLeft = (space.tw - 2) * ENTRY_SIZE / 2 - ENTRY_SIZE;
 				int w = client.textRenderer.getWidth(text) / 2;
@@ -1598,8 +1746,15 @@ public class EmiScreenManager {
 			}
 		}
 
+		private int totalPages() {
+			if (getType() == SidebarType.FAVORITES) {
+				return Math.max(1, bookmarks.pages());
+			}
+			return space == null || space.pageSize <= 0 ? 1 : (space.getStacks().size() - 1) / space.pageSize + 1;
+		}
+
 		private void wrapPage() {
-			int totalPages = (space.getStacks().size() - 1) / space.pageSize + 1;
+			int totalPages = totalPages();
 			if (page >= totalPages) {
 				page = 0;
 				space.batcher.repopulate();
@@ -1644,7 +1799,7 @@ public class EmiScreenManager {
 		}
 
 		public boolean hasMultiplePages() {
-			return space != null && space.getStacks().size() > space.pageSize;
+			return space != null && totalPages() > 1;
 		}
 
 		public void scroll(int delta) {
@@ -1654,9 +1809,12 @@ public class EmiScreenManager {
 			if (space.pageSize == 0) {
 				return;
 			}
+			if (getType() == SidebarType.FAVORITES) {
+				bookmarks.scroll(delta);
+				return;
+			}
 			page += delta;
-			int pageSize = space.pageSize;
-			int totalPages = (space.getStacks().size() - 1) / pageSize + 1;
+			int totalPages = totalPages();
 			if (totalPages <= 1) {
 				return;
 			}
@@ -1904,7 +2062,7 @@ public class EmiScreenManager {
 			if (base.isEmpty()) {
 				return false;
 			}
-			if (this.contains(lastMouseX, lastMouseY)) {
+			if (this.contains(x, y)) {
 				for (Bounds bounds : EmiExclusionAreas.getExclusion(base)) {
 					if (bounds.contains(x, y)) {
 						return false;

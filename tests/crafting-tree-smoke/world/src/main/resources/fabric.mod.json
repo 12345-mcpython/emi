@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "emi_world_smoke",
+  "version": "1.0.0",
+  "name": "EMI Real World Crafting Smoke",
+  "description": "Opt-in isolated integrated-server survival inventory and table crafting fixture.",
+  "environment": "client",
+  "entrypoints": {"client": ["dev.emi.emi.test.CraftingWorldSmoke"]},
+  "depends": {"fabricloader": ">=0.14.21", "fabric-api": "*", "minecraft": "1.20.1", "java": ">=17", "emi": "*"}
+}

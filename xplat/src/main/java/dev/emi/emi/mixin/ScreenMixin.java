@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import dev.emi.emi.screen.EmiScreenManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 
 @Mixin(Screen.class)
@@ -15,6 +16,7 @@ public class ScreenMixin {
 
 	@Inject(at = @At("RETURN"), method = "init(Lnet/minecraft/client/MinecraftClient;II)V")
 	private void init(MinecraftClient client, int width, int height, CallbackInfo info) {
+		if ((Object) this instanceof TitleScreen) EmiScreenManager.prepareStartup();
 		if ((Object) this instanceof HandledScreen hs && client.currentScreen == hs) {
 			EmiScreenManager.addWidgets(hs);
 		}

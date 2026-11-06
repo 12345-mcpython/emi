@@ -42,6 +42,12 @@ import net.minecraft.util.Identifier;
 public class RecipeScreen extends Screen {
 	private static final Identifier TEXTURE = EmiPort.id("emi", "textures/gui/background.png");
 	public static @Nullable EmiIngredient resolve = null;
+	private @Nullable EmiIngredient resolutionTarget;
+
+	public void setResolutionTarget(EmiIngredient ingredient) {
+		resolutionTarget = ingredient;
+		resolve = ingredient;
+	}
 	private Map<EmiRecipeCategory, List<EmiRecipe>> recipes;
 	public HandledScreen<?> old;
 	private List<RecipeTab> tabs = Lists.newArrayList();
@@ -82,6 +88,8 @@ public class RecipeScreen extends Screen {
 
 	@Override
 	protected void init() {
+		// Each history entry owns its selection target; nested recipe pages cannot clear it.
+		resolve = resolutionTarget;
 		super.init();
 		minimumWidth = Math.max(EmiConfig.minimumRecipeScreenWidth, 56);
 		backgroundWidth = minimumWidth;

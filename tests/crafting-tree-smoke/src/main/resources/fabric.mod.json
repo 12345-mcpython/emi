@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "emi_tree_smoke",
+  "version": "1.0.0",
+  "name": "EMI Crafting Tree Visual Smoke",
+  "description": "Optional title-screen visual smoke test; loaded only by the external init.gradle.",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.emi.emi.test.CraftingTreeSmoke"]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.21",
+    "fabric-api": "*",
+    "minecraft": "1.20.1",
+    "java": ">=17",
+    "emi": "*"
+  }
+}
