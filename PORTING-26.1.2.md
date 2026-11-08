@@ -236,8 +236,25 @@ removed again from `BasicEmiRecipe`'s protected fields, `EmiPlayerInventory.inve
 | Line | Client | Dedicated server | Notes |
 | --- | --- | --- | --- |
 | 1.21.1 Fabric | dev client smoke PASS (title screen, 13 captures, real GLFW Ctrl/Alt verified) | not run yet | harnesses: crafting tree 79, crafting plans 290 + 7, bookmark groups 141, bookmark crafting 59, bookmark transfer full scenario |
-| 1.21.1 NeoForge | jar built, not runtime tested here | **PASS (tested 2026-11-08)** | server starts and runs with EMI loaded; the only client-only entry point is `EmiClientNeoForge`, gated by `Dist.CLIENT` |
+| 1.21.1 NeoForge | jar built, not runtime tested here | not run yet | the only client-only entry point is `EmiClientNeoForge`, gated by `Dist.CLIENT` |
 | 1.21.4 Fabric | release jar tested in a launcher | not run yet | recipe browsing is singleplayer-only in this checkpoint (integrated server) |
 | 1.21.4 NeoForge | jar built, not runtime tested | not run yet | same degradations as the Fabric checkpoint |
 | 1.20.x | existing release | existing release | the `1.20` branch still carries Forge 1.20.1 |
+
+Client against a vanilla server without EMI was tested and works (2026-11-08, NeoForge 1.21.1 line).
+
+### Server side behaviour
+
+EMI is client-side first; the server mod only upgrades it. The client probes the server on join and the
+server's `PingS2CPacket` flips `EmiClient.onServer`, which gates every server-assisted path:
+
+| Path | Server without EMI | Server with EMI |
+| --- | --- | --- |
+| Fill / craft from the sidebar or a recipe | simulated vanilla `handleInventoryMouseClick` clicks (`EmiRecipeFiller.clientFill`) | `FillRecipeC2SPacket` performs an exact fill server side |
+| Material transfer actions | pickup / single item deposit / return | adds the exact fill action |
+| Crafting confirmation | derived from `ClientboundContainerSetContentPacket` / `SetSlot` | same, plus EMI acks |
+| `CreateItemC2SPacket` (dev mode item creation) | not sent, `onServer` stays false | available |
+
+No EMI packet is ever sent while `onServer` is false, so a vanilla or third-party server never sees an
+unknown channel; the cost is precision and speed, not correctness.
 
