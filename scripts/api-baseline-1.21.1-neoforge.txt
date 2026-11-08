@@ -1,0 +1,942 @@
+class dev.emi.emi.api.EmiApi
+  header public class dev.emi.emi.api.EmiApi {
+  member public dev.emi.emi.api.EmiApi(); | descriptor: ()V
+  member public static boolean isCheatMode(); | descriptor: ()Z
+  member public static boolean isSearchFocused(); | descriptor: ()Z
+  member public static dev.emi.emi.api.recipe.EmiRecipe getRecipeContext(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Ldev/emi/emi/api/recipe/EmiRecipe;
+  member public static dev.emi.emi.api.recipe.EmiRecipeManager getRecipeManager(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipeManager;
+  member public static dev.emi.emi.api.stack.EmiStackInteraction getHoveredStack(boolean); | descriptor: (Z)Ldev/emi/emi/api/stack/EmiStackInteraction;
+  member public static dev.emi.emi.api.stack.EmiStackInteraction getHoveredStack(int, int, boolean); | descriptor: (IIZ)Ldev/emi/emi/api/stack/EmiStackInteraction;
+  member public static java.lang.String getSearchText(); | descriptor: ()Ljava/lang/String;
+  member public static java.util.List<dev.emi.emi.api.stack.EmiStack> getIndexStacks(); | descriptor: ()Ljava/util/List;
+  member public static net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?> getHandledScreen(); | descriptor: ()Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;
+  member public static void displayAllRecipes(); | descriptor: ()V
+  member public static void displayRecipe(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)V
+  member public static void displayRecipeCategory(dev.emi.emi.api.recipe.EmiRecipeCategory); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeCategory;)V
+  member public static void displayRecipes(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)V
+  member public static void displayRecipesForWorkstation(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)V
+  member public static void displayUses(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)V
+  member public static void focusRecipe(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)V
+  member public static void setSearchText(java.lang.String); | descriptor: (Ljava/lang/String;)V
+  member public static void viewRecipeTree(); | descriptor: ()V
+class dev.emi.emi.api.EmiApi$1
+  header class dev.emi.emi.api.EmiApi$1 {
+class dev.emi.emi.api.EmiDragDropHandler
+  header public interface dev.emi.emi.api.EmiDragDropHandler<T extends net.minecraft.client.gui.screens.Screen> {
+  member public abstract boolean dropStack(T, dev.emi.emi.api.stack.EmiIngredient, int, int); | descriptor: (Lnet/minecraft/client/gui/screens/Screen;Ldev/emi/emi/api/stack/EmiIngredient;II)Z
+  member public default void render(T, dev.emi.emi.api.stack.EmiIngredient, net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/screens/Screen;Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.EmiDragDropHandler$BoundsBased
+  header public class dev.emi.emi.api.EmiDragDropHandler$BoundsBased<T extends net.minecraft.client.gui.screens.Screen> implements dev.emi.emi.api.EmiDragDropHandler<T> {
+  member public boolean dropStack(T, dev.emi.emi.api.stack.EmiIngredient, int, int); | descriptor: (Lnet/minecraft/client/gui/screens/Screen;Ldev/emi/emi/api/stack/EmiIngredient;II)Z
+  member public dev.emi.emi.api.EmiDragDropHandler$BoundsBased(java.util.function.BiConsumer<T, java.util.function.BiConsumer<dev.emi.emi.api.widget.Bounds, java.util.function.Consumer<dev.emi.emi.api.stack.EmiIngredient>>>); | descriptor: (Ljava/util/function/BiConsumer;)V
+  member public dev.emi.emi.api.EmiDragDropHandler$BoundsBased(java.util.function.Function<T, java.util.Map<dev.emi.emi.api.widget.Bounds, java.util.function.Consumer<dev.emi.emi.api.stack.EmiIngredient>>>); | descriptor: (Ljava/util/function/Function;)V
+  member public void render(T, dev.emi.emi.api.stack.EmiIngredient, net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/screens/Screen;Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.EmiDragDropHandler$SlotBased
+  header public class dev.emi.emi.api.EmiDragDropHandler$SlotBased<T extends net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>> extends dev.emi.emi.api.EmiDragDropHandler$BoundsBased<T> {
+  member public dev.emi.emi.api.EmiDragDropHandler$SlotBased(java.util.function.BiPredicate<T, net.minecraft.world.inventory.Slot>, dev.emi.emi.api.EmiDragDropHandler$SlotBased$TriConsumer<T, net.minecraft.world.inventory.Slot, dev.emi.emi.api.stack.EmiIngredient>); | descriptor: (Ljava/util/function/BiPredicate;Ldev/emi/emi/api/EmiDragDropHandler$SlotBased$TriConsumer;)V
+  member public dev.emi.emi.api.EmiDragDropHandler$SlotBased(java.util.function.Function<T, java.util.Collection<net.minecraft.world.inventory.Slot>>, dev.emi.emi.api.EmiDragDropHandler$SlotBased$TriConsumer<T, net.minecraft.world.inventory.Slot, dev.emi.emi.api.stack.EmiIngredient>); | descriptor: (Ljava/util/function/Function;Ldev/emi/emi/api/EmiDragDropHandler$SlotBased$TriConsumer;)V
+class dev.emi.emi.api.EmiDragDropHandler$SlotBased$TriConsumer
+  header public interface dev.emi.emi.api.EmiDragDropHandler$SlotBased$TriConsumer<A, B, C> {
+  member public abstract void accept(A, B, C); | descriptor: (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)V
+class dev.emi.emi.api.EmiEntrypoint
+  header public interface dev.emi.emi.api.EmiEntrypoint extends java.lang.annotation.Annotation {
+class dev.emi.emi.api.EmiExclusionArea
+  header public interface dev.emi.emi.api.EmiExclusionArea<T extends net.minecraft.client.gui.screens.Screen> {
+  member public abstract void addExclusionArea(T, java.util.function.Consumer<dev.emi.emi.api.widget.Bounds>); | descriptor: (Lnet/minecraft/client/gui/screens/Screen;Ljava/util/function/Consumer;)V
+class dev.emi.emi.api.EmiFillAction
+  header public class dev.emi.emi.api.EmiFillAction extends java.lang.Enum<dev.emi.emi.api.EmiFillAction> {
+  member public int id; | descriptor: I
+  member public static dev.emi.emi.api.EmiFillAction CURSOR; | descriptor: Ldev/emi/emi/api/EmiFillAction;
+  member public static dev.emi.emi.api.EmiFillAction FILL; | descriptor: Ldev/emi/emi/api/EmiFillAction;
+  member public static dev.emi.emi.api.EmiFillAction QUICK_MOVE; | descriptor: Ldev/emi/emi/api/EmiFillAction;
+  member public static dev.emi.emi.api.EmiFillAction valueOf(java.lang.String); | descriptor: (Ljava/lang/String;)Ldev/emi/emi/api/EmiFillAction;
+  member public static dev.emi.emi.api.EmiFillAction[] values(); | descriptor: ()[Ldev/emi/emi/api/EmiFillAction;
+  final public int id;
+  final public static dev.emi.emi.api.EmiFillAction CURSOR;
+  final public static dev.emi.emi.api.EmiFillAction FILL;
+  final public static dev.emi.emi.api.EmiFillAction QUICK_MOVE;
+class dev.emi.emi.api.EmiInitRegistry
+  header public interface dev.emi.emi.api.EmiInitRegistry {
+  member public abstract <T extends dev.emi.emi.api.stack.EmiIngredient> void addIngredientSerializer(java.lang.Class<T>, dev.emi.emi.api.stack.serializer.EmiIngredientSerializer<T>); | descriptor: (Ljava/lang/Class;Ldev/emi/emi/api/stack/serializer/EmiIngredientSerializer;)V
+  member public abstract void addRegistryAdapter(dev.emi.emi.api.stack.EmiRegistryAdapter<?>); | descriptor: (Ldev/emi/emi/api/stack/EmiRegistryAdapter;)V
+  member public abstract void disableStack(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)V
+  member public abstract void disableStacks(java.util.function.Predicate<dev.emi.emi.api.stack.EmiStack>); | descriptor: (Ljava/util/function/Predicate;)V
+class dev.emi.emi.api.EmiPlugin
+  header public interface dev.emi.emi.api.EmiPlugin {
+  member public abstract void register(dev.emi.emi.api.EmiRegistry); | descriptor: (Ldev/emi/emi/api/EmiRegistry;)V
+  member public default void initialize(dev.emi.emi.api.EmiInitRegistry); | descriptor: (Ldev/emi/emi/api/EmiInitRegistry;)V
+class dev.emi.emi.api.EmiRegistry
+  header public interface dev.emi.emi.api.EmiRegistry {
+  member public abstract <T extends dev.emi.emi.api.stack.EmiIngredient> void addIngredientSerializer(java.lang.Class<T>, dev.emi.emi.api.stack.serializer.EmiIngredientSerializer<T>); | descriptor: (Ljava/lang/Class;Ldev/emi/emi/api/stack/serializer/EmiIngredientSerializer;)V
+  member public abstract <T extends net.minecraft.client.gui.screens.Screen> void addDragDropHandler(java.lang.Class<T>, dev.emi.emi.api.EmiDragDropHandler<T>); | descriptor: (Ljava/lang/Class;Ldev/emi/emi/api/EmiDragDropHandler;)V
+  member public abstract <T extends net.minecraft.client.gui.screens.Screen> void addExclusionArea(java.lang.Class<T>, dev.emi.emi.api.EmiExclusionArea<T>); | descriptor: (Ljava/lang/Class;Ldev/emi/emi/api/EmiExclusionArea;)V
+  member public abstract <T extends net.minecraft.client.gui.screens.Screen> void addScreenBoundsProvider(java.lang.Class<T>, dev.emi.emi.api.EmiScreenBoundsProvider<T>); | descriptor: (Ljava/lang/Class;Ldev/emi/emi/api/EmiScreenBoundsProvider;)V
+  member public abstract <T extends net.minecraft.client.gui.screens.Screen> void addStackProvider(java.lang.Class<T>, dev.emi.emi.api.EmiStackProvider<T>); | descriptor: (Ljava/lang/Class;Ldev/emi/emi/api/EmiStackProvider;)V
+  member public abstract <T extends net.minecraft.world.inventory.AbstractContainerMenu> void addRecipeHandler(net.minecraft.world.inventory.MenuType<T>, dev.emi.emi.api.recipe.handler.EmiRecipeHandler<T>); | descriptor: (Lnet/minecraft/world/inventory/MenuType;Ldev/emi/emi/api/recipe/handler/EmiRecipeHandler;)V
+  member public abstract boolean isStackDisabled(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Z
+  member public abstract net.minecraft.world.item.crafting.RecipeManager getRecipeManager(); | descriptor: ()Lnet/minecraft/world/item/crafting/RecipeManager;
+  member public abstract void addAlias(dev.emi.emi.api.stack.EmiIngredient, net.minecraft.network.chat.Component); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/network/chat/Component;)V
+  member public abstract void addCategory(dev.emi.emi.api.recipe.EmiRecipeCategory); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeCategory;)V
+  member public abstract void addDeferredRecipes(java.util.function.Consumer<java.util.function.Consumer<dev.emi.emi.api.recipe.EmiRecipe>>); | descriptor: (Ljava/util/function/Consumer;)V
+  member public abstract void addEmiStack(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)V
+  member public abstract void addEmiStackAfter(dev.emi.emi.api.stack.EmiStack, java.util.function.Predicate<dev.emi.emi.api.stack.EmiStack>); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ljava/util/function/Predicate;)V
+  member public abstract void addGenericDragDropHandler(dev.emi.emi.api.EmiDragDropHandler<net.minecraft.client.gui.screens.Screen>); | descriptor: (Ldev/emi/emi/api/EmiDragDropHandler;)V
+  member public abstract void addGenericExclusionArea(dev.emi.emi.api.EmiExclusionArea<net.minecraft.client.gui.screens.Screen>); | descriptor: (Ldev/emi/emi/api/EmiExclusionArea;)V
+  member public abstract void addGenericScreenBoundsProvider(dev.emi.emi.api.EmiScreenBoundsProvider<net.minecraft.client.gui.screens.Screen>); | descriptor: (Ldev/emi/emi/api/EmiScreenBoundsProvider;)V
+  member public abstract void addGenericStackProvider(dev.emi.emi.api.EmiStackProvider<net.minecraft.client.gui.screens.Screen>); | descriptor: (Ldev/emi/emi/api/EmiStackProvider;)V
+  member public abstract void addRecipe(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)V
+  member public abstract void addRecipeDecorator(dev.emi.emi.api.recipe.EmiRecipeDecorator); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeDecorator;)V
+  member public abstract void addWorkstation(dev.emi.emi.api.recipe.EmiRecipeCategory, dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeCategory;Ldev/emi/emi/api/stack/EmiIngredient;)V
+  member public abstract void removeEmiStacks(java.util.function.Predicate<dev.emi.emi.api.stack.EmiStack>); | descriptor: (Ljava/util/function/Predicate;)V
+  member public abstract void removeRecipes(java.util.function.Predicate<dev.emi.emi.api.recipe.EmiRecipe>); | descriptor: (Ljava/util/function/Predicate;)V
+  member public abstract void setDefaultComparison(java.lang.Object, java.util.function.Function<dev.emi.emi.api.stack.Comparison, dev.emi.emi.api.stack.Comparison>); | descriptor: (Ljava/lang/Object;Ljava/util/function/Function;)V
+  member public default void addEmiStackAfter(dev.emi.emi.api.stack.EmiStack, dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ldev/emi/emi/api/stack/EmiStack;)V
+  member public default void addRecipeDecorator(dev.emi.emi.api.recipe.EmiRecipeCategory, dev.emi.emi.api.recipe.EmiRecipeDecorator); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeCategory;Ldev/emi/emi/api/recipe/EmiRecipeDecorator;)V
+  member public default void removeEmiStacks(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)V
+  member public default void removeRecipes(net.minecraft.resources.ResourceLocation); | descriptor: (Lnet/minecraft/resources/ResourceLocation;)V
+  member public default void setDefaultComparison(dev.emi.emi.api.stack.EmiStack, dev.emi.emi.api.stack.Comparison); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ldev/emi/emi/api/stack/Comparison;)V
+  member public default void setDefaultComparison(dev.emi.emi.api.stack.EmiStack, java.util.function.Function<dev.emi.emi.api.stack.Comparison, dev.emi.emi.api.stack.Comparison>); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ljava/util/function/Function;)V
+  member public default void setDefaultComparison(java.lang.Object, dev.emi.emi.api.stack.Comparison); | descriptor: (Ljava/lang/Object;Ldev/emi/emi/api/stack/Comparison;)V
+class dev.emi.emi.api.EmiScreenBoundsProvider
+  header public interface dev.emi.emi.api.EmiScreenBoundsProvider<T extends net.minecraft.client.gui.screens.Screen> {
+  member public abstract dev.emi.emi.api.widget.Bounds getBounds(T); | descriptor: (Lnet/minecraft/client/gui/screens/Screen;)Ldev/emi/emi/api/widget/Bounds;
+class dev.emi.emi.api.EmiStackProvider
+  header public interface dev.emi.emi.api.EmiStackProvider<T extends net.minecraft.client.gui.screens.Screen> {
+  member public abstract dev.emi.emi.api.stack.EmiStackInteraction getStackAt(T, int, int); | descriptor: (Lnet/minecraft/client/gui/screens/Screen;II)Ldev/emi/emi/api/stack/EmiStackInteraction;
+class dev.emi.emi.api.neoforge.NeoForgeEmiIngredient
+  header public class dev.emi.emi.api.neoforge.NeoForgeEmiIngredient {
+  member public dev.emi.emi.api.neoforge.NeoForgeEmiIngredient(); | descriptor: ()V
+  member public static dev.emi.emi.api.stack.EmiIngredient of(net.neoforged.neoforge.common.crafting.SizedIngredient); | descriptor: (Lnet/neoforged/neoforge/common/crafting/SizedIngredient;)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static dev.emi.emi.api.stack.EmiIngredient of(net.neoforged.neoforge.fluids.crafting.FluidIngredient); | descriptor: (Lnet/neoforged/neoforge/fluids/crafting/FluidIngredient;)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static dev.emi.emi.api.stack.EmiIngredient of(net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient); | descriptor: (Lnet/neoforged/neoforge/fluids/crafting/SizedFluidIngredient;)Ldev/emi/emi/api/stack/EmiIngredient;
+class dev.emi.emi.api.neoforge.NeoForgeEmiStack
+  header public class dev.emi.emi.api.neoforge.NeoForgeEmiStack {
+  member public dev.emi.emi.api.neoforge.NeoForgeEmiStack(); | descriptor: ()V
+  member public static dev.emi.emi.api.stack.EmiStack of(net.neoforged.neoforge.fluids.FluidStack); | descriptor: (Lnet/neoforged/neoforge/fluids/FluidStack;)Ldev/emi/emi/api/stack/EmiStack;
+class dev.emi.emi.api.recipe.BasicEmiRecipe
+  header public abstract class dev.emi.emi.api.recipe.BasicEmiRecipe implements dev.emi.emi.api.recipe.EmiRecipe {
+  member protected dev.emi.emi.api.recipe.EmiRecipeCategory category; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member protected int height; | descriptor: I
+  member protected int width; | descriptor: I
+  member protected java.util.List<dev.emi.emi.api.stack.EmiIngredient> catalysts; | descriptor: Ljava/util/List;
+  member protected java.util.List<dev.emi.emi.api.stack.EmiIngredient> inputs; | descriptor: Ljava/util/List;
+  member protected java.util.List<dev.emi.emi.api.stack.EmiStack> outputs; | descriptor: Ljava/util/List;
+  member protected net.minecraft.resources.ResourceLocation id; | descriptor: Lnet/minecraft/resources/ResourceLocation;
+  member public dev.emi.emi.api.recipe.BasicEmiRecipe(dev.emi.emi.api.recipe.EmiRecipeCategory, net.minecraft.resources.ResourceLocation, int, int); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeCategory;Lnet/minecraft/resources/ResourceLocation;II)V
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory getCategory(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public int getDisplayHeight(); | descriptor: ()I
+  member public int getDisplayWidth(); | descriptor: ()I
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getCatalysts(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getInputs(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getOutputs(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+class dev.emi.emi.api.recipe.EmiCraftingRecipe
+  header public class dev.emi.emi.api.recipe.EmiCraftingRecipe implements dev.emi.emi.api.recipe.EmiRecipe {
+  member protected dev.emi.emi.api.stack.EmiStack output; | descriptor: Ldev/emi/emi/api/stack/EmiStack;
+  member protected java.util.List<dev.emi.emi.api.stack.EmiIngredient> input; | descriptor: Ljava/util/List;
+  member protected net.minecraft.resources.ResourceLocation id; | descriptor: Lnet/minecraft/resources/ResourceLocation;
+  member public boolean canFit(int, int); | descriptor: (II)Z
+  member public boolean shapeless; | descriptor: Z
+  member public dev.emi.emi.api.recipe.EmiCraftingRecipe(java.util.List<dev.emi.emi.api.stack.EmiIngredient>, dev.emi.emi.api.stack.EmiStack, net.minecraft.resources.ResourceLocation); | descriptor: (Ljava/util/List;Ldev/emi/emi/api/stack/EmiStack;Lnet/minecraft/resources/ResourceLocation;)V
+  member public dev.emi.emi.api.recipe.EmiCraftingRecipe(java.util.List<dev.emi.emi.api.stack.EmiIngredient>, dev.emi.emi.api.stack.EmiStack, net.minecraft.resources.ResourceLocation, boolean); | descriptor: (Ljava/util/List;Ldev/emi/emi/api/stack/EmiStack;Lnet/minecraft/resources/ResourceLocation;Z)V
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory getCategory(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public int getDisplayHeight(); | descriptor: ()I
+  member public int getDisplayWidth(); | descriptor: ()I
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getInputs(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getOutputs(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public void addWidgets(dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/widget/WidgetHolder;)V
+  final protected dev.emi.emi.api.stack.EmiStack output;
+  final protected java.util.List<dev.emi.emi.api.stack.EmiIngredient> input;
+  final protected net.minecraft.resources.ResourceLocation id;
+  final public boolean shapeless;
+class dev.emi.emi.api.recipe.EmiInfoRecipe
+  header public class dev.emi.emi.api.recipe.EmiInfoRecipe implements dev.emi.emi.api.recipe.EmiRecipe {
+  member public boolean supportsRecipeTree(); | descriptor: ()Z
+  member public dev.emi.emi.api.recipe.EmiInfoRecipe(java.util.List<dev.emi.emi.api.stack.EmiIngredient>, java.util.List<net.minecraft.network.chat.Component>, net.minecraft.resources.ResourceLocation); | descriptor: (Ljava/util/List;Ljava/util/List;Lnet/minecraft/resources/ResourceLocation;)V
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory getCategory(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public int getDisplayHeight(); | descriptor: ()I
+  member public int getDisplayWidth(); | descriptor: ()I
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getInputs(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getOutputs(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public void addWidgets(dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/widget/WidgetHolder;)V
+class dev.emi.emi.api.recipe.EmiInfoRecipe$PageManager
+  header class dev.emi.emi.api.recipe.EmiInfoRecipe$PageManager {
+  member public dev.emi.emi.api.recipe.EmiInfoRecipe$PageManager(java.util.List<net.minecraft.util.FormattedCharSequence>, int); | descriptor: (Ljava/util/List;I)V
+  member public int currentPage; | descriptor: I
+  member public int pageSize; | descriptor: I
+  member public int start(); | descriptor: ()I
+  member public java.util.List<net.minecraft.util.FormattedCharSequence> lines; | descriptor: Ljava/util/List;
+  member public void scroll(int); | descriptor: (I)V
+  final public int pageSize;
+  final public java.util.List<net.minecraft.util.FormattedCharSequence> lines;
+class dev.emi.emi.api.recipe.EmiIngredientRecipe
+  header public abstract class dev.emi.emi.api.recipe.EmiIngredientRecipe implements dev.emi.emi.api.recipe.EmiRecipe {
+  member protected abstract dev.emi.emi.api.recipe.EmiRecipe getRecipeContext(dev.emi.emi.api.stack.EmiStack, int); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;I)Ldev/emi/emi/api/recipe/EmiRecipe;
+  member protected abstract dev.emi.emi.api.stack.EmiIngredient getIngredient(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member protected abstract java.util.List<dev.emi.emi.api.stack.EmiStack> getStacks(); | descriptor: ()Ljava/util/List;
+  member public boolean supportsRecipeTree(); | descriptor: ()Z
+  member public dev.emi.emi.api.recipe.EmiIngredientRecipe(); | descriptor: ()V
+  member public int getDisplayHeight(); | descriptor: ()I
+  member public int getDisplayWidth(); | descriptor: ()I
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getInputs(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getOutputs(); | descriptor: ()Ljava/util/List;
+  member public void addWidgets(dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/widget/WidgetHolder;)V
+class dev.emi.emi.api.recipe.EmiIngredientRecipe$PageManager
+  header class dev.emi.emi.api.recipe.EmiIngredientRecipe$PageManager {
+  member public dev.emi.emi.api.recipe.EmiIngredientRecipe$PageManager(java.util.List<dev.emi.emi.api.stack.EmiStack>, int); | descriptor: (Ldev/emi/emi/api/recipe/EmiIngredientRecipe;Ljava/util/List;I)V
+  member public dev.emi.emi.api.recipe.EmiRecipe getRecipe(int); | descriptor: (I)Ldev/emi/emi/api/recipe/EmiRecipe;
+  member public dev.emi.emi.api.stack.EmiStack getStack(int); | descriptor: (I)Ldev/emi/emi/api/stack/EmiStack;
+  member public int currentPage; | descriptor: I
+  member public int pageSize; | descriptor: I
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> stacks; | descriptor: Ljava/util/List;
+  member public void scroll(int); | descriptor: (I)V
+  final public int pageSize;
+  final public java.util.List<dev.emi.emi.api.stack.EmiStack> stacks;
+class dev.emi.emi.api.recipe.EmiIngredientRecipe$PageSlotWidget
+  header class dev.emi.emi.api.recipe.EmiIngredientRecipe$PageSlotWidget extends dev.emi.emi.api.widget.SlotWidget {
+  member public dev.emi.emi.api.recipe.EmiIngredientRecipe$PageManager manager; | descriptor: Ldev/emi/emi/api/recipe/EmiIngredientRecipe$PageManager;
+  member public dev.emi.emi.api.recipe.EmiIngredientRecipe$PageSlotWidget(dev.emi.emi.api.recipe.EmiIngredientRecipe, dev.emi.emi.api.recipe.EmiIngredientRecipe$PageManager, int, int, int); | descriptor: (Ldev/emi/emi/api/recipe/EmiIngredientRecipe;Ldev/emi/emi/api/recipe/EmiIngredientRecipe$PageManager;III)V
+  member public dev.emi.emi.api.recipe.EmiRecipe getRecipe(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipe;
+  member public dev.emi.emi.api.stack.EmiIngredient getStack(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public int offset; | descriptor: I
+  member public void drawBackground(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final public dev.emi.emi.api.recipe.EmiIngredientRecipe$PageManager manager;
+  final public int offset;
+class dev.emi.emi.api.recipe.EmiPatternCraftingRecipe
+  header public abstract class dev.emi.emi.api.recipe.EmiPatternCraftingRecipe extends dev.emi.emi.api.recipe.EmiCraftingRecipe {
+  member protected int unique; | descriptor: I
+  member public abstract dev.emi.emi.api.widget.SlotWidget getInputWidget(int, int, int); | descriptor: (III)Ldev/emi/emi/api/widget/SlotWidget;
+  member public abstract dev.emi.emi.api.widget.SlotWidget getOutputWidget(int, int); | descriptor: (II)Ldev/emi/emi/api/widget/SlotWidget;
+  member public boolean supportsRecipeTree(); | descriptor: ()Z
+  member public dev.emi.emi.api.recipe.EmiPatternCraftingRecipe(java.util.List<dev.emi.emi.api.stack.EmiIngredient>, dev.emi.emi.api.stack.EmiStack, net.minecraft.resources.ResourceLocation); | descriptor: (Ljava/util/List;Ldev/emi/emi/api/stack/EmiStack;Lnet/minecraft/resources/ResourceLocation;)V
+  member public dev.emi.emi.api.recipe.EmiPatternCraftingRecipe(java.util.List<dev.emi.emi.api.stack.EmiIngredient>, dev.emi.emi.api.stack.EmiStack, net.minecraft.resources.ResourceLocation, boolean); | descriptor: (Ljava/util/List;Ldev/emi/emi/api/stack/EmiStack;Lnet/minecraft/resources/ResourceLocation;Z)V
+  member public void addWidgets(dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/widget/WidgetHolder;)V
+  final protected int unique;
+class dev.emi.emi.api.recipe.EmiPlayerInventory
+  header public class dev.emi.emi.api.recipe.EmiPlayerInventory {
+  member public boolean canCraft(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)Z
+  member public boolean canCraft(dev.emi.emi.api.recipe.EmiRecipe, long); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;J)Z
+  member public boolean isEqual(dev.emi.emi.api.recipe.EmiPlayerInventory); | descriptor: (Ldev/emi/emi/api/recipe/EmiPlayerInventory;)Z
+  member public dev.emi.emi.api.recipe.EmiPlayerInventory(java.util.List<dev.emi.emi.api.stack.EmiStack>); | descriptor: (Ljava/util/List;)V
+  member public dev.emi.emi.api.recipe.EmiPlayerInventory(net.minecraft.world.entity.player.Player); | descriptor: (Lnet/minecraft/world/entity/player/Player;)V
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getCraftables(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<java.lang.Boolean> getCraftAvailability(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)Ljava/util/List;
+  member public java.util.Map<dev.emi.emi.api.stack.EmiStack, dev.emi.emi.api.stack.EmiStack> inventory; | descriptor: Ljava/util/Map;
+  member public java.util.function.Predicate<dev.emi.emi.api.recipe.EmiRecipe> getPredicate(); | descriptor: ()Ljava/util/function/Predicate;
+  member public static dev.emi.emi.api.recipe.EmiPlayerInventory of(net.minecraft.world.entity.player.Player); | descriptor: (Lnet/minecraft/world/entity/player/Player;)Ldev/emi/emi/api/recipe/EmiPlayerInventory;
+class dev.emi.emi.api.recipe.EmiRecipe
+  header public interface dev.emi.emi.api.recipe.EmiRecipe {
+  member public abstract dev.emi.emi.api.recipe.EmiRecipeCategory getCategory(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public abstract int getDisplayHeight(); | descriptor: ()I
+  member public abstract int getDisplayWidth(); | descriptor: ()I
+  member public abstract java.util.List<dev.emi.emi.api.stack.EmiIngredient> getInputs(); | descriptor: ()Ljava/util/List;
+  member public abstract java.util.List<dev.emi.emi.api.stack.EmiStack> getOutputs(); | descriptor: ()Ljava/util/List;
+  member public abstract net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public abstract void addWidgets(dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/widget/WidgetHolder;)V
+  member public default boolean hideCraftable(); | descriptor: ()Z
+  member public default boolean supportsRecipeTree(); | descriptor: ()Z
+  member public default java.util.List<dev.emi.emi.api.stack.EmiIngredient> getCatalysts(); | descriptor: ()Ljava/util/List;
+  member public default net.minecraft.world.item.crafting.RecipeHolder<?> getBackingRecipe(); | descriptor: ()Lnet/minecraft/world/item/crafting/RecipeHolder;
+class dev.emi.emi.api.recipe.EmiRecipeCategory
+  header public class dev.emi.emi.api.recipe.EmiRecipeCategory implements dev.emi.emi.api.render.EmiRenderable {
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory(net.minecraft.resources.ResourceLocation, dev.emi.emi.api.render.EmiRenderable); | descriptor: (Lnet/minecraft/resources/ResourceLocation;Ldev/emi/emi/api/render/EmiRenderable;)V
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory(net.minecraft.resources.ResourceLocation, dev.emi.emi.api.render.EmiRenderable, dev.emi.emi.api.render.EmiRenderable); | descriptor: (Lnet/minecraft/resources/ResourceLocation;Ldev/emi/emi/api/render/EmiRenderable;Ldev/emi/emi/api/render/EmiRenderable;)V
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory(net.minecraft.resources.ResourceLocation, dev.emi.emi.api.render.EmiRenderable, dev.emi.emi.api.render.EmiRenderable, java.util.Comparator<dev.emi.emi.api.recipe.EmiRecipe>); | descriptor: (Lnet/minecraft/resources/ResourceLocation;Ldev/emi/emi/api/render/EmiRenderable;Ldev/emi/emi/api/render/EmiRenderable;Ljava/util/Comparator;)V
+  member public dev.emi.emi.api.render.EmiRenderable icon; | descriptor: Ldev/emi/emi/api/render/EmiRenderable;
+  member public dev.emi.emi.api.render.EmiRenderable simplified; | descriptor: Ldev/emi/emi/api/render/EmiRenderable;
+  member public java.util.Comparator<dev.emi.emi.api.recipe.EmiRecipe> getSort(); | descriptor: ()Ljava/util/Comparator;
+  member public java.util.Comparator<dev.emi.emi.api.recipe.EmiRecipe> sorter; | descriptor: Ljava/util/Comparator;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.network.chat.Component getName(); | descriptor: ()Lnet/minecraft/network/chat/Component;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public net.minecraft.resources.ResourceLocation id; | descriptor: Lnet/minecraft/resources/ResourceLocation;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  member public void renderSimplified(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.recipe.EmiRecipeDecorator
+  header public interface dev.emi.emi.api.recipe.EmiRecipeDecorator {
+  member public abstract void decorateRecipe(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/widget/WidgetHolder;)V
+class dev.emi.emi.api.recipe.EmiRecipeManager
+  header public interface dev.emi.emi.api.recipe.EmiRecipeManager {
+  member public abstract dev.emi.emi.api.recipe.EmiRecipe getRecipe(net.minecraft.resources.ResourceLocation); | descriptor: (Lnet/minecraft/resources/ResourceLocation;)Ldev/emi/emi/api/recipe/EmiRecipe;
+  member public abstract java.util.List<dev.emi.emi.api.recipe.EmiRecipe> getRecipes(); | descriptor: ()Ljava/util/List;
+  member public abstract java.util.List<dev.emi.emi.api.recipe.EmiRecipe> getRecipes(dev.emi.emi.api.recipe.EmiRecipeCategory); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeCategory;)Ljava/util/List;
+  member public abstract java.util.List<dev.emi.emi.api.recipe.EmiRecipe> getRecipesByInput(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Ljava/util/List;
+  member public abstract java.util.List<dev.emi.emi.api.recipe.EmiRecipe> getRecipesByOutput(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Ljava/util/List;
+  member public abstract java.util.List<dev.emi.emi.api.recipe.EmiRecipeCategory> getCategories(); | descriptor: ()Ljava/util/List;
+  member public abstract java.util.List<dev.emi.emi.api.stack.EmiIngredient> getWorkstations(dev.emi.emi.api.recipe.EmiRecipeCategory); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipeCategory;)Ljava/util/List;
+class dev.emi.emi.api.recipe.EmiRecipeSorting
+  header public class dev.emi.emi.api.recipe.EmiRecipeSorting {
+  member public dev.emi.emi.api.recipe.EmiRecipeSorting(); | descriptor: ()V
+  member public static java.util.Comparator<dev.emi.emi.api.recipe.EmiRecipe> compareInputThenOutput(); | descriptor: ()Ljava/util/Comparator;
+  member public static java.util.Comparator<dev.emi.emi.api.recipe.EmiRecipe> compareOutputThenInput(); | descriptor: ()Ljava/util/Comparator;
+  member public static java.util.Comparator<dev.emi.emi.api.recipe.EmiRecipe> identifier(); | descriptor: ()Ljava/util/Comparator;
+  member public static java.util.Comparator<dev.emi.emi.api.recipe.EmiRecipe> none(); | descriptor: ()Ljava/util/Comparator;
+class dev.emi.emi.api.recipe.EmiResolutionRecipe
+  header public class dev.emi.emi.api.recipe.EmiResolutionRecipe implements dev.emi.emi.api.recipe.EmiRecipe {
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory getCategory(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public dev.emi.emi.api.recipe.EmiResolutionRecipe(dev.emi.emi.api.stack.EmiIngredient, dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Ldev/emi/emi/api/stack/EmiStack;)V
+  member public dev.emi.emi.api.stack.EmiIngredient ingredient; | descriptor: Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiStack stack; | descriptor: Ldev/emi/emi/api/stack/EmiStack;
+  member public int getDisplayHeight(); | descriptor: ()I
+  member public int getDisplayWidth(); | descriptor: ()I
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getInputs(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getOutputs(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public void addWidgets(dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/widget/WidgetHolder;)V
+  final public dev.emi.emi.api.stack.EmiIngredient ingredient;
+  final public dev.emi.emi.api.stack.EmiStack stack;
+class dev.emi.emi.api.recipe.EmiWorldInteractionRecipe
+  header public class dev.emi.emi.api.recipe.EmiWorldInteractionRecipe implements dev.emi.emi.api.recipe.EmiRecipe {
+  member protected dev.emi.emi.api.recipe.EmiWorldInteractionRecipe(dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder); | descriptor: (Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;)V
+  member public boolean supportsRecipeTree(); | descriptor: ()Z
+  member public dev.emi.emi.api.recipe.EmiRecipeCategory getCategory(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public int getDisplayHeight(); | descriptor: ()I
+  member public int getDisplayWidth(); | descriptor: ()I
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getCatalysts(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiIngredient> getInputs(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getOutputs(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public static dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder builder(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public void addWidgets(dev.emi.emi.api.widget.WidgetHolder); | descriptor: (Ldev/emi/emi/api/widget/WidgetHolder;)V
+class dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder
+  header public class dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder {
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe build(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder id(net.minecraft.resources.ResourceLocation); | descriptor: (Lnet/minecraft/resources/ResourceLocation;)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder leftInput(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder leftInput(dev.emi.emi.api.stack.EmiIngredient, java.util.function.Function<dev.emi.emi.api.widget.SlotWidget, dev.emi.emi.api.widget.SlotWidget>); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Ljava/util/function/Function;)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder output(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder output(dev.emi.emi.api.stack.EmiStack, java.util.function.Function<dev.emi.emi.api.widget.SlotWidget, dev.emi.emi.api.widget.SlotWidget>); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ljava/util/function/Function;)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder rightInput(dev.emi.emi.api.stack.EmiIngredient, boolean); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Z)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder rightInput(dev.emi.emi.api.stack.EmiIngredient, boolean, java.util.function.Function<dev.emi.emi.api.widget.SlotWidget, dev.emi.emi.api.widget.SlotWidget>); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;ZLjava/util/function/Function;)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+  member public dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$Builder supportsRecipeTree(boolean); | descriptor: (Z)Ldev/emi/emi/api/recipe/EmiWorldInteractionRecipe$Builder;
+class dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$WorldIngredient
+  header class dev.emi.emi.api.recipe.EmiWorldInteractionRecipe$WorldIngredient extends java.lang.Record {
+  member public boolean catalyst(); | descriptor: ()Z
+  member public boolean equals(java.lang.Object); | descriptor: (Ljava/lang/Object;)Z
+  member public dev.emi.emi.api.stack.EmiIngredient stack(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public int hashCode(); | descriptor: ()I
+  member public java.lang.String toString(); | descriptor: ()Ljava/lang/String;
+  member public java.util.function.Function<dev.emi.emi.api.widget.SlotWidget, dev.emi.emi.api.widget.SlotWidget> mutator(); | descriptor: ()Ljava/util/function/Function;
+  final public boolean equals(java.lang.Object);
+  final public int hashCode();
+  final public java.lang.String toString();
+class dev.emi.emi.api.recipe.VanillaEmiRecipeCategories
+  header public class dev.emi.emi.api.recipe.VanillaEmiRecipeCategories {
+  member public dev.emi.emi.api.recipe.VanillaEmiRecipeCategories(); | descriptor: ()V
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory ANVIL_REPAIRING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory BLASTING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory BREWING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory CAMPFIRE_COOKING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory COMPOSTING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory CRAFTING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory FUEL; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory GRINDING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory INFO; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory SMELTING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory SMITHING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory SMOKING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory STONECUTTING; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+  member public static dev.emi.emi.api.recipe.EmiRecipeCategory WORLD_INTERACTION; | descriptor: Ldev/emi/emi/api/recipe/EmiRecipeCategory;
+class dev.emi.emi.api.recipe.handler.EmiCraftContext
+  header public class dev.emi.emi.api.recipe.handler.EmiCraftContext<T extends net.minecraft.world.inventory.AbstractContainerMenu> {
+  member public T getScreenHandler(); | descriptor: ()Lnet/minecraft/world/inventory/AbstractContainerMenu;
+  member public dev.emi.emi.api.recipe.EmiPlayerInventory getInventory(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiPlayerInventory;
+  member public dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination getDestination(); | descriptor: ()Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Destination;
+  member public dev.emi.emi.api.recipe.handler.EmiCraftContext$Type getType(); | descriptor: ()Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Type;
+  member public dev.emi.emi.api.recipe.handler.EmiCraftContext(net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<T>, dev.emi.emi.api.recipe.EmiPlayerInventory, dev.emi.emi.api.recipe.handler.EmiCraftContext$Type); | descriptor: (Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;Ldev/emi/emi/api/recipe/EmiPlayerInventory;Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Type;)V
+  member public dev.emi.emi.api.recipe.handler.EmiCraftContext(net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<T>, dev.emi.emi.api.recipe.EmiPlayerInventory, dev.emi.emi.api.recipe.handler.EmiCraftContext$Type, dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination, int); | descriptor: (Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;Ldev/emi/emi/api/recipe/EmiPlayerInventory;Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Type;Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Destination;I)V
+  member public int getAmount(); | descriptor: ()I
+  member public net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<T> getScreen(); | descriptor: ()Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;
+class dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination
+  header public class dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination extends java.lang.Enum<dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination> {
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination CURSOR; | descriptor: Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Destination;
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination INVENTORY; | descriptor: Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Destination;
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination NONE; | descriptor: Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Destination;
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination valueOf(java.lang.String); | descriptor: (Ljava/lang/String;)Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Destination;
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination[] values(); | descriptor: ()[Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Destination;
+  final public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination CURSOR;
+  final public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination INVENTORY;
+  final public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Destination NONE;
+class dev.emi.emi.api.recipe.handler.EmiCraftContext$Type
+  header public class dev.emi.emi.api.recipe.handler.EmiCraftContext$Type extends java.lang.Enum<dev.emi.emi.api.recipe.handler.EmiCraftContext$Type> {
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Type CRAFTABLE; | descriptor: Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Type;
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Type FILL_BUTTON; | descriptor: Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Type;
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Type valueOf(java.lang.String); | descriptor: (Ljava/lang/String;)Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Type;
+  member public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Type[] values(); | descriptor: ()[Ldev/emi/emi/api/recipe/handler/EmiCraftContext$Type;
+  final public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Type CRAFTABLE;
+  final public static dev.emi.emi.api.recipe.handler.EmiCraftContext$Type FILL_BUTTON;
+class dev.emi.emi.api.recipe.handler.EmiRecipeHandler
+  header public interface dev.emi.emi.api.recipe.handler.EmiRecipeHandler<T extends net.minecraft.world.inventory.AbstractContainerMenu> {
+  member public abstract boolean canCraft(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/handler/EmiCraftContext;)Z
+  member public abstract boolean craft(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/handler/EmiCraftContext;)Z
+  member public abstract boolean supportsRecipe(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)Z
+  member public abstract dev.emi.emi.api.recipe.EmiPlayerInventory getInventory(net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<T>); | descriptor: (Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;)Ldev/emi/emi/api/recipe/EmiPlayerInventory;
+  member public default boolean alwaysDisplaySupport(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)Z
+  member public default java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/handler/EmiCraftContext;)Ljava/util/List;
+  member public default void render(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>, java.util.List<dev.emi.emi.api.widget.Widget>, net.minecraft.client.gui.GuiGraphics); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/handler/EmiCraftContext;Ljava/util/List;Lnet/minecraft/client/gui/GuiGraphics;)V
+  member public static net.minecraft.network.chat.Component NOT_ENOUGH_INGREDIENTS; | descriptor: Lnet/minecraft/network/chat/Component;
+  final public static net.minecraft.network.chat.Component NOT_ENOUGH_INGREDIENTS;
+class dev.emi.emi.api.recipe.handler.StandardRecipeHandler
+  header public interface dev.emi.emi.api.recipe.handler.StandardRecipeHandler<T extends net.minecraft.world.inventory.AbstractContainerMenu> extends dev.emi.emi.api.recipe.handler.EmiRecipeHandler<T> {
+  member public abstract java.util.List<net.minecraft.world.inventory.Slot> getCraftingSlots(T); | descriptor: (Lnet/minecraft/world/inventory/AbstractContainerMenu;)Ljava/util/List;
+  member public abstract java.util.List<net.minecraft.world.inventory.Slot> getInputSources(T); | descriptor: (Lnet/minecraft/world/inventory/AbstractContainerMenu;)Ljava/util/List;
+  member public default boolean canCraft(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/handler/EmiCraftContext;)Z
+  member public default boolean craft(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/handler/EmiCraftContext;)Z
+  member public default dev.emi.emi.api.recipe.EmiPlayerInventory getInventory(net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<T>); | descriptor: (Lnet/minecraft/client/gui/screens/inventory/AbstractContainerScreen;)Ldev/emi/emi/api/recipe/EmiPlayerInventory;
+  member public default java.util.List<net.minecraft.world.inventory.Slot> getCraftingSlots(dev.emi.emi.api.recipe.EmiRecipe, T); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Lnet/minecraft/world/inventory/AbstractContainerMenu;)Ljava/util/List;
+  member public default net.minecraft.world.inventory.Slot getOutputSlot(T); | descriptor: (Lnet/minecraft/world/inventory/AbstractContainerMenu;)Lnet/minecraft/world/inventory/Slot;
+  member public default void render(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.handler.EmiCraftContext<T>, java.util.List<dev.emi.emi.api.widget.Widget>, net.minecraft.client.gui.GuiGraphics); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/handler/EmiCraftContext;Ljava/util/List;Lnet/minecraft/client/gui/GuiGraphics;)V
+  member public static void renderMissing(dev.emi.emi.api.recipe.EmiRecipe, dev.emi.emi.api.recipe.EmiPlayerInventory, java.util.List<dev.emi.emi.api.widget.Widget>, net.minecraft.client.gui.GuiGraphics); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;Ldev/emi/emi/api/recipe/EmiPlayerInventory;Ljava/util/List;Lnet/minecraft/client/gui/GuiGraphics;)V
+class dev.emi.emi.api.recipe.handler.StandardRecipeHandler$1
+  header class dev.emi.emi.api.recipe.handler.StandardRecipeHandler$1 {
+class dev.emi.emi.api.render.EmiRender
+  header public class dev.emi.emi.api.render.EmiRender {
+  member public dev.emi.emi.api.render.EmiRender(); | descriptor: ()V
+  member public static void renderCatalystIcon(dev.emi.emi.api.stack.EmiIngredient, net.minecraft.client.gui.GuiGraphics, int, int); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/client/gui/GuiGraphics;II)V
+  member public static void renderIngredientIcon(dev.emi.emi.api.stack.EmiIngredient, net.minecraft.client.gui.GuiGraphics, int, int); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/client/gui/GuiGraphics;II)V
+  member public static void renderRemainderIcon(dev.emi.emi.api.stack.EmiIngredient, net.minecraft.client.gui.GuiGraphics, int, int); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/client/gui/GuiGraphics;II)V
+  member public static void renderTagIcon(dev.emi.emi.api.stack.EmiIngredient, net.minecraft.client.gui.GuiGraphics, int, int); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Lnet/minecraft/client/gui/GuiGraphics;II)V
+class dev.emi.emi.api.render.EmiRenderable
+  header public interface dev.emi.emi.api.render.EmiRenderable {
+  member public abstract void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.render.EmiTexture
+  header public class dev.emi.emi.api.render.EmiTexture implements dev.emi.emi.api.render.EmiRenderable {
+  member public dev.emi.emi.api.render.EmiTexture(net.minecraft.resources.ResourceLocation, int, int, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIII)V
+  member public dev.emi.emi.api.render.EmiTexture(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIIIII)V
+  member public int height; | descriptor: I
+  member public int regionHeight; | descriptor: I
+  member public int regionWidth; | descriptor: I
+  member public int textureHeight; | descriptor: I
+  member public int textureWidth; | descriptor: I
+  member public int u; | descriptor: I
+  member public int v; | descriptor: I
+  member public int width; | descriptor: I
+  member public net.minecraft.resources.ResourceLocation texture; | descriptor: Lnet/minecraft/resources/ResourceLocation;
+  member public static dev.emi.emi.api.render.EmiTexture EMPTY_ARROW; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public static dev.emi.emi.api.render.EmiTexture EMPTY_FLAME; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public static dev.emi.emi.api.render.EmiTexture FULL_ARROW; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public static dev.emi.emi.api.render.EmiTexture FULL_FLAME; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public static dev.emi.emi.api.render.EmiTexture LARGE_SLOT; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public static dev.emi.emi.api.render.EmiTexture PLUS; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public static dev.emi.emi.api.render.EmiTexture SHAPELESS; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public static dev.emi.emi.api.render.EmiTexture SLOT; | descriptor: Ldev/emi/emi/api/render/EmiTexture;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final public int height;
+  final public int regionHeight;
+  final public int regionWidth;
+  final public int textureHeight;
+  final public int textureWidth;
+  final public int u;
+  final public int v;
+  final public int width;
+  final public net.minecraft.resources.ResourceLocation texture;
+  final public static dev.emi.emi.api.render.EmiTexture EMPTY_ARROW;
+  final public static dev.emi.emi.api.render.EmiTexture EMPTY_FLAME;
+  final public static dev.emi.emi.api.render.EmiTexture FULL_ARROW;
+  final public static dev.emi.emi.api.render.EmiTexture FULL_FLAME;
+  final public static dev.emi.emi.api.render.EmiTexture LARGE_SLOT;
+  final public static dev.emi.emi.api.render.EmiTexture PLUS;
+  final public static dev.emi.emi.api.render.EmiTexture SHAPELESS;
+  final public static dev.emi.emi.api.render.EmiTexture SLOT;
+class dev.emi.emi.api.render.EmiTooltipComponents
+  header public class dev.emi.emi.api.render.EmiTooltipComponents {
+  member public dev.emi.emi.api.render.EmiTooltipComponents(); | descriptor: ()V
+  member public static net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent getAmount(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;
+  member public static net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent getIngredientTooltipComponent(java.util.List<? extends dev.emi.emi.api.stack.EmiIngredient>); | descriptor: (Ljava/util/List;)Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;
+  member public static net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent getRecipeCostTooltipComponent(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;
+  member public static net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent getRecipeTooltipComponent(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;
+  member public static net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent getRemainderTooltipComponent(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;
+  member public static net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent of(net.minecraft.network.chat.Component); | descriptor: (Lnet/minecraft/network/chat/Component;)Lnet/minecraft/client/gui/screens/inventory/tooltip/ClientTooltipComponent;
+  member public static void appendModName(java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>, java.lang.String); | descriptor: (Ljava/util/List;Ljava/lang/String;)V
+class dev.emi.emi.api.render.EmiTooltipMetadata
+  header public class dev.emi.emi.api.render.EmiTooltipMetadata {
+  member public dev.emi.emi.api.recipe.EmiRecipe getRecipe(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipe;
+  member public dev.emi.emi.api.stack.EmiIngredient getStack(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static dev.emi.emi.api.render.EmiTooltipMetadata of(java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>); | descriptor: (Ljava/util/List;)Ldev/emi/emi/api/render/EmiTooltipMetadata;
+class dev.emi.emi.api.stack.Comparison
+  header public class dev.emi.emi.api.stack.Comparison {
+  member public boolean compare(dev.emi.emi.api.stack.EmiStack, dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ldev/emi/emi/api/stack/EmiStack;)Z
+  member public int getHash(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)I
+  member public static <T> dev.emi.emi.api.stack.Comparison compareData(java.util.function.Function<dev.emi.emi.api.stack.EmiStack, T>); | descriptor: (Ljava/util/function/Function;)Ldev/emi/emi/api/stack/Comparison;
+  member public static dev.emi.emi.api.stack.Comparison DEFAULT_COMPARISON; | descriptor: Ldev/emi/emi/api/stack/Comparison;
+  member public static dev.emi.emi.api.stack.Comparison compareComponents(); | descriptor: ()Ldev/emi/emi/api/stack/Comparison;
+  member public static dev.emi.emi.api.stack.Comparison of(dev.emi.emi.api.stack.Comparison$Predicate); | descriptor: (Ldev/emi/emi/api/stack/Comparison$Predicate;)Ldev/emi/emi/api/stack/Comparison;
+  member public static dev.emi.emi.api.stack.Comparison of(dev.emi.emi.api.stack.Comparison$Predicate, dev.emi.emi.api.stack.Comparison$HashFunction); | descriptor: (Ldev/emi/emi/api/stack/Comparison$Predicate;Ldev/emi/emi/api/stack/Comparison$HashFunction;)Ldev/emi/emi/api/stack/Comparison;
+  final public static dev.emi.emi.api.stack.Comparison DEFAULT_COMPARISON;
+class dev.emi.emi.api.stack.Comparison$Builder
+  header class dev.emi.emi.api.stack.Comparison$Builder {
+class dev.emi.emi.api.stack.Comparison$HashFunction
+  header public interface dev.emi.emi.api.stack.Comparison$HashFunction {
+  member public abstract int hash(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)I
+class dev.emi.emi.api.stack.Comparison$Predicate
+  header public interface dev.emi.emi.api.stack.Comparison$Predicate {
+  member public abstract boolean test(dev.emi.emi.api.stack.EmiStack, dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ldev/emi/emi/api/stack/EmiStack;)Z
+class dev.emi.emi.api.stack.EmiIngredient
+  header public interface dev.emi.emi.api.stack.EmiIngredient extends dev.emi.emi.api.render.EmiRenderable {
+  member public abstract dev.emi.emi.api.stack.EmiIngredient copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public abstract dev.emi.emi.api.stack.EmiIngredient setAmount(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public abstract dev.emi.emi.api.stack.EmiIngredient setChance(float); | descriptor: (F)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public abstract float getChance(); | descriptor: ()F
+  member public abstract java.util.List<dev.emi.emi.api.stack.EmiStack> getEmiStacks(); | descriptor: ()Ljava/util/List;
+  member public abstract java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public abstract long getAmount(); | descriptor: ()J
+  member public abstract void render(net.minecraft.client.gui.GuiGraphics, int, int, float, int); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIFI)V
+  member public default boolean isEmpty(); | descriptor: ()Z
+  member public default void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  member public static <T> dev.emi.emi.api.stack.EmiIngredient of(net.minecraft.tags.TagKey<T>); | descriptor: (Lnet/minecraft/tags/TagKey;)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static <T> dev.emi.emi.api.stack.EmiIngredient of(net.minecraft.tags.TagKey<T>, long); | descriptor: (Lnet/minecraft/tags/TagKey;J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static boolean areEqual(dev.emi.emi.api.stack.EmiIngredient, dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Ldev/emi/emi/api/stack/EmiIngredient;)Z
+  member public static dev.emi.emi.api.stack.EmiIngredient of(java.util.List<? extends dev.emi.emi.api.stack.EmiIngredient>); | descriptor: (Ljava/util/List;)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static dev.emi.emi.api.stack.EmiIngredient of(java.util.List<? extends dev.emi.emi.api.stack.EmiIngredient>, long); | descriptor: (Ljava/util/List;J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static dev.emi.emi.api.stack.EmiIngredient of(net.minecraft.world.item.crafting.Ingredient); | descriptor: (Lnet/minecraft/world/item/crafting/Ingredient;)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static dev.emi.emi.api.stack.EmiIngredient of(net.minecraft.world.item.crafting.Ingredient, long); | descriptor: (Lnet/minecraft/world/item/crafting/Ingredient;J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static int RENDER_AMOUNT; | descriptor: I
+  member public static int RENDER_ICON; | descriptor: I
+  member public static int RENDER_INGREDIENT; | descriptor: I
+  member public static int RENDER_REMAINDER; | descriptor: I
+  final public static int RENDER_AMOUNT;
+  final public static int RENDER_ICON;
+  final public static int RENDER_INGREDIENT;
+  final public static int RENDER_REMAINDER;
+class dev.emi.emi.api.stack.EmiRegistryAdapter
+  header public interface dev.emi.emi.api.stack.EmiRegistryAdapter<T> {
+  member public abstract dev.emi.emi.api.stack.EmiStack of(T, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Ljava/lang/Object;Lnet/minecraft/core/component/DataComponentPatch;J)Ldev/emi/emi/api/stack/EmiStack;
+  member public abstract java.lang.Class<T> getBaseClass(); | descriptor: ()Ljava/lang/Class;
+  member public abstract net.minecraft.core.Registry<T> getRegistry(); | descriptor: ()Lnet/minecraft/core/Registry;
+  member public static <T> dev.emi.emi.api.stack.EmiRegistryAdapter<T> simple(java.lang.Class<T>, net.minecraft.core.Registry<T>, dev.emi.emi.api.stack.EmiRegistryAdapter$StackConstructor<T>); | descriptor: (Ljava/lang/Class;Lnet/minecraft/core/Registry;Ldev/emi/emi/api/stack/EmiRegistryAdapter$StackConstructor;)Ldev/emi/emi/api/stack/EmiRegistryAdapter;
+class dev.emi.emi.api.stack.EmiRegistryAdapter$1
+  header class dev.emi.emi.api.stack.EmiRegistryAdapter$1 implements dev.emi.emi.api.stack.EmiRegistryAdapter<T> {
+  member public dev.emi.emi.api.stack.EmiStack of(T, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Ljava/lang/Object;Lnet/minecraft/core/component/DataComponentPatch;J)Ldev/emi/emi/api/stack/EmiStack;
+  member public java.lang.Class<T> getBaseClass(); | descriptor: ()Ljava/lang/Class;
+  member public net.minecraft.core.Registry<T> getRegistry(); | descriptor: ()Lnet/minecraft/core/Registry;
+class dev.emi.emi.api.stack.EmiRegistryAdapter$StackConstructor
+  header public interface dev.emi.emi.api.stack.EmiRegistryAdapter$StackConstructor<T> {
+  member public abstract dev.emi.emi.api.stack.EmiStack of(T, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Ljava/lang/Object;Lnet/minecraft/core/component/DataComponentPatch;J)Ldev/emi/emi/api/stack/EmiStack;
+class dev.emi.emi.api.stack.EmiStack
+  header public abstract class dev.emi.emi.api.stack.EmiStack implements dev.emi.emi.api.stack.EmiIngredient {
+  member protected dev.emi.emi.api.stack.Comparison comparison; | descriptor: Ldev/emi/emi/api/stack/Comparison;
+  member protected float chance; | descriptor: F
+  member protected long amount; | descriptor: J
+  member public <T> T get(net.minecraft.core.component.DataComponentType<? extends T>); | descriptor: (Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;
+  member public <T> T getKeyOfType(java.lang.Class<T>); | descriptor: (Ljava/lang/Class;)Ljava/lang/Object;
+  member public <T> T getOrDefault(net.minecraft.core.component.DataComponentType<? extends T>, T); | descriptor: (Lnet/minecraft/core/component/DataComponentType;Ljava/lang/Object;)Ljava/lang/Object;
+  member public abstract boolean isEmpty(); | descriptor: ()Z
+  member public abstract dev.emi.emi.api.stack.EmiStack copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiStack;
+  member public abstract java.lang.Object getKey(); | descriptor: ()Ljava/lang/Object;
+  member public abstract java.util.List<net.minecraft.network.chat.Component> getTooltipText(); | descriptor: ()Ljava/util/List;
+  member public abstract net.minecraft.core.component.DataComponentPatch getComponentChanges(); | descriptor: ()Lnet/minecraft/core/component/DataComponentPatch;
+  member public abstract net.minecraft.network.chat.Component getName(); | descriptor: ()Lnet/minecraft/network/chat/Component;
+  member public abstract net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public boolean equals(java.lang.Object); | descriptor: (Ljava/lang/Object;)Z
+  member public boolean isEqual(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Z
+  member public boolean isEqual(dev.emi.emi.api.stack.EmiStack, dev.emi.emi.api.stack.Comparison); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;Ldev/emi/emi/api/stack/Comparison;)Z
+  member public dev.emi.emi.api.stack.EmiIngredient copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setAmount(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setChance(float); | descriptor: (F)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiStack comparison(dev.emi.emi.api.stack.Comparison); | descriptor: (Ldev/emi/emi/api/stack/Comparison;)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack comparison(java.util.function.Function<dev.emi.emi.api.stack.Comparison, dev.emi.emi.api.stack.Comparison>); | descriptor: (Ljava/util/function/Function;)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack getRemainder(); | descriptor: ()Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack setAmount(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack setChance(float); | descriptor: (F)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack setRemainder(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack(); | descriptor: ()V
+  member public float getChance(); | descriptor: ()F
+  member public int hashCode(); | descriptor: ()I
+  member public java.lang.String toString(); | descriptor: ()Ljava/lang/String;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getEmiStacks(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public long getAmount(); | descriptor: ()J
+  member public net.minecraft.world.item.ItemStack getItemStack(); | descriptor: ()Lnet/minecraft/world/item/ItemStack;
+  member public static dev.emi.emi.api.stack.EmiStack EMPTY; | descriptor: Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.item.ItemStack); | descriptor: (Lnet/minecraft/world/item/ItemStack;)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.item.ItemStack, long); | descriptor: (Lnet/minecraft/world/item/ItemStack;J)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.ItemLike); | descriptor: (Lnet/minecraft/world/level/ItemLike;)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.ItemLike, long); | descriptor: (Lnet/minecraft/world/level/ItemLike;J)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.ItemLike, net.minecraft.core.component.DataComponentPatch); | descriptor: (Lnet/minecraft/world/level/ItemLike;Lnet/minecraft/core/component/DataComponentPatch;)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.ItemLike, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Lnet/minecraft/world/level/ItemLike;Lnet/minecraft/core/component/DataComponentPatch;J)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.material.Fluid); | descriptor: (Lnet/minecraft/world/level/material/Fluid;)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.material.Fluid, long); | descriptor: (Lnet/minecraft/world/level/material/Fluid;J)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.material.Fluid, net.minecraft.core.component.DataComponentPatch); | descriptor: (Lnet/minecraft/world/level/material/Fluid;Lnet/minecraft/core/component/DataComponentPatch;)Ldev/emi/emi/api/stack/EmiStack;
+  member public static dev.emi.emi.api.stack.EmiStack of(net.minecraft.world.level.material.Fluid, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Lnet/minecraft/world/level/material/Fluid;Lnet/minecraft/core/component/DataComponentPatch;J)Ldev/emi/emi/api/stack/EmiStack;
+  final public static dev.emi.emi.api.stack.EmiStack EMPTY;
+class dev.emi.emi.api.stack.EmiStack$Entry
+  header abstract class dev.emi.emi.api.stack.EmiStack$Entry<T> {
+class dev.emi.emi.api.stack.EmiStackConvertible
+  header public interface dev.emi.emi.api.stack.EmiStackConvertible {
+  member public default dev.emi.emi.api.stack.EmiStack emi(); | descriptor: ()Ldev/emi/emi/api/stack/EmiStack;
+  member public default dev.emi.emi.api.stack.EmiStack emi(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiStack;
+class dev.emi.emi.api.stack.EmiStackInteraction
+  header public class dev.emi.emi.api.stack.EmiStackInteraction {
+  member public boolean isClickable(); | descriptor: ()Z
+  member public boolean isEmpty(); | descriptor: ()Z
+  member public dev.emi.emi.api.recipe.EmiRecipe getRecipeContext(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipe;
+  member public dev.emi.emi.api.stack.EmiIngredient getStack(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiStackInteraction(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)V
+  member public dev.emi.emi.api.stack.EmiStackInteraction(dev.emi.emi.api.stack.EmiIngredient, dev.emi.emi.api.recipe.EmiRecipe, boolean); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;Ldev/emi/emi/api/recipe/EmiRecipe;Z)V
+  member public static dev.emi.emi.api.stack.EmiStackInteraction EMPTY; | descriptor: Ldev/emi/emi/api/stack/EmiStackInteraction;
+  final public static dev.emi.emi.api.stack.EmiStackInteraction EMPTY;
+class dev.emi.emi.api.stack.EmptyEmiStack
+  header public class dev.emi.emi.api.stack.EmptyEmiStack extends dev.emi.emi.api.stack.EmiStack {
+  member public boolean isEmpty(); | descriptor: ()Z
+  member public boolean isEqual(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Z
+  member public dev.emi.emi.api.stack.EmiIngredient copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setAmount(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setChance(float); | descriptor: (F)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiStack copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack getRemainder(); | descriptor: ()Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack setAmount(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack setChance(float); | descriptor: (F)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmiStack setRemainder(dev.emi.emi.api.stack.EmiStack); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.EmptyEmiStack(); | descriptor: ()V
+  member public java.lang.Object getKey(); | descriptor: ()Ljava/lang/Object;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getEmiStacks(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<net.minecraft.network.chat.Component> getTooltipText(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.core.component.DataComponentPatch getComponentChanges(); | descriptor: ()Lnet/minecraft/core/component/DataComponentPatch;
+  member public net.minecraft.network.chat.Component getName(); | descriptor: ()Lnet/minecraft/network/chat/Component;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public net.minecraft.world.item.ItemStack getItemStack(); | descriptor: ()Lnet/minecraft/world/item/ItemStack;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float, int); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIFI)V
+class dev.emi.emi.api.stack.EmptyEmiStack$EmptyEntry
+  header class dev.emi.emi.api.stack.EmptyEmiStack$EmptyEntry {
+class dev.emi.emi.api.stack.FluidEmiStack
+  header public class dev.emi.emi.api.stack.FluidEmiStack extends dev.emi.emi.api.stack.EmiStack {
+  member public boolean isEmpty(); | descriptor: ()Z
+  member public dev.emi.emi.api.stack.EmiIngredient copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiStack copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.FluidEmiStack(net.minecraft.world.level.material.Fluid); | descriptor: (Lnet/minecraft/world/level/material/Fluid;)V
+  member public dev.emi.emi.api.stack.FluidEmiStack(net.minecraft.world.level.material.Fluid, net.minecraft.core.component.DataComponentPatch); | descriptor: (Lnet/minecraft/world/level/material/Fluid;Lnet/minecraft/core/component/DataComponentPatch;)V
+  member public dev.emi.emi.api.stack.FluidEmiStack(net.minecraft.world.level.material.Fluid, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Lnet/minecraft/world/level/material/Fluid;Lnet/minecraft/core/component/DataComponentPatch;J)V
+  member public java.lang.Object getKey(); | descriptor: ()Ljava/lang/Object;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<net.minecraft.network.chat.Component> getTooltipText(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.core.component.DataComponentPatch getComponentChanges(); | descriptor: ()Lnet/minecraft/core/component/DataComponentPatch;
+  member public net.minecraft.network.chat.Component getName(); | descriptor: ()Lnet/minecraft/network/chat/Component;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float, int); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIFI)V
+class dev.emi.emi.api.stack.FluidEmiStack$FluidEntry
+  header class dev.emi.emi.api.stack.FluidEmiStack$FluidEntry {
+class dev.emi.emi.api.stack.ItemEmiStack
+  header public class dev.emi.emi.api.stack.ItemEmiStack extends dev.emi.emi.api.stack.EmiStack implements dev.emi.emi.screen.StackBatcher$Batchable {
+  member public <T> T get(net.minecraft.core.component.DataComponentType<? extends T>); | descriptor: (Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;
+  member public boolean isEmpty(); | descriptor: ()Z
+  member public boolean isSideLit(); | descriptor: ()Z
+  member public boolean isUnbatchable(); | descriptor: ()Z
+  member public dev.emi.emi.api.stack.EmiIngredient copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiStack copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiStack;
+  member public dev.emi.emi.api.stack.ItemEmiStack(net.minecraft.world.item.Item, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Lnet/minecraft/world/item/Item;Lnet/minecraft/core/component/DataComponentPatch;J)V
+  member public dev.emi.emi.api.stack.ItemEmiStack(net.minecraft.world.item.ItemStack); | descriptor: (Lnet/minecraft/world/item/ItemStack;)V
+  member public dev.emi.emi.api.stack.ItemEmiStack(net.minecraft.world.item.ItemStack, long); | descriptor: (Lnet/minecraft/world/item/ItemStack;J)V
+  member public java.lang.Object getKey(); | descriptor: ()Ljava/lang/Object;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<net.minecraft.network.chat.Component> getTooltipText(); | descriptor: ()Ljava/util/List;
+  member public net.minecraft.core.component.DataComponentPatch getComponentChanges(); | descriptor: ()Lnet/minecraft/core/component/DataComponentPatch;
+  member public net.minecraft.network.chat.Component getName(); | descriptor: ()Lnet/minecraft/network/chat/Component;
+  member public net.minecraft.resources.ResourceLocation getId(); | descriptor: ()Lnet/minecraft/resources/ResourceLocation;
+  member public net.minecraft.world.item.ItemStack getItemStack(); | descriptor: ()Lnet/minecraft/world/item/ItemStack;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float, int); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIFI)V
+  member public void renderForBatch(net.minecraft.client.renderer.MultiBufferSource, net.minecraft.client.gui.GuiGraphics, int, int, int, float); | descriptor: (Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/GuiGraphics;IIIF)V
+  member public void setUnbatchable(); | descriptor: ()V
+class dev.emi.emi.api.stack.ItemEmiStack$ItemEntry
+  header class dev.emi.emi.api.stack.ItemEmiStack$ItemEntry {
+class dev.emi.emi.api.stack.ListEmiIngredient
+  header public class dev.emi.emi.api.stack.ListEmiIngredient implements dev.emi.emi.api.stack.EmiIngredient {
+  member public boolean equals(java.lang.Object); | descriptor: (Ljava/lang/Object;)Z
+  member public dev.emi.emi.api.stack.EmiIngredient copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setAmount(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setChance(float); | descriptor: (F)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.ListEmiIngredient(java.util.List<? extends dev.emi.emi.api.stack.EmiIngredient>, long); | descriptor: (Ljava/util/List;J)V
+  member public float getChance(); | descriptor: ()F
+  member public int hashCode(); | descriptor: ()I
+  member public java.lang.String toString(); | descriptor: ()Ljava/lang/String;
+  member public java.util.List<? extends dev.emi.emi.api.stack.EmiIngredient> getIngredients(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getEmiStacks(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public long getAmount(); | descriptor: ()J
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float, int); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIFI)V
+class dev.emi.emi.api.stack.TagEmiIngredient
+  header public class dev.emi.emi.api.stack.TagEmiIngredient implements dev.emi.emi.api.stack.EmiIngredient {
+  member public boolean equals(java.lang.Object); | descriptor: (Ljava/lang/Object;)Z
+  member public dev.emi.emi.api.stack.EmiIngredient copy(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setAmount(long); | descriptor: (J)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.EmiIngredient setChance(float); | descriptor: (F)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.stack.TagEmiIngredient(dev.emi.emi.runtime.EmiTagKey<?>, long); | descriptor: (Ldev/emi/emi/runtime/EmiTagKey;J)V
+  member public dev.emi.emi.api.stack.TagEmiIngredient(net.minecraft.tags.TagKey<?>, java.util.List<dev.emi.emi.api.stack.EmiStack>, long); | descriptor: (Lnet/minecraft/tags/TagKey;Ljava/util/List;J)V
+  member public dev.emi.emi.api.stack.TagEmiIngredient(net.minecraft.tags.TagKey<?>, long); | descriptor: (Lnet/minecraft/tags/TagKey;J)V
+  member public float getChance(); | descriptor: ()F
+  member public int hashCode(); | descriptor: ()I
+  member public java.util.List<dev.emi.emi.api.stack.EmiStack> getEmiStacks(); | descriptor: ()Ljava/util/List;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(); | descriptor: ()Ljava/util/List;
+  member public long getAmount(); | descriptor: ()J
+  member public net.minecraft.tags.TagKey<?> key; | descriptor: Lnet/minecraft/tags/TagKey;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float, int); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIFI)V
+  final public net.minecraft.tags.TagKey<?> key;
+class dev.emi.emi.api.stack.serializer.EmiIngredientSerializer
+  header public interface dev.emi.emi.api.stack.serializer.EmiIngredientSerializer<T extends dev.emi.emi.api.stack.EmiIngredient> {
+  member public abstract com.google.gson.JsonElement serialize(T); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Lcom/google/gson/JsonElement;
+  member public abstract dev.emi.emi.api.stack.EmiIngredient deserialize(com.google.gson.JsonElement); | descriptor: (Lcom/google/gson/JsonElement;)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public abstract java.lang.String getType(); | descriptor: ()Ljava/lang/String;
+  member public static com.google.gson.JsonElement getSerialized(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Lcom/google/gson/JsonElement;
+  member public static dev.emi.emi.api.stack.EmiIngredient getDeserialized(com.google.gson.JsonElement); | descriptor: (Lcom/google/gson/JsonElement;)Ldev/emi/emi/api/stack/EmiIngredient;
+class dev.emi.emi.api.stack.serializer.EmiStackSerializer
+  header public interface dev.emi.emi.api.stack.serializer.EmiStackSerializer<T extends dev.emi.emi.api.stack.EmiStack> extends dev.emi.emi.api.stack.serializer.EmiIngredientSerializer<T> {
+  member public abstract dev.emi.emi.api.stack.EmiStack create(net.minecraft.resources.ResourceLocation, net.minecraft.core.component.DataComponentPatch, long); | descriptor: (Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/core/component/DataComponentPatch;J)Ldev/emi/emi/api/stack/EmiStack;
+  member public default com.google.gson.JsonElement serialize(T); | descriptor: (Ldev/emi/emi/api/stack/EmiStack;)Lcom/google/gson/JsonElement;
+  member public default com.google.gson.JsonElement serialize(dev.emi.emi.api.stack.EmiIngredient); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;)Lcom/google/gson/JsonElement;
+  member public default dev.emi.emi.api.stack.EmiIngredient deserialize(com.google.gson.JsonElement); | descriptor: (Lcom/google/gson/JsonElement;)Ldev/emi/emi/api/stack/EmiIngredient;
+  member public static java.util.regex.Pattern STACK_REGEX; | descriptor: Ljava/util/regex/Pattern;
+  final public static java.util.regex.Pattern STACK_REGEX;
+class dev.emi.emi.api.widget.AnimatedTextureWidget
+  header public class dev.emi.emi.api.widget.AnimatedTextureWidget extends dev.emi.emi.api.widget.TextureWidget {
+  member protected boolean endToStart; | descriptor: Z
+  member protected boolean fullToEmpty; | descriptor: Z
+  member protected boolean horizontal; | descriptor: Z
+  member protected int time; | descriptor: I
+  member public dev.emi.emi.api.widget.AnimatedTextureWidget(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int, int, boolean, boolean, boolean); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIIIIZZZ)V
+  member public dev.emi.emi.api.widget.AnimatedTextureWidget(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int, int, int, int, int, int, boolean, boolean, boolean); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIIIIIIIIZZZ)V
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final protected boolean endToStart;
+  final protected boolean fullToEmpty;
+  final protected boolean horizontal;
+  final protected int time;
+class dev.emi.emi.api.widget.Bounds
+  header public class dev.emi.emi.api.widget.Bounds extends java.lang.Record {
+  member public boolean contains(int, int); | descriptor: (II)Z
+  member public boolean empty(); | descriptor: ()Z
+  member public boolean equals(java.lang.Object); | descriptor: (Ljava/lang/Object;)Z
+  member public dev.emi.emi.api.widget.Bounds overlap(dev.emi.emi.api.widget.Bounds); | descriptor: (Ldev/emi/emi/api/widget/Bounds;)Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.Bounds(int, int, int, int); | descriptor: (IIII)V
+  member public int bottom(); | descriptor: ()I
+  member public int hashCode(); | descriptor: ()I
+  member public int height(); | descriptor: ()I
+  member public int left(); | descriptor: ()I
+  member public int right(); | descriptor: ()I
+  member public int top(); | descriptor: ()I
+  member public int width(); | descriptor: ()I
+  member public int x(); | descriptor: ()I
+  member public int y(); | descriptor: ()I
+  member public java.lang.String toString(); | descriptor: ()Ljava/lang/String;
+  member public static dev.emi.emi.api.widget.Bounds EMPTY; | descriptor: Ldev/emi/emi/api/widget/Bounds;
+  final public boolean equals(java.lang.Object);
+  final public int hashCode();
+  final public java.lang.String toString();
+  final public static dev.emi.emi.api.widget.Bounds EMPTY;
+class dev.emi.emi.api.widget.ButtonWidget
+  header public class dev.emi.emi.api.widget.ButtonWidget extends dev.emi.emi.api.widget.Widget {
+  member protected dev.emi.emi.api.widget.ButtonWidget$ClickAction action; | descriptor: Ldev/emi/emi/api/widget/ButtonWidget$ClickAction;
+  member protected int height; | descriptor: I
+  member protected int u; | descriptor: I
+  member protected int v; | descriptor: I
+  member protected int width; | descriptor: I
+  member protected int x; | descriptor: I
+  member protected int y; | descriptor: I
+  member protected java.util.function.BooleanSupplier isActive; | descriptor: Ljava/util/function/BooleanSupplier;
+  member protected net.minecraft.resources.ResourceLocation texture; | descriptor: Lnet/minecraft/resources/ResourceLocation;
+  member public boolean mouseClicked(int, int, int); | descriptor: (III)Z
+  member public dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.ButtonWidget(int, int, int, int, int, int, java.util.function.BooleanSupplier, dev.emi.emi.api.widget.ButtonWidget$ClickAction); | descriptor: (IIIIIILjava/util/function/BooleanSupplier;Ldev/emi/emi/api/widget/ButtonWidget$ClickAction;)V
+  member public dev.emi.emi.api.widget.ButtonWidget(int, int, int, int, int, int, net.minecraft.resources.ResourceLocation, java.util.function.BooleanSupplier, dev.emi.emi.api.widget.ButtonWidget$ClickAction); | descriptor: (IIIIIILnet/minecraft/resources/ResourceLocation;Ljava/util/function/BooleanSupplier;Ldev/emi/emi/api/widget/ButtonWidget$ClickAction;)V
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final protected dev.emi.emi.api.widget.ButtonWidget$ClickAction action;
+  final protected int height;
+  final protected int u;
+  final protected int v;
+  final protected int width;
+  final protected int x;
+  final protected int y;
+  final protected java.util.function.BooleanSupplier isActive;
+  final protected net.minecraft.resources.ResourceLocation texture;
+class dev.emi.emi.api.widget.ButtonWidget$ClickAction
+  header public interface dev.emi.emi.api.widget.ButtonWidget$ClickAction {
+  member public abstract void click(double, double, int); | descriptor: (DDI)V
+class dev.emi.emi.api.widget.DrawableWidget
+  header public class dev.emi.emi.api.widget.DrawableWidget extends dev.emi.emi.api.widget.Widget implements dev.emi.emi.api.widget.WidgetTooltipHolder<dev.emi.emi.api.widget.DrawableWidget> {
+  member protected dev.emi.emi.api.widget.Bounds bounds; | descriptor: Ldev/emi/emi/api/widget/Bounds;
+  member protected dev.emi.emi.api.widget.DrawableWidget$DrawableWidgetConsumer consumer; | descriptor: Ldev/emi/emi/api/widget/DrawableWidget$DrawableWidgetConsumer;
+  member protected int x; | descriptor: I
+  member protected int y; | descriptor: I
+  member protected java.util.function.BiFunction<java.lang.Integer, java.lang.Integer, java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>> tooltipSupplier; | descriptor: Ljava/util/function/BiFunction;
+  member public dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.DrawableWidget tooltip(java.util.function.BiFunction<java.lang.Integer, java.lang.Integer, java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>>); | descriptor: (Ljava/util/function/BiFunction;)Ldev/emi/emi/api/widget/DrawableWidget;
+  member public dev.emi.emi.api.widget.DrawableWidget(int, int, int, int, dev.emi.emi.api.widget.DrawableWidget$DrawableWidgetConsumer); | descriptor: (IIIILdev/emi/emi/api/widget/DrawableWidget$DrawableWidgetConsumer;)V
+  member public java.lang.Object tooltip(java.util.function.BiFunction); | descriptor: (Ljava/util/function/BiFunction;)Ljava/lang/Object;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(int, int); | descriptor: (II)Ljava/util/List;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final protected dev.emi.emi.api.widget.Bounds bounds;
+  final protected dev.emi.emi.api.widget.DrawableWidget$DrawableWidgetConsumer consumer;
+  final protected int x;
+  final protected int y;
+class dev.emi.emi.api.widget.DrawableWidget$DrawableWidgetConsumer
+  header public interface dev.emi.emi.api.widget.DrawableWidget$DrawableWidgetConsumer {
+  member public abstract void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.widget.FillingArrowWidget
+  header public class dev.emi.emi.api.widget.FillingArrowWidget extends dev.emi.emi.api.widget.AnimatedTextureWidget {
+  member public dev.emi.emi.api.widget.FillingArrowWidget(int, int, int); | descriptor: (III)V
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.widget.GeneratedSlotWidget
+  header public class dev.emi.emi.api.widget.GeneratedSlotWidget extends dev.emi.emi.api.widget.SlotWidget {
+  member public dev.emi.emi.api.stack.EmiIngredient getStack(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.widget.GeneratedSlotWidget(java.util.function.Function<java.util.Random, dev.emi.emi.api.stack.EmiIngredient>, int, int, int); | descriptor: (Ljava/util/function/Function;III)V
+  member public void drawOverlay(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.widget.RecipeFillButtonWidget
+  header public class dev.emi.emi.api.widget.RecipeFillButtonWidget extends dev.emi.emi.widget.RecipeButtonWidget {
+  member public boolean mouseClicked(int, int, int); | descriptor: (III)Z
+  member public dev.emi.emi.api.widget.RecipeFillButtonWidget(int, int, dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (IILdev/emi/emi/api/recipe/EmiRecipe;)V
+  member public int getTextureOffset(int, int); | descriptor: (II)I
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(int, int); | descriptor: (II)Ljava/util/List;
+class dev.emi.emi.api.widget.SlotWidget
+  header public class dev.emi.emi.api.widget.SlotWidget extends dev.emi.emi.api.widget.Widget {
+  member protected boolean catalyst; | descriptor: Z
+  member protected boolean custom; | descriptor: Z
+  member protected boolean drawBack; | descriptor: Z
+  member protected boolean output; | descriptor: Z
+  member protected dev.emi.emi.api.stack.EmiIngredient stack; | descriptor: Ldev/emi/emi/api/stack/EmiIngredient;
+  member protected dev.emi.emi.api.widget.Bounds bounds; | descriptor: Ldev/emi/emi/api/widget/Bounds;
+  member protected int customHeight; | descriptor: I
+  member protected int customWidth; | descriptor: I
+  member protected int u; | descriptor: I
+  member protected int v; | descriptor: I
+  member protected int x; | descriptor: I
+  member protected int y; | descriptor: I
+  member protected java.util.List<java.util.function.Supplier<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>> tooltipSuppliers; | descriptor: Ljava/util/List;
+  member protected net.minecraft.resources.ResourceLocation textureId; | descriptor: Lnet/minecraft/resources/ResourceLocation;
+  member protected void addSlotTooltip(java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>); | descriptor: (Ljava/util/List;)V
+  member public boolean keyPressed(int, int, int); | descriptor: (III)Z
+  member public boolean mouseClicked(int, int, int); | descriptor: (III)Z
+  member public boolean shouldDrawSlotHighlight(int, int); | descriptor: (II)Z
+  member public dev.emi.emi.api.recipe.EmiRecipe getRecipe(); | descriptor: ()Ldev/emi/emi/api/recipe/EmiRecipe;
+  member public dev.emi.emi.api.stack.EmiIngredient getStack(); | descriptor: ()Ldev/emi/emi/api/stack/EmiIngredient;
+  member public dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.SlotWidget appendTooltip(java.util.function.Function<dev.emi.emi.api.stack.EmiIngredient, net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>); | descriptor: (Ljava/util/function/Function;)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget appendTooltip(java.util.function.Supplier<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>); | descriptor: (Ljava/util/function/Supplier;)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget appendTooltip(net.minecraft.network.chat.Component); | descriptor: (Lnet/minecraft/network/chat/Component;)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget backgroundTexture(net.minecraft.resources.ResourceLocation, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;II)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget catalyst(boolean); | descriptor: (Z)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget customBackground(net.minecraft.resources.ResourceLocation, int, int, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIII)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget drawBack(boolean); | descriptor: (Z)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget large(boolean); | descriptor: (Z)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget recipeContext(dev.emi.emi.api.recipe.EmiRecipe); | descriptor: (Ldev/emi/emi/api/recipe/EmiRecipe;)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.SlotWidget(dev.emi.emi.api.stack.EmiIngredient, int, int); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;II)V
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(int, int); | descriptor: (II)Ljava/util/List;
+  member public void drawBackground(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  member public void drawOverlay(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  member public void drawSlotHighlight(net.minecraft.client.gui.GuiGraphics, dev.emi.emi.api.widget.Bounds); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;Ldev/emi/emi/api/widget/Bounds;)V
+  member public void drawStack(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final protected dev.emi.emi.api.stack.EmiIngredient stack;
+  final protected int x;
+  final protected int y;
+class dev.emi.emi.api.widget.TankWidget
+  header public class dev.emi.emi.api.widget.TankWidget extends dev.emi.emi.api.widget.SlotWidget {
+  member public dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.SlotWidget backgroundTexture(net.minecraft.resources.ResourceLocation, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;II)Ldev/emi/emi/api/widget/SlotWidget;
+  member public dev.emi.emi.api.widget.TankWidget(dev.emi.emi.api.stack.EmiIngredient, int, int, int, int, long); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;IIIIJ)V
+  member public void drawStack(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.widget.TextWidget
+  header public class dev.emi.emi.api.widget.TextWidget extends dev.emi.emi.api.widget.Widget {
+  member protected boolean shadow; | descriptor: Z
+  member protected dev.emi.emi.api.widget.TextWidget$Alignment horizontalAlignment; | descriptor: Ldev/emi/emi/api/widget/TextWidget$Alignment;
+  member protected dev.emi.emi.api.widget.TextWidget$Alignment verticalAlignment; | descriptor: Ldev/emi/emi/api/widget/TextWidget$Alignment;
+  member protected int color; | descriptor: I
+  member protected int x; | descriptor: I
+  member protected int y; | descriptor: I
+  member protected net.minecraft.util.FormattedCharSequence text; | descriptor: Lnet/minecraft/util/FormattedCharSequence;
+  member public dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.TextWidget horizontalAlign(dev.emi.emi.api.widget.TextWidget$Alignment); | descriptor: (Ldev/emi/emi/api/widget/TextWidget$Alignment;)Ldev/emi/emi/api/widget/TextWidget;
+  member public dev.emi.emi.api.widget.TextWidget verticalAlign(dev.emi.emi.api.widget.TextWidget$Alignment); | descriptor: (Ldev/emi/emi/api/widget/TextWidget$Alignment;)Ldev/emi/emi/api/widget/TextWidget;
+  member public dev.emi.emi.api.widget.TextWidget(net.minecraft.util.FormattedCharSequence, int, int, int, boolean); | descriptor: (Lnet/minecraft/util/FormattedCharSequence;IIIZ)V
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final protected boolean shadow;
+  final protected int color;
+  final protected int x;
+  final protected int y;
+  final protected net.minecraft.util.FormattedCharSequence text;
+class dev.emi.emi.api.widget.TextWidget$Alignment
+  header public class dev.emi.emi.api.widget.TextWidget$Alignment extends java.lang.Enum<dev.emi.emi.api.widget.TextWidget$Alignment> {
+  member public int offset(int); | descriptor: (I)I
+  member public static dev.emi.emi.api.widget.TextWidget$Alignment CENTER; | descriptor: Ldev/emi/emi/api/widget/TextWidget$Alignment;
+  member public static dev.emi.emi.api.widget.TextWidget$Alignment END; | descriptor: Ldev/emi/emi/api/widget/TextWidget$Alignment;
+  member public static dev.emi.emi.api.widget.TextWidget$Alignment START; | descriptor: Ldev/emi/emi/api/widget/TextWidget$Alignment;
+  member public static dev.emi.emi.api.widget.TextWidget$Alignment valueOf(java.lang.String); | descriptor: (Ljava/lang/String;)Ldev/emi/emi/api/widget/TextWidget$Alignment;
+  member public static dev.emi.emi.api.widget.TextWidget$Alignment[] values(); | descriptor: ()[Ldev/emi/emi/api/widget/TextWidget$Alignment;
+  final public static dev.emi.emi.api.widget.TextWidget$Alignment CENTER;
+  final public static dev.emi.emi.api.widget.TextWidget$Alignment END;
+  final public static dev.emi.emi.api.widget.TextWidget$Alignment START;
+class dev.emi.emi.api.widget.TextureWidget
+  header public class dev.emi.emi.api.widget.TextureWidget extends dev.emi.emi.api.widget.Widget implements dev.emi.emi.api.widget.WidgetTooltipHolder<dev.emi.emi.api.widget.TextureWidget> {
+  member protected int height; | descriptor: I
+  member protected int regionHeight; | descriptor: I
+  member protected int regionWidth; | descriptor: I
+  member protected int textureHeight; | descriptor: I
+  member protected int textureWidth; | descriptor: I
+  member protected int u; | descriptor: I
+  member protected int v; | descriptor: I
+  member protected int width; | descriptor: I
+  member protected int x; | descriptor: I
+  member protected int y; | descriptor: I
+  member protected net.minecraft.resources.ResourceLocation texture; | descriptor: Lnet/minecraft/resources/ResourceLocation;
+  member public dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.TextureWidget tooltip(java.util.function.BiFunction<java.lang.Integer, java.lang.Integer, java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>>); | descriptor: (Ljava/util/function/BiFunction;)Ldev/emi/emi/api/widget/TextureWidget;
+  member public dev.emi.emi.api.widget.TextureWidget(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIII)V
+  member public dev.emi.emi.api.widget.TextureWidget(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int, int, int, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIIIIIII)V
+  member public java.lang.Object tooltip(java.util.function.BiFunction); | descriptor: (Ljava/util/function/BiFunction;)Ljava/lang/Object;
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(int, int); | descriptor: (II)Ljava/util/List;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  final protected int height;
+  final protected int regionHeight;
+  final protected int regionWidth;
+  final protected int textureHeight;
+  final protected int textureWidth;
+  final protected int u;
+  final protected int v;
+  final protected int width;
+  final protected int x;
+  final protected int y;
+  final protected net.minecraft.resources.ResourceLocation texture;
+class dev.emi.emi.api.widget.TooltipWidget
+  header public class dev.emi.emi.api.widget.TooltipWidget extends dev.emi.emi.api.widget.Widget {
+  member public dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public dev.emi.emi.api.widget.TooltipWidget(java.util.function.BiFunction<java.lang.Integer, java.lang.Integer, java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>>, int, int, int, int); | descriptor: (Ljava/util/function/BiFunction;IIII)V
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(int, int); | descriptor: (II)Ljava/util/List;
+  member public void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+class dev.emi.emi.api.widget.Widget
+  header public abstract class dev.emi.emi.api.widget.Widget implements net.minecraft.client.gui.components.Renderable {
+  member public abstract dev.emi.emi.api.widget.Bounds getBounds(); | descriptor: ()Ldev/emi/emi/api/widget/Bounds;
+  member public abstract void render(net.minecraft.client.gui.GuiGraphics, int, int, float); | descriptor: (Lnet/minecraft/client/gui/GuiGraphics;IIF)V
+  member public boolean keyPressed(int, int, int); | descriptor: (III)Z
+  member public boolean mouseClicked(int, int, int); | descriptor: (III)Z
+  member public dev.emi.emi.api.widget.Widget(); | descriptor: ()V
+  member public java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip(int, int); | descriptor: (II)Ljava/util/List;
+class dev.emi.emi.api.widget.WidgetHolder
+  header public interface dev.emi.emi.api.widget.WidgetHolder {
+  member public abstract <T extends dev.emi.emi.api.widget.Widget> T add(T); | descriptor: (Ldev/emi/emi/api/widget/Widget;)Ldev/emi/emi/api/widget/Widget;
+  member public abstract int getHeight(); | descriptor: ()I
+  member public abstract int getWidth(); | descriptor: ()I
+  member public default dev.emi.emi.api.widget.AnimatedTextureWidget addAnimatedTexture(dev.emi.emi.api.render.EmiTexture, int, int, int, boolean, boolean, boolean); | descriptor: (Ldev/emi/emi/api/render/EmiTexture;IIIZZZ)Ldev/emi/emi/api/widget/AnimatedTextureWidget;
+  member public default dev.emi.emi.api.widget.AnimatedTextureWidget addAnimatedTexture(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int, int, boolean, boolean, boolean); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIIIIZZZ)Ldev/emi/emi/api/widget/AnimatedTextureWidget;
+  member public default dev.emi.emi.api.widget.AnimatedTextureWidget addAnimatedTexture(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int, int, int, int, int, int, boolean, boolean, boolean); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIIIIIIIIZZZ)Ldev/emi/emi/api/widget/AnimatedTextureWidget;
+  member public default dev.emi.emi.api.widget.ButtonWidget addButton(int, int, int, int, int, int, java.util.function.BooleanSupplier, dev.emi.emi.api.widget.ButtonWidget$ClickAction); | descriptor: (IIIIIILjava/util/function/BooleanSupplier;Ldev/emi/emi/api/widget/ButtonWidget$ClickAction;)Ldev/emi/emi/api/widget/ButtonWidget;
+  member public default dev.emi.emi.api.widget.ButtonWidget addButton(int, int, int, int, int, int, net.minecraft.resources.ResourceLocation, java.util.function.BooleanSupplier, dev.emi.emi.api.widget.ButtonWidget$ClickAction); | descriptor: (IIIIIILnet/minecraft/resources/ResourceLocation;Ljava/util/function/BooleanSupplier;Ldev/emi/emi/api/widget/ButtonWidget$ClickAction;)Ldev/emi/emi/api/widget/ButtonWidget;
+  member public default dev.emi.emi.api.widget.DrawableWidget addDrawable(int, int, int, int, dev.emi.emi.api.widget.DrawableWidget$DrawableWidgetConsumer); | descriptor: (IIIILdev/emi/emi/api/widget/DrawableWidget$DrawableWidgetConsumer;)Ldev/emi/emi/api/widget/DrawableWidget;
+  member public default dev.emi.emi.api.widget.FillingArrowWidget addFillingArrow(int, int, int); | descriptor: (III)Ldev/emi/emi/api/widget/FillingArrowWidget;
+  member public default dev.emi.emi.api.widget.GeneratedSlotWidget addGeneratedSlot(java.util.function.Function<java.util.Random, dev.emi.emi.api.stack.EmiIngredient>, int, int, int); | descriptor: (Ljava/util/function/Function;III)Ldev/emi/emi/api/widget/GeneratedSlotWidget;
+  member public default dev.emi.emi.api.widget.SlotWidget addSlot(dev.emi.emi.api.stack.EmiIngredient, int, int); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;II)Ldev/emi/emi/api/widget/SlotWidget;
+  member public default dev.emi.emi.api.widget.SlotWidget addSlot(int, int); | descriptor: (II)Ldev/emi/emi/api/widget/SlotWidget;
+  member public default dev.emi.emi.api.widget.TankWidget addTank(dev.emi.emi.api.stack.EmiIngredient, int, int, int, int, int); | descriptor: (Ldev/emi/emi/api/stack/EmiIngredient;IIIII)Ldev/emi/emi/api/widget/TankWidget;
+  member public default dev.emi.emi.api.widget.TextWidget addText(net.minecraft.network.chat.Component, int, int, int, boolean); | descriptor: (Lnet/minecraft/network/chat/Component;IIIZ)Ldev/emi/emi/api/widget/TextWidget;
+  member public default dev.emi.emi.api.widget.TextWidget addText(net.minecraft.util.FormattedCharSequence, int, int, int, boolean); | descriptor: (Lnet/minecraft/util/FormattedCharSequence;IIIZ)Ldev/emi/emi/api/widget/TextWidget;
+  member public default dev.emi.emi.api.widget.TextureWidget addTexture(dev.emi.emi.api.render.EmiTexture, int, int); | descriptor: (Ldev/emi/emi/api/render/EmiTexture;II)Ldev/emi/emi/api/widget/TextureWidget;
+  member public default dev.emi.emi.api.widget.TextureWidget addTexture(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIII)Ldev/emi/emi/api/widget/TextureWidget;
+  member public default dev.emi.emi.api.widget.TextureWidget addTexture(net.minecraft.resources.ResourceLocation, int, int, int, int, int, int, int, int, int, int); | descriptor: (Lnet/minecraft/resources/ResourceLocation;IIIIIIIIII)Ldev/emi/emi/api/widget/TextureWidget;
+  member public default dev.emi.emi.api.widget.TooltipWidget addTooltip(java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>, int, int, int, int); | descriptor: (Ljava/util/List;IIII)Ldev/emi/emi/api/widget/TooltipWidget;
+  member public default dev.emi.emi.api.widget.TooltipWidget addTooltip(java.util.function.BiFunction<java.lang.Integer, java.lang.Integer, java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>>, int, int, int, int); | descriptor: (Ljava/util/function/BiFunction;IIII)Ldev/emi/emi/api/widget/TooltipWidget;
+  member public default dev.emi.emi.api.widget.TooltipWidget addTooltipText(java.util.List<net.minecraft.network.chat.Component>, int, int, int, int); | descriptor: (Ljava/util/List;IIII)Ldev/emi/emi/api/widget/TooltipWidget;
+class dev.emi.emi.api.widget.WidgetTooltipHolder
+  header public interface dev.emi.emi.api.widget.WidgetTooltipHolder<T> {
+  member public abstract T tooltip(java.util.function.BiFunction<java.lang.Integer, java.lang.Integer, java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>>); | descriptor: (Ljava/util/function/BiFunction;)Ljava/lang/Object;
+  member public default T tooltip(java.util.List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent>); | descriptor: (Ljava/util/List;)Ljava/lang/Object;
+  member public default T tooltipText(java.util.List<net.minecraft.network.chat.Component>); | descriptor: (Ljava/util/List;)Ljava/lang/Object;
+  member public default T tooltipText(java.util.function.BiFunction<java.lang.Integer, java.lang.Integer, java.util.List<net.minecraft.network.chat.Component>>); | descriptor: (Ljava/util/function/BiFunction;)Ljava/lang/Object;

@@ -11,8 +11,11 @@ declaration text and JVM descriptor, so removing, renaming, re-typing, hiding or
 final all count as incompatibilities. Private members and lambdas are ignored (pass --all to keep
 them). The check exits with status 1 when the API becomes incompatible.
 
-The committed baseline lives next to this script in `scripts/api-baseline-1.21.1.txt`; regenerate it deliberately with
-`--dump` after an intentional API change and review the diff of that file.
+Baselines live next to this script. The shipped jars are remapped into different name spaces, so
+each platform has its own baseline: `api-baseline-1.21.1.txt` for Fabric (intermediary names) and
+`api-baseline-1.21.1-neoforge.txt` for NeoForge (Mojang names). `--check` picks the baseline from the
+jar name when no path is given. Regenerate a baseline deliberately with `--dump` after an intentional
+API change and review the diff of that file.
 """
 import re
 import subprocess
@@ -25,6 +28,14 @@ JAVAP = "javap"
 HEADER = re.compile(r'^(public|protected)?\s*(final\s+|abstract\s+|sealed\s+|non-sealed\s+)*(class|interface|enum|record)\b')
 VOLATILE_MODIFIERS = re.compile(r'\b(final|synchronized|native|strictfp)\b\s*')
 DEFAULT_BASELINE = str(Path(__file__).with_name("api-baseline-1.21.1.txt"))
+NEOFORGE_BASELINE = str(Path(__file__).with_name("api-baseline-1.21.1-neoforge.txt"))
+
+
+def baseline_for(jar):
+    """Pick the baseline that matches the jar's mapping space."""
+    if "neoforge" in Path(str(jar)).name.lower() and Path(NEOFORGE_BASELINE).exists():
+        return NEOFORGE_BASELINE
+    return DEFAULT_BASELINE
 
 
 def class_names(jar):
@@ -181,7 +192,7 @@ def main():
         dump(collect(args[1], show_all), args[2])
         return 0
     if args and args[0] == "--check":
-        baseline = args[2] if len(args) > 2 else DEFAULT_BASELINE
+        baseline = args[2] if len(args) > 2 else baseline_for(args[1])
         return 0 if compare(load(baseline), collect(args[1], show_all), "baseline", "current") else 1
     if len(args) != 2:
         print(__doc__)
