@@ -164,3 +164,25 @@ results, real shaped pattern layout, remainder index guard, custom crafting inpu
 Dead code, not a regression: `EmiSuspiciousStewRecipe` (the vanilla recipe no longer exists), and
 `EmiPort#getQuads(BakedModel)` (baked models still exist in 1.21.4, they go away in 1.21.5).
 
+## 1.21.5 hop (branch `1.21.5`)
+
+The `1.21.5` branch starts from the finished `1.21.4-jei` line (so every 1.21.4 fix carries over) and bumps
+`minecraft_version=1.21.5`, `fabric_api_version=0.128.2+1.21.5`, `neoforge_version=21.5.101` and
+architectury loom to `1.10.455`. The old `1.21.5-wip` branch is superseded: it was based on an early 1.21.4
+port without the display pipeline, the local data pack fallback or the JEI 20 bridge.
+
+`gradlew :xplat:compileJava` currently reports 36 errors in these clusters:
+
+| Cluster | Removed in 1.21.5 | Touch points |
+| --- | --- | --- |
+| Baked models | `net.minecraft.client.resources.model.BakedModel`, `ModelResourceLocation` | `EmiPort`, `ItemEmiStack`, `EmiAgnos`, `EmiTags#registerTagModels` |
+| Vertex plumbing | `com.mojang.blaze3d.vertex.VertexBuffer`, `BufferUploader` | `EmiPort#setShader`, `screen/widget/config/ListWidget` |
+| Render state | `GlStateManager` import in `ListWidget` | config list widget |
+| Items | `net.minecraft.world.item.ArmorItem` | `VanillaPlugin` |
+| Recipes | `SmithingTransformRecipe` / `SmithingTrimRecipe` field layout | `mixin/accessor/Smithing*Accessor` |
+
+Order that keeps the tree buildable as long as possible: drop the armour and smithing paths first (small,
+localised), then `ListWidget`/`GlStateManager`, then the render plumbing (`EmiPort#setShader`,
+`#getQuads`), and finally the tag model pipeline, which is the only part that needs the new item model
+set (`ItemModelResolver` / `ItemStackRenderState`) rather than a mechanical removal.
+
