@@ -50,7 +50,7 @@ public class LocalRecipes {
 	public static void acceptSynced(Map<ResourceLocation, Recipe<?>> recipes) {
 		synced = Map.copyOf(recipes);
 		cache = null;
-		EmiLog.warn("[EMI] Server recipe sync provided " + recipes.size() + " recipes");
+		EmiLog.warn("Server recipe sync provided " + recipes.size() + " recipes");
 	}
 
 	public static Map<ResourceLocation, Recipe<?>> get() {
@@ -93,7 +93,7 @@ public class LocalRecipes {
 			}
 		}
 		if (files.isEmpty()) {
-			EmiLog.warn("[EMI] Local data pack has no recipe resources; the client only gets recipes from the server");
+			EmiLog.warn("Local data pack has no recipe resources; the client only gets recipes from the server");
 			return recipes;
 		}
 		RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, client.level.registryAccess());
@@ -108,10 +108,10 @@ public class LocalRecipes {
 			}
 		}
 		if (failed > 0) {
-			EmiLog.warn("[EMI] Local data pack fallback skipped " + failed + " unreadable recipe files");
+			EmiLog.warn("Local data pack fallback skipped " + failed + " unreadable recipe files");
 		}
 		if (!recipes.isEmpty()) {
-			EmiLog.warn("[EMI] Local data pack fallback loaded " + recipes.size()
+			EmiLog.warn("Local data pack fallback loaded " + recipes.size()
 				+ " recipes because the server did not provide any");
 		}
 		return recipes;

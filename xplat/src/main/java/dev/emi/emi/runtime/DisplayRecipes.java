@@ -66,7 +66,7 @@ public class DisplayRecipes {
 				}
 			}
 		}
-		EmiLog.info("[EMI] Registered " + count + " recipes from client displays");
+		EmiLog.info("Registered " + count + " recipes from client displays");
 		return count;
 	}
 
