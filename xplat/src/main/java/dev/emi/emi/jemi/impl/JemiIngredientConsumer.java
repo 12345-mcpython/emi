@@ -7,74 +7,111 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 
+import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.config.FluidUnit;
 import dev.emi.emi.jemi.JemiUtil;
-import mezz.jei.api.gui.builder.IIngredientConsumer;
+import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.material.Fluid;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
-public class JemiIngredientConsumer implements IIngredientConsumer {
-	public List<EmiIngredient> stacks = Lists.newArrayList();
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class JemiIngredientConsumer implements IIngredientAcceptor<JemiIngredientConsumer> {
+    public List<EmiIngredient> stacks = Lists.newArrayList();
 
-	@Override
-	public <I> IIngredientConsumer addIngredients(IIngredientType<I> ingredientType, List<@Nullable I> ingredients) {
-		for (I i : ingredients) {
-			addIngredient(ingredientType, i);
-		}
-		return this;
-	}
+    @Override
+    public JemiIngredientConsumer add(SlotDisplay display) {
+        ItemStack stack = display.resolveForFirstStack(EmiPort.emptyContext());
+        if (!stack.isEmpty()) {
+            stacks.add(EmiStack.of(stack));
+        }
+        return this;
+    }
 
-	@Override
-	public <I> IIngredientConsumer addIngredient(IIngredientType<I> ingredientType, I ingredient) {
-		stacks.add(JemiUtil.getStack(ingredientType, ingredient));
-		return this;
-	}
+    @Override
+    public JemiIngredientConsumer add(Ingredient ingredient) {
+        EmiIngredient emi = EmiIngredient.of(ingredient);
+        if (!emi.isEmpty()) {
+            stacks.add(emi);
+        }
+        return this;
+    }
 
-	@Override
-	public IIngredientConsumer addIngredientsUnsafe(List<?> ingredients) {
-		for (Object o : ingredients) {
-			stacks.add(JemiUtil.getStack(o));
-		}
-		return this;
-	}
+    @Override
+    public JemiIngredientConsumer add(Fluid fluid) {
+        return addFluidStack(fluid, FluidUnit.BUCKET);
+    }
 
-	@Override
-	public IIngredientConsumer addTypedIngredients(List<ITypedIngredient<?>> ingredients) {
-		for (ITypedIngredient i : ingredients) {
-			addIngredient(i.getType(), i.getIngredient());
-		}
-		return this;
-	}
+    @Override
+    public JemiIngredientConsumer add(Fluid fluid, long amount) {
+        return addFluidStack(fluid, amount);
+    }
 
-	@Override
-	public IIngredientConsumer addOptionalTypedIngredients(List<Optional<ITypedIngredient<?>>> ingredients) {
-		for (Optional<ITypedIngredient<?>> i : ingredients) {
-			if (i.isPresent()) {
-				ITypedIngredient t = i.get();
-				addIngredient(t.getType(), t.getIngredient());
-			}
-		}
-		return this;
-	}
+    @Override
+    public JemiIngredientConsumer add(Fluid fluid, long amount, DataComponentPatch componentPatch) {
+        return addFluidStack(fluid, amount, componentPatch);
+    }
 
-	@Override
-	public IIngredientConsumer addFluidStack(Fluid fluid) {
-		return addFluidStack(fluid, FluidUnit.BUCKET);
-	}
+    @Override
+    public <I> JemiIngredientConsumer addIngredients(IIngredientType<I> ingredientType, List<@Nullable I> ingredients) {
+        for (I i : ingredients) {
+            addIngredient(ingredientType, i);
+        }
+        return this;
+    }
 
-	@Override
-	public IIngredientConsumer addFluidStack(Fluid fluid, long amount) {
-		return addFluidStack(fluid, amount, DataComponentPatch.EMPTY);
-	}
+    @Override
+    public <I> JemiIngredientConsumer addIngredient(IIngredientType<I> ingredientType, I ingredient) {
+        stacks.add(JemiUtil.getStack(ingredientType, ingredient));
+        return this;
+    }
 
-	@Override
-	public IIngredientConsumer addFluidStack(Fluid fluid, long amount, DataComponentPatch component) {
-		stacks.add(EmiStack.of(fluid, component, amount));
-		return this;
-	}
+    @Override
+    public JemiIngredientConsumer addIngredientsUnsafe(List<?> ingredients) {
+        for (Object o : ingredients) {
+            stacks.add(JemiUtil.getStack(o));
+        }
+        return this;
+    }
+
+    @Override
+    public JemiIngredientConsumer addTypedIngredients(List<ITypedIngredient<?>> ingredients) {
+        for (ITypedIngredient i : ingredients) {
+            addIngredient(i.getType(), i.getIngredient());
+        }
+        return this;
+    }
+
+    @Override
+    public JemiIngredientConsumer addOptionalTypedIngredients(List<Optional<ITypedIngredient<?>>> ingredients) {
+        for (Optional<ITypedIngredient<?>> i : ingredients) {
+            if (i.isPresent()) {
+                ITypedIngredient t = i.get();
+                addIngredient(t.getType(), t.getIngredient());
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public JemiIngredientConsumer addFluidStack(Fluid fluid) {
+        return addFluidStack(fluid, FluidUnit.BUCKET);
+    }
+
+    @Override
+    public JemiIngredientConsumer addFluidStack(Fluid fluid, long amount) {
+        return addFluidStack(fluid, amount, DataComponentPatch.EMPTY);
+    }
+
+    @Override
+    public JemiIngredientConsumer addFluidStack(Fluid fluid, long amount, DataComponentPatch component) {
+        stacks.add(EmiStack.of(fluid, component, amount));
+        return this;
+    }
 }

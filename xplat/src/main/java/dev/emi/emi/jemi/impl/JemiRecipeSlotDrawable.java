@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 
 import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.jemi.widget.JemiSlotWidget;
-import mezz.jei.api.gui.builder.IIngredientConsumer;
+import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.ingredients.ITypedIngredient;
@@ -22,7 +22,7 @@ import net.minecraft.network.chat.Component;
 
 public class JemiRecipeSlotDrawable implements IRecipeSlotDrawable {
 	public JemiSlotWidget widget;
-	public List<IIngredientConsumer> overrides = Lists.newArrayList();
+	public List<IIngredientAcceptor<?>> overrides = Lists.newArrayList();
 
 	@Override
 	public Stream<ITypedIngredient<?>> getAllIngredients() {
@@ -87,7 +87,7 @@ public class JemiRecipeSlotDrawable implements IRecipeSlotDrawable {
 	}
 
 	@Override
-	public IIngredientConsumer createDisplayOverrides() {
+	public IIngredientAcceptor<?> createDisplayOverrides() {
 		// "Implemented" but also just ignored
 		JemiIngredientConsumer consumer = new JemiIngredientConsumer();
 		overrides.add(consumer);

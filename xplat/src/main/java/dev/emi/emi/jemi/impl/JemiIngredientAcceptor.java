@@ -25,6 +25,8 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.material.Fluid;
 
 public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredientAcceptor> {
@@ -86,6 +88,42 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 	}
 
 	@Override
+	public JemiIngredientAcceptor add(SlotDisplay display) {
+		ItemStack stack = display.resolveForFirstStack(EmiPort.emptyContext());
+		if (!stack.isEmpty()) {
+			addStack(EmiStack.of(stack));
+		}
+		return this;
+	}
+
+	@Override
+	public JemiIngredientAcceptor add(Ingredient ingredient) {
+		EmiIngredient emi = EmiIngredient.of(ingredient);
+		if (!emi.isEmpty()) {
+			for (EmiStack stack : emi.getEmiStacks()) {
+				addStack(stack);
+			}
+		}
+		return this;
+	}
+
+	@Override
+	public JemiIngredientAcceptor add(Fluid fluid) {
+		return add(fluid, FluidUnit.BUCKET);
+	}
+
+	@Override
+	public JemiIngredientAcceptor add(Fluid fluid, long amount) {
+		return add(fluid, amount, DataComponentPatch.EMPTY);
+	}
+
+	@Override
+	public JemiIngredientAcceptor add(Fluid fluid, long amount, DataComponentPatch componentChanges) {
+		addStack(EmiStack.of(fluid, componentChanges, amount));
+		return this;
+	}
+
+	@Override
 	public <I> JemiIngredientAcceptor addIngredients(IIngredientType<I> ingredientType, List<@Nullable I> ingredients) {
 		for (I i : ingredients) {
 			addIngredient(ingredientType, i);
@@ -94,7 +132,7 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 	}
 
 	@Override
-	public <I> JemiIngredientAcceptor addIngredient(IIngredientType<I> ingredientType, I ingredient) {
+	public <I> JemiIngredientAcceptor add(IIngredientType<I> ingredientType, I ingredient) {
 		addStack(JemiUtil.getStack(ingredientType, ingredient));
 		return this;
 	}
@@ -108,27 +146,16 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 	}
 
 	@Override
-	public JemiIngredientAcceptor addFluidStack(Fluid fluid) {
-		return addFluidStack(fluid, FluidUnit.BUCKET);
-	}
-
-	@Override
 	public JemiIngredientAcceptor addFluidStack(Fluid fluid, long amount) {
 		addStack(EmiStack.of(fluid, amount));
 		return this;
 	}
 	
 	@Override
-	public JemiIngredientAcceptor addFluidStack(Fluid fluid, long amount, DataComponentPatch componentChanges) {
-		addStack(EmiStack.of(fluid, componentChanges, amount));
-		return this;
-	}
-
-	@Override
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public JemiIngredientAcceptor addTypedIngredients(List<ITypedIngredient<?>> ingredients) {
 		for (ITypedIngredient<?> i : ingredients) {
-			addIngredient(((IIngredientType) i.getType()), i.getIngredient());
+			add(((IIngredientType) i.getType()), i.getIngredient());
 		}
 		return this;
 	}
@@ -139,7 +166,7 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 		for (Optional<ITypedIngredient<?>> opt : ingredients) {
 			if (opt.isPresent()) {
 				ITypedIngredient<?> i = opt.get();
-				addIngredient(((IIngredientType) i.getType()), i.getIngredient());
+				add(((IIngredientType) i.getType()), i.getIngredient());
 			}
 		}
 		return this;

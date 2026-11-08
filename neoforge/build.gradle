@@ -66,6 +66,13 @@ dependencies {
 
 	common(project(path: ":xplat", configuration: "namedElements")) { transitive = false }
 	shadowCommon(project(path: ":xplat", configuration: "transformProductionNeoForge")) { transitive = false }
+
+	modCompileOnly("mezz.jei:${rootProject.jei_version}") {
+		transitive = false
+	}
+	modLocalRuntime("mezz.jei:${rootProject.jei_version}") {
+		transitive = false
+	}
 }
 
 processResources {
@@ -99,8 +106,6 @@ sourcesJar.configure { Jar jar ->
 	def commonSources = project(":xplat").tasks.named("sourcesJar", Jar)
 	dependsOn commonSources
 	jar.from zipTree(commonSources.flatMap { it.archiveFile })
-	//TODO: Fix this in a better way that doesn't lead to stripping out the jemi sources
-	jar.exclude 'dev/emi/emi/jemi/**'
 }
 
 def filteredSourcesJar = tasks.register('filteredSourcesJar', Jar, {
@@ -108,7 +113,6 @@ def filteredSourcesJar = tasks.register('filteredSourcesJar', Jar, {
 	def remapSourcesJar = tasks.named('remapSourcesJar', RemapSourcesJarTask)
 	dependsOn remapSourcesJar
 	from zipTree(remapSourcesJar.flatMap { it.archiveFile })
-	exclude 'dev/emi/emi/jemi/**'
 })
 
 def apiJar = tasks.register('apiJar', Jar, {

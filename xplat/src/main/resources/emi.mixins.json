@@ -30,6 +30,7 @@
     "ToastManagerMixin"
   ],
   "mixins": [
+		"jei.PluginCallerMixin",
   ],
   "injectors": {
     "defaultRequire": 1
