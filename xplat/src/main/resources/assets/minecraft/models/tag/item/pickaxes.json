@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/diamond_pickaxe"
+  "parent": "minecraft:item/diamond_pickaxe",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

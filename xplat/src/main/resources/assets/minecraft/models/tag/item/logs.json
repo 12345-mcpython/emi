@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:block/oak_log"
+  "parent": "minecraft:block/oak_log",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

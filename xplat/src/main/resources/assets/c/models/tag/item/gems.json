@@ -2,6 +2,7 @@
   "parent": "emi:item/half_item",
   "textures": {
     "first": "minecraft:item/emerald",
-    "second": "minecraft:item/diamond"
+    "second": "minecraft:item/diamond",
+    "particle": "#first"
   }
 }

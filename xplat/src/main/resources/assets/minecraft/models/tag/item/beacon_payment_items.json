@@ -4,6 +4,7 @@
     "first": "minecraft:item/iron_ingot",
     "second": "minecraft:item/emerald",
     "third": "minecraft:item/diamond",
-    "fourth": "minecraft:item/gold_ingot"
+    "fourth": "minecraft:item/gold_ingot",
+    "particle": "#first"
   }
 }

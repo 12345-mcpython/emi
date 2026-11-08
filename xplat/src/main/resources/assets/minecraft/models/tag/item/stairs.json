@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:block/weathered_cut_copper_stairs"
+  "parent": "minecraft:block/weathered_cut_copper_stairs",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

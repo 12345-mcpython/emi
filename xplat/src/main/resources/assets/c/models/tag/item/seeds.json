@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/wheat_seeds"
+  "parent": "minecraft:item/wheat_seeds",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/diamond_chestplate"
+  "parent": "minecraft:item/diamond_chestplate",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

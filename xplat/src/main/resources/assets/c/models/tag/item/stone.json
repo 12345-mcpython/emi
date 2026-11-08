@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:block/stone"
+  "parent": "minecraft:block/stone",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

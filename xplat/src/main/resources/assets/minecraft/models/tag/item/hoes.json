@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/diamond_hoe"
+  "parent": "minecraft:item/diamond_hoe",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

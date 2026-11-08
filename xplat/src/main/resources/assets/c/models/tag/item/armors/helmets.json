@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/diamond_helmet"
+  "parent": "minecraft:item/diamond_helmet",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

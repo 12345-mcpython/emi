@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:tag/item/axes"
+  "parent": "minecraft:tag/item/axes",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

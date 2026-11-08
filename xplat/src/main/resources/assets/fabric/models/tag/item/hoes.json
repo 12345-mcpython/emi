@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:tag/item/hoes"
+  "parent": "minecraft:tag/item/hoes",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

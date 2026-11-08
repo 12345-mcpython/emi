@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/diamond_shovel"
+  "parent": "minecraft:item/diamond_shovel",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }

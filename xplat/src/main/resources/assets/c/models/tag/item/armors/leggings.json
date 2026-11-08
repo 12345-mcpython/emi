@@ -1,3 +1,6 @@
 {
-  "parent": "minecraft:item/diamond_leggings"
+  "parent": "minecraft:item/diamond_leggings",
+  "textures": {
+    "particle": "minecraft:block/stone"
+  }
 }
