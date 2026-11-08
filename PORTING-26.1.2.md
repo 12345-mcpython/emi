@@ -103,3 +103,32 @@ and no Fabric classes or metadata, and the platform independent harnesses still 
 not run on this line until they are ported to a NeoForge fixture mod (they need a
 `META-INF/neoforge.mods.toml` plus a `@Mod` entry point instead of the Fabric entrypoint).
 
+## JEI on 1.21.4
+
+JEI only publishes a NeoForge build for 1.21.4 (`mezz.jei:jei-1.21.4-neoforge:20.0.0.4`), which is why the
+platform is NeoForge only and why jemi had to be ported from the JEI 19 API to the JEI 20 API:
+
+* `IIngredientConsumer` became `IIngredientAcceptor<THIS>` with `add(SlotDisplay)` / `add(Ingredient)` /
+  `add(Fluid…)` as the required methods;
+* recipe descriptors moved to `IRecipeType` / `IRecipeHolderType`, so `RecipeTypes.*` constants and the
+  category, transfer handler and recipes gui all use those types now;
+* `RecipeIngredientRole.CATALYST` was renamed to `CRAFTING_STATION`;
+* `ISubtypeManager#getSubtypeInfo` became `getSubtypeData`, `IIngredientHelper#getUniqueId` became `getUid`;
+* `IIngredientManager#getTypedIngredientByUid` is gone, the stack serializer searches the registered
+  ingredients and matches the helper uid instead;
+* `IRecipeLayoutBuilder#addSlotToWidget` is gone;
+* `RecipeManager#getAllRecipesFor` no longer exists on 1.21.4, the plugin filters `getRecipes()` by type;
+* the Fabric-only `IJeiFluidIngredient` is gone; NeoForge fluids go through the platform fluid helper.
+
+### Dev runs
+
+`GlobalMixin` is not source code: `generateClassLists` in the root build generates it from the compiled
+class list. The NeoForge dev mod is assembled from the `xplat` source set only, so the generated class was
+missing on the dev classpath and the client died in mixin preparation. The task now also mirrors the class
+into the `xplat` classes directory, which restores `:neoforge:runClient`.
+
+Verified so far: the dev client boots with `EMI 1.1.24-SNAPSHOT+1.21.4+neoforge` and
+`Just Enough Items 20.0.0.4` loaded, the resource manager includes `mod/emi` and `mod/jei`, JEI starts
+without mixin or plugin errors, and the packaged jar contains 40 jemi classes. The JEI to EMI data bridge
+only runs once a recipe manager exists, so it still needs an in-world check.
+

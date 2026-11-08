@@ -137,6 +137,17 @@ allprojects {
 			reader.accept(writer, 0)
 
 			outputFile.bytes = writer.toByteArray()
+
+			// The dev mod is built from the xplat source set only, so the generated mixin also has to
+			// exist in the xplat classes directory for dev runs to resolve it.
+			if (!project.name.contains("xplat")) {
+				def xplat = findProject(":xplat")
+				if (xplat != null) {
+					def devFile = new File(xplat.projectDir, "build/classes/java/main/dev/emi/emi/mixin/GlobalMixin.class")
+					devFile.parentFile.mkdirs()
+					devFile.bytes = writer.toByteArray()
+				}
+			}
 		}
 	}
 
