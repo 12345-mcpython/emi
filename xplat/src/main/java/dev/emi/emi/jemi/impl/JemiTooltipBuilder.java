@@ -53,6 +53,11 @@ public class JemiTooltipBuilder implements ITooltipBuilder {
 	}
 
 	@Override
+	@Override
+	public List<Component> getLines() {
+		return legacyText;
+	}
+
 	public List<Component> toLegacyToComponents() {
 		return legacyText;
 	}

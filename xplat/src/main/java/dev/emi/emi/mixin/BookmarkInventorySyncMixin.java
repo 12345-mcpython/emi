@@ -21,7 +21,7 @@ public abstract class BookmarkInventorySyncMixin {
 
     @Inject(method = "handleContainerContent", at = @At("TAIL"))
     private void emi$bookmarkInventory(ClientboundContainerSetContentPacket packet, CallbackInfo ci) {
-        BookmarkCrafting.observeServerInventory(packet.getContainerId(), packet.getItems());
-        dev.emi.emi.runtime.BookmarkMaterialTransfer.observeServerInventory(packet.getContainerId(), packet.getItems(), packet.getCarriedItem());
+        BookmarkCrafting.observeServerInventory(packet.containerId(), packet.items());
+        dev.emi.emi.runtime.BookmarkMaterialTransfer.observeServerInventory(packet.containerId(), packet.items(), packet.carriedItem());
     }
 }

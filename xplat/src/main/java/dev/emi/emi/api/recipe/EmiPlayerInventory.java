@@ -59,8 +59,9 @@ public class EmiPlayerInventory {
 		}
 
 		Inventory pInv = entity.getInventory();
-		for (int i = 0; i < pInv.items.size(); i++) {
-			addStack(pInv.items.get(i));
+		// 1.21.5 made Inventory#items private, go through the container interface.
+		for (int i = 0; i < pInv.getContainerSize(); i++) {
+			addStack(pInv.getItem(i));
 		}
 	}
 

@@ -55,6 +55,11 @@ public class JemiRecipeSlotDrawable implements IRecipeSlotDrawable {
 	}
 
 	@Override
+	@Override
+	public void drawTooltip(GuiGraphics raw, int mouseX, int mouseY) {
+		// EMI draws its own tooltips, JEI only needs the method to exist.
+	}
+
 	public void draw(GuiGraphics raw) {
 		// I don't think I will
 	}
