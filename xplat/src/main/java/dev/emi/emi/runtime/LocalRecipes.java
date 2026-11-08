@@ -1,7 +1,9 @@
 package dev.emi.emi.runtime;
 
 import java.io.Reader;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.Map;
 
 import com.google.gson.JsonElement;
@@ -9,10 +11,15 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import dev.emi.emi.EmiPort;
 
@@ -26,17 +33,77 @@ import dev.emi.emi.EmiPort;
  */
 public class LocalRecipes {
 	private static Map<ResourceLocation, Recipe<?>> cache = null;
+	private static Map<ResourceLocation, Recipe<?>> synced = null;
 	private static int failed = 0;
 
+	/**
+	 * Recipes pushed by a server side recipe sync (EMI on the server, or a compat plugin using the
+	 * {@code fabric:recipe_sync} / {@code neoforge:recipe_content} channels).
+	 */
+	public static void acceptSynced(Map<ResourceLocation, Recipe<?>> recipes) {
+		synced = Map.copyOf(recipes);
+		cache = null;
+		EmiLog.warn("[EMI] Server recipe sync provided " + recipes.size() + " recipes");
+	}
+
 	public static Map<ResourceLocation, Recipe<?>> get() {
+		if (synced != null) {
+			return synced;
+		}
 		if (cache == null) {
 			cache = load();
 		}
 		return cache;
 	}
 
+	/** Reads the {@code fabric:recipe_sync} payload: a list of serializer grouped holders. */
+	public static Map<ResourceLocation, Recipe<?>> decodeFabric(RegistryFriendlyByteBuf buf) {
+		Map<ResourceLocation, Recipe<?>> recipes = new LinkedHashMap<>();
+		int groups = buf.readVarInt();
+		for (int g = 0; g < groups; g++) {
+			ResourceLocation serializerId = buf.readResourceLocation();
+			RecipeSerializer<?> serializer = BuiltInRegistries.RECIPE_SERIALIZER.get(serializerId)
+				.map(net.minecraft.core.Holder.Reference::value).orElse(null);
+			int count = buf.readVarInt();
+			for (int i = 0; i < count; i++) {
+				ResourceLocation id = buf.readResourceLocation();
+				if (serializer == null) {
+					continue;
+				}
+				try {
+					recipes.put(id, serializer.streamCodec().decode(buf));
+				} catch (Throwable t) {
+					failed++;
+				}
+			}
+		}
+		return recipes;
+	}
+
+	/** Reads the {@code neoforge:recipe_content} payload: a recipe type filter plus holders. */
+	public static Map<ResourceLocation, Recipe<?>> decodeNeoForge(RegistryFriendlyByteBuf buf) {
+		Map<ResourceLocation, Recipe<?>> recipes = new LinkedHashMap<>();
+		int types = buf.readVarInt();
+		Set<Object> ignored = new HashSet<>();
+		for (int i = 0; i < types; i++) {
+			// Registry ids are varints in ByteBufCodecs.registry, only the count has to be consumed.
+			ignored.add(buf.readVarInt());
+		}
+		int count = buf.readVarInt();
+		for (int i = 0; i < count; i++) {
+			try {
+				RecipeHolder<?> holder = RecipeHolder.STREAM_CODEC.decode(buf);
+				recipes.put(holder.id().location(), holder.value());
+			} catch (Throwable t) {
+				failed++;
+			}
+		}
+		return recipes;
+	}
+
 	public static void invalidate() {
 		cache = null;
+		synced = null;
 		failed = 0;
 	}
 
