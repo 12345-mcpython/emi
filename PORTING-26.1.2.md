@@ -274,3 +274,31 @@ single field instead of failing the whole file, so a future regression degrades 
 of them. Verified by a real client run: no `Error reading config`, no `IllegalAccessException`, and the
 crafting tree smoke still passes.
 
+## Field write checks
+
+`final` is easy to add and hard to notice when it is wrong, because neither of the two failure modes
+below is a compile error. `scripts/check_field_writes.py` catches both:
+
+```
+python scripts/check_field_writes.py
+```
+
+* reflection: any `@ConfigValue` / `@ConfigFilter` field that is declared `final` while its class is
+  assigned through `Field#set`. Such a write throws `IllegalAccessException` on a modern JVM, and
+  because `EmiConfig.loadConfig` catches around the whole loop, one bad field silently disables the
+  entire config file.
+* mixins: `@Shadow` fields declared `final` without `@Mutable` (they cannot be written), and
+  `@Shadow` fields with an initialiser (Mixin discards it, so it reads as a bug in the source).
+  `@Accessor` setters without `@Mutable` are reported as warnings because the target's finality is
+  not visible from this repository.
+
+Exit status is 1 when an error is found, so it works as a pre-commit gate:
+
+```
+python scripts/check_field_writes.py && git commit
+```
+
+The scanner is validated against a deliberately broken fixture, and the repository itself reports
+`0 errors, 0 warnings`. It complements `scripts/api_compat.py` (addon API) and
+`scripts/format_sources.py` (whitespace).
+
