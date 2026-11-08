@@ -78,10 +78,6 @@ public final class BookmarkSidebar {
         for (Group group : EmiBookmarkGroups.groups()) {
             List<Row> contents = EmiBookmarkGroups.rows(group, EmiScreenManager.lastPlayerInventory);
             if (contents.isEmpty()) continue;
-            if (col > 0) {
-                row++;
-                col = 0;
-            }
             EmiFavorite previous = null;
             for (Row item : contents) {
                 if (group.viewMode == BookmarkViewMode.TODO && previous != null && previous != item.anchor && col > 0) {
@@ -426,7 +422,7 @@ public final class BookmarkSidebar {
     private static void showTransferStatus() {
         BookmarkMaterialTransfer.Status status = BookmarkMaterialTransfer.status();
         var client = net.minecraft.client.Minecraft.getInstance();
-        if (client.gui != null) client.gui.setOverlayMessage(EmiPort.translatable("emi.bookmarks.transfer_status",
+        client.gui.setOverlayMessage(EmiPort.translatable("emi.bookmarks.transfer_status",
                 EmiPort.translatable("emi.bookmarks.status." + status.result()),
                 EmiPort.translatable("emi.bookmarks.reason." + status.reason()), status.completed(), status.operations()), false);
     }
@@ -691,7 +687,7 @@ public final class BookmarkSidebar {
             }
             BookmarkCrafting.Status status = BookmarkCrafting.status();
             var client = net.minecraft.client.Minecraft.getInstance();
-            if (client.gui != null) client.gui.setOverlayMessage(EmiPort.translatable("emi.bookmarks.craft_status",
+            client.gui.setOverlayMessage(EmiPort.translatable("emi.bookmarks.craft_status",
                     EmiPort.translatable("emi.bookmarks.status." + status.result()),
                     EmiPort.translatable("emi.bookmarks.reason." + status.reason()), status.completed(), status.operations()), false);
             return true;
