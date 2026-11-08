@@ -209,7 +209,7 @@ The project no longer tracks upstream styling, but the addon API in `dev.emi.emi
 source and binary compatible. `scripts/api_compat.py` enforces that by comparing the public and
 protected members (declaration plus JVM descriptor) of every API class.
 
-The committed baseline is `api/baseline-1.21.1.txt`, generated from the released 1.21.1 jar. To
+The committed baseline is `scripts/api-baseline-1.21.1.txt`, generated from the released 1.21.1 jar. To
 verify a build:
 
 ```
@@ -224,7 +224,7 @@ Rules encoded by the check:
 * adding classes, methods or fields is allowed and does not need a baseline update
 
 When an API change is intentional, regenerate the baseline with
-`python scripts/api_compat.py --dump <jar> api/baseline-1.21.1.txt` and review that file's diff.
+`python scripts/api_compat.py --dump <jar> scripts/api-baseline-1.21.1.txt` and review that file's diff.
 
 Changes made to satisfy this policy during the cleanup pass: `EmiCraftContext` stayed a plain class
 (record form reverted, deprecated getters and record-style accessors both kept), and `final` was

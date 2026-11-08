@@ -11,19 +11,20 @@ declaration text and JVM descriptor, so removing, renaming, re-typing, hiding or
 final all count as incompatibilities. Private members and lambdas are ignored (pass --all to keep
 them). The check exits with status 1 when the API becomes incompatible.
 
-The committed baseline lives in `api/baseline-1.21.1.txt`; regenerate it deliberately with
+The committed baseline lives next to this script in `scripts/api-baseline-1.21.1.txt`; regenerate it deliberately with
 `--dump` after an intentional API change and review the diff of that file.
 """
 import re
 import subprocess
 import sys
 import zipfile
+from pathlib import Path
 
 JAVAP = "javap"
 
 HEADER = re.compile(r'^(public|protected)?\s*(final\s+|abstract\s+|sealed\s+|non-sealed\s+)*(class|interface|enum|record)\b')
 VOLATILE_MODIFIERS = re.compile(r'\b(final|synchronized|native|strictfp)\b\s*')
-DEFAULT_BASELINE = "api/baseline-1.21.1.txt"
+DEFAULT_BASELINE = str(Path(__file__).with_name("api-baseline-1.21.1.txt"))
 
 
 def class_names(jar):
