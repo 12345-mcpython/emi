@@ -231,3 +231,13 @@ Changes made to satisfy this policy during the cleanup pass: `EmiCraftContext` s
 removed again from `BasicEmiRecipe`'s protected fields, `EmiPlayerInventory.inventory`,
 `EmiRecipeCategory.id`/`sorter` and `SlotWidget.tooltipSuppliers`.
 
+## Verification status
+
+| Line | Client | Dedicated server | Notes |
+| --- | --- | --- | --- |
+| 1.21.1 Fabric | dev client smoke PASS (title screen, 13 captures, real GLFW Ctrl/Alt verified) | not run yet | harnesses: crafting tree 79, crafting plans 290 + 7, bookmark groups 141, bookmark crafting 59, bookmark transfer full scenario |
+| 1.21.1 NeoForge | jar built, not runtime tested here | **PASS (tested 2026-11-08)** | server starts and runs with EMI loaded; the only client-only entry point is `EmiClientNeoForge`, gated by `Dist.CLIENT` |
+| 1.21.4 Fabric | release jar tested in a launcher | not run yet | recipe browsing is singleplayer-only in this checkpoint (integrated server) |
+| 1.21.4 NeoForge | jar built, not runtime tested | not run yet | same degradations as the Fabric checkpoint |
+| 1.20.x | existing release | existing release | the `1.20` branch still carries Forge 1.20.1 |
+
