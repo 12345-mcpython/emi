@@ -17,10 +17,19 @@ import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.runtime.ProxyRecipeManager;
 
 public class EmiShapedRecipe extends EmiCraftingRecipe {
+	private final int recipeWidth, recipeHeight;
 
 	public EmiShapedRecipe(ShapedRecipe recipe) {
 		super(padIngredients(recipe), EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe), false);
+		this.recipeWidth = recipe.getWidth();
+		this.recipeHeight = recipe.getHeight();
 		setRemainders(input, recipe);
+	}
+
+	@Override
+	public boolean canFit(int width, int height) {
+		// 1.21.2+ dropped canCraftInDimensions, so the grid size check has to be kept here.
+		return recipeWidth <= width && recipeHeight <= height && super.canFit(width, height);
 	}
 
 	public static void setRemainders(List<EmiIngredient> input, CraftingRecipe recipe) {
