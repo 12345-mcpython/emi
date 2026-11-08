@@ -11,6 +11,7 @@ import dev.emi.emi.data.EmiData;
 import dev.emi.emi.network.CommandS2CPacket;
 import dev.emi.emi.network.EmiChessPacket;
 import dev.emi.emi.network.EmiNetwork;
+import dev.emi.emi.network.SyncPayloads;
 import dev.emi.emi.network.EmiPacket;
 import dev.emi.emi.network.PingS2CPacket;
 import dev.emi.emi.platform.EmiClient;
@@ -32,6 +33,8 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import dev.emi.emi.runtime.LocalRecipes;
+import dev.emi.emi.runtime.EmiReloadManager;
 
 public class EmiClientFabric implements ClientModInitializer {
 
@@ -74,6 +77,21 @@ public class EmiClientFabric implements ClientModInitializer {
 				ClientPlayNetworking.send(packet);
 			}
 		});
+
+		// Third party server recipe sync (for example the Paper JEI compat plugin). Optional channels: a
+		// server that never sends them is unaffected.
+		PayloadTypeRegistry.playS2C().register(SyncPayloads.Fabric.TYPE, SyncPayloads.Fabric.CODEC);
+		ClientPlayNetworking.registerGlobalReceiver(SyncPayloads.Fabric.TYPE, (payload, context) ->
+			context.client().execute(() -> {
+				LocalRecipes.acceptSynced(payload.recipes());
+				EmiReloadManager.reload();
+			}));
+		PayloadTypeRegistry.playS2C().register(SyncPayloads.NeoForge.TYPE, SyncPayloads.NeoForge.CODEC);
+		ClientPlayNetworking.registerGlobalReceiver(SyncPayloads.NeoForge.TYPE, (payload, context) ->
+			context.client().execute(() -> {
+				LocalRecipes.acceptSynced(payload.recipes());
+				EmiReloadManager.reload();
+			}));
 
 		registerPacketReader(EmiNetwork.PING, PingS2CPacket::new);
 		registerPacketReader(EmiNetwork.COMMAND, CommandS2CPacket::new);

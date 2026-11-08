@@ -5,6 +5,7 @@ import dev.emi.emi.network.CommandS2CPacket;
 import dev.emi.emi.network.CreateItemC2SPacket;
 import dev.emi.emi.network.EmiChessPacket;
 import dev.emi.emi.network.EmiNetwork;
+import dev.emi.emi.network.SyncPayloads;
 import dev.emi.emi.network.EmiPacket;
 import dev.emi.emi.network.FillRecipeC2SPacket;
 import dev.emi.emi.network.PingS2CPacket;
@@ -16,6 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import dev.emi.emi.runtime.LocalRecipes;
+import dev.emi.emi.runtime.EmiReloadManager;
 
 public class EmiPacketHandler {
     private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(EmiPort.id("emi:chess_s2c"));
@@ -26,6 +29,17 @@ public class EmiPacketHandler {
 
         registrar.playToServer(EmiNetwork.FILL_RECIPE, makeReader(EmiNetwork.FILL_RECIPE, FillRecipeC2SPacket::new), EmiPacketHandler::handleServerbound);
         registrar.playToServer(EmiNetwork.CREATE_ITEM, makeReader(EmiNetwork.CREATE_ITEM, CreateItemC2SPacket::new), EmiPacketHandler::handleServerbound);
+        // Third party server recipe sync, optional so a server without it is unaffected.
+        registrar.playToClient(SyncPayloads.Fabric.TYPE, SyncPayloads.Fabric.CODEC, (payload, context) ->
+        	context.enqueueWork(() -> {
+        		LocalRecipes.acceptSynced(payload.recipes());
+        		EmiReloadManager.reload();
+        	}));
+        registrar.playToClient(SyncPayloads.NeoForge.TYPE, SyncPayloads.NeoForge.CODEC, (payload, context) ->
+        	context.enqueueWork(() -> {
+        		LocalRecipes.acceptSynced(payload.recipes());
+        		EmiReloadManager.reload();
+        	}));
         registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToServer(ID_CHESS_SERVERBOUND, makeReader(ID_CHESS_SERVERBOUND, EmiChessPacket.C2S::new), EmiPacketHandler::handleServerbound);
