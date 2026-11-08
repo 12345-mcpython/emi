@@ -261,3 +261,16 @@ server's `PingS2CPacket` flips `EmiClient.onServer`, which gates every server-as
 No EMI packet is ever sent while `onServer` is false, so a vanilla or third-party server never sees an
 unknown channel; the cost is precision and speed, not correctness.
 
+## Config fields must not be final
+
+`EmiConfig` assigns every `@ConfigValue` field by reflection (`Field#set(null, value)`), and modern JVMs
+reject writes to a `static final` field with `IllegalAccessException: Can not set static final ...`.
+Marking the config fields `final` therefore broke config loading entirely: the exception aborted the
+whole load loop, so the file was ignored and only the compiled defaults were in effect, plus an
+`Error reading config` log line at client start.
+
+The fields are non-final again, and `assignField` now checks `Modifier.isFinal` and logs a warning for a
+single field instead of failing the whole file, so a future regression degrades one key instead of all
+of them. Verified by a real client run: no `Error reading config`, no `IllegalAccessException`, and the
+crafting tree smoke still passes.
+
