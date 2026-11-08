@@ -181,7 +181,7 @@ public class EmiReloadManager {
 						break;
 					// On a server there is no integrated recipe manager, but the client recipe book still
 					// provides the synchronized displays, so reload from those instead of bailing out.
-					} else if (!ProxyRecipeManager.isAvailable() && !DisplayRecipes.isUsable()) {
+					} else if (!ProxyRecipeManager.isAvailable() && !DisplayRecipes.isUsable() && LocalRecipes.get().isEmpty()) {
 						EmiReloadLog.warn("Recipe Manager is null");
 						status = 0;
 						break;

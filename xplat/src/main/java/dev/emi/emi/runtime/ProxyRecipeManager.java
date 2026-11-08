@@ -42,7 +42,15 @@ public class ProxyRecipeManager {
 
 	public static @Nullable ResourceLocation getId(Recipe<?> recipe) {
 		ResourceKey<Recipe<?>> key = recipeIds.get(recipe);
-		return key == null ? null : key.location();
+		if (key != null) {
+			return key.location();
+		}
+		for (Map.Entry<ResourceLocation, Recipe<?>> entry : LocalRecipes.get().entrySet()) {
+			if (entry.getValue() == recipe) {
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 
 	public static boolean hasId(ResourceLocation id) {

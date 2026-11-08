@@ -156,6 +156,7 @@ import dev.emi.emi.registry.EmiTags;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.DisplayRecipes;
 import dev.emi.emi.runtime.EmiLog;
+import dev.emi.emi.runtime.LocalRecipes;
 import dev.emi.emi.runtime.EmiReloadLog;
 import dev.emi.emi.runtime.EmiTagKey;
 import dev.emi.emi.runtime.ProxyRecipeManager;
@@ -802,7 +803,9 @@ public class VanillaPlugin implements EmiPlugin {
 	private static <C extends RecipeInput, T extends Recipe<C>> Iterable<T> getRecipes(EmiRegistry registry, RecipeType<T> type) {
 		net.minecraft.world.item.crafting.RecipeManager raw = ProxyRecipeManager.getRaw();
 		if (raw == null) {
-			return java.util.List.of();
+			// A 1.21.4 server never sends the recipe table, so use the data pack copy the client has.
+			return LocalRecipes.get().values().stream().filter(recipe -> recipe.getType() == type)
+				.map(recipe -> (T) recipe).toList();
 		}
 		return raw.getRecipes().stream().filter(holder -> holder.value().getType() == type)
 			.map(holder -> (T) holder.value()).toList();
