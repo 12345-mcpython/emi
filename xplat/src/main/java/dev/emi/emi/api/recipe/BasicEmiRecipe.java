@@ -12,13 +12,13 @@ import java.util.List;
  * A convenience type for easy implementation of {@link EmiRecipe}
  */
 public abstract class BasicEmiRecipe implements EmiRecipe {
-    protected final List<EmiIngredient> inputs = Lists.newArrayList();
-    protected final List<EmiIngredient> catalysts = Lists.newArrayList();
-    protected final List<EmiStack> outputs = Lists.newArrayList();
-    protected final EmiRecipeCategory category;
-    protected final ResourceLocation id;
-    protected final int width;
-    protected final int height;
+    protected List<EmiIngredient> inputs = Lists.newArrayList();
+    protected List<EmiIngredient> catalysts = Lists.newArrayList();
+    protected List<EmiStack> outputs = Lists.newArrayList();
+    protected EmiRecipeCategory category;
+    protected ResourceLocation id;
+    protected int width;
+    protected int height;
 
     public BasicEmiRecipe(EmiRecipeCategory category, ResourceLocation id, int width, int height) {
         this.category = category;

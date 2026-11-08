@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class EmiPlayerInventory {
     private final Comparison none = Comparison.DEFAULT_COMPARISON;
     private final Comparison strict = EmiPort.compareStrict();
-    public final Map<EmiStack, EmiStack> inventory = Maps.newHashMap();
+    public Map<EmiStack, EmiStack> inventory = Maps.newHashMap();
 
     @Deprecated
     @ApiStatus.Internal

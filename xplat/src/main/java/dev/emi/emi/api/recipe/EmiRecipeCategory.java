@@ -18,9 +18,9 @@ import java.util.Comparator;
 import java.util.List;
 
 public class EmiRecipeCategory implements EmiRenderable {
-    public final ResourceLocation id;
+    public ResourceLocation id;
     public EmiRenderable icon, simplified;
-    public final Comparator<EmiRecipe> sorter;
+    public Comparator<EmiRecipe> sorter;
 
     /**
      * A constructor to use only a single renderable for both the icon and simplified icon.

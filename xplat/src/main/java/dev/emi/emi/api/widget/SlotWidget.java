@@ -38,7 +38,7 @@ public class SlotWidget extends Widget {
     protected int u, v;
     protected int customWidth, customHeight;
     protected boolean drawBack = true, output = false, catalyst = false, custom = false;
-    protected final List<Supplier<ClientTooltipComponent>> tooltipSuppliers = Lists.newArrayList();
+    protected List<Supplier<ClientTooltipComponent>> tooltipSuppliers = Lists.newArrayList();
     protected Bounds bounds;
     private EmiRecipe recipe;
 

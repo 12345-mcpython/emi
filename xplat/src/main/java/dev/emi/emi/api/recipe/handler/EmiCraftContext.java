@@ -5,11 +5,20 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.jetbrains.annotations.ApiStatus;
 
-public record EmiCraftContext<T extends AbstractContainerMenu>(AbstractContainerScreen<T> screen,
-                                                               EmiPlayerInventory inventory, Type type,
-                                                               Destination destination, int amount) {
+public class EmiCraftContext<T extends AbstractContainerMenu> {
+    private final AbstractContainerScreen<T> screen;
+    private final EmiPlayerInventory inventory;
+    private final Type type;
+    private final Destination destination;
+    private final int amount;
+
     @ApiStatus.Internal
-    public EmiCraftContext {
+    public EmiCraftContext(AbstractContainerScreen<T> screen, EmiPlayerInventory inventory, Type type, Destination destination, int amount) {
+        this.screen = screen;
+        this.inventory = inventory;
+        this.type = type;
+        this.destination = destination;
+        this.amount = amount;
     }
 
     @ApiStatus.Internal
@@ -17,51 +26,50 @@ public record EmiCraftContext<T extends AbstractContainerMenu>(AbstractContainer
         this(screen, inventory, type, Destination.NONE, 1);
     }
 
+    public AbstractContainerScreen<T> getScreen() {
+        return screen;
+    }
 
     public T getScreenHandler() {
         return screen.getMenu();
     }
 
-    /**
-     * @deprecated use {@link #screen()}
-     */
-    @Deprecated
-    public AbstractContainerScreen<T> getScreen() {
-        return screen;
-    }
-
-    /**
-     * @deprecated use {@link #inventory()}
-     */
-    @Deprecated
     public EmiPlayerInventory getInventory() {
         return inventory;
     }
 
-    /**
-     * @deprecated use {@link #type()}
-     */
-    @Deprecated
     public Type getType() {
         return type;
     }
 
-    /**
-     * @deprecated use {@link #destination()}
-     */
-    @Deprecated
     public Destination getDestination() {
         return destination;
     }
 
-    /**
-     * @deprecated use {@link #amount()}
-     */
-    @Deprecated
     public int getAmount() {
         return amount;
     }
 
+    // Accessor-style readers, kept so call sites written against the record form keep working.
+    public AbstractContainerScreen<T> screen() {
+        return screen;
+    }
+
+    public EmiPlayerInventory inventory() {
+        return inventory;
+    }
+
+    public Type type() {
+        return type;
+    }
+
+    public Destination destination() {
+        return destination;
+    }
+
+    public int amount() {
+        return amount;
+    }
 
     public enum Type {
         /**

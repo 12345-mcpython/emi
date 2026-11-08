@@ -202,3 +202,32 @@ python scripts/format_sources.py --tabs xplat/src fabric/src neoforge/src tests 
 Reformatting was verified to be cosmetic only: stripping comments and whitespace from every changed
 file before and after gives identical token streams, the extracted string and text block literals are
 unchanged, both platform builds succeed and all five regression harnesses pass.
+
+## Addon compatibility
+
+The project no longer tracks upstream styling, but the addon API in `dev.emi.emi.api` must stay
+source and binary compatible. `scripts/api_compat.py` enforces that by comparing the public and
+protected members (declaration plus JVM descriptor) of every API class.
+
+The committed baseline is `api/baseline-1.21.1.txt`, generated from the released 1.21.1 jar. To
+verify a build:
+
+```
+python scripts/api_compat.py --check fabric/build/libs/emi-<version>+1.21.1+fabric.jar
+```
+
+Rules encoded by the check:
+
+* removing a class or a public/protected member fails the check
+* changing a class header (for example a class turning into a record, or gaining `final`) fails
+* adding `final` to a public/protected field fails, because addons may legitimately assign it
+* adding classes, methods or fields is allowed and does not need a baseline update
+
+When an API change is intentional, regenerate the baseline with
+`python scripts/api_compat.py --dump <jar> api/baseline-1.21.1.txt` and review that file's diff.
+
+Changes made to satisfy this policy during the cleanup pass: `EmiCraftContext` stayed a plain class
+(record form reverted, deprecated getters and record-style accessors both kept), and `final` was
+removed again from `BasicEmiRecipe`'s protected fields, `EmiPlayerInventory.inventory`,
+`EmiRecipeCategory.id`/`sorter` and `SlotWidget.tooltipSuppliers`.
+
