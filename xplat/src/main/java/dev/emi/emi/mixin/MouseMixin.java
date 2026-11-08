@@ -21,7 +21,7 @@ public class MouseMixin {
     @Shadow
     private double xpos, ypos;
     @Shadow
-    private final int activeButton = -1;
+    private int activeButton;
 
     @Shadow
     private double accumulatedDX;
