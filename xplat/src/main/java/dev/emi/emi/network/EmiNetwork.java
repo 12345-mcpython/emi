@@ -1,9 +1,12 @@
 package dev.emi.emi.network;
 
 import dev.emi.emi.EmiPort;
+import dev.emi.emi.runtime.EmiLog;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -15,6 +18,7 @@ public class EmiNetwork {
     public static final CustomPacketPayload.Type<PingS2CPacket> PING = new CustomPacketPayload.Type<>(EmiPort.id("emi:ping"));
     private static BiConsumer<ServerPlayer, EmiPacket> clientSender;
     private static Consumer<EmiPacket> serverSender;
+    private static final Set<Class<?>> rejectedSends = new HashSet<>();
 
     public static void initServer(BiConsumer<ServerPlayer, EmiPacket> sender) {
         clientSender = sender;
@@ -29,6 +33,16 @@ public class EmiNetwork {
     }
 
     public static void sendToServer(EmiPacket packet) {
-        serverSender.accept(packet);
+        if (serverSender == null) {
+            return;
+        }
+        try {
+            serverSender.accept(packet);
+        } catch (RuntimeException e) {
+            if (rejectedSends.add(packet.getClass())) {
+                EmiLog.warn("Server rejected the EMI packet " + packet.type().id()
+                    + "; the server probably does not have EMI installed");
+            }
+        }
     }
 }
