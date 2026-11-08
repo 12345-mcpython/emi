@@ -11,7 +11,9 @@ import org.joml.Matrix4f;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.systems.RenderSystem;
+import org.joml.Matrix4f;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.config.EmiConfig;
@@ -55,10 +57,18 @@ public class EmiScreenshotRecorder {
 			framebuffer.clear();
 			framebuffer.bindWrite(true);
 			try {
-				// TODO the 1.21.4 render pipeline needs its own projection setup here; screenshots render
-				// without the orthographic override until that is wired up.
-				renderer.run();
-				nativeImage = takeScreenshot(framebuffer);
+				// 1.21.4 keeps the projection in RenderSystem, so back it up and install an orthographic
+				// projection matching the offscreen target before drawing into it.
+				RenderSystem.backupProjectionMatrix();
+				RenderSystem.setProjectionMatrix(
+					new Matrix4f().setOrtho(0f, width * scale, height * scale, 0f, 1000f, 21000f),
+					ProjectionType.ORTHOGRAPHIC);
+				try {
+					renderer.run();
+					nativeImage = takeScreenshot(framebuffer);
+				} finally {
+					RenderSystem.restoreProjectionMatrix();
+				}
 			} finally {
 				framebuffer.destroyBuffers();
 				client.getMainRenderTarget().bindWrite(true);
