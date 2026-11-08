@@ -119,8 +119,12 @@ public class LocalRecipes {
 			return recipes;
 		}
 		RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, client.level.registryAccess());
-		for (ResourceLocation file : client.getResourceManager().listResources("recipe",
-				path -> path.getPath().endsWith(".json")).keySet()) {
+		java.util.Set<ResourceLocation> files = client.getResourceManager().listResources("recipe",
+			path -> path.getPath().endsWith(".json")).keySet();
+		if (files.isEmpty()) {
+			EmiLog.warn("[EMI] Local data pack has no recipe resources; the client only gets recipes from the server");
+		}
+		for (ResourceLocation file : files) {
 			try {
 				Resource resource = client.getResourceManager().getResourceOrThrow(file);
 				try (Reader reader = resource.openAsReader()) {
