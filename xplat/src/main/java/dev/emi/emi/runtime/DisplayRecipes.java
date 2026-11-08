@@ -70,6 +70,44 @@ public class DisplayRecipes {
 		return count;
 	}
 
+	/**
+	 * Crafting ingredients as the recipe itself wants them displayed. Custom crafting types such as
+	 * transmute (dyeing) report their real inputs only through the recipe display, so falling back to
+	 * {@code placementInfo().ingredients()} loses the target item.
+	 */
+	public static CraftingInputs craftingInputs(net.minecraft.world.item.crafting.Recipe<?> recipe) {
+		if (client.level == null) {
+			return null;
+		}
+		ContextMap context = SlotDisplayContext.fromLevel(client.level);
+		for (RecipeDisplay display : recipe.display()) {
+			if (display instanceof ShapedCraftingRecipeDisplay shaped) {
+				List<EmiIngredient> list = new java.util.ArrayList<>();
+				int width = shaped.width();
+				int height = shaped.height();
+				List<SlotDisplay> ingredients = shaped.ingredients();
+				for (int y = 0; y < 3; y++) {
+					for (int x = 0; x < 3; x++) {
+						int index = y * width + x;
+						if (x < width && y < height && index < ingredients.size()) {
+							list.add(resolve(ingredients.get(index), context));
+						} else {
+							list.add(EmiStack.EMPTY);
+						}
+					}
+				}
+				return new CraftingInputs(list, false);
+			}
+			if (display instanceof ShapelessCraftingRecipeDisplay shapeless) {
+				return new CraftingInputs(resolve(shapeless.ingredients(), context), true);
+			}
+		}
+		return null;
+	}
+
+	public record CraftingInputs(List<EmiIngredient> inputs, boolean shapeless) {
+	}
+
 	private static EmiRecipe convert(RecipeDisplayEntry entry, ContextMap context) {
 		RecipeDisplay display = entry.display();
 		ResourceLocation id = EmiPort.id("emi", "/display/" + entry.id().index());

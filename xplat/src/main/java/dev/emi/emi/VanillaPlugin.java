@@ -397,11 +397,15 @@ public class VanillaPlugin implements EmiPlugin {
 			} else if (!(recipe instanceof CustomRecipe)) {
 				try {
 					List<Ingredient> ingredients = recipe.placementInfo().ingredients();
+				// Custom crafting types only expose their real inputs through the recipe display.
+				DisplayRecipes.CraftingInputs displayed = DisplayRecipes.craftingInputs(recipe);
 					if (!ingredients.isEmpty() && !EmiPort.getOutput(recipe).isEmpty()) {
 						// 1.21.2+ no longer reports craft dimensions, so treat unknown layouts as shapeless.
-						List<EmiIngredient> input = ingredients.stream().map(EmiIngredient::of).toList();
+						List<EmiIngredient> input = displayed != null && !displayed.inputs().isEmpty()
+					? displayed.inputs() : ingredients.stream().map(EmiIngredient::of).toList();
 						EmiShapedRecipe.setRemainders(input, recipe);
-						addRecipeSafe(registry, () -> new EmiCraftingRecipe(input, EmiStack.of(EmiPort.getOutput(recipe)), id, true));
+						addRecipeSafe(registry, () -> new EmiCraftingRecipe(input, EmiStack.of(EmiPort.getOutput(recipe)), id,
+					displayed == null || displayed.shapeless()));
 					}
 				} catch (Exception e) {
 					EmiReloadLog.warn("Exception when parsing vanilla crafting recipe " + id, e);
