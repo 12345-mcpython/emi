@@ -54,7 +54,7 @@ import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.ISubtypeManager;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.vanilla.IJeiIngredientInfoRecipe;
 import mezz.jei.api.registration.IModIngredientRegistration;
@@ -188,7 +188,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 
 		EmiReloadManager.step(EmiPort.literal("Processing JEI recipes..."), 5_000);
 		Set<ResourceLocation> existingCategories = EmiRecipes.categories.stream().map(EmiRecipeCategory::getId).collect(Collectors.toSet());
-		Map<RecipeType, EmiRecipeCategory> categoryMap = Maps.newHashMap();
+		Map<IRecipeType<?>, EmiRecipeCategory> categoryMap = Maps.newHashMap();
 		categoryMap.put(RecipeTypes.CRAFTING, VanillaEmiRecipeCategories.CRAFTING);
 		categoryMap.put(RecipeTypes.SMELTING, VanillaEmiRecipeCategories.SMELTING);
 		categoryMap.put(RecipeTypes.BLASTING, VanillaEmiRecipeCategories.BLASTING);
@@ -198,7 +198,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 		categoryMap.put(RecipeTypes.SMITHING, VanillaEmiRecipeCategories.SMITHING);
 		categoryMap.put(RecipeTypes.ANVIL, VanillaEmiRecipeCategories.ANVIL_REPAIRING);
 		categoryMap.put(RecipeTypes.BREWING, VanillaEmiRecipeCategories.BREWING);
-		categoryMap.put(RecipeTypes.FUELING, VanillaEmiRecipeCategories.FUEL);
+		categoryMap.put(RecipeTypes.SMELTING_FUEL, VanillaEmiRecipeCategories.FUEL);
 		categoryMap.put(RecipeTypes.COMPOSTING, VanillaEmiRecipeCategories.COMPOSTING);
 		categoryMap.put(RecipeTypes.INFORMATION, VanillaEmiRecipeCategories.INFO);
 		
@@ -210,7 +210,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 			EmiLog.info("[JEMI] Collecting data for " + c.getTitle().getString());
 			EmiReloadManager.step(EmiPort.literal("Loading JEI data for ").append(c.getTitle()), 5_000);
 			try {
-				RecipeType type = c.getRecipeType();
+				IRecipeType<?> type = c.getRecipeType();
 				ResourceLocation id = type.getUid();
 				List<EmiStack> catalysts = runtime.getRecipeManager().createRecipeCatalystLookup(type).includeHidden().get().map(JemiUtil::getStack).toList();
 				if (categoryMap.containsKey(type)) {
@@ -298,7 +298,9 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 		Set<EmiRecipe> replacements = Sets.newHashSet();
 		List<RecipeHolder<CraftingRecipe>> recipes = Stream.concat(
 			runtime.getRecipeManager().createRecipeLookup(category.getRecipeType()).includeHidden().get(),
-			registry.getRecipeManager().getAllRecipesFor(net.minecraft.world.item.crafting.RecipeType.CRAFTING).stream()
+			registry.getRecipeManager().getRecipes().stream()
+			.filter(h -> h.value().getType() == net.minecraft.world.item.crafting.RecipeType.CRAFTING)
+			.map(h -> (RecipeHolder<CraftingRecipe>) h)
 				.filter(r -> r.value() instanceof CustomRecipe)
 		).distinct().toList();
 		for (RecipeHolder<CraftingRecipe> recipe : recipes) {
@@ -312,7 +314,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 						EmiIngredient stack = acceptor.build();
 						if (acceptor.role == RecipeIngredientRole.INPUT) {
 							inputs.add(stack);
-						} else if (acceptor.role == RecipeIngredientRole.CATALYST) {
+						} else if (acceptor.role == RecipeIngredientRole.CRAFTING_STATION) {
 							inputs.add(stack);
 						} else if (acceptor.role == RecipeIngredientRole.OUTPUT) {
 							outputs.addAll(stack.getEmiStacks());
@@ -368,7 +370,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 			for (Item item : EmiPort.getItemRegistry()) {
 				if (hasSubtype.test(VanillaTypes.ITEM_STACK, item.getDefaultInstance())) {
 					registry.setDefaultComparison(item, Comparison.compareData(stack -> {
-						return subtypeManager.getSubtypeInfo(stack.getItemStack(), UidContext.Recipe);
+						return subtypeManager.getSubtypeData(stack.getItemStack(), UidContext.Recipe);
 					}));
 				}
 			}
@@ -378,7 +380,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 					registry.setDefaultComparison(fluid, Comparison.compareData(stack -> {
 						ITypedIngredient<?> typed = JemiUtil.getTyped(stack).orElse(null);
 						if (typed != null) {
-							return subtypeManager.getSubtypeInfo(type, typed.getIngredient(), UidContext.Recipe);
+							return subtypeManager.getSubtypeData(type, typed, UidContext.Recipe);
 						}
 						return null;
 					}));
@@ -395,7 +397,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 							if (hasSubtype.test(iitws, o)) {
 								registry.setDefaultComparison(iitws.getBase(o), Comparison.compareData(stack -> {
 									if (stack instanceof JemiStack jemi) {
-										return subtypeManager.getSubtypeInfo(iitws, jemi.ingredient, UidContext.Recipe);
+										return subtypeManager.getSubtypeData(iitws, jemi.ingredient, UidContext.Recipe);
 									}
 									return null;
 								}));

@@ -39,12 +39,12 @@ public class JemiStack<T> extends EmiStack {
 		if (type instanceof IIngredientTypeWithSubtypes<?, T> iitws) {
 			base = iitws.getBase(ingredient);
 		} else {
-			base = helper.getUniqueId(ingredient, UidContext.Recipe);
+			base = helper.getUid(ingredient, UidContext.Recipe);
 		}
 	}
 
 	public String getJeiUid() {
-		return helper.getUniqueId(ingredient, UidContext.Ingredient);
+		return String.valueOf(helper.getUid(ingredient, UidContext.Ingredient));
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 
 public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredientAcceptor> {
@@ -126,7 +127,7 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 	@Override
 	public <I> JemiIngredientAcceptor addIngredients(IIngredientType<I> ingredientType, List<@Nullable I> ingredients) {
 		for (I i : ingredients) {
-			addIngredient(ingredientType, i);
+			add(ingredientType, i);
 		}
 		return this;
 	}

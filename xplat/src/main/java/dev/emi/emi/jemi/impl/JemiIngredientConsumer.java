@@ -61,13 +61,13 @@ public class JemiIngredientConsumer implements IIngredientAcceptor<JemiIngredien
     @Override
     public <I> JemiIngredientConsumer addIngredients(IIngredientType<I> ingredientType, List<@Nullable I> ingredients) {
         for (I i : ingredients) {
-            addIngredient(ingredientType, i);
+            add(ingredientType, i);
         }
         return this;
     }
 
     @Override
-    public <I> JemiIngredientConsumer addIngredient(IIngredientType<I> ingredientType, I ingredient) {
+    public <I> JemiIngredientConsumer add(IIngredientType<I> ingredientType, I ingredient) {
         stacks.add(JemiUtil.getStack(ingredientType, ingredient));
         return this;
     }
@@ -83,7 +83,7 @@ public class JemiIngredientConsumer implements IIngredientAcceptor<JemiIngredien
     @Override
     public JemiIngredientConsumer addTypedIngredients(List<ITypedIngredient<?>> ingredients) {
         for (ITypedIngredient i : ingredients) {
-            addIngredient(i.getType(), i.getIngredient());
+            add(i.getType(), i.getIngredient());
         }
         return this;
     }
@@ -93,7 +93,7 @@ public class JemiIngredientConsumer implements IIngredientAcceptor<JemiIngredien
         for (Optional<ITypedIngredient<?>> i : ingredients) {
             if (i.isPresent()) {
                 ITypedIngredient t = i.get();
-                addIngredient(t.getType(), t.getIngredient());
+                add(t.getType(), t.getIngredient());
             }
         }
         return this;

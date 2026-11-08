@@ -67,7 +67,7 @@ public class JemiRecipe<T> implements EmiRecipe {
 			EmiIngredient stack = acceptor.build();
 			if (acceptor.role == RecipeIngredientRole.INPUT) {
 				inputs.add(stack);
-			} else if (acceptor.role == RecipeIngredientRole.CATALYST) {
+			} else if (acceptor.role == RecipeIngredientRole.CRAFTING_STATION) {
 				catalysts.add(stack);
 			} else if (acceptor.role == RecipeIngredientRole.OUTPUT) {
 				if (stack.getEmiStacks().size() > 1) {

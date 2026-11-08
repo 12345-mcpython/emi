@@ -9,7 +9,9 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.IIngredientType;
+import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.runtime.IIngredientManager;
 import net.minecraft.util.GsonHelper;
 
@@ -31,12 +33,23 @@ public class JemiStackSerializer implements EmiIngredientSerializer<JemiStack> {
 			if (type == VanillaTypes.ITEM_STACK || type == JemiUtil.getFluidType()) {
 				continue;
 			}
-			Optional<EmiStack> opt = manager.getTypedIngredientByUid(type, uid).map(JemiUtil::getStack);
+			Optional<EmiStack> opt = findByUid(type, uid);
 			if (opt.isPresent()) {
 				return opt.get().setAmount(amount);
 			}
 		}
 		return EmiStack.EMPTY;
+	}
+
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	private Optional<EmiStack> findByUid(IIngredientType<?> type, String uid) {
+		IIngredientHelper helper = manager.getIngredientHelper((IIngredientType) type);
+		for (Object ingredient : manager.getAllIngredients((IIngredientType) type)) {
+			if (uid.equals(String.valueOf(helper.getUid(ingredient, UidContext.Ingredient)))) {
+				return Optional.of(JemiUtil.getStack(type, ingredient));
+			}
+		}
+		return Optional.empty();
 	}
 
 	@Override

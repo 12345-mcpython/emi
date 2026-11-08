@@ -26,7 +26,7 @@ import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.ingredients.IIngredientType;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import net.minecraft.client.Minecraft;
@@ -36,7 +36,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
 public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements EmiRecipeHandler<T> {
-	private final RecipeType<R> type;
+	private final IRecipeType<R> type;
 	//private IRecipeCategory<R> category;
 	public IRecipeTransferHandler<T, R> handler;
 
@@ -138,7 +138,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 		return () -> IRecipeTransferError.Type.INTERNAL;
 	}
 
-	public static <R> JemiRecipeSlotsView createSlotsView(EmiRecipe recipe, R rawRecipe, RecipeType<R> type, List<Widget> widgets) {
+	public static <R> JemiRecipeSlotsView createSlotsView(EmiRecipe recipe, R rawRecipe, IRecipeType<R> type, List<Widget> widgets) {
 		JemiRecipeLayoutBuilder builder = null;
 		if (rawRecipe != null) {
 			/*
@@ -195,7 +195,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 					addIngredients(builder, slotWidgets, List.of(EmiStack.EMPTY), RecipeIngredientRole.INPUT);
 				}
 			}
-			addIngredients(builder, slotWidgets, recipe.getCatalysts(), RecipeIngredientRole.CATALYST);
+			addIngredients(builder, slotWidgets, recipe.getCatalysts(), RecipeIngredientRole.CRAFTING_STATION);
 		}
 
 		return new JemiRecipeSlotsView(builder.slots.stream().map(JemiRecipeSlot::new).toList());
@@ -243,7 +243,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 				Optional<ITypedIngredient<?>> opt = JemiUtil.getTyped(stack);
 				if (opt.isPresent()) {
 					ITypedIngredient<?> typed = opt.get();
-					acceptor.addIngredient((IIngredientType) typed.getType(), typed.getIngredient());
+					acceptor.add((IIngredientType) typed.getType(), typed.getIngredient());
 				}
 			}
 		}
