@@ -637,7 +637,7 @@ public class VanillaPlugin implements EmiPlugin {
 				.id(synthetic("world/cauldron_washing", EmiUtil.subId(i)))
 				.leftInput(EmiStack.EMPTY, s -> new GeneratedSlotWidget(r -> {
 					ItemStack stack = i.getDefaultInstance();
-					stack.set(DataComponents.DYED_COLOR, new DyedItemColor(r.nextInt(0xFFFFFF + 1), true));
+					stack.set(DataComponents.DYED_COLOR, new DyedItemColor(r.nextInt(0xFFFFFF + 1)));
 					return EmiStack.of(stack);
 				}, uniq, s.getBounds().x(), s.getBounds().y()))
 				.rightInput(cauldron, true)

@@ -53,8 +53,10 @@ public class JemiTooltipBuilder implements ITooltipBuilder {
 	}
 
 	@Override
-	public List<Component> getLines() {
-		return legacyText;
+	public List<com.mojang.datafixers.util.Either<FormattedText, TooltipComponent>> getLines() {
+		return legacyText.stream()
+			.map(text -> com.mojang.datafixers.util.Either.<FormattedText, TooltipComponent>left(text))
+			.toList();
 	}
 
 	public List<Component> toLegacyToComponents() {

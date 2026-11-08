@@ -186,3 +186,27 @@ localised), then `ListWidget`/`GlStateManager`, then the render plumbing (`EmiPo
 `#getQuads`), and finally the tag model pipeline, which is the only part that needs the new item model
 set (`ItemModelResolver` / `ItemStackRenderState`) rather than a mechanical removal.
 
+### 1.21.5 progress
+
+The `1.21.5` branch now carries every 1.21.4 fix plus `minecraft_version=1.21.5`,
+`fabric_api_version=0.128.2+1.21.5`, `neoforge_version=21.5.101`, loom `1.10.455` and
+`jei_version=jei-1.21.5-neoforge:21.4.0.27` (JEI still has no Fabric build for 1.21.5, so jemi stays
+NeoForge only). Compile errors went 36 -> 56 after the mechanical removals, the inventory adaptions, the
+component/NBT updates and the JEI 21 overrides (`drawTooltip`, `Either` based `getLines`).
+
+What is left is one cluster: the render pipeline rework (primer 1.21.5 "Render Pipeline Rework" and
+"Model Rework").
+
+| File | Errors | Needed |
+| --- | --- | --- |
+| `runtime/EmiScreenshotRecorder` | 20 | offscreen capture on the new pipeline (`RenderTarget`/`GpuTexture`) |
+| `screen/widget/config/ListWidget` | 16 | `Scissor`/`GlStateManager` in their new packages |
+| `EmiRenderHelper` | 14 | `GuiGraphics#blit` takes a `Function<ResourceLocation, RenderType>` and `GpuTexture` |
+| `EmiPort` | 2 | `BufferUploader` removed, `EmiPort#draw` needs the new submit path |
+
+Removed in 1.21.5 and already handled: `ArmorItem`, `Smithing*Recipe` optional ingredient fields (now read
+from `SmithingRecipeDisplay`), `BakedModel`/`ModelResourceLocation` (tag model rebake stubbed, tag icons fall
+back to the first ingredient), `VertexBuffer`/`BufferUploader` helpers in `EmiPort`, `Inventory#items`,
+`RenderSystem#enableDepthTest/enableBlend`, `TagParser#parseTag`, `Tag#getAsString`, `DyedItemColor`'s second
+component, `ItemModelResolver#updateForTopItem`'s handedness argument.
+
