@@ -133,9 +133,21 @@ entry points at.
 | 1 | `screen/EmiScreenshotRecorder.java:58` | Recipe export renders without the 1.21.4 projection setup | `client/renderer/GameRenderer`, `com.mojang.blaze3d.vertex.ProjectionMatrixBuffer`, `client/gui/render/RenderTarget` |
 | 2 | `screen/StackBatcher.java:13` | Batched stack rendering disabled, everything draws unbatched (performance) | `client/renderer/RenderType`, `com.mojang.blaze3d.vertex.VertexConsumer` / `MeshData` (the old `VertexBuffer` / `BufferUploader` path is gone) |
 | 3 | `VanillaPlugin.java:479` | `isDamageable` replaced by a `maxDamage > 0` approximation | `world/item/ItemStack#isDamageableItem` |
-| 4 | `bom/TreeCost.java:105` | Chanced remainders are not part of the cost calculation | `world/item/crafting/CraftingRecipe#getRemainingItems`, `bom/ChanceState` |
-| 5 | `recipe/special/EmiBookCloningRecipe.java:21` | Book cloning recipe details are incomplete | `world/item/crafting/BookCloningRecipe` |
-| 6 | `api/recipe/EmiRecipe#getBackingRecipe` | No `RecipeHolder` on a server, so paths that need the backing recipe degrade in multiplayer | `world/item/crafting/RecipeAccess`, `client/multiplayer/ClientRecipeContainer` |
+| 4 | `bom/TreeCost.java:105` | Chanced remainders are not part of the cost calculation | pre-existing upstream TODO (`add partial chanced remainders`), not a 1.21.4 change |
+
+Reclassified while working through the list: entries 4, 5 and 6 were originally filed as upgrade
+regressions but are not caused by the 1.21.1 -> 1.21.4 move.
+
+* `TreeCost` chanced remainders: the `TODO add partial chanced remainders` comment predates the port.
+* `EmiBookCloningRecipe`: it is a decorative sample recipe generator (random titles, authors, generations),
+  the vanilla `BookCloningRecipe` still is a `CustomRecipe`, so nothing about it changed with the version;
+  the `TODO more book stuff` is an upstream fidelity note.
+* `EmiRecipe#getBackingRecipe`: since 1.21.2 the client genuinely has no `Recipe` objects, only displays, so a
+  `RecipeHolder` cannot be returned on a server. Browsing is covered by `DisplayRecipes` and filling goes
+  through `FillRecipeC2SPacket`, so this is an inherent limitation of the new recipe model rather than a
+  missing port step.
+
+That leaves **#2 (stack batching)** as the only migration regression still open.
 
 Fixed on this line already: client display pipeline (`DisplayRecipes`), display context for ingredients and
 results, real shaped pattern layout, remainder index guard, custom crafting inputs from the display,
