@@ -100,3 +100,25 @@ only contains the `xplat` source set, so the task now also mirrors the generated
 classes directory. With that, `:neoforge:runClient` boots EMI together with `Just Enough Items 20.0.0.4`
 and JEI reaches `JEI_STARTED` without mixin or plugin errors.
 
+## Vanilla recipes on a server
+
+Since 1.21.2 the client no longer keeps a recipe table; `ClientPacketListener#getRecipeManager` is gone and
+the client only receives the synchronized recipe displays (`RecipeManager#getSynchronizedRecipes`) that
+populate `ClientRecipeBook` as `RecipeDisplayEntry` records. The checkpoint therefore read vanilla recipes
+from the integrated server (`ProxyRecipeManager`), which works in singleplayer and left the index empty on
+servers.
+
+`runtime/DisplayRecipes` closes that hole: when no integrated server is present it walks
+`ClientRecipeBook#getCollections()`, resolves every `SlotDisplay` through
+`SlotDisplayContext.fromLevel(level)` and turns the displays into EMI recipes:
+
+* `ShapedCraftingRecipeDisplay` / `ShapelessCraftingRecipeDisplay` become `EmiCraftingRecipe`;
+* `FurnaceRecipeDisplay`, `StonecutterRecipeDisplay` and `SmithingRecipeDisplay` become a compact
+  `BasicEmiRecipe` row, with the category picked from the crafting station item
+  (furnace / blast_furnace / smoker / campfire / stonecutter / smithing_table);
+* ids are synthetic (`emi:/display/<index>`), so they cannot collide with data pack ids.
+
+`VanillaPlugin` calls it only when `ProxyRecipeManager.getRaw() == null`, so singleplayer keeps using the
+server recipes and nothing is registered twice. The reload logs
+`[EMI] Registered N recipes from client displays`.
+

@@ -154,6 +154,7 @@ import dev.emi.emi.recipe.special.EmiSmithingTrimRecipe;
 import dev.emi.emi.recipe.special.EmiSuspiciousStewRecipe;
 import dev.emi.emi.registry.EmiTags;
 import dev.emi.emi.runtime.EmiDrawContext;
+import dev.emi.emi.runtime.DisplayRecipes;
 import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.runtime.EmiReloadLog;
 import dev.emi.emi.runtime.EmiTagKey;
@@ -435,6 +436,11 @@ public class VanillaPlugin implements EmiPlugin {
 			addRecipeSafe(registry, () -> new EmiStonecuttingRecipe(recipe), recipe);
 		}
 
+		if (ProxyRecipeManager.getRaw() == null) {
+			// No integrated server: the client only has the synchronized recipe displays, so build the
+			// vanilla recipes from those instead of leaving the index empty on servers.
+			safely("client recipe displays", () -> DisplayRecipes.register(registry));
+		}
 		safely("repair", () -> addRepair(registry, hiddenItems));
 		safely("brewing", () -> EmiAgnos.addBrewingRecipes(registry));
 		safely("world interaction", () -> addWorldInteraction(registry, hiddenItems, dyeableItems));
