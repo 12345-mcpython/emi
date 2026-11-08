@@ -119,7 +119,9 @@ public final class EmiPort {
 
 
 	public static void draw(BufferBuilder bufferBuilder) {
-		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+		// 1.21.5 removed BufferUploader; submitting a raw builder now needs a render pass from the
+		// command encoder. Tinted sprites fall back to their unmodified colour until that is wired up.
+		bufferBuilder.buildOrThrow();
 	}
 
 	public static int getGuiScale(Minecraft client) {

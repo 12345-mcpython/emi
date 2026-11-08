@@ -89,8 +89,6 @@ public class EmiRenderHelper {
 		}
 		EmiPort.setPositionColorTexShader();
 		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-		RenderSystem.setShaderTexture(0, sprite.atlasLocation());
-		RenderSystem.enableBlend();
 		
 		float r = ((color >> 16) & 255) / 256f;
 		float g = ((color >> 8) & 255) / 256f;
@@ -211,9 +209,7 @@ public class EmiRenderHelper {
 	public static void drawSlotHightlight(EmiDrawContext context, int x, int y, int w, int h, int z) {
 		context.push();
 		context.matrices().translate(0, 0, z);
-		RenderSystem.colorMask(true, true, true, false);
 		context.fill(x, y, w, h, -2130706433);
-		RenderSystem.colorMask(true, true, true, true);
 		context.pop();
 	}
 
@@ -266,7 +262,6 @@ public class EmiRenderHelper {
 		context.enableDepthTest();
 		context.push();
 		context.matrices().translate(0, 0, 200);
-		RenderSystem.setShaderTexture(0, EmiRenderHelper.WIDGETS);
 		context.drawTexture(WIDGETS, x, y, 8, 252, 4, 4);
 		context.pop();
 	}
@@ -370,11 +365,9 @@ public class EmiRenderHelper {
 
 			// Force translucency to match that of the recipe background
 			context.disableBlend();
-			RenderSystem.colorMask(false, false, false, true);
 			context.disableDepthTest();
 			renderRecipeBackground(recipe, context, x, y);
 			context.enableDepthTest();
-			RenderSystem.colorMask(true, true, true, true);
 			// Blend should be off by default
 		} catch (Throwable e) {
 			EmiLog.error("Error rendering recipe", e);

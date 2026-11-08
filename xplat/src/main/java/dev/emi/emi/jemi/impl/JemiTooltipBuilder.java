@@ -67,4 +67,7 @@ public class JemiTooltipBuilder implements ITooltipBuilder {
 	public void removeAll(List<Component> components) {
 		// EMI does not support tooltip removeal
 	}
+	@Override
+	public void clearIngredient() {
+	}
 }

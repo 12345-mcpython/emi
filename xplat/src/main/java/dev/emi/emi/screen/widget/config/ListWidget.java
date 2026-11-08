@@ -165,10 +165,8 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
 
 		{	// Render background
-			RenderSystem.enableBlend();
 			ResourceLocation identifier = this.client.level == null ? MENU_LIST_BACKGROUND_TEXTURE : INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
 			draw.blit(RenderType::guiTextured, identifier, left, top, right, bottom + (int)scrollAmount, right - left, bottom - top, 32, 32);
-			RenderSystem.disableBlend();
 		}
 
 		draw.enableScissor(left, top, right, bottom);
@@ -179,12 +177,10 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 
 
 		{	// Render header & footer separators
-			RenderSystem.enableBlend();
 			ResourceLocation identifier = this.client.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
 			ResourceLocation identifier2 = this.client.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
 			draw.blit(RenderType::guiTextured, identifier, left, top - 2, 0.0F, 0.0F, width, 2, 32, 2);
 			draw.blit(RenderType::guiTextured, identifier2, left, bottom, 0.0F, 0.0F, width, 2, 32, 2);
-			RenderSystem.disableBlend();
 		}
 
 		if ((o = this.getMaxScroll()) > 0) {
@@ -209,7 +205,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			bufferBuilder.addVertex(i, n, 0).setColor(192, 192, 192, 255);
 			BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
 		}
-		RenderSystem.disableBlend();
 	}
 
 	public void centerScrollOn(Entry entry) {
