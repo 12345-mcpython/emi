@@ -43,7 +43,17 @@ public class EmiShapedRecipe extends EmiCraftingRecipe {
 					inv.setItem(i, stack.getItemStack().copy());
 					CraftingInput cri = CraftingInput.of(inv.getWidth(), inv.getHeight(), inv.getItems());
 					if (cri.width() <= 3 && cri.height() <= 3) {
-						ItemStack remainder = recipe.getRemainingItems(cri).get((i / 3 * cri.width()) + (i % 3));
+						ItemStack remainder = ItemStack.EMPTY;
+						// 1.21.2+ shrinks the crafting input for smaller recipes, so the remainder list
+						// does not always cover the padded 3x3 grid. Only read positions that exist.
+						int rx = i % 3, ry = i / 3;
+						if (rx < cri.width() && ry < cri.height()) {
+							List<ItemStack> remainders = recipe.getRemainingItems(cri);
+							int index = ry * cri.width() + rx;
+							if (index >= 0 && index < remainders.size()) {
+								remainder = remainders.get(index);
+							}
+						}
 						if (!remainder.isEmpty()) {
 							stack.setRemainder(EmiStack.of(remainder));
 						}
