@@ -480,8 +480,8 @@ public class VanillaPlugin implements EmiPlugin {
 				if (i.components().getOrDefault(DataComponents.MAX_DAMAGE, 0) > 0) {
 					// Armour repair materials are data components now; the anvil material recipe needs a rework.
 				}
-				// TODO used to be isDamageable, the 20.1 impl of that method appears to just be maxDamage > 0 though
-				if (i.components().getOrDefault(DataComponents.MAX_DAMAGE, 0) > 0) {
+				// 1.21.4 exposes the real check on the stack, which also honours the unbreakable component.
+				if (i.getDefaultInstance().isDamageableItem()) {
 					addRecipeSafe(registry, () -> new EmiAnvilRepairItemRecipe(i, synthetic("anvil/repairing/tool", EmiUtil.subId(i))));
 					addRecipeSafe(registry, () -> new EmiGrindstoneRecipe(i, synthetic("grindstone/repairing", EmiUtil.subId(i))));
 				}
