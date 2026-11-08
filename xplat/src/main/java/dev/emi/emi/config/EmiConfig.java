@@ -1,20 +1,5 @@
 package dev.emi.emi.config;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -30,855 +15,873 @@ import net.minecraft.Util;
 import net.minecraft.client.StringSplitter;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
+import org.lwjgl.glfw.GLFW;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class EmiConfig {
-	private static final Map<Class<?>, Setter> SETTERS = Maps.newHashMap();
-	private static final Map<Class<?>, Writer<?>> WRITERS = Maps.newHashMap();
-	private static final Map<Class<?>, MultiWriter<?>> MULTI_WRITERS = Maps.newHashMap();
-	private static final Map<String, List<String>> unparsed = Maps.newHashMap();
-	public static final Map<String, Predicate<?>> FILTERS = Maps.newHashMap();
-	public static final String DEFAULT_CONFIG;
-	public static boolean useGlobalConfig = false;
-	public static String startupConfig;
-
-	// General
-	@Comment("Whether EMI is enabled and visible.")
-	@ConfigValue("general.enabled")
-	public static boolean enabled = true;
-
-	/** Use {@link dev.emi.emi.api.EmiApi#isCheatMode EmiApi.isCheatMode()} to get the boolean value. */
-	@Comment("Whether cheating in items is enabled.")
-	@ConfigValue("general.cheat-mode")
-	public static final CheatMode cheatMode = CheatMode.CREATIVE;
-
-	@Comment("How much EMI should use tooltips and popups to show controls and information.")
-	@ConfigValue("general.help-level")
-	public static final HelpLevel helpLevel = HelpLevel.NORMAL;
-
-	@Comment("Where EMI should pull stacks from to populate the index.")
-	@ConfigValue("general.index-source")
-	public static final IndexSource indexSource = IndexSource.CREATIVE;
-
-	@ConfigGroup("general.search")
-	@Comment("Which sidebar should be searched using the search bar.")
-	@ConfigValue("general.search-sidebar")
-	public static final SidebarSide searchSidebar = SidebarSide.RIGHT;
-
-	@Comment("Whether normal search queries should include the tooltip.")
-	@ConfigValue("general.search-tooltip-by-default")
-	public static final boolean searchTooltipByDefault = true;
-
-	@Comment("Whether normal search queries should include the mod name.")
-	@ConfigValue("general.search-mod-name-by-default")
-	public static final boolean searchModNameByDefault = false;
-
-	@ConfigGroupEnd
-	@Comment("Whether normal search queries should include the stack's tags.")
-	@ConfigValue("general.search-tags-by-default")
-	public static final boolean searchTagsByDefault = false;
-
-	// UI
-	@Comment("Which action should be performed when clicking the recipe book.")
-	@ConfigValue("ui.recipe-book-action")
-	public static final RecipeBookAction recipeBookAction = RecipeBookAction.TOGGLE_CRAFTABLES;
-
-	@Comment("Where to display status effects in the inventory.")
-	@ConfigValue("ui.effect-location")
-	public static final EffectLocation effectLocation = EffectLocation.TOP;
-
-	@Comment("Whether to display a gray overlay when hovering over a stack.")
-	@ConfigValue("ui.show-hover-overlay")
-	public static final boolean showHoverOverlay = true;
-
-	@ConfigGroup("ui.mod-id")
-	@Comment("Whether to add mod name to tooltips")
-	@ConfigValue("ui.append-mod-id")
-	public static final boolean appendModId = true;
-
-	@ConfigGroupEnd
-	@Comment("Whether to add mod name to item tooltips, in case another mod provides behavior")
-	@ConfigValue("ui.append-item-mod-id")
-	public static boolean appendItemModId = true;
-
-	@Comment("Prevents recipes being quick crafted from shifting around under the cursor.")
-	@ConfigValue("ui.miscraft-prevention")
-	public static final boolean miscraftPrevention = true;
-
-	@Comment("The unit to display fluids as.")
-	@ConfigValue("ui.fluid-unit")
-	public static final FluidUnit fluidUnit = EmiAgnos.isForge() ? FluidUnit.MILLIBUCKETS : FluidUnit.LITERS;
-
-	@Comment("Whether to use the batched render system. Batching is faster, but may have incompatibilities"
-		+ " with shaders or other mods.")
-	@ConfigValue("ui.use-batched-renderer")
-	public static final boolean useBatchedRenderer = true;
-
-	@Comment("The bookmark quantity step used by Ctrl + Alt + scroll. Minimum: 1.")
-	@ConfigValue("ui.bookmark-quantity-step")
-	public static int bookmarkQuantityStep = 64;
-
-	@Comment("Initial layout for new bookmark groups. DEFAULT flows items through the grid;"
-		+ " TODO puts each result/item on its own row. The group header still toggles this per group.")
-	@ConfigValue("ui.bookmark-view-mode")
-	public static final BookmarkViewMode bookmarkViewMode = BookmarkViewMode.DEFAULT;
-
-	/** Clamp on use as the config UI can assign integer fields directly. */
-	public static int getBookmarkQuantityStep() {
-		return Math.max(1, bookmarkQuantityStep);
-	}
-
-	@Comment("Whether to have the search bar in the center of the screen, instead of to the side.")
-	@ConfigValue("ui.center-search-bar")
-	public static final boolean centerSearchBar = true;
-
-	@ConfigFilter("ui.search-sidebar-focus")
-	private static final Predicate<SidebarType> searchSidebarFocusFilter = type -> type != SidebarType.CHESS;
-
-	@Comment("Which sidebar type to switch to when searching.")
-	@ConfigValue("ui.search-sidebar-focus")
-	public static SidebarType searchSidebarFocus = SidebarType.INDEX;
-
-	@ConfigFilter("ui.empty-search-sidebar-focus")
-	private static final Predicate<SidebarType> emptySearchSidebarFocusFilter = type -> type != SidebarType.CHESS;
-
-	@Comment("Which sidebar type to focus when the search is empty.")
-	@ConfigValue("ui.empty-search-sidebar-focus")
-	public static SidebarType emptySearchSidebarFocus = SidebarType.NONE;
-
-	@Comment("Whether the EMI config button should be visible.")
-	@ConfigValue("ui.emi-config-button-visibility")
-	public static final ButtonVisibility emiConfigButtonVisibility = ButtonVisibility.SHOWN;
-
-	@Comment("Whether the recipe tree button should be visible.")
-	@ConfigValue("ui.recipe-tree-button-visibility")
-	public static final ButtonVisibility recipeTreeButtonVisibility = ButtonVisibility.AUTO;
-
-	@ConfigGroup("ui.recipe-screen")
-	@Comment("The maximum height the recipe screen will grow to be if space is available in pixels.")
-	@ConfigValue("ui.maximum-recipe-screen-height")
-	public static final int maximumRecipeScreenHeight = 256;
-
-	@Comment("The minimum width of the recipe screen in pixels. "
-		+ "Controls how many tabs there can be, and where the page switching buttons go. "
-		+ "The default is 176, the width of most screens.")
-	@ConfigValue("ui.minimum-recipe-screen-width")
-	public static final int minimumRecipeScreenWidth = 176;
-
-	@Comment("The amount of vertical margin to give in the recipe screen.")
-	@ConfigValue("ui.vertical-margin")
-	public static final int verticalMargin = 20;
-
-	@ConfigFilter("ui.workstation-location")
-	private static final Predicate<SidebarSide> workstationLocationFilter = side -> side != SidebarSide.TOP;
-	@Comment("Where to show workstations in the recipe screen")
-	@ConfigValue("ui.workstation-location")
-	public static final SidebarSide workstationLocation = SidebarSide.BOTTOM;
-
-	@ConfigGroupEnd()
-	@Comment("Display cost per batch when hovering a recipe output")
-	@ConfigValue("ui.show-cost-per-batch")
-	public static final boolean showCostPerBatch = true;
-
-	@ConfigGroup("ui.recipe-buttons")
-	@Comment("Whether recipes should have a button to set as default.")
-	@ConfigValue("ui.recipe-default-button")
-	public static final boolean recipeDefaultButton = true;
-
-	@Comment("Whether recipes should have a button to show the recipe tree.")
-	@ConfigValue("ui.recipe-tree-button")
-	public static final boolean recipeTreeButton = true;
-
-	@Comment("Whether recipes should have a button to fill the ingredients in a handler.")
-	@ConfigValue("ui.recipe-fill-button")
-	public static final boolean recipeFillButton = true;
-
-	@Comment("Whether recipes should have a button to take a screenshot of the recipe.")
-	@ConfigValue("ui.recipe-screenshot-button")
-	public static final boolean recipeScreenshotButton = false;
-
-	@ConfigGroupEnd
-	@Comment("The GUI scale at which recipe screenshots are saved. Use 0 to use the current GUI scale.")
-	@ConfigValue("ui.recipe-screenshot-scale")
-	public static final int recipeScreenshotScale = 0;
-
-	// Left sidebar
-
-	@ConfigGroup("ui.left-sidebar")
-	@Comment("The pages in the left sidebar")
-	@ConfigValue("ui.left-sidebar-pages")
-	public static final SidebarPages leftSidebarPages = new SidebarPages(List.of(
-		new SidebarPages.SidebarPage(SidebarType.FAVORITES)
-	), SidebarSettings.LEFT);
-
-	@Comment("The subpanels in the left sidebar")
-	@ConfigValue("ui.left-sidebar-subpanels")
-	public static final SidebarSubpanels leftSidebarSubpanels = new SidebarSubpanels(List.of(
-	), SidebarSettings.LEFT);
-
-	@Comment("How many columns and rows of ingredients to limit the left sidebar to")
-	@ConfigValue("ui.left-sidebar-size")
-	public static final IntGroup leftSidebarSize = new IntGroup(
-		"emi.sidebar.size.",
-		List.of("columns", "rows"),
-		IntList.of(12, 100)
-	);
-
-	@Comment("How much space to maintain between the left sidebar and obstructions, in pixels")
-	@ConfigValue("ui.left-sidebar-margins")
-	public static final Margins leftSidebarMargins = new Margins(2, 2, 2, 2);
-
-	@Comment("Where to position the left sidebar")
-	@ConfigValue("ui.left-sidebar-align")
-	public static ScreenAlign leftSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.LEFT, ScreenAlign.Vertical.TOP);
-
-	@Comment("Whether to render the header buttons and page count for the left sidebar")
-	@ConfigValue("ui.left-sidebar-header")
-	public static HeaderType leftSidebarHeader = HeaderType.VISIBLE;
-
-	@ConfigGroupEnd
-	@Comment("Which theme to use for the left sidebar")
-	@ConfigValue("ui.left-sidebar-theme")
-	public static SidebarTheme leftSidebarTheme = SidebarTheme.TRANSPARENT;
-
-
-	// Right sidebar
-
-	@ConfigGroup("ui.right-sidebar")
-	@Comment("The pages in the right sidebar")
-	@ConfigValue("ui.right-sidebar-pages")
-	public static final SidebarPages rightSidebarPages = new SidebarPages(List.of(
-		new SidebarPages.SidebarPage(SidebarType.INDEX),
-		new SidebarPages.SidebarPage(SidebarType.CRAFTABLES)
-	), SidebarSettings.RIGHT);
-
-	@Comment("The subpanels in the right sidebar")
-	@ConfigValue("ui.right-sidebar-subpanels")
-	public static final SidebarSubpanels rightSidebarSubpanels = new SidebarSubpanels(List.of(
-	), SidebarSettings.RIGHT);
-
-	@Comment("How many columns and rows of ingredients to limit the right sidebar to")
-	@ConfigValue("ui.right-sidebar-size")
-	public static final IntGroup rightSidebarSize = new IntGroup(
-		"emi.sidebar.size.",
-		List.of("columns", "rows"),
-		IntList.of(12, 100)
-	);
-
-	@Comment("How much space to maintain between the right sidebar and obstructions, in pixels")
-	@ConfigValue("ui.right-sidebar-margins")
-	public static final Margins rightSidebarMargins = new Margins(2, 2, 2, 2);
-
-	@Comment("Where to position the right sidebar")
-	@ConfigValue("ui.right-sidebar-align")
-	public static ScreenAlign rightSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.RIGHT, ScreenAlign.Vertical.TOP);
-
-	@Comment("Whether to render the header buttons and page count for the right sidebar")
-	@ConfigValue("ui.right-sidebar-header")
-	public static HeaderType rightSidebarHeader = HeaderType.VISIBLE;
-
-	@ConfigGroupEnd
-	@Comment("Which theme to use for the right sidebar")
-	@ConfigValue("ui.right-sidebar-theme")
-	public static SidebarTheme rightSidebarTheme = SidebarTheme.TRANSPARENT;
-
-	// Top sidebar
-
-	@ConfigGroup("ui.top-sidebar")
-	@Comment("The pages in the top sidebar")
-	@ConfigValue("ui.top-sidebar-pages")
-	public static final SidebarPages topSidebarPages = new SidebarPages(List.of(
-	), SidebarSettings.TOP);
-
-	@Comment("The subpanels in the top sidebar")
-	@ConfigValue("ui.top-sidebar-subpanels")
-	public static final SidebarSubpanels topSidebarSubpanels = new SidebarSubpanels(List.of(
-	), SidebarSettings.TOP);
-
-	@Comment("How many columns and rows of ingredients to limit the top sidebar to")
-	@ConfigValue("ui.top-sidebar-size")
-	public static final IntGroup topSidebarSize = new IntGroup(
-		"emi.sidebar.size.",
-		List.of("columns", "rows"),
-		IntList.of(9, 9)
-	);
-
-	@Comment("How much space to maintain between the top sidebar and obstructions, in pixels")
-	@ConfigValue("ui.top-sidebar-margins")
-	public static final Margins topSidebarMargins = new Margins(2, 2, 2, 2);
-
-	@Comment("Where to position the top sidebar")
-	@ConfigValue("ui.top-sidebar-align")
-	public static ScreenAlign topSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.CENTER, ScreenAlign.Vertical.CENTER);
-
-	@Comment("Whether to render the header buttons and page count for the top sidebar")
-	@ConfigValue("ui.top-sidebar-header")
-	public static HeaderType topSidebarHeader = HeaderType.VISIBLE;
-
-	@ConfigGroupEnd
-	@Comment("Which theme to use for the top sidebar")
-	@ConfigValue("ui.top-sidebar-theme")
-	public static SidebarTheme topSidebarTheme = SidebarTheme.TRANSPARENT;
-
-	// Bottom sidebar
-
-	@ConfigGroup("ui.bottom-sidebar")
-	@Comment("The pages in the bottom sidebar")
-	@ConfigValue("ui.bottom-sidebar-pages")
-	public static final SidebarPages bottomSidebarPages = new SidebarPages(List.of(
-	), SidebarSettings.BOTTOM);
-
-	@Comment("The subpanels in the bottom sidebar")
-	@ConfigValue("ui.bottom-sidebar-subpanels")
-	public static final SidebarSubpanels bottomSidebarSubpanels = new SidebarSubpanels(List.of(
-	), SidebarSettings.BOTTOM);
-
-	@Comment("How many columns and rows of ingredients to limit the bottom sidebar to")
-	@ConfigValue("ui.bottom-sidebar-size")
-	public static final IntGroup bottomSidebarSize = new IntGroup(
-		"emi.sidebar.size.",
-		List.of("columns", "rows"),
-		IntList.of(9, 9)
-	);
-
-	@Comment("How much space to maintain between the bottom sidebar and obstructions, in pixels")
-	@ConfigValue("ui.bottom-sidebar-margins")
-	public static final Margins bottomSidebarMargins = new Margins(2, 2, 2, 2);
-
-	@Comment("Where to position the bottom sidebar")
-	@ConfigValue("ui.bottom-sidebar-align")
-	public static final ScreenAlign bottomSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.CENTER, ScreenAlign.Vertical.CENTER);
-
-	@Comment("Whether to render the header buttons and page count for the bottom sidebar")
-	@ConfigValue("ui.bottom-sidebar-header")
-	public static final HeaderType bottomSidebarHeader = HeaderType.VISIBLE;
-
-	@ConfigGroupEnd
-	@Comment("Which theme to use for the bottom sidebar")
-	@ConfigValue("ui.bottom-sidebar-theme")
-	public static final SidebarTheme bottomSidebarTheme = SidebarTheme.TRANSPARENT;
-
-	// Binds
-	@Comment("Toggle the visibility of EMI.")
-	@ConfigValue("binds.toggle-visibility")
-	public static final EmiBind toggleVisibility = new EmiBind("key.emi.toggle_visibility", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_O);
-
-	@Comment("Focuses the search bar.")
-	@ConfigValue("binds.focus-search")
-	public static final EmiBind focusSearch = new EmiBind("key.emi.focus_search", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_F);
-
-	@Comment("Clears the search bar.")
-	@ConfigValue("binds.clear-search")
-	public static final EmiBind clearSearch = new EmiBind("key.emi.clear_search", InputConstants.UNKNOWN.getValue());
-
-	@Comment("Display all recipes in the game.")
-	@ConfigValue("binds.display-all-recipes")
-	public static final EmiBind displayAllRecipes = new EmiBind("key.emi.display_all_recipes", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_Y);
-
-	@Comment("Display the recipes for creating a stack.")
-	@ConfigValue("binds.view-recipes")
-	public static final EmiBind viewRecipes = new EmiBind("key.emi.view_recipes",
-		new EmiBind.ModifiedKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_R), 0),
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
-
-	@Comment("Display the recipes that can be created using a stack.")
-	@ConfigValue("binds.view-uses")
-	public static final EmiBind viewUses = new EmiBind("key.emi.view_uses",
-		new EmiBind.ModifiedKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_U), 0),
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(1), 0));
-
-	@Comment("Favorite the item to display on the side of the screen opposite of recipies for quick access.")
-	@ConfigValue("binds.favorite")
-	public static final EmiBind favorite = new EmiBind("key.emi.favorite", GLFW.GLFW_KEY_A);
-
-	@Comment("Open the hovered bookmark group's temporary recipe tree without replacing the current plan.")
-	@ConfigValue("binds.view-bookmark-group")
-	public static final EmiBind viewBookmarkGroup = new EmiBind("key.emi.view_bookmark_group", GLFW.GLFW_KEY_T);
-
-	@Comment("Take the bookmark group's item materials from ordinary storage; add Shift to subtract inventory.")
-	@ConfigValue("binds.take-bookmark-group")
-	public static final EmiBind takeBookmarkGroup = new EmiBind("key.emi.take_bookmark_group", GLFW.GLFW_KEY_V);
-
-	@Comment("Craft the selected bookmark group in the current supported crafting container.")
-	@ConfigValue("binds.craft-bookmark-group")
-	public static final EmiBind craftBookmarkGroup = new EmiBind("key.emi.craft_bookmark_group", EmiInput.SHIFT_MASK, GLFW.GLFW_KEY_C);
-
-	@Comment("Set the default recipe for a given stack in the output of a recipe to that recipe.")
-	@ConfigValue("binds.default-stack")
-	public static final EmiBind defaultStack = new EmiBind("key.emi.default_stack",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
-
-	@Comment("Display the recipe tree for a given stack.")
-	@ConfigValue("binds.view-stack-tree")
-	public static final EmiBind viewStackTree = new EmiBind("key.emi.view_stack_tree", InputConstants.UNKNOWN.getValue());
-
-	@Comment("Display the recipe tree.")
-	@ConfigValue("binds.view-tree")
-	public static final EmiBind viewTree = new EmiBind("key.emi.view_tree", InputConstants.UNKNOWN.getValue());
-
-	@Comment("Return to the previous page in EMI.")
-	@ConfigValue("binds.back")
-	public static final EmiBind back = new EmiBind("key.emi.back", GLFW.GLFW_KEY_BACKSPACE);
-
-	@Comment("Return to the next page in EMI after going back.")
-	@ConfigValue("binds.forward")
-	public static final EmiBind forward = new EmiBind("key.emi.forward", InputConstants.UNKNOWN.getValue());
-
-	@ConfigGroup("binds.crafts")
-	@Comment("When on a stack with an associated recipe:\n"
-		+ "Move ingredients for a single result.")
-	@ConfigValue("binds.craft-one")
-	public static final EmiBind craftOne = new EmiBind("key.emi.craft_one",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
-
-	@Comment("When on a stack with an associated recipe:\n"
-		+ "Move ingredients for as many results as possible.")
-	@ConfigValue("binds.craft-all")
-	public static final EmiBind craftAll = new EmiBind("key.emi.craft_all",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.SHIFT_MASK));
-
-	@Comment("When on a stack with an associated recipe:\n"
-		+ "Move ingredients for a single result and put in inventory if possible.")
-	@ConfigValue("binds.craft-one-to-inventory")
-	public static final EmiBind craftOneToInventory = new EmiBind("key.emi.craft_one_to_inventory", InputConstants.UNKNOWN.getValue());
-
-	@Comment("When on a stack with an associated recipe:\n"
-		+ "Move ingredients for as many results as possible and put in inventory if possible.")
-	@ConfigValue("binds.craft-all-to-inventory")
-	public static final EmiBind craftAllToInventory = new EmiBind("key.emi.craft_all_to_inventory", InputConstants.UNKNOWN.getValue());
-
-	@Comment("When on a stack with an associated recipe:\n"
-		+ "Move ingredients for a single result and put in cursor if possible.")
-	@ConfigValue("binds.craft-one-to-cursor")
-	public static final EmiBind craftOneToCursor = new EmiBind("key.emi.craft_one_to_cursor",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
-
-	@ConfigGroupEnd
-	@Comment("Display the recipe that will be used to craft on a stack with no recipe context.")
-	@ConfigValue("binds.show-craft")
-	public static final EmiBind showCraft = new EmiBind("key.emi.show_craft", GLFW.GLFW_KEY_LEFT_SHIFT);
-
-	@ConfigGroup("binds.cheats")
-	@Comment("Cheat in one of an item into the inventory.")
-	@ConfigValue("binds.cheat-one-to-inventory")
-	public static final EmiBind cheatOneToInventory = new EmiBind("key.emi.cheat_one_to_inventory",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(1), EmiInput.CONTROL_MASK));
-
-	@Comment("Cheat in a stack of an item into the inventory.")
-	@ConfigValue("binds.cheat-stack-to-inventory")
-	public static final EmiBind cheatStackToInventory = new EmiBind("key.emi.cheat_stack_to_inventory",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
-
-	@Comment("Cheat in one of an item into the cursor.")
-	@ConfigValue("binds.cheat-one-to-cursor")
-	public static final EmiBind cheatOneToCursor = new EmiBind("key.emi.cheat_one_to_cursor",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(2), EmiInput.CONTROL_MASK));
-
-	@Comment("Cheat in a stack of an item into the cursor.")
-	@ConfigValue("binds.cheat-stack-to-cursor")
-	public static final EmiBind cheatStackToCursor = new EmiBind("key.emi.cheat_stack_to_cursor", InputConstants.UNKNOWN.getValue());
-
-	@ConfigGroupEnd
-	@Comment("Delete the stack in the cursor when hovering the index")
-	@ConfigValue("binds.delete-cursor-stack")
-	public static final EmiBind deleteCursorStack = new EmiBind("key.emi.delete_cursor_stack",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
-
-	@Comment("Copies the hovered recipe's ID to the clipboard")
-	@ConfigValue("binds.copy-recipe-id")
-	public static final EmiBind copyId = new EmiBind("key.emi.copy_recipe_id", InputConstants.UNKNOWN.getValue());
-
-	@Comment("In edit mode, hide the hovered stack")
-	@ConfigValue("binds.hide-stack")
-	public static final EmiBind hideStack = new EmiBind("key.emi.hide_stack",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
-
-	@Comment("In edit mode, hide stacks with the hovered stack's id")
-	@ConfigValue("binds.hide-stack-by-id")
-	public static final EmiBind hideStackById = new EmiBind("key.emi.hide_stack_by_id",
-		new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK | EmiInput.SHIFT_MASK));
-
-	// Dev
-	@Comment("Whether development functions should be enabled. Not recommended for general play.")
-	@ConfigValue("dev.dev-mode")
-	public static final boolean devMode = EmiAgnos.isDevelopmentEnvironment();
-
-	@Comment("Whether editing the index is enabled")
-	@ConfigValue("dev.edit-mode")
-	public static final boolean editMode = false;
-
-	@Comment("Whether to log untranslated tags as warnings.")
-	@ConfigValue("dev.log-untranslated-tags")
-	public static final boolean logUntranslatedTags = EmiAgnos.isDevelopmentEnvironment();
-
-	@Comment("Whether to log ingredients that don't have a representative tag as warnings.")
-	@ConfigValue("dev.log-non-tag-ingredients")
-	public static final boolean logNonTagIngredients = false;
-
-	@Comment("Whether hovering the output of a recipe should show the recipe's EMI ID.")
-	@ConfigValue("dev.show-recipe-ids")
-	public static final boolean showRecipeIds = false;
-
-	@Comment("Whether to display additional widgets added to recipes from other mods.\nThese are typically developer facing and compatibility related, and not useful for players.")
-	@ConfigValue("dev.show-recipe-decorators")
-	public static final boolean showRecipeDecorators = EmiAgnos.isDevelopmentEnvironment();
-
-	@Comment("Whether stacks in the index should display a highlight if they have a recipe default.")
-	@ConfigValue("dev.highlight-defaulted")
-	public static final boolean highlightDefaulted = false;
-
-	@Comment("Whether to display exclusion areas")
-	@ConfigValue("dev.highlight-exclusion-areas")
-	public static final boolean highlightExclusionAreas = false;
-
-	// Persistent (currently empty)
-
-	public static void loadConfig() {
-		try {
-			File global = new File(getGlobalFolder(), "global.css");
-			if (global.exists() && global.isFile()) {
-				QDCSS css = QDCSS.load(global);
-				if (css.containsKey("global.use-global") && css.get("global.use-global").get().equals("true")) {
-					useGlobalConfig = true;
-				}
-			}
-			File config = getConfigFile();
-			if (config.exists() && config.isFile()) {
-				QDCSS css = QDCSS.load(config);
-				loadConfig(css);
-			} else {
-				File defaultConfig = new File(EmiAgnos.getConfigDirectory().getParent().toFile(), "defaultconfigs/emi.css");
-				if (defaultConfig.exists() && defaultConfig.isFile()) {
-					QDCSS css = QDCSS.load(defaultConfig);
-					loadConfig(css);
-				}
-			}
-			if (startupConfig == null) {
-				startupConfig = getSavedConfig();
-			}
-			writeConfig();
-		} catch (Exception e) {
-			EmiLog.error("Error reading config", e);
-		}
-	}
-
-	public static void setGlobalState(boolean useGlobal) {
-		try {
-			File folder = getGlobalFolder();
-			folder.mkdirs();
-			File global = new File(folder, "global.css");
-			FileWriter writer = new FileWriter(global);
-			writer.write("#global {\n\tuse-global: " + useGlobal + ";\n}\n");
-			writer.close();
-			useGlobalConfig = useGlobal;
-			File emi = getConfigFile();
-			if (!emi.exists()) {
-				emi.createNewFile();
-				writeConfig();
-			} else {
-				loadConfig();
-			}
-		} catch (Exception e) {
-			EmiLog.error("Error writing global config", e);
-		}
-	}
-
-	public static void loadConfig(QDCSS css) {
-		try {
-			Set<String> consumed = Sets.newHashSet();
-			for (Field field : EmiConfig.class.getFields()) {
-				ConfigValue annot = field.getAnnotation(ConfigValue.class);
-				if (annot != null) {
-					if (css.containsKey(annot.value())) {
-						consumed.add(annot.value());
-						assignField(css, annot.value(), field);
-					}
-				}
-			}
-			bookmarkQuantityStep = getBookmarkQuantityStep();
-			for (String key : css.keySet()) {
-				if (!consumed.contains(key)) {
-					unparsed.put(key, css.getAll(key));
-				}
-			}
-		} catch (Exception e) {
-			EmiLog.error("Error reading config", e);
-		}
-	}
-
-	public static void writeConfig() {
-		try {
-			FileWriter writer = new FileWriter(getConfigFile());
-			writer.write(getSavedConfig());
-			writer.close();
-		} catch (Exception e) {
-			EmiLog.error("Error writing config", e);
-		}
-	}
-
-	public static String getSavedConfig() {
-		Map<String, List<String>> unparsed = Maps.newLinkedHashMap();
-		StringSplitter wrapper = new StringSplitter((point, style) -> 1);
-		for (Field field : EmiConfig.class.getFields()) {
-			ConfigValue annot = field.getAnnotation(ConfigValue.class);
-			if (annot != null) {
-				String[] parts = annot.value().split("\\.");
-				String group = parts[0];
-				String key = parts[1];
-				Comment comment = field.getAnnotation(Comment.class);
-				StringBuilder commentText = new StringBuilder();
-				if (comment != null) {
-					commentText.append("\t/**\n");
-					for (FormattedText line : wrapper.splitLines(comment.value(), 80, Style.EMPTY)) {
-						commentText.append("\t * ");
-						commentText.append(line.getString());
-						commentText.append("\n");
-					}
-					commentText.append("\t */\n");
-				}
-				String text = commentText.toString();
-				try {
-					text += writeField(key, field);
-				} catch (Exception e) {
-					EmiLog.error("Error serializing config", e);
-				}
-				unparsed.computeIfAbsent(group, g -> Lists.newArrayList()).add(text);
-			}
-		}
-		for (Map.Entry<String, List<String>> entry : EmiConfig.unparsed.entrySet()) {
-			String[] parts = entry.getKey().split("\\.");
-			String group = parts[0];
-			String key = parts[1];
-			for (String value : entry.getValue()) {
-				unparsed.computeIfAbsent(group, g -> Lists.newArrayList()).add("\t/** unparsed */\n\t" + key + ": "
-					+ value + ";\n");
-			}
-		}
-		StringBuilder ret = new StringBuilder();
-		ret.append("/** EMI Config */\n\n");
-		boolean firstCategory = true;
-		for (Map.Entry<String, List<String>> category : unparsed.entrySet()) {
-			if (!firstCategory) {
-				ret.append("\n");
-			}
-			firstCategory = false;
-
-			ret.append("#").append(category.getKey()).append(" {\n");
-			ret.append(Strings.join(category.getValue(), "\n"));
-			ret.append("}\n");
-		}
-		return ret.toString();
-	}
-
-	private static File getConfigFile() {
-		String s = System.getProperty("emi.config");
-		if (s != null) {
-			File f = new File(s);
-			if (f.exists() && f.isFile()) {
-				return f;
-			}
-			EmiLog.error("System property 'emi.config' set to '" + s + "' but does not point to real file, using default config.");
-		}
-		if (useGlobalConfig) {
-			return new File(getGlobalFolder(), "emi.css");
-		}
-		return new File(EmiAgnos.getConfigDirectory().toFile(), "emi.css");
-	}
-
-	private static File getGlobalFolder() {
-		String s = switch (Util.getPlatform()) {
-			case WINDOWS -> System.getenv("APPDATA") + "/.minecraft";
-			case OSX -> System.getProperty("user.home") + "/Library/Application Support/minecraft";
-			default -> System.getProperty("user.home") + "/.minecraft";
-		};
-
-		return new File(s + "/global/emi");
-	}
-
-	private static void assignField(QDCSS css, String annot, Field field) throws IllegalAccessException {
-		Class<?> type = field.getType();
-		Setter setter = SETTERS.get(type);
-		if (setter != null) {
-			setter.setValue(css, annot, field);
-		} else if (ConfigEnum.class.isAssignableFrom(type)) {
-			SETTERS.get(ConfigEnum.class).setValue(css, annot, field);
-		} else {
-			throw new RuntimeException("[emi] Unknown parsing type: " + type);
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static String writeField(String key, Field field) throws IllegalAccessException {
-		StringBuilder text = new StringBuilder();
-		Class<?> type = field.getType();
-		if (MULTI_WRITERS.containsKey(type)) {
-			for (String line : ((MultiWriter<Object>) MULTI_WRITERS.get(type)).writeValue(field.get(null))) {
-				text.append("\t").append(key).append(": ").append(line).append(";\n");
-			}
-		} else if (WRITERS.containsKey(type)) {
-			text.append("\t").append(key).append(": ").append(((Writer<Object>) WRITERS.get(type)).writeValue(field.get(null))).append(";\n");
-		} else if (ConfigEnum.class.isAssignableFrom(type)) {
-			text.append("\t").append(key).append(": ").append(((Writer<Object>) WRITERS.get(ConfigEnum.class)).writeValue(field.get(null))).append(";\n");
-		}
-		return text.toString();
-	}
-
-	private static void defineType(Class<?> clazz, Setter setter, Writer<?> writer) {
-		SETTERS.put(clazz, setter);
-		WRITERS.put(clazz, writer);
-	}
-
-	private static void defineType(Class<?> clazz, Setter setter) {
-		defineType(clazz, setter, Object::toString);
-	}
-
-	private static void defineMultiType(Class<?> clazz, Setter setter, MultiWriter<?> writer) {
-		SETTERS.put(clazz, setter);
-		MULTI_WRITERS.put(clazz, writer);
-	}
-
-	static {
-		defineType(boolean.class, (css, annot, field) -> field.setBoolean(null, css.getBoolean(annot).get()));
-		defineType(int.class, (css, annot, field) -> field.setInt(null, css.getInt(annot).get()));
-		defineType(double.class, (css, annot, field) -> field.setDouble(null, css.getDouble(annot).get()));
-		defineType(String.class,
-			(css, annot, field) -> {
-				String s = css.get(annot).get();
-				s = s.substring(1, s.length() - 1);
-				field.set(null, s);
-			},
-			(String field) -> "\"" + field + "\"");
-		defineMultiType(EmiBind.class,
-			(css, annot, field) -> {
-				List<String> strings = Lists.newArrayList(css.getAll(annot));
-				for (int i = 0; i < strings.size(); i++) {
-					String s = strings.get(i);
-					strings.set(i, s.substring(1, s.length() - 1));
-				}
-				((EmiBind) field.get(null)).setKey(strings);
-			},
-			(EmiBind field) -> {
-				List<String> list = Lists.newArrayList();
-				for (EmiBind.ModifiedKey key : field.boundKeys) {
-					if (!key.isUnbound() || field.boundKeys.size() == 1) {
-						list.add("\"" + key.toName() + "\"");
-					}
-				}
-				return list;
-			});
-		defineType(ScreenAlign.class,
-			(css, annot, field) -> {
-				String[] parts = css.get(annot).get().split(",");
-				if (parts.length == 2) {
-					((ScreenAlign) field.get(null)).horizontal = ScreenAlign.Horizontal.fromName(parts[0].strip());
-					((ScreenAlign) field.get(null)).vertical = ScreenAlign.Vertical.fromName(parts[1].strip());
-				} else {
-					((ScreenAlign) field.get(null)).horizontal = ScreenAlign.Horizontal.CENTER;
-					((ScreenAlign) field.get(null)).vertical = ScreenAlign.Vertical.CENTER;
-				}
-			},
-			(ScreenAlign field) -> field.horizontal.getName() + ", " + field.vertical.getName());
-		defineType(SidebarPages.class,
-			(css, annot, field) -> {
-				String[] parts = css.get(annot).get().split(",");
-				SidebarPages pages = (SidebarPages) field.get(null);
-				pages.pages.clear();
-				for (String s : parts) {
-					pages.pages.add(new SidebarPages.SidebarPage(SidebarType.fromName(s.trim().toLowerCase())));
-				}
-				pages.unique();
-			},
-			(SidebarPages field) -> {
-				if (field.pages.isEmpty()) {
-					return "none";
-				} else {
-					return field.pages.stream().map(p -> p.type.getName()).collect(Collectors.joining(", "));
-				}
-			});
-		defineType(SidebarSubpanels.class,
-			(css, annot, field) -> {
-				String[] parts = css.get(annot).get().split(",");
-				SidebarSubpanels subpanels = (SidebarSubpanels) field.get(null);
-				subpanels.subpanels.clear();
-				for (String s : parts) {
-					String[] subparts = s.trim().split("\\s+");
-					SidebarType type = SidebarType.fromName(subparts[0].toLowerCase());
-					int rows = subparts.length > 1 ? Integer.parseInt(subparts[1]) : 1;
-					if (rows >= 1) {
-						subpanels.subpanels.add(new SidebarSubpanels.Subpanel(type, rows));
-					}
-				}
-				subpanels.unique();
-			},
-			(SidebarSubpanels field) -> {
-				if (field.subpanels.isEmpty()) {
-					return "none";
-				} else {
-					return field.subpanels.stream().map(p -> p.type.getName() + " " + p.rows).collect(Collectors.joining(", "));
-				}
-			});
-		defineType(IntGroup.class, (css, annot, field) -> ((IntGroup) field.get(null)).deserialize(css.get(annot).get()), (IntGroup group) -> group.serialize());
-		defineType(Margins.class, (css, annot, field) -> ((Margins) field.get(null)).deserialize(css.get(annot).get()), (Margins group) -> group.serialize());
-		defineType(ConfigEnum.class, (css, annot, field) -> {
-			String name = css.get(annot).get();
-			for (ConfigEnum e : (ConfigEnum[]) field.getType().getEnumConstants()) {
-				if (e.getName().equals(name)) {
-					field.set(null, e);
-					break;
-				}
-			}
-		}, (ConfigEnum c) -> c.getName());
-		try {
-			for (Field field : EmiConfig.class.getDeclaredFields()) {
-				ConfigFilter annot = field.getAnnotation(ConfigFilter.class);
-				if (annot != null) {
-					Predicate<?> predicate = (Predicate<?>) field.get(null);
-					FILTERS.put(annot.value(), predicate);
-				}
-			}
-		} catch (Exception e) {
-			EmiLog.error("Error reflecting config", e);
-		}
-		DEFAULT_CONFIG = getSavedConfig();
-	}
-
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ConfigValue {
-		String value();
-	}
-
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ConfigFilter {
-		String value();
-	}
-
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface Comment {
-		String value();
-	}
-
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ConfigGroup {
-		String value();
-	}
-
-	@Target(ElementType.FIELD)
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface ConfigGroupEnd {
-	}
-
-	private interface Setter {
-		void setValue(QDCSS css, String annot, Field field) throws IllegalAccessException ;
-	}
-
-	private interface Writer<T> {
-		String writeValue(T value);
-	}
-
-	private interface MultiWriter<T> {
-		List<String> writeValue(T value);
-	}
+    private static final Map<Class<?>, Setter> SETTERS = Maps.newHashMap();
+    private static final Map<Class<?>, Writer<?>> WRITERS = Maps.newHashMap();
+    private static final Map<Class<?>, MultiWriter<?>> MULTI_WRITERS = Maps.newHashMap();
+    private static final Map<String, List<String>> unparsed = Maps.newHashMap();
+    public static final Map<String, Predicate<?>> FILTERS = Maps.newHashMap();
+    public static final String DEFAULT_CONFIG;
+    public static boolean useGlobalConfig = false;
+    public static String startupConfig;
+
+    // General
+    @Comment("Whether EMI is enabled and visible.")
+    @ConfigValue("general.enabled")
+    public static boolean enabled = true;
+
+    /**
+     * Use {@link dev.emi.emi.api.EmiApi#isCheatMode EmiApi.isCheatMode()} to get the boolean value.
+     */
+    @Comment("Whether cheating in items is enabled.")
+    @ConfigValue("general.cheat-mode")
+    public static final CheatMode cheatMode = CheatMode.CREATIVE;
+
+    @Comment("How much EMI should use tooltips and popups to show controls and information.")
+    @ConfigValue("general.help-level")
+    public static final HelpLevel helpLevel = HelpLevel.NORMAL;
+
+    @Comment("Where EMI should pull stacks from to populate the index.")
+    @ConfigValue("general.index-source")
+    public static final IndexSource indexSource = IndexSource.CREATIVE;
+
+    @ConfigGroup("general.search")
+    @Comment("Which sidebar should be searched using the search bar.")
+    @ConfigValue("general.search-sidebar")
+    public static final SidebarSide searchSidebar = SidebarSide.RIGHT;
+
+    @Comment("Whether normal search queries should include the tooltip.")
+    @ConfigValue("general.search-tooltip-by-default")
+    public static final boolean searchTooltipByDefault = true;
+
+    @Comment("Whether normal search queries should include the mod name.")
+    @ConfigValue("general.search-mod-name-by-default")
+    public static final boolean searchModNameByDefault = false;
+
+    @ConfigGroupEnd
+    @Comment("Whether normal search queries should include the stack's tags.")
+    @ConfigValue("general.search-tags-by-default")
+    public static final boolean searchTagsByDefault = false;
+
+    // UI
+    @Comment("Which action should be performed when clicking the recipe book.")
+    @ConfigValue("ui.recipe-book-action")
+    public static final RecipeBookAction recipeBookAction = RecipeBookAction.TOGGLE_CRAFTABLES;
+
+    @Comment("Where to display status effects in the inventory.")
+    @ConfigValue("ui.effect-location")
+    public static final EffectLocation effectLocation = EffectLocation.TOP;
+
+    @Comment("Whether to display a gray overlay when hovering over a stack.")
+    @ConfigValue("ui.show-hover-overlay")
+    public static final boolean showHoverOverlay = true;
+
+    @ConfigGroup("ui.mod-id")
+    @Comment("Whether to add mod name to tooltips")
+    @ConfigValue("ui.append-mod-id")
+    public static final boolean appendModId = true;
+
+    @ConfigGroupEnd
+    @Comment("Whether to add mod name to item tooltips, in case another mod provides behavior")
+    @ConfigValue("ui.append-item-mod-id")
+    public static boolean appendItemModId = true;
+
+    @Comment("Prevents recipes being quick crafted from shifting around under the cursor.")
+    @ConfigValue("ui.miscraft-prevention")
+    public static final boolean miscraftPrevention = true;
+
+    @Comment("The unit to display fluids as.")
+    @ConfigValue("ui.fluid-unit")
+    public static final FluidUnit fluidUnit = EmiAgnos.isForge() ? FluidUnit.MILLIBUCKETS : FluidUnit.LITERS;
+
+    @Comment("Whether to use the batched render system. Batching is faster, but may have incompatibilities"
+            + " with shaders or other mods.")
+    @ConfigValue("ui.use-batched-renderer")
+    public static final boolean useBatchedRenderer = true;
+
+    @Comment("The bookmark quantity step used by Ctrl + Alt + scroll. Minimum: 1.")
+    @ConfigValue("ui.bookmark-quantity-step")
+    public static int bookmarkQuantityStep = 64;
+
+    @Comment("Initial layout for new bookmark groups. DEFAULT flows items through the grid;"
+            + " TODO puts each result/item on its own row. The group header still toggles this per group.")
+    @ConfigValue("ui.bookmark-view-mode")
+    public static final BookmarkViewMode bookmarkViewMode = BookmarkViewMode.DEFAULT;
+
+    /**
+     * Clamp on use as the config UI can assign integer fields directly.
+     */
+    public static int getBookmarkQuantityStep() {
+        return Math.max(1, bookmarkQuantityStep);
+    }
+
+    @Comment("Whether to have the search bar in the center of the screen, instead of to the side.")
+    @ConfigValue("ui.center-search-bar")
+    public static final boolean centerSearchBar = true;
+
+    @ConfigFilter("ui.search-sidebar-focus")
+    private static final Predicate<SidebarType> searchSidebarFocusFilter = type -> type != SidebarType.CHESS;
+
+    @Comment("Which sidebar type to switch to when searching.")
+    @ConfigValue("ui.search-sidebar-focus")
+    public static SidebarType searchSidebarFocus = SidebarType.INDEX;
+
+    @ConfigFilter("ui.empty-search-sidebar-focus")
+    private static final Predicate<SidebarType> emptySearchSidebarFocusFilter = type -> type != SidebarType.CHESS;
+
+    @Comment("Which sidebar type to focus when the search is empty.")
+    @ConfigValue("ui.empty-search-sidebar-focus")
+    public static SidebarType emptySearchSidebarFocus = SidebarType.NONE;
+
+    @Comment("Whether the EMI config button should be visible.")
+    @ConfigValue("ui.emi-config-button-visibility")
+    public static final ButtonVisibility emiConfigButtonVisibility = ButtonVisibility.SHOWN;
+
+    @Comment("Whether the recipe tree button should be visible.")
+    @ConfigValue("ui.recipe-tree-button-visibility")
+    public static final ButtonVisibility recipeTreeButtonVisibility = ButtonVisibility.AUTO;
+
+    @ConfigGroup("ui.recipe-screen")
+    @Comment("The maximum height the recipe screen will grow to be if space is available in pixels.")
+    @ConfigValue("ui.maximum-recipe-screen-height")
+    public static final int maximumRecipeScreenHeight = 256;
+
+    @Comment("The minimum width of the recipe screen in pixels. "
+            + "Controls how many tabs there can be, and where the page switching buttons go. "
+            + "The default is 176, the width of most screens.")
+    @ConfigValue("ui.minimum-recipe-screen-width")
+    public static final int minimumRecipeScreenWidth = 176;
+
+    @Comment("The amount of vertical margin to give in the recipe screen.")
+    @ConfigValue("ui.vertical-margin")
+    public static final int verticalMargin = 20;
+
+    @ConfigFilter("ui.workstation-location")
+    private static final Predicate<SidebarSide> workstationLocationFilter = side -> side != SidebarSide.TOP;
+    @Comment("Where to show workstations in the recipe screen")
+    @ConfigValue("ui.workstation-location")
+    public static final SidebarSide workstationLocation = SidebarSide.BOTTOM;
+
+    @ConfigGroupEnd()
+    @Comment("Display cost per batch when hovering a recipe output")
+    @ConfigValue("ui.show-cost-per-batch")
+    public static final boolean showCostPerBatch = true;
+
+    @ConfigGroup("ui.recipe-buttons")
+    @Comment("Whether recipes should have a button to set as default.")
+    @ConfigValue("ui.recipe-default-button")
+    public static final boolean recipeDefaultButton = true;
+
+    @Comment("Whether recipes should have a button to show the recipe tree.")
+    @ConfigValue("ui.recipe-tree-button")
+    public static final boolean recipeTreeButton = true;
+
+    @Comment("Whether recipes should have a button to fill the ingredients in a handler.")
+    @ConfigValue("ui.recipe-fill-button")
+    public static final boolean recipeFillButton = true;
+
+    @Comment("Whether recipes should have a button to take a screenshot of the recipe.")
+    @ConfigValue("ui.recipe-screenshot-button")
+    public static final boolean recipeScreenshotButton = false;
+
+    @ConfigGroupEnd
+    @Comment("The GUI scale at which recipe screenshots are saved. Use 0 to use the current GUI scale.")
+    @ConfigValue("ui.recipe-screenshot-scale")
+    public static final int recipeScreenshotScale = 0;
+
+    // Left sidebar
+
+    @ConfigGroup("ui.left-sidebar")
+    @Comment("The pages in the left sidebar")
+    @ConfigValue("ui.left-sidebar-pages")
+    public static final SidebarPages leftSidebarPages = new SidebarPages(List.of(
+            new SidebarPages.SidebarPage(SidebarType.FAVORITES)
+    ), SidebarSettings.LEFT);
+
+    @Comment("The subpanels in the left sidebar")
+    @ConfigValue("ui.left-sidebar-subpanels")
+    public static final SidebarSubpanels leftSidebarSubpanels = new SidebarSubpanels(List.of(
+    ), SidebarSettings.LEFT);
+
+    @Comment("How many columns and rows of ingredients to limit the left sidebar to")
+    @ConfigValue("ui.left-sidebar-size")
+    public static final IntGroup leftSidebarSize = new IntGroup(
+            "emi.sidebar.size.",
+            List.of("columns", "rows"),
+            IntList.of(12, 100)
+    );
+
+    @Comment("How much space to maintain between the left sidebar and obstructions, in pixels")
+    @ConfigValue("ui.left-sidebar-margins")
+    public static final Margins leftSidebarMargins = new Margins(2, 2, 2, 2);
+
+    @Comment("Where to position the left sidebar")
+    @ConfigValue("ui.left-sidebar-align")
+    public static ScreenAlign leftSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.LEFT, ScreenAlign.Vertical.TOP);
+
+    @Comment("Whether to render the header buttons and page count for the left sidebar")
+    @ConfigValue("ui.left-sidebar-header")
+    public static HeaderType leftSidebarHeader = HeaderType.VISIBLE;
+
+    @ConfigGroupEnd
+    @Comment("Which theme to use for the left sidebar")
+    @ConfigValue("ui.left-sidebar-theme")
+    public static SidebarTheme leftSidebarTheme = SidebarTheme.TRANSPARENT;
+
+
+    // Right sidebar
+
+    @ConfigGroup("ui.right-sidebar")
+    @Comment("The pages in the right sidebar")
+    @ConfigValue("ui.right-sidebar-pages")
+    public static final SidebarPages rightSidebarPages = new SidebarPages(List.of(
+            new SidebarPages.SidebarPage(SidebarType.INDEX),
+            new SidebarPages.SidebarPage(SidebarType.CRAFTABLES)
+    ), SidebarSettings.RIGHT);
+
+    @Comment("The subpanels in the right sidebar")
+    @ConfigValue("ui.right-sidebar-subpanels")
+    public static final SidebarSubpanels rightSidebarSubpanels = new SidebarSubpanels(List.of(
+    ), SidebarSettings.RIGHT);
+
+    @Comment("How many columns and rows of ingredients to limit the right sidebar to")
+    @ConfigValue("ui.right-sidebar-size")
+    public static final IntGroup rightSidebarSize = new IntGroup(
+            "emi.sidebar.size.",
+            List.of("columns", "rows"),
+            IntList.of(12, 100)
+    );
+
+    @Comment("How much space to maintain between the right sidebar and obstructions, in pixels")
+    @ConfigValue("ui.right-sidebar-margins")
+    public static final Margins rightSidebarMargins = new Margins(2, 2, 2, 2);
+
+    @Comment("Where to position the right sidebar")
+    @ConfigValue("ui.right-sidebar-align")
+    public static ScreenAlign rightSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.RIGHT, ScreenAlign.Vertical.TOP);
+
+    @Comment("Whether to render the header buttons and page count for the right sidebar")
+    @ConfigValue("ui.right-sidebar-header")
+    public static HeaderType rightSidebarHeader = HeaderType.VISIBLE;
+
+    @ConfigGroupEnd
+    @Comment("Which theme to use for the right sidebar")
+    @ConfigValue("ui.right-sidebar-theme")
+    public static SidebarTheme rightSidebarTheme = SidebarTheme.TRANSPARENT;
+
+    // Top sidebar
+
+    @ConfigGroup("ui.top-sidebar")
+    @Comment("The pages in the top sidebar")
+    @ConfigValue("ui.top-sidebar-pages")
+    public static final SidebarPages topSidebarPages = new SidebarPages(List.of(
+    ), SidebarSettings.TOP);
+
+    @Comment("The subpanels in the top sidebar")
+    @ConfigValue("ui.top-sidebar-subpanels")
+    public static final SidebarSubpanels topSidebarSubpanels = new SidebarSubpanels(List.of(
+    ), SidebarSettings.TOP);
+
+    @Comment("How many columns and rows of ingredients to limit the top sidebar to")
+    @ConfigValue("ui.top-sidebar-size")
+    public static final IntGroup topSidebarSize = new IntGroup(
+            "emi.sidebar.size.",
+            List.of("columns", "rows"),
+            IntList.of(9, 9)
+    );
+
+    @Comment("How much space to maintain between the top sidebar and obstructions, in pixels")
+    @ConfigValue("ui.top-sidebar-margins")
+    public static final Margins topSidebarMargins = new Margins(2, 2, 2, 2);
+
+    @Comment("Where to position the top sidebar")
+    @ConfigValue("ui.top-sidebar-align")
+    public static ScreenAlign topSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.CENTER, ScreenAlign.Vertical.CENTER);
+
+    @Comment("Whether to render the header buttons and page count for the top sidebar")
+    @ConfigValue("ui.top-sidebar-header")
+    public static HeaderType topSidebarHeader = HeaderType.VISIBLE;
+
+    @ConfigGroupEnd
+    @Comment("Which theme to use for the top sidebar")
+    @ConfigValue("ui.top-sidebar-theme")
+    public static SidebarTheme topSidebarTheme = SidebarTheme.TRANSPARENT;
+
+    // Bottom sidebar
+
+    @ConfigGroup("ui.bottom-sidebar")
+    @Comment("The pages in the bottom sidebar")
+    @ConfigValue("ui.bottom-sidebar-pages")
+    public static final SidebarPages bottomSidebarPages = new SidebarPages(List.of(
+    ), SidebarSettings.BOTTOM);
+
+    @Comment("The subpanels in the bottom sidebar")
+    @ConfigValue("ui.bottom-sidebar-subpanels")
+    public static final SidebarSubpanels bottomSidebarSubpanels = new SidebarSubpanels(List.of(
+    ), SidebarSettings.BOTTOM);
+
+    @Comment("How many columns and rows of ingredients to limit the bottom sidebar to")
+    @ConfigValue("ui.bottom-sidebar-size")
+    public static final IntGroup bottomSidebarSize = new IntGroup(
+            "emi.sidebar.size.",
+            List.of("columns", "rows"),
+            IntList.of(9, 9)
+    );
+
+    @Comment("How much space to maintain between the bottom sidebar and obstructions, in pixels")
+    @ConfigValue("ui.bottom-sidebar-margins")
+    public static final Margins bottomSidebarMargins = new Margins(2, 2, 2, 2);
+
+    @Comment("Where to position the bottom sidebar")
+    @ConfigValue("ui.bottom-sidebar-align")
+    public static final ScreenAlign bottomSidebarAlign = new ScreenAlign(ScreenAlign.Horizontal.CENTER, ScreenAlign.Vertical.CENTER);
+
+    @Comment("Whether to render the header buttons and page count for the bottom sidebar")
+    @ConfigValue("ui.bottom-sidebar-header")
+    public static final HeaderType bottomSidebarHeader = HeaderType.VISIBLE;
+
+    @ConfigGroupEnd
+    @Comment("Which theme to use for the bottom sidebar")
+    @ConfigValue("ui.bottom-sidebar-theme")
+    public static final SidebarTheme bottomSidebarTheme = SidebarTheme.TRANSPARENT;
+
+    // Binds
+    @Comment("Toggle the visibility of EMI.")
+    @ConfigValue("binds.toggle-visibility")
+    public static final EmiBind toggleVisibility = new EmiBind("key.emi.toggle_visibility", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_O);
+
+    @Comment("Focuses the search bar.")
+    @ConfigValue("binds.focus-search")
+    public static final EmiBind focusSearch = new EmiBind("key.emi.focus_search", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_F);
+
+    @Comment("Clears the search bar.")
+    @ConfigValue("binds.clear-search")
+    public static final EmiBind clearSearch = new EmiBind("key.emi.clear_search", InputConstants.UNKNOWN.getValue());
+
+    @Comment("Display all recipes in the game.")
+    @ConfigValue("binds.display-all-recipes")
+    public static final EmiBind displayAllRecipes = new EmiBind("key.emi.display_all_recipes", EmiInput.CONTROL_MASK, GLFW.GLFW_KEY_Y);
+
+    @Comment("Display the recipes for creating a stack.")
+    @ConfigValue("binds.view-recipes")
+    public static final EmiBind viewRecipes = new EmiBind("key.emi.view_recipes",
+            new EmiBind.ModifiedKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_R), 0),
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
+
+    @Comment("Display the recipes that can be created using a stack.")
+    @ConfigValue("binds.view-uses")
+    public static final EmiBind viewUses = new EmiBind("key.emi.view_uses",
+            new EmiBind.ModifiedKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_U), 0),
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(1), 0));
+
+    @Comment("Favorite the item to display on the side of the screen opposite of recipies for quick access.")
+    @ConfigValue("binds.favorite")
+    public static final EmiBind favorite = new EmiBind("key.emi.favorite", GLFW.GLFW_KEY_A);
+
+    @Comment("Open the hovered bookmark group's temporary recipe tree without replacing the current plan.")
+    @ConfigValue("binds.view-bookmark-group")
+    public static final EmiBind viewBookmarkGroup = new EmiBind("key.emi.view_bookmark_group", GLFW.GLFW_KEY_T);
+
+    @Comment("Take the bookmark group's item materials from ordinary storage; add Shift to subtract inventory.")
+    @ConfigValue("binds.take-bookmark-group")
+    public static final EmiBind takeBookmarkGroup = new EmiBind("key.emi.take_bookmark_group", GLFW.GLFW_KEY_V);
+
+    @Comment("Craft the selected bookmark group in the current supported crafting container.")
+    @ConfigValue("binds.craft-bookmark-group")
+    public static final EmiBind craftBookmarkGroup = new EmiBind("key.emi.craft_bookmark_group", EmiInput.SHIFT_MASK, GLFW.GLFW_KEY_C);
+
+    @Comment("Set the default recipe for a given stack in the output of a recipe to that recipe.")
+    @ConfigValue("binds.default-stack")
+    public static final EmiBind defaultStack = new EmiBind("key.emi.default_stack",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
+
+    @Comment("Display the recipe tree for a given stack.")
+    @ConfigValue("binds.view-stack-tree")
+    public static final EmiBind viewStackTree = new EmiBind("key.emi.view_stack_tree", InputConstants.UNKNOWN.getValue());
+
+    @Comment("Display the recipe tree.")
+    @ConfigValue("binds.view-tree")
+    public static final EmiBind viewTree = new EmiBind("key.emi.view_tree", InputConstants.UNKNOWN.getValue());
+
+    @Comment("Return to the previous page in EMI.")
+    @ConfigValue("binds.back")
+    public static final EmiBind back = new EmiBind("key.emi.back", GLFW.GLFW_KEY_BACKSPACE);
+
+    @Comment("Return to the next page in EMI after going back.")
+    @ConfigValue("binds.forward")
+    public static final EmiBind forward = new EmiBind("key.emi.forward", InputConstants.UNKNOWN.getValue());
+
+    @ConfigGroup("binds.crafts")
+    @Comment("When on a stack with an associated recipe:\n"
+            + "Move ingredients for a single result.")
+    @ConfigValue("binds.craft-one")
+    public static final EmiBind craftOne = new EmiBind("key.emi.craft_one",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
+
+    @Comment("When on a stack with an associated recipe:\n"
+            + "Move ingredients for as many results as possible.")
+    @ConfigValue("binds.craft-all")
+    public static final EmiBind craftAll = new EmiBind("key.emi.craft_all",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.SHIFT_MASK));
+
+    @Comment("When on a stack with an associated recipe:\n"
+            + "Move ingredients for a single result and put in inventory if possible.")
+    @ConfigValue("binds.craft-one-to-inventory")
+    public static final EmiBind craftOneToInventory = new EmiBind("key.emi.craft_one_to_inventory", InputConstants.UNKNOWN.getValue());
+
+    @Comment("When on a stack with an associated recipe:\n"
+            + "Move ingredients for as many results as possible and put in inventory if possible.")
+    @ConfigValue("binds.craft-all-to-inventory")
+    public static final EmiBind craftAllToInventory = new EmiBind("key.emi.craft_all_to_inventory", InputConstants.UNKNOWN.getValue());
+
+    @Comment("When on a stack with an associated recipe:\n"
+            + "Move ingredients for a single result and put in cursor if possible.")
+    @ConfigValue("binds.craft-one-to-cursor")
+    public static final EmiBind craftOneToCursor = new EmiBind("key.emi.craft_one_to_cursor",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
+
+    @ConfigGroupEnd
+    @Comment("Display the recipe that will be used to craft on a stack with no recipe context.")
+    @ConfigValue("binds.show-craft")
+    public static final EmiBind showCraft = new EmiBind("key.emi.show_craft", GLFW.GLFW_KEY_LEFT_SHIFT);
+
+    @ConfigGroup("binds.cheats")
+    @Comment("Cheat in one of an item into the inventory.")
+    @ConfigValue("binds.cheat-one-to-inventory")
+    public static final EmiBind cheatOneToInventory = new EmiBind("key.emi.cheat_one_to_inventory",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(1), EmiInput.CONTROL_MASK));
+
+    @Comment("Cheat in a stack of an item into the inventory.")
+    @ConfigValue("binds.cheat-stack-to-inventory")
+    public static final EmiBind cheatStackToInventory = new EmiBind("key.emi.cheat_stack_to_inventory",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
+
+    @Comment("Cheat in one of an item into the cursor.")
+    @ConfigValue("binds.cheat-one-to-cursor")
+    public static final EmiBind cheatOneToCursor = new EmiBind("key.emi.cheat_one_to_cursor",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(2), EmiInput.CONTROL_MASK));
+
+    @Comment("Cheat in a stack of an item into the cursor.")
+    @ConfigValue("binds.cheat-stack-to-cursor")
+    public static final EmiBind cheatStackToCursor = new EmiBind("key.emi.cheat_stack_to_cursor", InputConstants.UNKNOWN.getValue());
+
+    @ConfigGroupEnd
+    @Comment("Delete the stack in the cursor when hovering the index")
+    @ConfigValue("binds.delete-cursor-stack")
+    public static final EmiBind deleteCursorStack = new EmiBind("key.emi.delete_cursor_stack",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), 0));
+
+    @Comment("Copies the hovered recipe's ID to the clipboard")
+    @ConfigValue("binds.copy-recipe-id")
+    public static final EmiBind copyId = new EmiBind("key.emi.copy_recipe_id", InputConstants.UNKNOWN.getValue());
+
+    @Comment("In edit mode, hide the hovered stack")
+    @ConfigValue("binds.hide-stack")
+    public static final EmiBind hideStack = new EmiBind("key.emi.hide_stack",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK));
+
+    @Comment("In edit mode, hide stacks with the hovered stack's id")
+    @ConfigValue("binds.hide-stack-by-id")
+    public static final EmiBind hideStackById = new EmiBind("key.emi.hide_stack_by_id",
+            new EmiBind.ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(0), EmiInput.CONTROL_MASK | EmiInput.SHIFT_MASK));
+
+    // Dev
+    @Comment("Whether development functions should be enabled. Not recommended for general play.")
+    @ConfigValue("dev.dev-mode")
+    public static final boolean devMode = EmiAgnos.isDevelopmentEnvironment();
+
+    @Comment("Whether editing the index is enabled")
+    @ConfigValue("dev.edit-mode")
+    public static final boolean editMode = false;
+
+    @Comment("Whether to log untranslated tags as warnings.")
+    @ConfigValue("dev.log-untranslated-tags")
+    public static final boolean logUntranslatedTags = EmiAgnos.isDevelopmentEnvironment();
+
+    @Comment("Whether to log ingredients that don't have a representative tag as warnings.")
+    @ConfigValue("dev.log-non-tag-ingredients")
+    public static final boolean logNonTagIngredients = false;
+
+    @Comment("Whether hovering the output of a recipe should show the recipe's EMI ID.")
+    @ConfigValue("dev.show-recipe-ids")
+    public static final boolean showRecipeIds = false;
+
+    @Comment("Whether to display additional widgets added to recipes from other mods.\nThese are typically developer facing and compatibility related, and not useful for players.")
+    @ConfigValue("dev.show-recipe-decorators")
+    public static final boolean showRecipeDecorators = EmiAgnos.isDevelopmentEnvironment();
+
+    @Comment("Whether stacks in the index should display a highlight if they have a recipe default.")
+    @ConfigValue("dev.highlight-defaulted")
+    public static final boolean highlightDefaulted = false;
+
+    @Comment("Whether to display exclusion areas")
+    @ConfigValue("dev.highlight-exclusion-areas")
+    public static final boolean highlightExclusionAreas = false;
+
+    // Persistent (currently empty)
+
+    public static void loadConfig() {
+        try {
+            File global = new File(getGlobalFolder(), "global.css");
+            if (global.exists() && global.isFile()) {
+                QDCSS css = QDCSS.load(global);
+                if (css.containsKey("global.use-global") && css.get("global.use-global").get().equals("true")) {
+                    useGlobalConfig = true;
+                }
+            }
+            File config = getConfigFile();
+            if (config.exists() && config.isFile()) {
+                QDCSS css = QDCSS.load(config);
+                loadConfig(css);
+            } else {
+                File defaultConfig = new File(EmiAgnos.getConfigDirectory().getParent().toFile(), "defaultconfigs/emi.css");
+                if (defaultConfig.exists() && defaultConfig.isFile()) {
+                    QDCSS css = QDCSS.load(defaultConfig);
+                    loadConfig(css);
+                }
+            }
+            if (startupConfig == null) {
+                startupConfig = getSavedConfig();
+            }
+            writeConfig();
+        } catch (Exception e) {
+            EmiLog.error("Error reading config", e);
+        }
+    }
+
+    public static void setGlobalState(boolean useGlobal) {
+        try {
+            File folder = getGlobalFolder();
+            folder.mkdirs();
+            File global = new File(folder, "global.css");
+            FileWriter writer = new FileWriter(global);
+            writer.write("#global {\n\tuse-global: " + useGlobal + ";\n}\n");
+            writer.close();
+            useGlobalConfig = useGlobal;
+            File emi = getConfigFile();
+            if (!emi.exists()) {
+                emi.createNewFile();
+                writeConfig();
+            } else {
+                loadConfig();
+            }
+        } catch (Exception e) {
+            EmiLog.error("Error writing global config", e);
+        }
+    }
+
+    public static void loadConfig(QDCSS css) {
+        try {
+            Set<String> consumed = Sets.newHashSet();
+            for (Field field : EmiConfig.class.getFields()) {
+                ConfigValue annot = field.getAnnotation(ConfigValue.class);
+                if (annot != null) {
+                    if (css.containsKey(annot.value())) {
+                        consumed.add(annot.value());
+                        assignField(css, annot.value(), field);
+                    }
+                }
+            }
+            bookmarkQuantityStep = getBookmarkQuantityStep();
+            for (String key : css.keySet()) {
+                if (!consumed.contains(key)) {
+                    unparsed.put(key, css.getAll(key));
+                }
+            }
+        } catch (Exception e) {
+            EmiLog.error("Error reading config", e);
+        }
+    }
+
+    public static void writeConfig() {
+        try {
+            FileWriter writer = new FileWriter(getConfigFile());
+            writer.write(getSavedConfig());
+            writer.close();
+        } catch (Exception e) {
+            EmiLog.error("Error writing config", e);
+        }
+    }
+
+    public static String getSavedConfig() {
+        Map<String, List<String>> unparsed = Maps.newLinkedHashMap();
+        StringSplitter wrapper = new StringSplitter((point, style) -> 1);
+        for (Field field : EmiConfig.class.getFields()) {
+            ConfigValue annot = field.getAnnotation(ConfigValue.class);
+            if (annot != null) {
+                String[] parts = annot.value().split("\\.");
+                String group = parts[0];
+                String key = parts[1];
+                Comment comment = field.getAnnotation(Comment.class);
+                StringBuilder commentText = new StringBuilder();
+                if (comment != null) {
+                    commentText.append("\t/**\n");
+                    for (FormattedText line : wrapper.splitLines(comment.value(), 80, Style.EMPTY)) {
+                        commentText.append("\t * ");
+                        commentText.append(line.getString());
+                        commentText.append("\n");
+                    }
+                    commentText.append("\t */\n");
+                }
+                String text = commentText.toString();
+                try {
+                    text += writeField(key, field);
+                } catch (Exception e) {
+                    EmiLog.error("Error serializing config", e);
+                }
+                unparsed.computeIfAbsent(group, g -> Lists.newArrayList()).add(text);
+            }
+        }
+        for (Map.Entry<String, List<String>> entry : EmiConfig.unparsed.entrySet()) {
+            String[] parts = entry.getKey().split("\\.");
+            String group = parts[0];
+            String key = parts[1];
+            for (String value : entry.getValue()) {
+                unparsed.computeIfAbsent(group, g -> Lists.newArrayList()).add("\t/** unparsed */\n\t" + key + ": "
+                        + value + ";\n");
+            }
+        }
+        StringBuilder ret = new StringBuilder();
+        ret.append("/** EMI Config */\n\n");
+        boolean firstCategory = true;
+        for (Map.Entry<String, List<String>> category : unparsed.entrySet()) {
+            if (!firstCategory) {
+                ret.append("\n");
+            }
+            firstCategory = false;
+
+            ret.append("#").append(category.getKey()).append(" {\n");
+            ret.append(Strings.join(category.getValue(), "\n"));
+            ret.append("}\n");
+        }
+        return ret.toString();
+    }
+
+    private static File getConfigFile() {
+        String s = System.getProperty("emi.config");
+        if (s != null) {
+            File f = new File(s);
+            if (f.exists() && f.isFile()) {
+                return f;
+            }
+            EmiLog.error("System property 'emi.config' set to '" + s + "' but does not point to real file, using default config.");
+        }
+        if (useGlobalConfig) {
+            return new File(getGlobalFolder(), "emi.css");
+        }
+        return new File(EmiAgnos.getConfigDirectory().toFile(), "emi.css");
+    }
+
+    private static File getGlobalFolder() {
+        String s = switch (Util.getPlatform()) {
+            case WINDOWS -> System.getenv("APPDATA") + "/.minecraft";
+            case OSX -> System.getProperty("user.home") + "/Library/Application Support/minecraft";
+            default -> System.getProperty("user.home") + "/.minecraft";
+        };
+
+        return new File(s + "/global/emi");
+    }
+
+    private static void assignField(QDCSS css, String annot, Field field) throws IllegalAccessException {
+        Class<?> type = field.getType();
+        Setter setter = SETTERS.get(type);
+        if (setter != null) {
+            setter.setValue(css, annot, field);
+        } else if (ConfigEnum.class.isAssignableFrom(type)) {
+            SETTERS.get(ConfigEnum.class).setValue(css, annot, field);
+        } else {
+            throw new RuntimeException("[emi] Unknown parsing type: " + type);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static String writeField(String key, Field field) throws IllegalAccessException {
+        StringBuilder text = new StringBuilder();
+        Class<?> type = field.getType();
+        if (MULTI_WRITERS.containsKey(type)) {
+            for (String line : ((MultiWriter<Object>) MULTI_WRITERS.get(type)).writeValue(field.get(null))) {
+                text.append("\t").append(key).append(": ").append(line).append(";\n");
+            }
+        } else if (WRITERS.containsKey(type)) {
+            text.append("\t").append(key).append(": ").append(((Writer<Object>) WRITERS.get(type)).writeValue(field.get(null))).append(";\n");
+        } else if (ConfigEnum.class.isAssignableFrom(type)) {
+            text.append("\t").append(key).append(": ").append(((Writer<Object>) WRITERS.get(ConfigEnum.class)).writeValue(field.get(null))).append(";\n");
+        }
+        return text.toString();
+    }
+
+    private static void defineType(Class<?> clazz, Setter setter, Writer<?> writer) {
+        SETTERS.put(clazz, setter);
+        WRITERS.put(clazz, writer);
+    }
+
+    private static void defineType(Class<?> clazz, Setter setter) {
+        defineType(clazz, setter, Object::toString);
+    }
+
+    private static void defineMultiType(Class<?> clazz, Setter setter, MultiWriter<?> writer) {
+        SETTERS.put(clazz, setter);
+        MULTI_WRITERS.put(clazz, writer);
+    }
+
+    static {
+        defineType(boolean.class, (css, annot, field) -> field.setBoolean(null, css.getBoolean(annot).get()));
+        defineType(int.class, (css, annot, field) -> field.setInt(null, css.getInt(annot).get()));
+        defineType(double.class, (css, annot, field) -> field.setDouble(null, css.getDouble(annot).get()));
+        defineType(String.class,
+                (css, annot, field) -> {
+                    String s = css.get(annot).get();
+                    s = s.substring(1, s.length() - 1);
+                    field.set(null, s);
+                },
+                (String field) -> "\"" + field + "\"");
+        defineMultiType(EmiBind.class,
+                (css, annot, field) -> {
+                    List<String> strings = Lists.newArrayList(css.getAll(annot));
+                    for (int i = 0; i < strings.size(); i++) {
+                        String s = strings.get(i);
+                        strings.set(i, s.substring(1, s.length() - 1));
+                    }
+                    ((EmiBind) field.get(null)).setKey(strings);
+                },
+                (EmiBind field) -> {
+                    List<String> list = Lists.newArrayList();
+                    for (EmiBind.ModifiedKey key : field.boundKeys) {
+                        if (!key.isUnbound() || field.boundKeys.size() == 1) {
+                            list.add("\"" + key.toName() + "\"");
+                        }
+                    }
+                    return list;
+                });
+        defineType(ScreenAlign.class,
+                (css, annot, field) -> {
+                    String[] parts = css.get(annot).get().split(",");
+                    if (parts.length == 2) {
+                        ((ScreenAlign) field.get(null)).horizontal = ScreenAlign.Horizontal.fromName(parts[0].strip());
+                        ((ScreenAlign) field.get(null)).vertical = ScreenAlign.Vertical.fromName(parts[1].strip());
+                    } else {
+                        ((ScreenAlign) field.get(null)).horizontal = ScreenAlign.Horizontal.CENTER;
+                        ((ScreenAlign) field.get(null)).vertical = ScreenAlign.Vertical.CENTER;
+                    }
+                },
+                (ScreenAlign field) -> field.horizontal.getName() + ", " + field.vertical.getName());
+        defineType(SidebarPages.class,
+                (css, annot, field) -> {
+                    String[] parts = css.get(annot).get().split(",");
+                    SidebarPages pages = (SidebarPages) field.get(null);
+                    pages.pages.clear();
+                    for (String s : parts) {
+                        pages.pages.add(new SidebarPages.SidebarPage(SidebarType.fromName(s.trim().toLowerCase())));
+                    }
+                    pages.unique();
+                },
+                (SidebarPages field) -> {
+                    if (field.pages.isEmpty()) {
+                        return "none";
+                    } else {
+                        return field.pages.stream().map(p -> p.type.getName()).collect(Collectors.joining(", "));
+                    }
+                });
+        defineType(SidebarSubpanels.class,
+                (css, annot, field) -> {
+                    String[] parts = css.get(annot).get().split(",");
+                    SidebarSubpanels subpanels = (SidebarSubpanels) field.get(null);
+                    subpanels.subpanels.clear();
+                    for (String s : parts) {
+                        String[] subparts = s.trim().split("\\s+");
+                        SidebarType type = SidebarType.fromName(subparts[0].toLowerCase());
+                        int rows = subparts.length > 1 ? Integer.parseInt(subparts[1]) : 1;
+                        if (rows >= 1) {
+                            subpanels.subpanels.add(new SidebarSubpanels.Subpanel(type, rows));
+                        }
+                    }
+                    subpanels.unique();
+                },
+                (SidebarSubpanels field) -> {
+                    if (field.subpanels.isEmpty()) {
+                        return "none";
+                    } else {
+                        return field.subpanels.stream().map(p -> p.type.getName() + " " + p.rows).collect(Collectors.joining(", "));
+                    }
+                });
+        defineType(IntGroup.class, (css, annot, field) -> ((IntGroup) field.get(null)).deserialize(css.get(annot).get()), (IntGroup group) -> group.serialize());
+        defineType(Margins.class, (css, annot, field) -> ((Margins) field.get(null)).deserialize(css.get(annot).get()), (Margins group) -> group.serialize());
+        defineType(ConfigEnum.class, (css, annot, field) -> {
+            String name = css.get(annot).get();
+            for (ConfigEnum e : (ConfigEnum[]) field.getType().getEnumConstants()) {
+                if (e.getName().equals(name)) {
+                    field.set(null, e);
+                    break;
+                }
+            }
+        }, (ConfigEnum c) -> c.getName());
+        try {
+            for (Field field : EmiConfig.class.getDeclaredFields()) {
+                ConfigFilter annot = field.getAnnotation(ConfigFilter.class);
+                if (annot != null) {
+                    Predicate<?> predicate = (Predicate<?>) field.get(null);
+                    FILTERS.put(annot.value(), predicate);
+                }
+            }
+        } catch (Exception e) {
+            EmiLog.error("Error reflecting config", e);
+        }
+        DEFAULT_CONFIG = getSavedConfig();
+    }
+
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ConfigValue {
+        String value();
+    }
+
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ConfigFilter {
+        String value();
+    }
+
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Comment {
+        String value();
+    }
+
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ConfigGroup {
+        String value();
+    }
+
+    @Target(ElementType.FIELD)
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface ConfigGroupEnd {
+    }
+
+    private interface Setter {
+        void setValue(QDCSS css, String annot, Field field) throws IllegalAccessException;
+    }
+
+    private interface Writer<T> {
+        String writeValue(T value);
+    }
+
+    private interface MultiWriter<T> {
+        List<String> writeValue(T value);
+    }
 }

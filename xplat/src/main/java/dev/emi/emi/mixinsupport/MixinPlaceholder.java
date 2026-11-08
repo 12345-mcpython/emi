@@ -1,5 +1,5 @@
 package dev.emi.emi.mixinsupport;
 
 public class MixinPlaceholder {
-	public static Object NEW_DUP;
+    public static Object NEW_DUP;
 }

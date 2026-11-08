@@ -1,14 +1,5 @@
 package dev.emi.emi.recipe.special;
 
-import java.util.List;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.item.enchantment.ItemEnchantments.Mutable;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
@@ -17,75 +8,84 @@ import dev.emi.emi.api.render.EmiTexture;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+
+import java.util.List;
 
 public class EmiAnvilEnchantRecipe implements EmiRecipe {
-	private final Item tool;
-	private final Enchantment enchantment;
-	private final int level;
-	private final ResourceLocation id;
+    private final Item tool;
+    private final Enchantment enchantment;
+    private final int level;
+    private final ResourceLocation id;
 
-	public EmiAnvilEnchantRecipe(Item tool, Enchantment enchantment, int level, ResourceLocation id) {
-		this.tool = tool;
-		this.enchantment = enchantment;
-		this.level = level;
-		this.id = id;
-	}
+    public EmiAnvilEnchantRecipe(Item tool, Enchantment enchantment, int level, ResourceLocation id) {
+        this.tool = tool;
+        this.enchantment = enchantment;
+        this.level = level;
+        this.id = id;
+    }
 
-	@Override
-	public EmiRecipeCategory getCategory() {
-		return VanillaEmiRecipeCategories.ANVIL_REPAIRING;
-	}
+    @Override
+    public EmiRecipeCategory getCategory() {
+        return VanillaEmiRecipeCategories.ANVIL_REPAIRING;
+    }
 
-	@Override
-	public ResourceLocation getId() {
-		return id;
-	}
+    @Override
+    public ResourceLocation getId() {
+        return id;
+    }
 
-	@Override
-	public List<EmiIngredient> getInputs() {
-		return List.of(EmiStack.of(tool), getBook());
-	}
+    @Override
+    public List<EmiIngredient> getInputs() {
+        return List.of(EmiStack.of(tool), getBook());
+    }
 
-	@Override
-	public List<EmiStack> getOutputs() {
-		return List.of(EmiStack.of(tool));
-	}
+    @Override
+    public List<EmiStack> getOutputs() {
+        return List.of(EmiStack.of(tool));
+    }
 
-	@Override
-	public boolean supportsRecipeTree() {
-		return false;
-	}
+    @Override
+    public boolean supportsRecipeTree() {
+        return false;
+    }
 
-	@Override
-	public int getDisplayWidth() {
-		return 125;
-	}
+    @Override
+    public int getDisplayWidth() {
+        return 125;
+    }
 
-	@Override
-	public int getDisplayHeight() {
-		return 18;
-	}
+    @Override
+    public int getDisplayHeight() {
+        return 18;
+    }
 
-	@Override
-	public void addWidgets(WidgetHolder widgets) {
-		widgets.addTexture(EmiTexture.PLUS, 27, 3);
-		widgets.addTexture(EmiTexture.EMPTY_ARROW, 75, 1);
-		widgets.addSlot(EmiStack.of(tool), 0, 0);
-		widgets.addSlot(getBook(), 49, 0);
-		widgets.addSlot(EmiStack.of(getTool()), 107, 0).recipeContext(this);
-	}
+    @Override
+    public void addWidgets(WidgetHolder widgets) {
+        widgets.addTexture(EmiTexture.PLUS, 27, 3);
+        widgets.addTexture(EmiTexture.EMPTY_ARROW, 75, 1);
+        widgets.addSlot(EmiStack.of(tool), 0, 0);
+        widgets.addSlot(getBook(), 49, 0);
+        widgets.addSlot(EmiStack.of(getTool()), 107, 0).recipeContext(this);
+    }
 
-	private ItemStack getTool() {
-		ItemStack itemStack = tool.getDefaultInstance();
-		itemStack.enchant(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), level);
-		return itemStack;
-	}
+    private ItemStack getTool() {
+        ItemStack itemStack = tool.getDefaultInstance();
+        itemStack.enchant(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), level);
+        return itemStack;
+    }
 
-	private EmiStack getBook() {
-		ItemStack item = new ItemStack(Items.ENCHANTED_BOOK);
-		var enchBuilder = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
-		enchBuilder.upgrade(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), level);
-		item.set(DataComponents.STORED_ENCHANTMENTS, enchBuilder.toImmutable());
-		return EmiStack.of(item);
-	}
+    private EmiStack getBook() {
+        ItemStack item = new ItemStack(Items.ENCHANTED_BOOK);
+        var enchBuilder = new ItemEnchantments.Mutable(ItemEnchantments.EMPTY);
+        enchBuilder.upgrade(EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment), level);
+        item.set(DataComponents.STORED_ENCHANTMENTS, enchBuilder.toImmutable());
+        return EmiStack.of(item);
+    }
 }

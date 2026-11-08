@@ -1,11 +1,12 @@
 package dev.emi.emi.data;
 
-import java.util.List;
-import net.minecraft.network.chat.Component;
 import dev.emi.emi.api.stack.EmiIngredient;
+import net.minecraft.network.chat.Component;
+
+import java.util.List;
 
 public record EmiAlias(List<EmiIngredient> stacks, List<String> keys) {
 
-	public record Baked(List<EmiIngredient> stacks, List<Component> text) {
-	}
+    public record Baked(List<EmiIngredient> stacks, List<Component> text) {
+    }
 }

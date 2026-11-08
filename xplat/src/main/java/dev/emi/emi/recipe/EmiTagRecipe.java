@@ -1,8 +1,5 @@
 package dev.emi.emi.recipe;
 
-import java.util.List;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiUtil;
 import dev.emi.emi.VanillaPlugin;
@@ -13,40 +10,44 @@ import dev.emi.emi.api.recipe.EmiResolutionRecipe;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.TagEmiIngredient;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+
+import java.util.List;
 
 public class EmiTagRecipe extends EmiIngredientRecipe {
-	private final List<EmiStack> stacks;
-	private final EmiIngredient ingredient;
-	public final TagKey<?> key;
+    private final List<EmiStack> stacks;
+    private final EmiIngredient ingredient;
+    public final TagKey<?> key;
 
-	public EmiTagRecipe(TagKey<?> key) {
-		this.key = key;
-		this.ingredient = new TagEmiIngredient(key, 1);
-		this.stacks = ingredient.getEmiStacks();
-	}
+    public EmiTagRecipe(TagKey<?> key) {
+        this.key = key;
+        this.ingredient = new TagEmiIngredient(key, 1);
+        this.stacks = ingredient.getEmiStacks();
+    }
 
-	@Override
-	protected EmiIngredient getIngredient() {
-		return ingredient;
-	}
+    @Override
+    protected EmiIngredient getIngredient() {
+        return ingredient;
+    }
 
-	@Override
-	protected List<EmiStack> getStacks() {
-		return stacks;
-	}
+    @Override
+    protected List<EmiStack> getStacks() {
+        return stacks;
+    }
 
-	@Override
-	protected EmiRecipe getRecipeContext(EmiStack stack, int offset) {
-		return new EmiResolutionRecipe(ingredient, stack);
-	}
+    @Override
+    protected EmiRecipe getRecipeContext(EmiStack stack, int offset) {
+        return new EmiResolutionRecipe(ingredient, stack);
+    }
 
-	@Override
-	public EmiRecipeCategory getCategory() {
-		return VanillaPlugin.TAG;
-	}
+    @Override
+    public EmiRecipeCategory getCategory() {
+        return VanillaPlugin.TAG;
+    }
 
-	@Override
-	public ResourceLocation getId() {
-		return EmiPort.id("emi", "/tag/" + key.registry().location().getPath() + "/" + EmiUtil.subId(key.location()));
-	}
+    @Override
+    public ResourceLocation getId() {
+        return EmiPort.id("emi", "/tag/" + key.registry().location().getPath() + "/" + EmiUtil.subId(key.location()));
+    }
 }

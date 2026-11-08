@@ -1,12 +1,13 @@
 package dev.emi.emi.runtime.dev;
 
-import java.util.List;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+
+import java.util.List;
 
 public record RecipeError(Severity severity, List<ClientTooltipComponent> tooltip) {
 
-	public enum Severity {
-		ERROR,
-		WARNING
-	}
+    public enum Severity {
+        ERROR,
+        WARNING
+    }
 }

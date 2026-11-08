@@ -36,65 +36,65 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @EventBusSubscriber(modid = "emi", bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class EmiClientNeoForge {
 
-	@SubscribeEvent
-	public static void clientInit(FMLClientSetupEvent event) {
-		StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(NeoForgeRenderTypes::get).toList());
-		EmiClient.init();
-		EmiNetwork.initClient(packet -> PacketDistributor.sendToServer(EmiPacketHandler.wrap(packet)));
-		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::recipesReloaded);
-		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::tagsReloaded);
-		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::renderScreenForeground);
-		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::postRenderScreen);
-		ModList.get().getModContainerById("emi").orElseThrow().registerExtensionPoint(IConfigScreenFactory.class,
-				(container, last) -> new ConfigScreen(last));
-	}
+    @SubscribeEvent
+    public static void clientInit(FMLClientSetupEvent event) {
+        StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(NeoForgeRenderTypes::get).toList());
+        EmiClient.init();
+        EmiNetwork.initClient(packet -> PacketDistributor.sendToServer(EmiPacketHandler.wrap(packet)));
+        NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::recipesReloaded);
+        NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::tagsReloaded);
+        NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::renderScreenForeground);
+        NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::postRenderScreen);
+        ModList.get().getModContainerById("emi").orElseThrow().registerExtensionPoint(IConfigScreenFactory.class,
+                (container, last) -> new ConfigScreen(last));
+    }
 
-	@SubscribeEvent
-	public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
-		Minecraft client = Minecraft.getInstance();
-		EmiTags.registerTagModels(client.getResourceManager(), event::register, ModelResourceLocation.STANDALONE_VARIANT);
-	}
+    @SubscribeEvent
+    public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
+        Minecraft client = Minecraft.getInstance();
+        EmiTags.registerTagModels(client.getResourceManager(), event::register, ModelResourceLocation.STANDALONE_VARIANT);
+    }
 
-	@SubscribeEvent
-	public static void registerResourceReloaders(RegisterClientReloadListenersEvent event) {
-		EmiData.init(event::registerReloadListener);
-	}
+    @SubscribeEvent
+    public static void registerResourceReloaders(RegisterClientReloadListenersEvent event) {
+        EmiData.init(event::registerReloadListener);
+    }
 
-	public static void recipesReloaded(RecipesUpdatedEvent event) {
-		EmiReloadManager.reloadRecipes();
-	}
+    public static void recipesReloaded(RecipesUpdatedEvent event) {
+        EmiReloadManager.reloadRecipes();
+    }
 
-	public static void tagsReloaded(TagsUpdatedEvent event) {
-		EmiReloadManager.reloadTags();
-	}
+    public static void tagsReloaded(TagsUpdatedEvent event) {
+        EmiReloadManager.reloadTags();
+    }
 
-	public static void renderScreenForeground(ContainerScreenEvent.Render.Foreground event) {
-		EmiDrawContext context = EmiDrawContext.wrap(event.getGuiGraphics());
-		AbstractContainerScreen<?> screen = event.getContainerScreen();
-		EmiScreenBase base = EmiScreenBase.of(screen);
-		if (base != null) {
-			Minecraft client = Minecraft.getInstance();
-			context.push();
-			context.translate(-screen.getGuiLeft(), -screen.getGuiTop());
-			EmiPort.setPositionTexShader();
-			EmiScreenManager.render(context, event.getMouseX(), event.getMouseY(), client.getTimer().getGameTimeDeltaPartialTick(false));
-			context.pop();
-		}
-	}
+    public static void renderScreenForeground(ContainerScreenEvent.Render.Foreground event) {
+        EmiDrawContext context = EmiDrawContext.wrap(event.getGuiGraphics());
+        AbstractContainerScreen<?> screen = event.getContainerScreen();
+        EmiScreenBase base = EmiScreenBase.of(screen);
+        if (base != null) {
+            Minecraft client = Minecraft.getInstance();
+            context.push();
+            context.translate(-screen.getGuiLeft(), -screen.getGuiTop());
+            EmiPort.setPositionTexShader();
+            EmiScreenManager.render(context, event.getMouseX(), event.getMouseY(), client.getTimer().getGameTimeDeltaPartialTick(false));
+            context.pop();
+        }
+    }
 
-	public static void postRenderScreen(ScreenEvent.Render.Post event) {
-		EmiDrawContext context = EmiDrawContext.wrap(event.getGuiGraphics());
-		Screen screen = event.getScreen();
-		if (!(screen instanceof AbstractContainerScreen<?>)) {
-			return;
-		}
-		EmiScreenBase base = EmiScreenBase.of(screen);
-		if (base != null) {
-			Minecraft client = Minecraft.getInstance();
-			context.push();
-			EmiPort.setPositionTexShader();
-			EmiScreenManager.drawForeground(context, event.getMouseX(), event.getMouseY(), client.getTimer().getGameTimeDeltaPartialTick(false));
-			context.pop();
-		}
-	}
+    public static void postRenderScreen(ScreenEvent.Render.Post event) {
+        EmiDrawContext context = EmiDrawContext.wrap(event.getGuiGraphics());
+        Screen screen = event.getScreen();
+        if (!(screen instanceof AbstractContainerScreen<?>)) {
+            return;
+        }
+        EmiScreenBase base = EmiScreenBase.of(screen);
+        if (base != null) {
+            Minecraft client = Minecraft.getInstance();
+            context.push();
+            EmiPort.setPositionTexShader();
+            EmiScreenManager.drawForeground(context, event.getMouseX(), event.getMouseY(), client.getTimer().getGameTimeDeltaPartialTick(false));
+            context.pop();
+        }
+    }
 }

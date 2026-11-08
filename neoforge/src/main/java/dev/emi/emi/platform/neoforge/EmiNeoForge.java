@@ -16,27 +16,27 @@ import net.neoforged.neoforge.network.PacketDistributor;
 @Mod("emi")
 public class EmiNeoForge {
 
-	public EmiNeoForge(IEventBus modEventBus) {
-		EmiMain.init();
-		modEventBus.addListener(EmiPacketHandler::init);
-		EmiNetwork.initServer((player, packet) -> {
-			if (player.connection.hasChannel(packet)) {
-				PacketDistributor.sendToPlayer(player, EmiPacketHandler.wrap(packet));
-			} else {
-				EmiLog.warn("Can't send EMI packet to " + player + " as they're missing the channel");
-			}
-		});
-		NeoForge.EVENT_BUS.addListener(this::registerCommands);
-		NeoForge.EVENT_BUS.addListener(this::playerConnect);
-	}
+    public EmiNeoForge(IEventBus modEventBus) {
+        EmiMain.init();
+        modEventBus.addListener(EmiPacketHandler::init);
+        EmiNetwork.initServer((player, packet) -> {
+            if (player.connection.hasChannel(packet)) {
+                PacketDistributor.sendToPlayer(player, EmiPacketHandler.wrap(packet));
+            } else {
+                EmiLog.warn("Can't send EMI packet to " + player + " as they're missing the channel");
+            }
+        });
+        NeoForge.EVENT_BUS.addListener(this::registerCommands);
+        NeoForge.EVENT_BUS.addListener(this::playerConnect);
+    }
 
-	public void registerCommands(RegisterCommandsEvent event) {
-		EmiCommands.registerCommands(event.getDispatcher());
-	}
+    public void registerCommands(RegisterCommandsEvent event) {
+        EmiCommands.registerCommands(event.getDispatcher());
+    }
 
-	public void playerConnect(PlayerEvent.PlayerLoggedInEvent event) {
-		if (event.getEntity() instanceof ServerPlayer spe) {
-			EmiNetwork.sendToClient(spe, new PingS2CPacket());
-		}
-	}
+    public void playerConnect(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer spe) {
+            EmiNetwork.sendToClient(spe, new PingS2CPacket());
+        }
+    }
 }

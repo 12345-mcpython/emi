@@ -1,13 +1,5 @@
 package dev.emi.emi.runtime;
 
-import java.io.File;
-import java.util.function.Consumer;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import org.joml.Matrix4f;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -15,165 +7,174 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexSorting;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.config.EmiConfig;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 
+import java.io.File;
+import java.util.function.Consumer;
+
 public class EmiScreenshotRecorder {
-	private static final String SCREENSHOTS_DIRNAME = "screenshots";
+    private static final String SCREENSHOTS_DIRNAME = "screenshots";
 
-	/**
-	 * Saves a screenshot to the game's `screenshots` directory, doing the appropriate setup so that anything rendered in renderer will be captured
-	 * and saved.
-	 * <p>
-	 * <b>Note:</b> the path can have <code>/</code> characters, indicating subdirectories. Java handles these correctly on Windows. The path should
-	 * <b>not</b> contain the <code>.png</code> extension, as that will be added after checking for duplicates. If a file with this path already
-	 * exists, then path will be suffixed with a <code>_#</code>, before adding the <code>.png</code> extension, where <code>#</code> represents an
-	 * increasing number to avoid conflicts.
-	 * <p>
-	 * <b>Note 2:</b> The width and height parameters are reflected in the viewport when rendering. But the EMI-config
-	 * <code>ui.recipe-screenshot-scale</code> value causes the resulting image to be scaled.
-	 *
-	 * @param path     the path to save the screenshot to, without extension.
-	 * @param width    the width of the screenshot, not counting EMI-config scale.
-	 * @param height   the height of the screenshot, not counting EMI-config scale.
-	 * @param renderer a function to render the things being screenshotted.
-	 */
-	public static void saveScreenshot(String path, int width, int height, Runnable renderer) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> saveScreenshotInner(path, width, height, renderer));
-		} else {
-			saveScreenshotInner(path, width, height, renderer);
-		}
-	}
+    /**
+     * Saves a screenshot to the game's `screenshots` directory, doing the appropriate setup so that anything rendered in renderer will be captured
+     * and saved.
+     * <p>
+     * <b>Note:</b> the path can have <code>/</code> characters, indicating subdirectories. Java handles these correctly on Windows. The path should
+     * <b>not</b> contain the <code>.png</code> extension, as that will be added after checking for duplicates. If a file with this path already
+     * exists, then path will be suffixed with a <code>_#</code>, before adding the <code>.png</code> extension, where <code>#</code> represents an
+     * increasing number to avoid conflicts.
+     * <p>
+     * <b>Note 2:</b> The width and height parameters are reflected in the viewport when rendering. But the EMI-config
+     * <code>ui.recipe-screenshot-scale</code> value causes the resulting image to be scaled.
+     *
+     * @param path     the path to save the screenshot to, without extension.
+     * @param width    the width of the screenshot, not counting EMI-config scale.
+     * @param height   the height of the screenshot, not counting EMI-config scale.
+     * @param renderer a function to render the things being screenshotted.
+     */
+    public static void saveScreenshot(String path, int width, int height, Runnable renderer) {
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> saveScreenshotInner(path, width, height, renderer));
+        } else {
+            saveScreenshotInner(path, width, height, renderer);
+        }
+    }
 
-	private static void saveScreenshotInner(String path, int width, int height, Runnable renderer) {
-		Minecraft client = Minecraft.getInstance();
+    private static void saveScreenshotInner(String path, int width, int height, Runnable renderer) {
+        Minecraft client = Minecraft.getInstance();
 
-		int scale;
-		if (EmiConfig.recipeScreenshotScale < 1) {
-			scale = EmiPort.getGuiScale(client);
-		} else {
-			scale = EmiConfig.recipeScreenshotScale;
-		}
+        int scale;
+        if (EmiConfig.recipeScreenshotScale < 1) {
+            scale = EmiPort.getGuiScale(client);
+        } else {
+            scale = EmiConfig.recipeScreenshotScale;
+        }
 
-		try {
-			NativeImage nativeImage = null;
-			try {
-				RenderTarget framebuffer = null;
-				Matrix4fStack view = RenderSystem.getModelViewStack();
-				boolean viewPushed = false;
-				boolean projectionBackedUp = false;
-				try {
-					framebuffer = new TextureTarget(width * scale, height * scale, true, Minecraft.ON_OSX);
-					framebuffer.setClearColor(0f, 0f, 0f, 0f);
-					framebuffer.clear(Minecraft.ON_OSX);
-					framebuffer.bindWrite(true);
+        try {
+            NativeImage nativeImage = null;
+            try {
+                RenderTarget framebuffer = null;
+                Matrix4fStack view = RenderSystem.getModelViewStack();
+                boolean viewPushed = false;
+                boolean projectionBackedUp = false;
+                try {
+                    framebuffer = new TextureTarget(width * scale, height * scale, true, Minecraft.ON_OSX);
+                    framebuffer.setClearColor(0f, 0f, 0f, 0f);
+                    framebuffer.clear(Minecraft.ON_OSX);
+                    framebuffer.bindWrite(true);
 
-					view.pushMatrix();
-					viewPushed = true;
-					view.identity();
-					view.translate(-1.0f, 1.0f, 0.0f);
-					view.scale(2f / width, -2f / height, -1f / 1000f);
-					view.translate(0.0f, 0.0f, 10.0f);
-					EmiPort.applyModelViewMatrix();
+                    view.pushMatrix();
+                    viewPushed = true;
+                    view.identity();
+                    view.translate(-1.0f, 1.0f, 0.0f);
+                    view.scale(2f / width, -2f / height, -1f / 1000f);
+                    view.translate(0.0f, 0.0f, 10.0f);
+                    EmiPort.applyModelViewMatrix();
 
-					RenderSystem.backupProjectionMatrix();
-					projectionBackedUp = true;
-					RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorting.ORTHOGRAPHIC_Z);
-					renderer.run();
-					nativeImage = takeScreenshot(framebuffer);
-				} finally {
-					// Each cleanup still runs if rendering, readback, or an earlier cleanup fails.
-					try {
-						if (projectionBackedUp) RenderSystem.restoreProjectionMatrix();
-					} finally {
-						try {
-							if (viewPushed) {
-								view.popMatrix();
-								EmiPort.applyModelViewMatrix();
-							}
-						} finally {
-							try {
-								if (framebuffer != null) framebuffer.destroyBuffers();
-							} finally {
-								client.getMainRenderTarget().bindWrite(true);
-							}
-						}
-					}
-				}
+                    RenderSystem.backupProjectionMatrix();
+                    projectionBackedUp = true;
+                    RenderSystem.setProjectionMatrix(new Matrix4f().identity(), VertexSorting.ORTHOGRAPHIC_Z);
+                    renderer.run();
+                    nativeImage = takeScreenshot(framebuffer);
+                } finally {
+                    // Each cleanup still runs if rendering, readback, or an earlier cleanup fails.
+                    try {
+                        if (projectionBackedUp) RenderSystem.restoreProjectionMatrix();
+                    } finally {
+                        try {
+                            if (viewPushed) {
+                                view.popMatrix();
+                                EmiPort.applyModelViewMatrix();
+                            }
+                        } finally {
+                            try {
+                                if (framebuffer != null) framebuffer.destroyBuffers();
+                            } finally {
+                                client.getMainRenderTarget().bindWrite(true);
+                            }
+                        }
+                    }
+                }
 
-				saveScreenshotInner(client.gameDirectory, path, nativeImage,
-					message -> client.execute(() -> client.gui.getChat().addMessage(message)));
-				// The IO worker owns the image only after submission succeeds.
-				nativeImage = null;
-			} finally {
-				if (nativeImage != null) nativeImage.close();
-			}
-		} catch (Throwable e) {
-			EmiLog.error("Failed to capture screenshot", e);
-			try {
-				client.execute(() -> {
-					try {
-						client.gui.getChat().addMessage(EmiPort.translatable("screenshot.failure", e.getMessage()));
-					} catch (Throwable feedbackError) {
-						EmiLog.error("Failed to report screenshot error", feedbackError);
-					}
-				});
-			} catch (Throwable feedbackError) {
-				EmiLog.error("Failed to schedule screenshot error", feedbackError);
-			}
-		}
-	}
+                saveScreenshotInner(client.gameDirectory, path, nativeImage,
+                        message -> client.execute(() -> client.gui.getChat().addMessage(message)));
+                // The IO worker owns the image only after submission succeeds.
+                nativeImage = null;
+            } finally {
+                if (nativeImage != null) nativeImage.close();
+            }
+        } catch (Throwable e) {
+            EmiLog.error("Failed to capture screenshot", e);
+            try {
+                client.execute(() -> {
+                    try {
+                        client.gui.getChat().addMessage(EmiPort.translatable("screenshot.failure", e.getMessage()));
+                    } catch (Throwable feedbackError) {
+                        EmiLog.error("Failed to report screenshot error", feedbackError);
+                    }
+                });
+            } catch (Throwable feedbackError) {
+                EmiLog.error("Failed to schedule screenshot error", feedbackError);
+            }
+        }
+    }
 
-	private static void saveScreenshotInner(File gameDirectory, String suggestedPath, NativeImage nativeImage, Consumer<Component> messageReceiver) {
+    private static void saveScreenshotInner(File gameDirectory, String suggestedPath, NativeImage nativeImage, Consumer<Component> messageReceiver) {
 
-		File screenshots = new File(gameDirectory, SCREENSHOTS_DIRNAME);
-		screenshots.mkdir();
+        File screenshots = new File(gameDirectory, SCREENSHOTS_DIRNAME);
+        screenshots.mkdir();
 
-		String filename = getScreenshotFilename(screenshots, suggestedPath);
-		File file = new File(screenshots, filename);
+        String filename = getScreenshotFilename(screenshots, suggestedPath);
+        File file = new File(screenshots, filename);
 
-		// Make sure the parent file exists. Note: `/`s in suggestedPath are valid, as they indicate subdirectories. Java even translates this
-		// correctly on Windows.
-		File parent = file.getParentFile();
-		parent.mkdirs();
+        // Make sure the parent file exists. Note: `/`s in suggestedPath are valid, as they indicate subdirectories. Java even translates this
+        // correctly on Windows.
+        File parent = file.getParentFile();
+        parent.mkdirs();
 
-		Util.ioPool().execute(() -> {
-			try {
-				nativeImage.writeToFile(file);
+        Util.ioPool().execute(() -> {
+            try {
+                nativeImage.writeToFile(file);
 
-				Component text = EmiPort.literal(filename,
-					Style.EMPTY.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
-				messageReceiver.accept(EmiPort.translatable("screenshot.success", text));
-			} catch (Throwable e) {
-				EmiLog.error("Failed to write screenshot", e);
-				messageReceiver.accept(EmiPort.translatable("screenshot.failure", e.getMessage()));
-			} finally {
-				nativeImage.close();
-			}
-		});
-	}
+                Component text = EmiPort.literal(filename,
+                        Style.EMPTY.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
+                messageReceiver.accept(EmiPort.translatable("screenshot.success", text));
+            } catch (Throwable e) {
+                EmiLog.error("Failed to write screenshot", e);
+                messageReceiver.accept(EmiPort.translatable("screenshot.failure", e.getMessage()));
+            } finally {
+                nativeImage.close();
+            }
+        });
+    }
 
-	private static NativeImage takeScreenshot(RenderTarget framebuffer) {
-		int i = framebuffer.width;
-		int j = framebuffer.height;
-		NativeImage nativeImage = new NativeImage(i, j, false);
-		boolean captured = false;
-		try {
-			RenderSystem.bindTexture(framebuffer.getColorTextureId());
-			nativeImage.downloadTexture(0, false);
-			nativeImage.flipY();
-			captured = true;
-			return nativeImage;
-		} finally {
-			if (!captured) nativeImage.close();
-		}
-	}
+    private static NativeImage takeScreenshot(RenderTarget framebuffer) {
+        int i = framebuffer.width;
+        int j = framebuffer.height;
+        NativeImage nativeImage = new NativeImage(i, j, false);
+        boolean captured = false;
+        try {
+            RenderSystem.bindTexture(framebuffer.getColorTextureId());
+            nativeImage.downloadTexture(0, false);
+            nativeImage.flipY();
+            captured = true;
+            return nativeImage;
+        } finally {
+            if (!captured) nativeImage.close();
+        }
+    }
 
-	private static String getScreenshotFilename(File directory, String path) {
-		int i = 1;
-		while ((new File(directory, path + (i == 1 ? "" : "_" + i) + ".png")).exists()) {
-			++i;
-		}
-		return path + (i == 1 ? "" : "_" + i) + ".png";
-	}
+    private static String getScreenshotFilename(File directory, String path) {
+        int i = 1;
+        while ((new File(directory, path + (i == 1 ? "" : "_" + i) + ".png")).exists()) {
+            ++i;
+        }
+        return path + (i == 1 ? "" : "_" + i) + ".png";
+    }
 }

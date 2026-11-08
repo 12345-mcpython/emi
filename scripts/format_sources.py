@@ -1,4 +1,4 @@
-"""Normalise Java indentation in this repository to tabs (tab width 4).
+"""Normalise Java indentation in this repository to four spaces (tab width 4).
 
 Only leading whitespace, trailing whitespace and the final newline are touched, so the code keeps
 its meaning. Lines inside text blocks are left alone because their indentation is significant.
@@ -9,6 +9,7 @@ import sys
 from pathlib import Path
 
 TAB = 4
+USE_TABS = '--tabs' in sys.argv
 
 
 def leading_columns(prefix):
@@ -50,7 +51,10 @@ def normalise(path):
             continue
         if prefix:
             columns = leading_columns(prefix)
-            new_prefix = '\t' * (columns // TAB) + ' ' * (columns % TAB)
+            if USE_TABS:
+                new_prefix = '\t' * (columns // TAB) + ' ' * (columns % TAB)
+            else:
+                new_prefix = ' ' * columns
             if new_prefix != prefix:
                 changed = True
             out.append(new_prefix + rest)
@@ -66,7 +70,7 @@ def normalise(path):
 
 
 def main():
-    roots = [Path(r) for r in sys.argv[1:]] or [Path('.')]
+    roots = [Path(r) for r in sys.argv[1:] if not r.startswith('--')] or [Path('.')]
     total = 0
     for root in roots:
         for path in sorted(root.rglob('*.java')):

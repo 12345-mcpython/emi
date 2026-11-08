@@ -5,7 +5,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 
 public interface EmiPacket extends CustomPacketPayload {
-	void write(RegistryFriendlyByteBuf buf);
+    void write(RegistryFriendlyByteBuf buf);
 
-	void apply(Player player);
+    void apply(Player player);
 }

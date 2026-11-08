@@ -9,23 +9,23 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface Transform {
 
-	/*
-	 * The method/field name
-	 */
-	String name() default "";
+    /*
+     * The method/field name
+     */
+    String name() default "";
 
-	/*
-	 * The method/field signature
-	 */
-	String desc() default "";
+    /*
+     * The method/field signature
+     */
+    String desc() default "";
 
-	/*
-	 * One of PUBLIC, PRIVATE, PROTECTED, or PACKAGE, or empty for no change
-	 */
-	String visibility() default "";
+    /*
+     * One of PUBLIC, PRIVATE, PROTECTED, or PACKAGE, or empty for no change
+     */
+    String visibility() default "";
 
-	/*
-	 * Extra access flags to be ORed onto the value
-	 */
-	int flags() default 0;
+    /*
+     * Extra access flags to be ORed onto the value
+     */
+    int flags() default 0;
 }

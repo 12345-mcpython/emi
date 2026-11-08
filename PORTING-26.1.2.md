@@ -188,12 +188,17 @@ transfer full scenario).
 
 ## Formatting
 
-The tree uses tab indentation at width 4. `scripts/format_sources.py` normalises leading whitespace
-(space runs are converted to the equivalent tab/space prefix for a 4 column tab stop), strips trailing
-whitespace and guarantees a trailing newline, leaving text blocks untouched because their indentation is
-significant. It never reflows code, so `git diff -w` stays empty after a run.
+The tree is formatted with the IDE style: **four spaces per indent level**, no tabs, no trailing
+whitespace, one trailing newline. `scripts/format_sources.py` enforces the whitespace part of that
+without touching code meaning (it converts leading whitespace to the equivalent four-space prefix,
+strips trailing whitespace, and leaves text blocks alone because their indentation is significant).
+Pass `--tabs` to normalise to tabs instead.
 
 ```
 python scripts/format_sources.py xplat/src fabric/src neoforge/src tests
+python scripts/format_sources.py --tabs xplat/src fabric/src neoforge/src tests   # tab indentation
 ```
 
+Reformatting was verified to be cosmetic only: stripping comments and whitespace from every changed
+file before and after gives identical token streams, the extracted string and text block literals are
+unchanged, both platform builds succeed and all five regression harnesses pass.

@@ -3,19 +3,19 @@ package dev.emi.emi.jemi.impl.extras;
 import dev.emi.emi.api.widget.WidgetHolder;
 
 public class JemiWidgetBuilder extends JemiPlaceable<JemiWidgetBuilder> {
-	public final WidgetConstructor constructor;
+    public final WidgetConstructor constructor;
 
-	public JemiWidgetBuilder(int width, int height, WidgetConstructor constructor) {
-		super(width, height);
-		this.constructor = constructor;
-	}
+    public JemiWidgetBuilder(int width, int height, WidgetConstructor constructor) {
+        super(width, height);
+        this.constructor = constructor;
+    }
 
-	public void addWidgets(WidgetHolder holder) {
-		constructor.accept(this, holder);
-	}
+    public void addWidgets(WidgetHolder holder) {
+        constructor.accept(this, holder);
+    }
 
-	public interface WidgetConstructor {
+    public interface WidgetConstructor {
 
-		void accept(JemiWidgetBuilder builder, WidgetHolder holder);
-	}
+        void accept(JemiWidgetBuilder builder, WidgetHolder holder);
+    }
 }

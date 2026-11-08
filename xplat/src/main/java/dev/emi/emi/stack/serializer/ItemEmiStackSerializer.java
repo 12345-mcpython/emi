@@ -10,14 +10,14 @@ import net.minecraft.world.item.ItemStack;
 
 public class ItemEmiStackSerializer implements EmiStackSerializer<ItemEmiStack> {
 
-	@Override
-	public String getType() {
-		return "item";
-	}
+    @Override
+    public String getType() {
+        return "item";
+    }
 
-	@Override
-	public EmiStack create(ResourceLocation id, DataComponentPatch componentChanges, long amount) {
-		ItemStack stack = new ItemStack(EmiPort.getItemRegistry().getHolder(id).orElseThrow(), 1, componentChanges);
-		return EmiStack.of(stack, amount);
-	}
+    @Override
+    public EmiStack create(ResourceLocation id, DataComponentPatch componentChanges, long amount) {
+        ItemStack stack = new ItemStack(EmiPort.getItemRegistry().getHolder(id).orElseThrow(), 1, componentChanges);
+        return EmiStack.of(stack, amount);
+    }
 }

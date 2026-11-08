@@ -7,46 +7,46 @@ import it.unimi.dsi.fastutil.doubles.Double2ObjectFunction;
 import net.minecraft.network.chat.Component;
 
 public enum FluidUnit implements ConfigEnum {
-	LITERS("liters", a -> EmiPort.translatable("emi.fluid.amount.liters",
-		EmiRenderHelper.TEXT_FORMAT.format((int) (a / literDivisor())))),
-	MILLIBUCKETS("millibuckets", a -> EmiPort.translatable("emi.fluid.amount.millibuckets",
-		EmiRenderHelper.TEXT_FORMAT.format((int) (a / literDivisor())))),
-	DROPLETS("droplets", a -> EmiPort.translatable("emi.fluid.amount.droplets",
-		EmiRenderHelper.TEXT_FORMAT.format((int) a))),
-	;
+    LITERS("liters", a -> EmiPort.translatable("emi.fluid.amount.liters",
+            EmiRenderHelper.TEXT_FORMAT.format((int) (a / literDivisor())))),
+    MILLIBUCKETS("millibuckets", a -> EmiPort.translatable("emi.fluid.amount.millibuckets",
+            EmiRenderHelper.TEXT_FORMAT.format((int) (a / literDivisor())))),
+    DROPLETS("droplets", a -> EmiPort.translatable("emi.fluid.amount.droplets",
+            EmiRenderHelper.TEXT_FORMAT.format((int) a))),
+    ;
 
-	public static final int BUCKET = EmiAgnos.isForge() ? 1000 : 81_000;
-	public static final int BOTTLE = EmiAgnos.isForge() ? 250 : 27_000;
+    public static final int BUCKET = EmiAgnos.isForge() ? 1000 : 81_000;
+    public static final int BOTTLE = EmiAgnos.isForge() ? 250 : 27_000;
 
-	private final String name;
-	private final Component translation;
-	private final Double2ObjectFunction<Component> translator;
+    private final String name;
+    private final Component translation;
+    private final Double2ObjectFunction<Component> translator;
 
-	FluidUnit(String name, Double2ObjectFunction<Component> translator) {
-		this.name = name;
-		translation = EmiPort.translatable("emi.unit." + name);
-		this.translator = translator;
-	}
+    FluidUnit(String name, Double2ObjectFunction<Component> translator) {
+        this.name = name;
+        translation = EmiPort.translatable("emi.unit." + name);
+        this.translator = translator;
+    }
 
-	public static int literDivisor() {
-		if (EmiAgnos.isForge()) {
-			return 1;
-		} else {
-			return 81;
-		}
-	}
+    public static int literDivisor() {
+        if (EmiAgnos.isForge()) {
+            return 1;
+        } else {
+            return 81;
+        }
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	public Component translate(double amount) {
-		return translator.apply(Double.valueOf(amount));
-	}
+    public Component translate(double amount) {
+        return translator.apply(Double.valueOf(amount));
+    }
 
-	@Override
-	public Component getText() {
-		return translation;
-	}
+    @Override
+    public Component getText() {
+        return translation;
+    }
 }

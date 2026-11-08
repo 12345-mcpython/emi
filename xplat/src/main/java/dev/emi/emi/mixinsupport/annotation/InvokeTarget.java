@@ -9,24 +9,24 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface InvokeTarget {
 
-	/*
-	 * The type to invoke the method on, or either "this" or "super" to assume
-	 */
-	String owner() default "this";
+    /*
+     * The type to invoke the method on, or either "this" or "super" to assume
+     */
+    String owner() default "this";
 
-	/*
-	 * The method name if type not NEW
-	 */
-	String name() default "";
+    /*
+     * The method name if type not NEW
+     */
+    String name() default "";
 
-	/*
-	 * One of VIRTUAL, SPECIAL, STATIC, INTERFACE, or NEW.
-	 * Empty to assume from call site
-	 */
-	String type() default "";
+    /*
+     * One of VIRTUAL, SPECIAL, STATIC, INTERFACE, or NEW.
+     * Empty to assume from call site
+     */
+    String type() default "";
 
-	/*
-	 * Method's signature, or empty to use existing
-	 */
-	String desc() default "";
+    /*
+     * Method's signature, or empty to use existing
+     */
+    String desc() default "";
 }

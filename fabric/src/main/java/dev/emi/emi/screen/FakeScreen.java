@@ -12,27 +12,27 @@ import dev.emi.emi.EmiPort;
 import dev.emi.emi.runtime.EmiLog;
 
 public class FakeScreen extends Screen {
-	public static final FakeScreen INSTANCE = new FakeScreen();
+    public static final FakeScreen INSTANCE = new FakeScreen();
 
-	protected FakeScreen() {
-		super(EmiPort.literal(""));
-		this.minecraft = Minecraft.getInstance();
-		this.font = minecraft.font;
-		this.width = Integer.MAX_VALUE;
-		this.height = Integer.MAX_VALUE;
-	}
+    protected FakeScreen() {
+        super(EmiPort.literal(""));
+        this.minecraft = Minecraft.getInstance();
+        this.font = minecraft.font;
+        this.width = Integer.MAX_VALUE;
+        this.height = Integer.MAX_VALUE;
+    }
 
-	public List<ClientTooltipComponent> getTooltipComponentListFromItem(ItemStack stack) {
-		List<ClientTooltipComponent> list = Screen.getTooltipFromItem(minecraft, stack)
-			.stream().map(EmiPort::ordered).map(ClientTooltipComponent::create).collect(Collectors.toList());
-		Optional<TooltipComponent> data = stack.getTooltipImage();
-		if (data.isPresent()) {
-			try {
-				list.add(ClientTooltipComponent.create(data.get()));
-			} catch (Throwable e) {
-				EmiLog.error("Exception converting TooltipComponent", e);
-			}
-		}
-		return list;
-	}
+    public List<ClientTooltipComponent> getTooltipComponentListFromItem(ItemStack stack) {
+        List<ClientTooltipComponent> list = Screen.getTooltipFromItem(minecraft, stack)
+            .stream().map(EmiPort::ordered).map(ClientTooltipComponent::create).collect(Collectors.toList());
+        Optional<TooltipComponent> data = stack.getTooltipImage();
+        if (data.isPresent()) {
+            try {
+                list.add(ClientTooltipComponent.create(data.get()));
+            } catch (Throwable e) {
+                EmiLog.error("Exception converting TooltipComponent", e);
+            }
+        }
+        return list;
+    }
 }

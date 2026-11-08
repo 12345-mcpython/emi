@@ -9,9 +9,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 public @interface AdditionalField {
 
-	String value();
+    String value();
 
-	String owner();
+    String owner();
 
-	String name();
+    String name();
 }

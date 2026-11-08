@@ -9,38 +9,38 @@ import net.minecraft.network.chat.Component;
  * bookmark list view.
  */
 public enum BookmarkViewMode implements ConfigEnum {
-	DEFAULT("default"),
-	TODO("todo"),
-	;
+    DEFAULT("default"),
+    TODO("todo"),
+    ;
 
-	private final String name;
+    private final String name;
 
-	BookmarkViewMode(String name) {
-		this.name = name;
-	}
+    BookmarkViewMode(String name) {
+        this.name = name;
+    }
 
-	@Override
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	@Override
-	public Component getText() {
-		return EmiPort.translatable("emi.bookmark_view_mode." + name);
-	}
+    @Override
+    public Component getText() {
+        return EmiPort.translatable("emi.bookmark_view_mode." + name);
+    }
 
-	public static BookmarkViewMode byName(String name) {
-		if (name != null) {
-			for (BookmarkViewMode mode : values()) {
-				if (mode.name.equalsIgnoreCase(name)) {
-					return mode;
-				}
-			}
-		}
-		return DEFAULT;
-	}
+    public static BookmarkViewMode byName(String name) {
+        if (name != null) {
+            for (BookmarkViewMode mode : values()) {
+                if (mode.name.equalsIgnoreCase(name)) {
+                    return mode;
+                }
+            }
+        }
+        return DEFAULT;
+    }
 
-	public BookmarkViewMode toggle() {
-		return this == DEFAULT ? TODO : DEFAULT;
-	}
+    public BookmarkViewMode toggle() {
+        return this == DEFAULT ? TODO : DEFAULT;
+    }
 }

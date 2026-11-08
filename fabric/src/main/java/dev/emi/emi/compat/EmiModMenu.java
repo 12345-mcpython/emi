@@ -7,8 +7,8 @@ import dev.emi.emi.screen.ConfigScreen;
 
 public class EmiModMenu implements ModMenuApi {
 
-	@Override
-	public ConfigScreenFactory<?> getModConfigScreenFactory() {
-		return ConfigScreen::new;
-	}
+    @Override
+    public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        return ConfigScreen::new;
+    }
 }

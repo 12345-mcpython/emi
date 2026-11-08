@@ -9,14 +9,14 @@ import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 public class EmiShapelessRecipe extends EmiCraftingRecipe {
 
-	public EmiShapelessRecipe(ShapelessRecipe recipe) {
-		super(recipe.getIngredients().stream().map(EmiIngredient::of).toList(),
-			EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe));
-		EmiShapedRecipe.setRemainders(input, recipe);
-	}
+    public EmiShapelessRecipe(ShapelessRecipe recipe) {
+        super(recipe.getIngredients().stream().map(EmiIngredient::of).toList(),
+                EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe));
+        EmiShapedRecipe.setRemainders(input, recipe);
+    }
 
-	@Override
-	public boolean canFit(int width, int height) {
-		return input.size() <= width * height;
-	}
+    @Override
+    public boolean canFit(int width, int height) {
+        return input.size() <= width * height;
+    }
 }

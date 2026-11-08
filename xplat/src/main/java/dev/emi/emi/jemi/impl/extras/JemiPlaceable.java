@@ -3,29 +3,29 @@ package dev.emi.emi.jemi.impl.extras;
 import mezz.jei.api.gui.placement.IPlaceable;
 
 public class JemiPlaceable<T extends IPlaceable<T>> implements IPlaceable<T> {
-	public int x = 0, y = 0;
-	public final int width;
-	public final int height;
+    public int x = 0, y = 0;
+    public final int width;
+    public final int height;
 
-	public JemiPlaceable(int width, int height) {
-		this.width = width;
-		this.height = height;
-	}
+    public JemiPlaceable(int width, int height) {
+        this.width = width;
+        this.height = height;
+    }
 
-	@Override
-	public T setPosition(int xPos, int yPos) {
-		this.x = xPos;
-		this.y = yPos;
-		return (T) this;
-	}
+    @Override
+    public T setPosition(int xPos, int yPos) {
+        this.x = xPos;
+        this.y = yPos;
+        return (T) this;
+    }
 
-	@Override
-	public int getWidth() {
-		return width;
-	}
+    @Override
+    public int getWidth() {
+        return width;
+    }
 
-	@Override
-	public int getHeight() {
-		return height;
-	}
+    @Override
+    public int getHeight() {
+        return height;
+    }
 }

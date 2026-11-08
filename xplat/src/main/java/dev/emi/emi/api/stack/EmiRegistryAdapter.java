@@ -11,45 +11,45 @@ import org.jetbrains.annotations.ApiStatus;
 @ApiStatus.Experimental
 public interface EmiRegistryAdapter<T> {
 
-	/**
-	 * @return The base class for objects in the registry.
-	 */
-	Class<T> getBaseClass();
+    /**
+     * @return The base class for objects in the registry.
+     */
+    Class<T> getBaseClass();
 
-	/**
-	 * @return
-	 */
-	Registry<T> getRegistry();
+    /**
+     * @return
+     */
+    Registry<T> getRegistry();
 
-	/**
-	 * Constructs an {@link EmiStack} from a given object from the registry, or {@link EmiStack#EMPTY} if somehow invalid.
-	 */
-	EmiStack of(T t, DataComponentPatch componentChanges, long amount);
+    /**
+     * Constructs an {@link EmiStack} from a given object from the registry, or {@link EmiStack#EMPTY} if somehow invalid.
+     */
+    EmiStack of(T t, DataComponentPatch componentChanges, long amount);
 
-	/**
-	 * Convenience method for creating an {@link EmiRegistryAdapter}.
-	 */
-	static <T> EmiRegistryAdapter<T> simple(Class<T> clazz, Registry<T> registry, StackConstructor<T> constructor) {
-		return new EmiRegistryAdapter<>() {
+    /**
+     * Convenience method for creating an {@link EmiRegistryAdapter}.
+     */
+    static <T> EmiRegistryAdapter<T> simple(Class<T> clazz, Registry<T> registry, StackConstructor<T> constructor) {
+        return new EmiRegistryAdapter<>() {
 
-			@Override
-			public Class<T> getBaseClass() {
-				return clazz;
-			}
+            @Override
+            public Class<T> getBaseClass() {
+                return clazz;
+            }
 
-			@Override
-			public Registry<T> getRegistry() {
-				return registry;
-			}
+            @Override
+            public Registry<T> getRegistry() {
+                return registry;
+            }
 
-			@Override
-			public EmiStack of(T t, DataComponentPatch componentChanges, long amount) {
-				return constructor.of(t, componentChanges, amount);
-			}
-		};
-	}
+            @Override
+            public EmiStack of(T t, DataComponentPatch componentChanges, long amount) {
+                return constructor.of(t, componentChanges, amount);
+            }
+        };
+    }
 
-	interface StackConstructor<T> {
-		EmiStack of(T t, DataComponentPatch componentChanges, long amount);
-	}
+    interface StackConstructor<T> {
+        EmiStack of(T t, DataComponentPatch componentChanges, long amount);
+    }
 }

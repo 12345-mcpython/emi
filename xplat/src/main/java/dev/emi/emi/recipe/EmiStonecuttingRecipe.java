@@ -1,8 +1,5 @@
 package dev.emi.emi.recipe;
 
-import java.util.List;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.StonecutterRecipe;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.recipe.EmiRecipe;
 import dev.emi.emi.api.recipe.EmiRecipeCategory;
@@ -12,52 +9,56 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.widget.WidgetHolder;
 import dev.emi.emi.runtime.ProxyRecipeManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
+
+import java.util.List;
 
 public class EmiStonecuttingRecipe implements EmiRecipe {
-	private final ResourceLocation id;
-	private final EmiIngredient input;
-	private final EmiStack output;
+    private final ResourceLocation id;
+    private final EmiIngredient input;
+    private final EmiStack output;
 
-	public EmiStonecuttingRecipe(StonecutterRecipe recipe) {
-		this.id = ProxyRecipeManager.getId(recipe);
-		input = EmiIngredient.of(recipe.getIngredients().getFirst());
-		output = EmiStack.of(EmiPort.getOutput(recipe));
-	}
+    public EmiStonecuttingRecipe(StonecutterRecipe recipe) {
+        this.id = ProxyRecipeManager.getId(recipe);
+        input = EmiIngredient.of(recipe.getIngredients().getFirst());
+        output = EmiStack.of(EmiPort.getOutput(recipe));
+    }
 
-	@Override
-	public EmiRecipeCategory getCategory() {
-		return VanillaEmiRecipeCategories.STONECUTTING;
-	}
+    @Override
+    public EmiRecipeCategory getCategory() {
+        return VanillaEmiRecipeCategories.STONECUTTING;
+    }
 
-	@Override
-	public ResourceLocation getId() {
-		return id;
-	}
+    @Override
+    public ResourceLocation getId() {
+        return id;
+    }
 
-	@Override
-	public List<EmiIngredient> getInputs() {
-		return List.of(input);
-	}
+    @Override
+    public List<EmiIngredient> getInputs() {
+        return List.of(input);
+    }
 
-	@Override
-	public List<EmiStack> getOutputs() {
-		return List.of(output);
-	}
+    @Override
+    public List<EmiStack> getOutputs() {
+        return List.of(output);
+    }
 
-	@Override
-	public int getDisplayWidth() {
-		return 76;
-	}
+    @Override
+    public int getDisplayWidth() {
+        return 76;
+    }
 
-	@Override
-	public int getDisplayHeight() {
-		return 18;
-	}
+    @Override
+    public int getDisplayHeight() {
+        return 18;
+    }
 
-	@Override
-	public void addWidgets(WidgetHolder widgets) {
-		widgets.addTexture(EmiTexture.EMPTY_ARROW, 26, 1);
-		widgets.addSlot(input, 0, 0);
-		widgets.addSlot(output, 58, 0).recipeContext(this);
-	}
+    @Override
+    public void addWidgets(WidgetHolder widgets) {
+        widgets.addTexture(EmiTexture.EMPTY_ARROW, 26, 1);
+        widgets.addSlot(input, 0, 0);
+        widgets.addSlot(output, 58, 0).recipeContext(this);
+    }
 }

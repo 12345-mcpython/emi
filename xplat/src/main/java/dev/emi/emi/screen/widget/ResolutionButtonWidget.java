@@ -1,10 +1,5 @@
 package dev.emi.emi.screen.widget;
 
-import java.util.List;
-import java.util.function.Supplier;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.render.EmiTexture;
@@ -15,44 +10,50 @@ import dev.emi.emi.bom.BoM;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.EmiHistory;
 import dev.emi.emi.widget.RecipeDefaultButtonWidget;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+
+import java.util.List;
+import java.util.function.Supplier;
 
 public class ResolutionButtonWidget extends Button {
-	public final Supplier<Widget> hoveredWidget;
-	public final EmiIngredient stack;
+    public final Supplier<Widget> hoveredWidget;
+    public final EmiIngredient stack;
 
-	public ResolutionButtonWidget(int x, int y, int width, int height, EmiIngredient stack, Supplier<Widget> hoveredWidget) {
-		super(x, y, width, height, EmiPort.literal(""), button -> {
-			BoM.addResolution(stack, null);
-			EmiHistory.pop();
-		}, Supplier::get);
-		this.stack = stack;
-		this.hoveredWidget = hoveredWidget;
-	}
+    public ResolutionButtonWidget(int x, int y, int width, int height, EmiIngredient stack, Supplier<Widget> hoveredWidget) {
+        super(x, y, width, height, EmiPort.literal(""), button -> {
+            BoM.addResolution(stack, null);
+            EmiHistory.pop();
+        }, Supplier::get);
+        this.stack = stack;
+        this.hoveredWidget = hoveredWidget;
+    }
 
-	@Override
-	public void renderWidget(GuiGraphics raw, int mouseX, int mouseY, float delta) {
-		EmiDrawContext context = EmiDrawContext.wrap(raw);
-		int u = 0;
-		if (this.isHovered()) {
-			u = 18;
-		} else {
-			Widget widget = hoveredWidget.get();
-			if ((widget instanceof SlotWidget slot && slot.getRecipe() != null)
-					|| widget instanceof RecipeDefaultButtonWidget) {
-				u = 36;
-			}
-		}
-		EmiTexture.SLOT.render(context.raw(), x, y, delta);
-		context.drawTexture(EmiRenderHelper.WIDGETS, x, y, u, 128, width, height);
-		if (this.isHovered()) {
-			Minecraft client = Minecraft.getInstance();
-			raw.renderComponentTooltip(client.font, List.of(
-				EmiPort.translatable("tooltip.emi.resolution"),
-				EmiPort.translatable("tooltip.emi.select_resolution"),
-				EmiPort.translatable("tooltip.emi.default_resolution"),
-				EmiPort.translatable("tooltip.emi.clear_resolution")
-			), mouseX, mouseY);
-		}
-		stack.render(raw, x + 1, y + 1, delta);
-	}
+    @Override
+    public void renderWidget(GuiGraphics raw, int mouseX, int mouseY, float delta) {
+        EmiDrawContext context = EmiDrawContext.wrap(raw);
+        int u = 0;
+        if (this.isHovered()) {
+            u = 18;
+        } else {
+            Widget widget = hoveredWidget.get();
+            if ((widget instanceof SlotWidget slot && slot.getRecipe() != null)
+                    || widget instanceof RecipeDefaultButtonWidget) {
+                u = 36;
+            }
+        }
+        EmiTexture.SLOT.render(context.raw(), x, y, delta);
+        context.drawTexture(EmiRenderHelper.WIDGETS, x, y, u, 128, width, height);
+        if (this.isHovered()) {
+            Minecraft client = Minecraft.getInstance();
+            raw.renderComponentTooltip(client.font, List.of(
+                    EmiPort.translatable("tooltip.emi.resolution"),
+                    EmiPort.translatable("tooltip.emi.select_resolution"),
+                    EmiPort.translatable("tooltip.emi.default_resolution"),
+                    EmiPort.translatable("tooltip.emi.clear_resolution")
+            ), mouseX, mouseY);
+        }
+        stack.render(raw, x + 1, y + 1, delta);
+    }
 }
