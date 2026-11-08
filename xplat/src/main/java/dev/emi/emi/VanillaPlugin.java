@@ -40,7 +40,6 @@ import net.minecraft.world.inventory.BlastFurnaceMenu;
 import net.minecraft.world.inventory.FurnaceMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.SmokerMenu;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
@@ -123,8 +122,6 @@ import dev.emi.emi.mixin.accessor.AxeItemAccessor;
 import dev.emi.emi.mixin.accessor.HandledScreenAccessor;
 import dev.emi.emi.mixin.accessor.HoeItemAccessor;
 import dev.emi.emi.mixin.accessor.ShovelItemAccessor;
-import dev.emi.emi.mixin.accessor.SmithingTransformRecipeAccessor;
-import dev.emi.emi.mixin.accessor.SmithingTrimRecipeAccessor;
 import dev.emi.emi.platform.EmiAgnos;
 import dev.emi.emi.platform.EmiClient;
 import dev.emi.emi.recipe.EmiAnvilRecipe;
@@ -427,14 +424,17 @@ public class VanillaPlugin implements EmiPlugin {
 			addRecipeSafe(registry, () -> new EmiCookingRecipe(recipe, CAMPFIRE_COOKING, 1, true), recipe);
 		}
 		for (SmithingRecipe recipe : getRecipes(registry, RecipeType.SMITHING)) {
-			//addRecipeSafe(registry, () -> new EmiSmithingRecipe(recipe), recipe);
-			Minecraft client = Minecraft.getInstance();
-			if (recipe instanceof SmithingTransformRecipeAccessor stra) {
-				addRecipeSafe(registry, () -> new EmiSmithingRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), stra.getBase().map(EmiIngredient::of).orElse(EmiStack.EMPTY),
-					stra.getAddition().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe)), recipe);
-			} else if (recipe instanceof SmithingTrimRecipeAccessor stra) {
-				addRecipeSafe(registry, () -> new EmiSmithingTrimRecipe(stra.getTemplate().map(EmiIngredient::of).orElse(EmiStack.EMPTY), stra.getBase().map(EmiIngredient::of).orElse(EmiStack.EMPTY),
-					stra.getAddition().map(EmiIngredient::of).orElse(EmiStack.EMPTY), EmiStack.of(EmiPort.getOutput(recipe)), recipe), recipe);
+			// 1.21.5 dropped the direct optional ingredient fields; the display carries them instead.
+			ResourceLocation id = ProxyRecipeManager.getId(recipe);
+			EmiStack output = EmiStack.of(EmiPort.getOutput(recipe));
+			for (var display : recipe.display()) {
+				if (display instanceof net.minecraft.world.item.crafting.display.SmithingRecipeDisplay smithing) {
+					addRecipeSafe(registry, () -> new EmiSmithingRecipe(
+						DisplayRecipes.ingredient(smithing.template()),
+						DisplayRecipes.ingredient(smithing.base()),
+						DisplayRecipes.ingredient(smithing.addition()),
+						output, id), recipe);
+				}
 			}
 		}
 		for (StonecutterRecipe recipe : getRecipes(registry, RecipeType.STONECUTTING)) {

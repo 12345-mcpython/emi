@@ -14,7 +14,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentPatch;
@@ -46,8 +45,6 @@ import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.VertexBuffer;
 import dev.emi.emi.api.stack.Comparison;
 
 /**
@@ -119,14 +116,7 @@ public final class EmiPort {
 		}
 	}
 
-	public static void setShader(VertexBuffer buf, Matrix4f mat) {
-		buf.bind();
-		buf.drawWithShader(mat, RenderSystem.getProjectionMatrix(), RenderSystem.getShader());
-	}
 
-	public static List<BakedQuad> getQuads(BakedModel model) {
-		return model.getQuads(null, null, RANDOM);
-	}
 
 	public static void draw(BufferBuilder bufferBuilder) {
 		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());

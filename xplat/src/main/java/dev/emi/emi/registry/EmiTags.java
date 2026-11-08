@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -144,32 +143,11 @@ public class EmiTags {
 		return (List<EmiTagKey<T>>) (List) SORTED_TAGS.getOrDefault(registry.key().location(), List.of());
 	}
 
-	public static void registerTagModels(ResourceManager manager, Consumer<ModelResourceLocation> consumer, String variant) {
-		EmiTags.MODELED_TAGS.clear();
-		for (ResourceLocation id : EmiPort.findResources(manager, "models/tag", s -> s.endsWith(".json"))) {
-			String path = id.getPath();
-			path = path.substring(11, path.length() - 5);
-			String[] parts = path.split("/");
-			if (parts.length > 1) {
-				TagKey<?> key = TagKey.create(ResourceKey.createRegistryKey(EmiPort.id("minecraft", parts[0])), EmiPort.id(id.getNamespace(), path.substring(1 + parts[0].length())));
-				ResourceLocation mid = EmiPort.id(id.getNamespace(), "tag/" + path);
-				EmiTags.MODELED_TAGS.put(key, mid);
-				consumer.accept(new ModelResourceLocation(mid, variant));
-			}
-		}
-		/*
-		Disable legacy tag models in 1.21+ due to modeling complications
-		for (Identifier id : EmiPort.findResources(manager, "models/item/tags", s -> s.endsWith(".json"))) {
-			String path = id.getPath();
-			path = path.substring(0, path.length() - 5);
-			String[] parts = path.substring(17).split("/");
-			if (id.getNamespace().equals("emi") && parts.length > 1) {
-				Identifier mid = new ModelIdentifier(id.getNamespace(), path.substring(12), "inventory");
-				EmiTags.MODELED_TAGS.put(TagKey.of(EmiPort.getItemRegistry().getKey(), EmiPort.id(parts[0], path.substring(18 + parts[0].length()))), mid);
-				consumer.accept(mid);
-			}
-		}
-		*/
+	public static void registerTagModels(net.minecraft.server.packs.resources.ResourceManager manager,
+			java.util.function.Consumer<net.minecraft.resources.ResourceLocation> consumer) {
+		// 1.21.5 replaced ModelResourceLocation with the item model pipeline; rebaking the tag icons needs
+		// the new ItemModelResolver path, so tag stacks fall back to their first ingredient for now.
+		MODELED_TAGS.clear();
 	}
 	
 	public static void reload() {

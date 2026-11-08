@@ -190,6 +190,14 @@ public class DisplayRecipes {
 		return displays.stream().map(display -> resolve(display, context)).toList();
 	}
 
+	public static EmiIngredient ingredient(SlotDisplay display) {
+		return client.level == null ? EmiStack.EMPTY : resolve(display, SlotDisplayContext.fromLevel(client.level));
+	}
+
+	public static EmiStack stack(SlotDisplay display) {
+		return client.level == null ? EmiStack.EMPTY : resolveStack(display, SlotDisplayContext.fromLevel(client.level));
+	}
+
 	private static EmiIngredient resolve(SlotDisplay display, ContextMap context) {
 		List<EmiStack> stacks = display.resolveForStacks(context).stream()
 			.filter(stack -> !stack.isEmpty()).map(EmiStack::of).toList();
