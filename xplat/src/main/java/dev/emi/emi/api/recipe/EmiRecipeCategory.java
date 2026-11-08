@@ -22,11 +22,11 @@ public class EmiRecipeCategory implements EmiRenderable {
 	public final ResourceLocation id;
 	public EmiRenderable icon, simplified;
 	public final Comparator<EmiRecipe> sorter;
-	
+
 	/**
 	 * A constructor to use only a single renderable for both the icon and simplified icon.
 	 * It is generally recommended that simplified icons be unique and follow the style of vanilla icons.
-	 * 
+	 *
 	 * {@link EmiStack} instances can be passed as {@link EmiRenderable}
 	 */
 	public EmiRecipeCategory(ResourceLocation id, EmiRenderable icon) {

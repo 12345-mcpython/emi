@@ -33,9 +33,9 @@ public class EnumWidget extends ConfigEntryWidget {
 		Minecraft client = Minecraft.getInstance();
 		if (client.screen instanceof ConfigScreen cs) {
 			client.setScreen(new ConfigEnumScreen<>(cs, Stream.of(values).filter(f -> filter.test((ConfigEnum) f)).map(v -> {
-                ConfigEnum en = (ConfigEnum) v;
-                return new ConfigEnumScreen.Entry<>(en, en.getText(), List.of());
-            }).toList(), consumer));
+				ConfigEnum en = (ConfigEnum) v;
+				return new ConfigEnumScreen.Entry<>(en, en.getText(), List.of());
+			}).toList(), consumer));
 		}
 	}
 

@@ -32,21 +32,21 @@ public interface EmiRegistryAdapter<T> {
 	static <T> EmiRegistryAdapter<T> simple(Class<T> clazz, Registry<T> registry, StackConstructor<T> constructor) {
 		return new EmiRegistryAdapter<>() {
 
-            @Override
-            public Class<T> getBaseClass() {
-                return clazz;
-            }
+			@Override
+			public Class<T> getBaseClass() {
+				return clazz;
+			}
 
-            @Override
-            public Registry<T> getRegistry() {
-                return registry;
-            }
+			@Override
+			public Registry<T> getRegistry() {
+				return registry;
+			}
 
-            @Override
-            public EmiStack of(T t, DataComponentPatch componentChanges, long amount) {
-                return constructor.of(t, componentChanges, amount);
-            }
-        };
+			@Override
+			public EmiStack of(T t, DataComponentPatch componentChanges, long amount) {
+				return constructor.of(t, componentChanges, amount);
+			}
+		};
 	}
 
 	interface StackConstructor<T> {

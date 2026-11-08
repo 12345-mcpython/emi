@@ -42,7 +42,7 @@ public interface EmiTooltipComponent extends ClientTooltipComponent {
 		private final BufferSource vertexConsumers;
 		public final Font renderer;
 		public final int x, y;
-		
+
 		public TextRenderData(Font renderer, int x, int y, Matrix4f matrix, BufferSource vertexConsumers) {
 			this.renderer = renderer;
 			this.x = x;

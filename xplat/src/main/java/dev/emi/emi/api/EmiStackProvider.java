@@ -4,7 +4,7 @@ import dev.emi.emi.api.stack.EmiStackInteraction;
 import net.minecraft.client.gui.screens.Screen;
 
 public interface EmiStackProvider<T extends Screen> {
-	
+
 	/**
 	 * Gets the EmiIngredient at the provided location.
 	 * Should <b>never</b> return null, instead use {@link EmiStackInteraction.EMPTY} to indicate the absence of a stack.

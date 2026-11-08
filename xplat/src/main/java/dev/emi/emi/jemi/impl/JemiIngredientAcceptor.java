@@ -117,7 +117,7 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 		addStack(EmiStack.of(fluid, amount));
 		return this;
 	}
-	
+
 	@Override
 	public JemiIngredientAcceptor addFluidStack(Fluid fluid, long amount, DataComponentPatch componentChanges) {
 		addStack(EmiStack.of(fluid, componentChanges, amount));
@@ -137,7 +137,7 @@ public class JemiIngredientAcceptor implements IIngredientAcceptor<JemiIngredien
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	public JemiIngredientAcceptor addOptionalTypedIngredients(List<Optional<ITypedIngredient<?>>> ingredients) {
 		for (Optional<ITypedIngredient<?>> opt : ingredients) {
-            opt.ifPresent(i -> addIngredient(((IIngredientType) i.getType()), i.getIngredient()));
+			opt.ifPresent(i -> addIngredient(((IIngredientType) i.getType()), i.getIngredient()));
 		}
 		return this;
 	}

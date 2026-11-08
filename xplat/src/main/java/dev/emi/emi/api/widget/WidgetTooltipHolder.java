@@ -6,7 +6,7 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.network.chat.Component;
 
 public interface WidgetTooltipHolder<T> {
-	
+
 	T tooltip(BiFunction<Integer, Integer, List<ClientTooltipComponent>> tooltipSupplier);
 
 	default T tooltip(List<ClientTooltipComponent> tooltip) {

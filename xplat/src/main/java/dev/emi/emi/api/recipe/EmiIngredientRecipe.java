@@ -127,7 +127,7 @@ public abstract class EmiIngredientRecipe implements EmiRecipe {
 				super.render(draw, mouseX, mouseY, delta);
 			}
 		}
-		
+
 		@Override
 		public void drawBackground(GuiGraphics draw, int mouseX, int mouseY, float delta) {
 			super.drawBackground(draw, mouseX, mouseY, delta);

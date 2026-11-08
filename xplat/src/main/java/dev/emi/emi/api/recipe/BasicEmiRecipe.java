@@ -19,7 +19,7 @@ public abstract class BasicEmiRecipe implements EmiRecipe {
 	protected final EmiRecipeCategory category;
 	protected final ResourceLocation id;
 	protected final int width;
-    protected final int height;
+	protected final int height;
 
 	public BasicEmiRecipe(EmiRecipeCategory category, ResourceLocation id, int width, int height) {
 		this.category = category;

@@ -13,23 +13,23 @@ public class LogicalOrQuery extends Query {
 
 	@Override
 	public boolean matches(EmiStack stack) {
-        for (Query q : queries) {
-            boolean success = !q.negated;
-            if (q.matches(stack) == success) {
-                return true;
-            }
-        }
+		for (Query q : queries) {
+			boolean success = !q.negated;
+			if (q.matches(stack) == success) {
+				return true;
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public boolean matchesUnbaked(EmiStack stack) {
-        for (Query q : queries) {
-            boolean success = !q.negated;
-            if (q.matchesUnbaked(stack) == success) {
-                return true;
-            }
-        }
+		for (Query q : queries) {
+			boolean success = !q.negated;
+			if (q.matchesUnbaked(stack) == success) {
+				return true;
+			}
+		}
 		return false;
 	}
 }

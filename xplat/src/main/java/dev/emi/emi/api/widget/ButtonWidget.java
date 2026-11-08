@@ -33,7 +33,7 @@ public class ButtonWidget extends Widget {
 	public Bounds getBounds() {
 		return new Bounds(x, y, width, height);
 	}
-	
+
 	@Override
 	public void render(GuiGraphics draw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);

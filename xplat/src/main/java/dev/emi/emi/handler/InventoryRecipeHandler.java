@@ -24,16 +24,16 @@ public class InventoryRecipeHandler implements StandardRecipeHandler<InventoryMe
 	@Override
 	public List<Slot> getInputSources(InventoryMenu handler) {
 		List<Slot> list = Lists.newArrayList();
-		for (int i = 1; i < 5; i++) { 
+		for (int i = 1; i < 5; i++) {
 			list.add(handler.getSlot(i));
 		}
 		int invStart = 9;
-		for (int i = invStart; i < invStart + 36; i++) { 
+		for (int i = invStart; i < invStart + 36; i++) {
 			list.add(handler.getSlot(i));
 		}
 		return list;
 	}
-	
+
 	@Override
 	public List<Slot> getCraftingSlots(InventoryMenu handler) {
 		List<Slot> list = Lists.newArrayList();

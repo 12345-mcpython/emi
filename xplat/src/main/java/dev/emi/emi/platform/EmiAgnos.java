@@ -141,7 +141,7 @@ public abstract class EmiAgnos {
 	public static boolean canBatch(ItemStack stack) {
 		return delegate.canBatchAgnos(stack);
 	}
-	
+
 	protected abstract boolean canBatchAgnos(ItemStack stack);
 
 	public static Map<Item, Integer> getFuelMap() {
@@ -161,10 +161,10 @@ public abstract class EmiAgnos {
 	}
 
 	protected abstract boolean isEnchantableAgnos(ItemStack stack, Enchantment enchantment);
-	
+
 	public static Object2FloatMap<ItemLike> getComposterMap() {
 		return delegate.getComposterMapAgnos();
 	}
-	
+
 	protected abstract Object2FloatMap<ItemLike> getComposterMapAgnos();
 }

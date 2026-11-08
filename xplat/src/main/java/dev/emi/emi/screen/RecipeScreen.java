@@ -96,7 +96,7 @@ public class RecipeScreen extends Screen {
 		x = (this.width - backgroundWidth) / 2;
 		y = (this.height - backgroundHeight) / 2 + 1;
 		this.tabPageSize = (minimumWidth - 32) / 24;
-		
+
 		for (SizedButtonWidget widget : arrows) {
 			addRenderableWidget(widget);
 		}
@@ -131,7 +131,7 @@ public class RecipeScreen extends Screen {
 						tabs.add(tab);
 					}
 				}
-				
+
 				tab = -1;
 				setPage(tabPage, 0, 0);
 			}
@@ -189,7 +189,7 @@ public class RecipeScreen extends Screen {
 		//EmiRenderHelper.drawScroll(context, x + 19 + buttonOff, y + 5 + 10, minimumWidth - 38, 2, tab, tabs.size(), -1);
 		EmiRenderHelper.drawNinePatch(context, TEXTURE, x + 19 + buttonOff, y + 19, minimumWidth - 38, 12, 0, 16, 3, 6);
 		//EmiRenderHelper.drawScroll(context, x + 19 + buttonOff, y + 19 + 10, minimumWidth - 38, 2, page, tabs.get(tab).getPageCount(), -1);
-		
+
 		boolean categoryHovered = mouseX >= x + 19 + buttonOff && mouseY >= y + 5 && mouseX < x + minimumWidth + buttonOff - 19 && mouseY < y + 5 + 12;
 		int categoryNameColor = categoryHovered ? 0x22ffff : 0xffffff;
 
@@ -312,7 +312,7 @@ public class RecipeScreen extends Screen {
 
 	public int getMaxWorkstations() {
 		return switch (EmiConfig.workstationLocation) {
-			case LEFT, RIGHT -> (this.backgroundHeight - getResolveOffset() - 18) / 18; 
+			case LEFT, RIGHT -> (this.backgroundHeight - getResolveOffset() - 18) / 18;
 			case BOTTOM -> (this.backgroundWidth - getResolveOffset() - 18) / 18;
 			default -> 0;
 		};

@@ -22,14 +22,14 @@ public class EmiWorldInteractionRecipe implements EmiRecipe {
 	private final boolean supportsRecipeTree;
 	private final int slotHeight;
 	private int width = 125;
-    private final int height;
+	private final int height;
 	private final int totalSize;
-    private final int leftSize;
-    private final int rightSize;
-    private final int outputSize;
+	private final int leftSize;
+	private final int rightSize;
+	private final int outputSize;
 	private final int leftHeight;
-    private final int rightHeight;
-    private final int outputHeight;
+	private final int rightHeight;
+	private final int outputHeight;
 
 	protected EmiWorldInteractionRecipe(Builder builder) {
 		this.id = builder.id;
@@ -144,14 +144,14 @@ public class EmiWorldInteractionRecipe implements EmiRecipe {
 			WorldIngredient wi = left.get(i);
 			widgets.add(wi.mutator.apply(new SlotWidget(wi.stack, i % leftSize * 18, yo + i / leftSize * 18)));
 		}
-		
+
 		yo = (slotHeight - rightHeight) * 9;
 		for (int i = 0; i < right.size(); i++) {
 			WorldIngredient wi = right.get(i);
 			widgets.add(wi.mutator.apply(new SlotWidget(wi.stack, rl + i % rightSize * 18, yo + i / rightSize * 18)
 				.catalyst(wi.catalyst)));
 		}
-		
+
 		yo = (slotHeight - outputHeight) * 9;
 		for (int i = 0; i < outputIngredients.size(); i++) {
 			WorldIngredient wi = outputIngredients.get(i);
@@ -159,7 +159,7 @@ public class EmiWorldInteractionRecipe implements EmiRecipe {
 				.recipeContext(this));
 		}
 	}
-	
+
 	public static class Builder {
 		private final List<WorldIngredient> left = Lists.newArrayList();
 		private final List<WorldIngredient> right = Lists.newArrayList();

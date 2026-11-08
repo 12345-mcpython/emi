@@ -69,10 +69,10 @@ public class EmiBookCloningRecipe extends EmiPatternCraftingRecipe {
 	public SlotWidget getOutputWidget(int x, int y) {
 		return new GeneratedSlotWidget(r -> getWrittenBook(r, true), unique, x, y);
 	}
-	
+
 	private EmiStack getWrittenBook(Random random, boolean copy) {
 		ItemStack stack = new ItemStack(Items.WRITTEN_BOOK);
-        String title = TEMPLATES.get(random.nextInt(TEMPLATES.size())).resolve(random);
+		String title = TEMPLATES.get(random.nextInt(TEMPLATES.size())).resolve(random);
 		if (!title.isEmpty()) {
 			title = Character.toUpperCase(title.charAt(0)) + title.substring(1);
 		}

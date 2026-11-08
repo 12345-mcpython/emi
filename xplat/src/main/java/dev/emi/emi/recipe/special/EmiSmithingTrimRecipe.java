@@ -26,7 +26,7 @@ public class EmiSmithingTrimRecipe extends EmiSmithingRecipe {
 	public boolean supportsRecipeTree() {
 		return false;
 	}
-	
+
 	@Override
 	public void addWidgets(WidgetHolder widgets) {
 		widgets.addTexture(EmiTexture.EMPTY_ARROW, 62, 1);

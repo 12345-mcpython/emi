@@ -26,6 +26,6 @@ public class JemiBookmarkOverlay implements IBookmarkOverlay {
 	@Override
 	public <T> @Nullable T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
 		Optional<ITypedIngredient<?>> opt = getIngredientUnderMouse();
-        return opt.map(iTypedIngredient -> iTypedIngredient.getIngredient(ingredientType).orElse(null)).orElse(null);
-    }
+		return opt.map(iTypedIngredient -> iTypedIngredient.getIngredient(ingredientType).orElse(null)).orElse(null);
+	}
 }

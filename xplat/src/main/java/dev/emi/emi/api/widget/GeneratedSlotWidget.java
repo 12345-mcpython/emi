@@ -20,7 +20,7 @@ public class GeneratedSlotWidget extends SlotWidget {
 		this.stackSupplier = stackSupplier;
 		this.unique = unique;
 	}
-	
+
 	@Override
 	public void drawOverlay(GuiGraphics draw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);
@@ -33,7 +33,7 @@ public class GeneratedSlotWidget extends SlotWidget {
 		}
 		super.drawOverlay(context.raw(), mouseX, mouseY, delta);
 	}
-	
+
 	@Override
 	public EmiIngredient getStack() {
 		long time = System.currentTimeMillis() / INCREMENT;

@@ -152,7 +152,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 		});
 
 		registry.addGenericStackProvider((screen, x, y) -> new EmiStackInteraction(runtime.getScreenHelper().getClickableIngredientUnderMouse(screen, x, y)
-                .map(IClickableIngredient::getTypedIngredient).map(JemiUtil::getStack).findFirst().orElse(EmiStack.EMPTY), null, false));
+				.map(IClickableIngredient::getTypedIngredient).map(JemiUtil::getStack).findFirst().orElse(EmiStack.EMPTY), null, false));
 
 		registry.addGenericDragDropHandler(new JemiDragDropHandler());
 
@@ -199,7 +199,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 		categoryMap.put(RecipeTypes.FUELING, VanillaEmiRecipeCategories.FUEL);
 		categoryMap.put(RecipeTypes.COMPOSTING, VanillaEmiRecipeCategories.COMPOSTING);
 		categoryMap.put(RecipeTypes.INFORMATION, VanillaEmiRecipeCategories.INFO);
-		
+
 		CATEGORY_MAP.clear();
 		EmiRecipeFiller.extraHandlers = JemiPlugin::getRecipeHandler;
 
@@ -285,7 +285,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 			}
 			identical.computeIfAbsent(text, k -> Lists.newArrayList()).addAll(group.getKey());
 		}
-		
+
 		for (Component text : identical.keySet()) {
 			registry.addRecipe(new EmiInfoRecipe(identical.get(text).stream().map(s -> (EmiIngredient) s).toList(), List.of(text), null));
 		}
@@ -325,7 +325,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 								public List<EmiStack> getOutputs() {
 									return outputs;
 								}
-								
+
 								@Override
 								public SlotWidget getInputWidget(int slot, int x, int y) {
 									if (slot <= inputs.size()) {
@@ -339,7 +339,7 @@ public class JemiPlugin implements IModPlugin, EmiPlugin {
 								public SlotWidget getOutputWidget(int x, int y) {
 									return new GeneratedSlotWidget(r -> outputs.get(r.nextInt(outputs.size())), recipe.hashCode(), x, y);
 								}
-								
+
 							};
 						} else {
 							replacement = new EmiCraftingRecipe(inputs, outputs.getFirst(), category.getRegistryName(recipe), builder.shapeless);

@@ -186,3 +186,14 @@ Verification after the compatibility pass: `:fabric:build` and `:neoforge:build`
 pass (crafting tree 79, crafting plans 290 + 7, bookmark groups 141, bookmark crafting 59, bookmark material
 transfer full scenario).
 
+## Formatting
+
+The tree uses tab indentation at width 4. `scripts/format_sources.py` normalises leading whitespace
+(space runs are converted to the equivalent tab/space prefix for a 4 column tab stop), strips trailing
+whitespace and guarantees a trailing newline, leaving text blocks untouched because their indentation is
+significant. It never reflows code, so `git diff -w` stays empty after a run.
+
+```
+python scripts/format_sources.py xplat/src fabric/src neoforge/src tests
+```
+

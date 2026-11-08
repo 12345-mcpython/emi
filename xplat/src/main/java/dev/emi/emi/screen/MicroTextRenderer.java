@@ -59,7 +59,7 @@ public class MicroTextRenderer {
 		addMicroChar(new MicroChar('B', 5, 13, 14)); // Also B for buckets
 		addMicroChar(new MicroChar('T', 5, 18, 14));
 		addMicroChar(new MicroChar('Q', 5, 23, 14));
-	
+
 		addMicroChar(new MicroChar('L', 5, 0, 28));
 		addMicroChar(new MicroChar('d', 5, 5, 28));
 		addMicroChar(new MicroChar('m', 5, 10, 28));
@@ -70,7 +70,7 @@ public class MicroTextRenderer {
 	private static void addMicroChar(MicroChar c) {
 		MICRO_CHARS.put(c.c, c);
 	}
-	
+
 	public static void render(EmiDrawContext context, long amount, boolean volume, int constraint, int right, int bottom) {
 		render(context, amount, volume, constraint, right, bottom, -1);
 	}
@@ -136,12 +136,12 @@ public class MicroTextRenderer {
 	}
 
 	private static String construct(String amount, int shift, int afterDecimal, String unit) {
-        StringBuilder amountBuilder = new StringBuilder(amount);
-        while (amountBuilder.length() < shift) {
+		StringBuilder amountBuilder = new StringBuilder(amount);
+		while (amountBuilder.length() < shift) {
 			amountBuilder.insert(0, "0");
 		}
-        amount = amountBuilder.toString();
-        int start = amount.length() - shift;
+		amount = amountBuilder.toString();
+		int start = amount.length() - shift;
 		String before = amount.substring(0, start);
 		if (afterDecimal <= 0) {
 			return before + unit;

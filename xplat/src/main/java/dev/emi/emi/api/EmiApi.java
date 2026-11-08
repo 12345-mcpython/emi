@@ -123,7 +123,7 @@ public class EmiApi {
 	public static void displayRecipeCategory(EmiRecipeCategory category) {
 		setPages(Map.of(category, getRecipeManager().getRecipes(category)), EmiStack.EMPTY);
 	}
-	
+
 	public static void displayRecipesForWorkstation(EmiIngredient workstation) {
 		EmiRecipeManager manager = getRecipeManager();
 		setPages(
@@ -138,7 +138,7 @@ public class EmiApi {
 	public static void displayRecipe(EmiRecipe recipe) {
 		setPages(Map.of(recipe.getCategory(), List.of(recipe)), EmiStack.EMPTY);
 	}
-	
+
 	public static void displayRecipes(EmiIngredient stack) {
 		if (stack instanceof EmiFavorite fav) {
 			stack = fav.getStack();
@@ -207,7 +207,7 @@ public class EmiApi {
 
 	private static List<EmiRecipe> pruneUses(List<EmiRecipe> list, EmiIngredient context) {
 		return list.stream().filter(r -> r.getInputs().stream().anyMatch(i -> containsAll(i, context))
-            || r.getCatalysts().stream().anyMatch(i -> containsAll(i, context))).sorted(Comparator.comparingInt(a -> getSmallestPresence(a, context))).toList();
+			|| r.getCatalysts().stream().anyMatch(i -> containsAll(i, context))).sorted(Comparator.comparingInt(a -> getSmallestPresence(a, context))).toList();
 	}
 
 	private static int getSmallestPresence(EmiRecipe recipe, EmiIngredient context) {

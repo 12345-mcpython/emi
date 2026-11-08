@@ -25,7 +25,7 @@ public class JemiStackSerializer implements EmiIngredientSerializer<JemiStack> {
 	public String getType() {
 		return "jemi";
 	}
-	
+
 	public EmiStack create(String uid, long amount) {
 		for (IIngredientType<?> type : manager.getRegisteredIngredientTypes()) {
 			if (type == VanillaTypes.ITEM_STACK || type == JemiUtil.getFluidType()) {

@@ -34,9 +34,9 @@ public class SidebarSubpanelsWidget extends ConfigEntryWidget {
 			final int j = i;
 			SidebarSubpanels.Subpanel page = pages.subpanels.get(i);
 			buttons.add(EmiPort.newButton(0, 0, 150, 20, page.type.getText(), b -> EnumWidget.page(page.type, t -> t != SidebarType.CHESS, t -> {
-                pages.subpanels.get(j).type = (SidebarType) t;
-                pages.unique();
-            })));
+				pages.subpanels.get(j).type = (SidebarType) t;
+				pages.unique();
+			})));
 			IntEdit edit = new IntEdit(40, page::rows, (ni) -> page.rows = Math.max(1, ni));
 			rows.add(edit);
 			raws.add(edit.up);
@@ -44,9 +44,9 @@ public class SidebarSubpanelsWidget extends ConfigEntryWidget {
 			raws.add(edit.text);
 		}
 		buttons.add(EmiPort.newButton(0, 0, 20, 20, EmiPort.literal("+"), b -> EnumWidget.page(SidebarType.INDEX, t -> t != SidebarType.CHESS, t -> {
-            pages.subpanels.add(new SidebarSubpanels.Subpanel((SidebarType) t, 1));
-            pages.unique();
-        })));
+			pages.subpanels.add(new SidebarSubpanels.Subpanel((SidebarType) t, 1));
+			pages.unique();
+		})));
 		raws.addAll(buttons);
 	}
 
@@ -71,10 +71,10 @@ public class SidebarSubpanelsWidget extends ConfigEntryWidget {
 			h += 24;
 		}
 		h = 0;
-        for (IntEdit edit : rows) {
-            edit.setPosition(x + width - 218, y + h);
-            h += 24;
-        }
+		for (IntEdit edit : rows) {
+			edit.setPosition(x + width - 218, y + h);
+			h += 24;
+		}
 		Button button = buttons.getLast();
 		button.x = x + width - 20;
 		button.y = y;

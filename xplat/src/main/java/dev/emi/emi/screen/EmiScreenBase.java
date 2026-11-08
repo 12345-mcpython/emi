@@ -40,7 +40,7 @@ public class EmiScreenBase {
 	public boolean isEmpty() {
 		return screen == null;
 	}
-	
+
 	public static EmiScreenBase getCurrent() {
 		Minecraft client = Minecraft.getInstance();
 		return of(client.screen);

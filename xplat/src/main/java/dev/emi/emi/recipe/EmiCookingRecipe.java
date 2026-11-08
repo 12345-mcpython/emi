@@ -24,7 +24,7 @@ public class EmiCookingRecipe implements EmiRecipe {
 	private final AbstractCookingRecipe recipe;
 	private final int fuelMultiplier;
 	private final boolean infiniBurn;
-	
+
 	public EmiCookingRecipe(AbstractCookingRecipe recipe, EmiRecipeCategory category, int fuelMultiplier, boolean infiniBurn) {
 		this.id = ProxyRecipeManager.getId(recipe);
 		this.category = category;

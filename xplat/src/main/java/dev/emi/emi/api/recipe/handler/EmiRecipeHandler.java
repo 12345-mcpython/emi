@@ -17,7 +17,7 @@ import dev.emi.emi.api.widget.Widget;
  */
 public interface EmiRecipeHandler<T extends AbstractContainerMenu> {
 	Component NOT_ENOUGH_INGREDIENTS = EmiPort.translatable("emi.not_enough_ingredients");
-	
+
 	/**
 	 * @return An inventory with the stacks the player can use for crafting.
 	 *  Craftables can only ever be discovered if the inventory contains one of its ingredients.

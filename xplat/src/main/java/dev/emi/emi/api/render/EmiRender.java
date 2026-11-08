@@ -6,7 +6,7 @@ import dev.emi.emi.runtime.EmiDrawContext;
 import net.minecraft.client.gui.GuiGraphics;
 
 public class EmiRender {
-	
+
 	public static void renderIngredientIcon(EmiIngredient ingredient, GuiGraphics draw, int x, int y) {
 		EmiRenderHelper.renderIngredient(ingredient, EmiDrawContext.wrap(draw), x, y);
 	}

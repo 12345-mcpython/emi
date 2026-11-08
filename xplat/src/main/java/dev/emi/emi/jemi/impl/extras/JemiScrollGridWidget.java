@@ -14,9 +14,9 @@ public class JemiScrollGridWidget implements IScrollGridWidget {
 	public final List<IRecipeSlotDrawable> slots;
 	public int x, y;
 	public final int gridWidth;
-    public final int gridHeight;
+	public final int gridHeight;
 	public final int width;
-    public final int height;
+	public final int height;
 
 	public JemiScrollGridWidget(List<IRecipeSlotDrawable> slots, int x, int y, int gridWidth, int gridHeight) {
 		this.slots = slots;

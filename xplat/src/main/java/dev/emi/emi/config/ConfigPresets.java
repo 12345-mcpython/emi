@@ -53,7 +53,7 @@ public class ConfigPresets {
 
 		EmiConfig.rightSidebarTheme = SidebarTheme.MODERN;
 		EmiConfig.rightSidebarHeader = HeaderType.VISIBLE;
-		
+
 		EmiConfig.rightSidebarSize.values.set(0, 12);
 		EmiConfig.rightSidebarSize.values.set(1, 100);
 
@@ -64,7 +64,7 @@ public class ConfigPresets {
 
 		EmiConfig.topSidebarTheme = SidebarTheme.TRANSPARENT;
 		EmiConfig.topSidebarHeader = HeaderType.INVISIBLE;
-		
+
 		EmiConfig.topSidebarSize.values.set(0, 12);
 		EmiConfig.topSidebarSize.values.set(1, 4);
 
@@ -93,7 +93,7 @@ public class ConfigPresets {
 
 		EmiConfig.leftSidebarTheme = SidebarTheme.VANILLA;
 		EmiConfig.leftSidebarHeader = HeaderType.VISIBLE;
-		
+
 		EmiConfig.leftSidebarSize.values.set(0, 8);
 		EmiConfig.leftSidebarSize.values.set(1, 7);
 
@@ -104,7 +104,7 @@ public class ConfigPresets {
 
 		EmiConfig.rightSidebarTheme = SidebarTheme.MODERN;
 		EmiConfig.rightSidebarHeader = HeaderType.VISIBLE;
-		
+
 		EmiConfig.rightSidebarSize.values.set(0, 12);
 		EmiConfig.rightSidebarSize.values.set(1, 100);
 
@@ -119,7 +119,7 @@ public class ConfigPresets {
 	public static Runnable lowDistraction = () -> {
 		EmiConfig.searchSidebarFocus = SidebarType.INDEX;
 		EmiConfig.emptySearchSidebarFocus = SidebarType.EMPTY;
-		
+
 		setPages(EmiConfig.rightSidebarPages, List.of(
 			new SidebarPages.SidebarPage(SidebarType.INDEX),
 			new SidebarPages.SidebarPage(SidebarType.EMPTY)
@@ -131,12 +131,12 @@ public class ConfigPresets {
 	public static Runnable emptySearchCraftable = () -> {
 		EmiConfig.searchSidebarFocus = SidebarType.INDEX;
 		EmiConfig.emptySearchSidebarFocus = SidebarType.CRAFTABLES;
-		
+
 		setPages(EmiConfig.rightSidebarPages, List.of(
 			new SidebarPages.SidebarPage(SidebarType.INDEX),
 			new SidebarPages.SidebarPage(SidebarType.CRAFTABLES)
 		));
-		
+
 		setPages(EmiConfig.leftSidebarPages, List.of(
 			new SidebarPages.SidebarPage(SidebarType.FAVORITES)
 		));

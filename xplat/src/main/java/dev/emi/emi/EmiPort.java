@@ -70,15 +70,15 @@ public final class EmiPort {
 	public static MutableComponent literal(String s, Style style) {
 		return Component.literal(s).setStyle(style);
 	}
-	
+
 	public static MutableComponent translatable(String s) {
 		return Component.translatable(s);
 	}
-	
+
 	public static MutableComponent translatable(String s, ChatFormatting formatting) {
 		return Component.translatable(s).withStyle(formatting);
 	}
-	
+
 	public static MutableComponent translatable(String s, Object... objects) {
 		return Component.translatable(s, objects);
 	}

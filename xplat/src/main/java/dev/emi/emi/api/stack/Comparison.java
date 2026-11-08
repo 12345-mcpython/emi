@@ -68,7 +68,7 @@ public class Comparison {
 		/**
 		 * @return Whether the two stacks should be treated as equivalent
 		 */
-        boolean test(EmiStack a, EmiStack b);
+		boolean test(EmiStack a, EmiStack b);
 	}
 
 	public interface HashFunction {
@@ -76,7 +76,7 @@ public class Comparison {
 		/**
 		 * @return The hash for the data being compared in the comparison
 		 */
-        int hash(EmiStack stack);
+		int hash(EmiStack stack);
 	}
 
 	static class Builder {

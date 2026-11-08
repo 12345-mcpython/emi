@@ -940,7 +940,7 @@ public class EmiScreenManager {
 			for (EmiFavorite.Synthetic fav : syntheticFavorites) {
 				synfavs.addAll(fav.getEmiStacks());
 			}
-			
+
 			try {
 				AbstractContainerScreen<?> hs = EmiApi.getHandledScreen();
 				for (EmiRecipeHandler handler : EmiRecipeFiller.getAllHandlers(hs)) {
@@ -1502,7 +1502,7 @@ public class EmiScreenManager {
 			return false;
 		}
 	}
-	
+
 	private static boolean deleteCursor(int mx, int my) {
 		if (client.screen instanceof AbstractContainerScreen<?> handled) {
 			ItemStack cursor = handled.getMenu().getCarried();
@@ -2014,7 +2014,7 @@ public class EmiScreenManager {
 						off += x - to;
 					}
 				} else {
-                    off += Math.min(x, widths[y]);
+					off += Math.min(x, widths[y]);
 				}
 				return off;
 			}

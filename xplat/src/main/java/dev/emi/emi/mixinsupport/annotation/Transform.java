@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.CLASS)
 public @interface Transform {
-	
+
 	/*
 	 * The method/field name
 	 */

@@ -8,7 +8,7 @@ import dev.emi.emi.runtime.ProxyRecipeManager;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 public class EmiShapelessRecipe extends EmiCraftingRecipe {
-	
+
 	public EmiShapelessRecipe(ShapelessRecipe recipe) {
 		super(recipe.getIngredients().stream().map(EmiIngredient::of).toList(),
 			EmiStack.of(EmiPort.getOutput(recipe)), ProxyRecipeManager.getId(recipe));

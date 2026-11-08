@@ -28,7 +28,7 @@ public class EmiTagKey<T> {
 	public static final Map<TagKey<?>, EmiTagKey<?>> CACHE = Maps.newHashMap();
 	private final TagKey<T> raw;
 	private List<T> cached;
-	
+
 	private EmiTagKey(TagKey<T> raw) {
 		this.raw = raw;
 		recalculate();

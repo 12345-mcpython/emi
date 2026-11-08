@@ -21,7 +21,7 @@ public class EmiExclusionAreas {
 		fromClass.clear();
 		generic.clear();
 	}
-	
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static List<Bounds> getExclusion(EmiScreenBase base) {
 		Screen screen = base.screen();

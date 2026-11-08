@@ -21,12 +21,12 @@ public class CookingRecipeHandler<T extends AbstractFurnaceMenu> implements Stan
 		List<Slot> list = Lists.newArrayList();
 		list.add(handler.getSlot(0));
 		int invStart = 3;
-		for (int i = invStart; i < invStart + 36; i++) { 
+		for (int i = invStart; i < invStart + 36; i++) {
 			list.add(handler.getSlot(i));
 		}
 		return list;
 	}
-	
+
 	@Override
 	public List<Slot> getCraftingSlots(T handler) {
 		return List.of(handler.slots.getFirst());

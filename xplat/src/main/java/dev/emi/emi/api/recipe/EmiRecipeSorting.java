@@ -14,8 +14,8 @@ public class EmiRecipeSorting {
 
 	public static Comparator<EmiRecipe> identifier() {
 		return (ar, br) -> {
-			ResourceLocation a = ar.getId(); 
-			ResourceLocation b = br.getId(); 
+			ResourceLocation a = ar.getId();
+			ResourceLocation b = br.getId();
 			if (a == null) {
 				if (b == null) {
 					return 0;
@@ -28,7 +28,7 @@ public class EmiRecipeSorting {
 			return a.compareTo(b);
 		};
 	}
-	
+
 	public static Comparator<EmiRecipe> compareOutputThenInput() {
 		return (a, b) -> {
 			int comp = compareStacks(EmiRecipeSorter.getOutput(a), EmiRecipeSorter.getOutput(b));

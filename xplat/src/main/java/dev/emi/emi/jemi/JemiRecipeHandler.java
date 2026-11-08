@@ -121,7 +121,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 		try {
 			Minecraft client = Minecraft.getInstance();
 			R rawRecipe = getRawRecipe(recipe);
-			
+
 			if (view == null) {
 				view = createSlotsView(recipe, rawRecipe, type, List.of());
 			}
@@ -129,7 +129,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 			if (view == null) {
 				return () -> IRecipeTransferError.Type.INTERNAL;
 			}
-			
+
 			return handler.transferRecipe(context.getScreenHandler(), rawRecipe != null ? rawRecipe : (R) recipe, view, client.player, context.amount() > 1, craft);
 		} catch (Exception e) {
 			EmiLog.error("Error executing JEI craft", e);
@@ -240,7 +240,7 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 			IIngredientAcceptor acceptor = builder.addSlot(role, x, y);
 			for (EmiStack stack : ing.getEmiStacks()) {
 				Optional<ITypedIngredient<?>> opt = JemiUtil.getTyped(stack);
-                opt.ifPresent(typed -> acceptor.addIngredient(typed.getType(), typed.getIngredient()));
+				opt.ifPresent(typed -> acceptor.addIngredient(typed.getType(), typed.getIngredient()));
 			}
 		}
 	}

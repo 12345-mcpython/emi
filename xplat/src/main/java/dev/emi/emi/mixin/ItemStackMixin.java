@@ -20,7 +20,7 @@ import dev.emi.emi.search.EmiSearch;
 
 @Mixin(value = ItemStack.class, priority = 500)
 public class ItemStackMixin {
-	
+
 	@Inject(at = @At("RETURN"), method = "getTooltipLines")
 	private void getTooltip(Item.TooltipContext context, @Nullable Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> info) {
 		List<Component> text = info.getReturnValue();

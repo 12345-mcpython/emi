@@ -36,7 +36,7 @@ public class EmiPlayerInventory {
 	private final Comparison none = Comparison.DEFAULT_COMPARISON;
 	private final Comparison strict = EmiPort.compareStrict();
 	public final Map<EmiStack, EmiStack> inventory = Maps.newHashMap();
-	
+
 	@Deprecated
 	@ApiStatus.Internal
 	public EmiPlayerInventory(Player entity) {
@@ -108,11 +108,11 @@ public class EmiPlayerInventory {
 		if (!handlers.isEmpty()) {
 			EmiCraftContext context = new EmiCraftContext(screen, this, EmiCraftContext.Type.CRAFTABLE);
 			return r -> {
-                for (EmiRecipeHandler handler : handlers) {
-                    if (handler.supportsRecipe(r)) {
-                        return handler.canCraft(r, context);
-                    }
-                }
+				for (EmiRecipeHandler handler : handlers) {
+					if (handler.supportsRecipe(r)) {
+						return handler.canCraft(r, context);
+					}
+				}
 				return false;
 			};
 		}

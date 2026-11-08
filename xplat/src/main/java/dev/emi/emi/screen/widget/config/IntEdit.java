@@ -14,7 +14,7 @@ public class IntEdit {
 	private static final Pattern NUMBER = Pattern.compile("^-?[0-9]*$");
 	public final EditBox text;
 	public final Button up, down;
-	
+
 	public IntEdit(int width, IntSupplier getter, IntConsumer setter) {
 		Minecraft client = Minecraft.getInstance();
 		text = new EditBox(client.font, 0, 0, width - 14, 18, EmiPort.literal(""));

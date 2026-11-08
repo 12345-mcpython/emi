@@ -21,7 +21,7 @@ import dev.emi.emi.mixin.accessor.HandledScreenAccessor;
 import dev.emi.emi.runtime.EmiDrawContext;
 
 public interface EmiDragDropHandler<T extends Screen> {
-	
+
 	/**
 	 * Called when a stack is released while being dragged.
 	 * @return Whether to consume the event.
@@ -38,7 +38,7 @@ public interface EmiDragDropHandler<T extends Screen> {
 	 * A simple, bounds based drag drop handler.
 	 * Bounds are rendered while a stack is dragged.
 	 */
-    class BoundsBased<T extends Screen> implements EmiDragDropHandler<T> {
+	class BoundsBased<T extends Screen> implements EmiDragDropHandler<T> {
 		private final Function<T, Map<Bounds, Consumer<EmiIngredient>>> bounds;
 
 		public BoundsBased(Function<T, Map<Bounds, Consumer<EmiIngredient>>> bounds) {
@@ -78,8 +78,8 @@ public interface EmiDragDropHandler<T extends Screen> {
 	 * A simple, slot based drag drop handler.
 	 * Slots render a highlight while a stack is dragged.
 	 */
-    class SlotBased<T extends AbstractContainerScreen<?>> extends BoundsBased<T> {
-		
+	class SlotBased<T extends AbstractContainerScreen<?>> extends BoundsBased<T> {
+
 		/**
 		 * @param slots A function to get a list of slot targets given a screen
 		 * @param consumer A consumer for dropped stacks

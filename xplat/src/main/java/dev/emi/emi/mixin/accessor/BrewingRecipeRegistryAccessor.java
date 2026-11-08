@@ -11,12 +11,12 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 @Mixin(PotionBrewing.class)
 public interface BrewingRecipeRegistryAccessor {
-    @Accessor("containers")
-    List<Ingredient> getPotionTypes();
+	@Accessor("containers")
+	List<Ingredient> getPotionTypes();
 
-    @Accessor("potionMixes")
-    List<PotionBrewing.Mix<Potion>> getPotionRecipes();
+	@Accessor("potionMixes")
+	List<PotionBrewing.Mix<Potion>> getPotionRecipes();
 
-    @Accessor("containerMixes")
-    List<PotionBrewing.Mix<Item>> getItemRecipes();
+	@Accessor("containerMixes")
+	List<PotionBrewing.Mix<Item>> getItemRecipes();
 }

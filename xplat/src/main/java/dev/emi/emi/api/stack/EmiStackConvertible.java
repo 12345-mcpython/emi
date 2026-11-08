@@ -10,7 +10,7 @@ import net.fabricmc.api.Environment;
  */
 @ApiStatus.Experimental
 public interface EmiStackConvertible {
-	
+
 	/**
 	 * @return The default representation of this type as an EmiStack.
 	 *  If the type has an amount of its own, it will be used.

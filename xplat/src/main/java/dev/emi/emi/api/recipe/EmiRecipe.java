@@ -29,13 +29,13 @@ public interface EmiRecipe {
 	 * @return The unique ID of the recipe, or null. If null, the recipe cannot be serialized.
 	 */
 	@Nullable ResourceLocation getId();
-	
+
 	/**
 	 * @return A list of ingredients required for the recipe.
 	 * 	Inputs will consider this recipe a use when exploring recipes.
 	 */
 	List<EmiIngredient> getInputs();
-	
+
 	/**
 	 * @return A list of ingredients associated with the creation of the recipe.
 	 * 	Catalysts are considered the same as workstations in the recipe, not broken down as a requirement.
@@ -63,7 +63,7 @@ public interface EmiRecipe {
 	/**
 	 * @return The maximum height taken up by the recipe's widgets.
 	 * 	Vertical screen space is capped, however, and EMI may opt to provide less vertical space.
-	 * 
+	 *
 	 * @see {@link WidgetHolder#getHeight()} when adding widgets for the EMI adjusted height.
 	 */
 	int getDisplayHeight();

@@ -9,7 +9,7 @@ public class Margins extends IntGroup {
 	public Margins(int top, int right, int bottom, int left) {
 		super("emi.sidebar.margins.", List.of("top", "right", "bottom", "left"), IntList.of(top, right, bottom, left));
 	}
-	
+
 	public int top() {
 		return values.getInt(0);
 	}

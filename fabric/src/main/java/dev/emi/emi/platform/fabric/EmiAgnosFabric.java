@@ -223,7 +223,7 @@ public class EmiAgnosFabric extends EmiAgnos {
 		}
 		TextureAtlasSprite sprite = sprites[0];
 		int color = FluidVariantRendering.getColor(fluid);
-		
+
 		EmiRenderHelper.drawTintedSprite(matrices, sprite, color, x, y, xOff, yOff, width, height);
 	}
 

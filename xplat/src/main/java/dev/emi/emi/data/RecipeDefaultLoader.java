@@ -46,7 +46,7 @@ public class RecipeDefaultLoader extends SimplePreparableReloadListener<RecipeDe
 	protected void apply(RecipeDefaults prepared, ResourceManager manager, ProfilerFiller profiler) {
 		BoM.setDefaults(prepared);
 	}
-	
+
 	@Override
 	public ResourceLocation getEmiId() {
 		return ID;

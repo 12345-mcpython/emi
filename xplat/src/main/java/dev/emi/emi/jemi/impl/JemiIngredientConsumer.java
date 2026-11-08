@@ -54,7 +54,7 @@ public class JemiIngredientConsumer implements IIngredientConsumer {
 	@Override
 	public IIngredientConsumer addOptionalTypedIngredients(List<Optional<ITypedIngredient<?>>> ingredients) {
 		for (Optional<ITypedIngredient<?>> i : ingredients) {
-            i.ifPresent(t -> addIngredient((mezz.jei.api.ingredients.IIngredientType) t.getType(), t.getIngredient()));
+			i.ifPresent(t -> addIngredient((mezz.jei.api.ingredients.IIngredientType) t.getType(), t.getIngredient()));
 		}
 		return this;
 	}

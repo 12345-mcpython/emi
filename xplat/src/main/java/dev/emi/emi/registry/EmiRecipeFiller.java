@@ -147,21 +147,21 @@ public class EmiRecipeFiller {
 						discovered.add(null);
 						continue;
 					}
-                    for (EmiStack stack : emiStacks) {
-                        slotLoop:
-                        for (Slot s : slots) {
-                            ItemStack ss = s.getItem();
-                            if (EmiStack.of(s.getItem()).isEqual(stack)) {
-                                for (DiscoveredItem di : d) {
-                                    if (ItemStack.isSameItemSameComponents(ss, di.stack)) {
-                                        di.amount += ss.getCount();
-                                        continue slotLoop;
-                                    }
-                                }
-                                d.add(new DiscoveredItem(stack, ss, ss.getCount(), (int) ingredient.getAmount(), ss.getMaxStackSize()));
-                            }
-                        }
-                    }
+					for (EmiStack stack : emiStacks) {
+						slotLoop:
+						for (Slot s : slots) {
+							ItemStack ss = s.getItem();
+							if (EmiStack.of(s.getItem()).isEqual(stack)) {
+								for (DiscoveredItem di : d) {
+									if (ItemStack.isSameItemSameComponents(ss, di.stack)) {
+										di.amount += ss.getCount();
+										continue slotLoop;
+									}
+								}
+								d.add(new DiscoveredItem(stack, ss, ss.getCount(), (int) ingredient.getAmount(), ss.getMaxStackSize()));
+							}
+						}
+					}
 					DiscoveredItem biggest = null;
 					for (DiscoveredItem di : d) {
 						if (biggest == null) {
@@ -217,16 +217,16 @@ public class EmiRecipeFiller {
 				}
 
 				List<ItemStack> desired = Lists.newArrayList();
-                for (DiscoveredItem di : discovered) {
-                    if (di != null) {
-                        ItemStack is = di.stack.copy();
-                        int a = di.catalyst() ? di.consumed : di.consumed * maxAmount;
-                        is.setCount(a);
-                        desired.add(is);
-                    } else {
-                        desired.add(ItemStack.EMPTY);
-                    }
-                }
+				for (DiscoveredItem di : discovered) {
+					if (di != null) {
+						ItemStack is = di.stack.copy();
+						int a = di.catalyst() ? di.consumed : di.consumed * maxAmount;
+						is.setCount(a);
+						desired.add(is);
+					} else {
+						desired.add(ItemStack.EMPTY);
+					}
+				}
 				return desired;
 			}
 		} catch (Exception e) {

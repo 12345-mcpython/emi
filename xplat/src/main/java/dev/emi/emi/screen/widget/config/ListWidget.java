@@ -378,7 +378,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 
 	/**
 	 * Moves the selection in the specified direction until the predicate returns true.
-	 * 
+	 *
 	 * @param direction the direction to move the selection
 	 */
 	protected void moveSelectionIf(MoveDirection direction, Predicate<Entry> predicate) {
@@ -545,5 +545,5 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		UP,
 		DOWN
 
-    }
+	}
 }

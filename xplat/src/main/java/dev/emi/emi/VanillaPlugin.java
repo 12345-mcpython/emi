@@ -140,7 +140,7 @@ import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 public class VanillaPlugin implements EmiPlugin {
 	public static final EmiRecipeCategory TAG = new EmiRecipeCategory(EmiPort.id("emi:tag"),
 		EmiStack.of(Items.NAME_TAG), simplifiedRenderer(240, 208), EmiRecipeSorting.none());
-	
+
 	public static final EmiRecipeCategory INGREDIENT = new EmiRecipeCategory(EmiPort.id("emi:ingredient"),
 		EmiStack.of(Items.COMPASS), simplifiedRenderer(240, 208));
 	public static final EmiRecipeCategory RESOLUTION = new EmiRecipeCategory(EmiPort.id("emi:resolution"),
@@ -314,7 +314,7 @@ public class VanillaPlugin implements EmiPlugin {
 						paper, paper, paper, paper,
 						EmiStack.of(Items.FILLED_MAP),
 						paper, paper, paper, paper
-				), 
+				),
 						EmiStack.of(Items.FILLED_MAP),
 						id, false), recipe);
 			} else if (recipe instanceof ShapedRecipe shaped && recipe.canCraftInDimensions(3, 3)) {
@@ -565,7 +565,7 @@ public class VanillaPlugin implements EmiPlugin {
 			ResourceLocation id = synthetic("world/stripping", EmiUtil.subId(entry.getKey()));
 			addRecipeSafe(registry, () -> basicWorld(EmiStack.of(entry.getKey()), axes, EmiStack.of(entry.getValue()), id));
 		}
-		
+
 		EmiIngredient shears = damagedTool(EmiStack.of(Items.SHEARS), 1);
 		addRecipeSafe(registry, () -> EmiWorldInteractionRecipe.builder()
 			.id(synthetic("world/shearing", "minecraft/pumpkin"))
@@ -665,7 +665,7 @@ public class VanillaPlugin implements EmiPlugin {
 			.rightInput(waterCatalyst, false)
 			.output(EmiStack.of(Items.OBSIDIAN))
 			.build());
-	
+
 		EmiStack soulSoil = EmiStack.of(Items.SOUL_SOIL);
 		soulSoil.setRemainder(soulSoil);
 		EmiStack blueIce = EmiStack.of(Items.BLUE_ICE);

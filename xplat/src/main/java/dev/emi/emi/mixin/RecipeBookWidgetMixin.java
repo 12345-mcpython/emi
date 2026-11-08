@@ -20,7 +20,7 @@ public abstract class RecipeBookWidgetMixin {
 
 	@Shadow
 	protected abstract void setVisible(boolean opened);
-	
+
 	@Inject(at = @At("HEAD"), method = "toggleVisibility", cancellable = true)
 	public void toggleOpen(CallbackInfo info) {
 		if (EmiConfig.recipeBookAction == RecipeBookAction.DEFAULT) {

@@ -42,7 +42,7 @@ public class EmiNameWidget implements Renderable {
 		"E M I".split(" ")
 	);
 	public final int x;
-    public final int y;
+	public final int y;
 
 	public EmiNameWidget(int x, int y) {
 		this.x = x;

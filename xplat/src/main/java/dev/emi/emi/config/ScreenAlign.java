@@ -11,7 +11,7 @@ public class ScreenAlign {
 		this.horizontal = horizontal;
 		this.vertical = vertical;
 	}
-	
+
 	public enum Horizontal implements ConfigEnum {
 		LEFT("left"),
 		CENTER("center"),
@@ -43,7 +43,7 @@ public class ScreenAlign {
 			return Horizontal.CENTER;
 		}
 	}
-	
+
 	public enum Vertical implements ConfigEnum {
 		TOP("top"),
 		CENTER("center"),

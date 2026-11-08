@@ -46,7 +46,7 @@ public class JemiRecipe<T> implements EmiRecipe {
 	public final List<EmiStack> outputs = Lists.newArrayList();
 	public final EmiRecipeCategory recipeCategory;
 	public final ResourceLocation originalId;
-    public ResourceLocation id;
+	public ResourceLocation id;
 	public final IRecipeCategory<T> category;
 	public final T recipe;
 	public boolean allowTree = true;

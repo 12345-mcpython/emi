@@ -46,7 +46,7 @@ public class EmiBannerShieldRecipe extends EmiPatternCraftingRecipe {
 	public SlotWidget getOutputWidget(int x, int y) {
 		return new GeneratedSlotWidget(r -> getPattern(r, Items.SHIELD), unique, x, y);
 	}
-	
+
 	public EmiStack getPattern(Random random, Item item) {
 		int base = random.nextInt(BANNERS.size());
 		if (item == null) {

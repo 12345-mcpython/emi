@@ -56,5 +56,5 @@ public class JemiTextWidget extends JemiPlaceable<ITextWidget> implements ITextW
 		this.vertical = verticalAlignment;
 		return this;
 	}
-	
+
 }

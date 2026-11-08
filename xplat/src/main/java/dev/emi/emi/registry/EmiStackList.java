@@ -146,7 +146,7 @@ public class EmiStackList {
 		groups.add(fluidGroup);
 
 		Set<EmiStack> added = new ObjectOpenCustomHashSet<>(new StrictHashStrategy());
-		
+
 		stacks = Lists.newLinkedList();
 		for (IndexGroup group : groups) {
 			if (group.shouldDisplay()) {

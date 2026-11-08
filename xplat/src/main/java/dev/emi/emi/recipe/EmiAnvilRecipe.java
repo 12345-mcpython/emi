@@ -18,7 +18,7 @@ public class EmiAnvilRecipe implements EmiRecipe {
 	private final EmiIngredient resource;
 	private final ResourceLocation id;
 	private final int uniq = EmiUtil.RANDOM.nextInt();
-	
+
 	public EmiAnvilRecipe(EmiStack tool, EmiIngredient resource, ResourceLocation id) {
 		this.tool = tool;
 		this.resource = resource;

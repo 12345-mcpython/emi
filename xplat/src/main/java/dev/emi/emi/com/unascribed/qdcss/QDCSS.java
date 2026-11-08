@@ -139,17 +139,17 @@ public class QDCSS {
 		if (list == null) return Collections.emptyList();
 		return new AbstractList<>() {
 
-            @Override
-            public String get(int index) {
-                return unwrap(list.get(index));
-            }
+			@Override
+			public String get(int index) {
+				return unwrap(list.get(index));
+			}
 
-            @Override
-            public int size() {
-                return list.size();
-            }
+			@Override
+			public int size() {
+				return list.size();
+			}
 
-        };
+		};
 	}
 
 	private String unwrap(BlameString bs) {
@@ -181,11 +181,11 @@ public class QDCSS {
 	}
 
 	private boolean strictParseBoolean(String s) {
-        return switch (s.toLowerCase(Locale.ROOT)) {
-            case "on", "true" -> true;
-            case "off", "false" -> false;
-            default -> throw new IllegalArgumentException();
-        };
+		return switch (s.toLowerCase(Locale.ROOT)) {
+			case "on", "true" -> true;
+			case "off", "false" -> false;
+			default -> throw new IllegalArgumentException();
+		};
 	}
 
 	public <E extends Enum<E>> Optional<E> getEnum(String key, Class<E> clazz) throws BadValueException {
@@ -231,30 +231,30 @@ public class QDCSS {
 	public Set<Map.Entry<String, List<String>>> entrySet() {
 		return new AbstractSet<>() {
 
-            @Override
-            public Iterator<Map.Entry<String, List<String>>> iterator() {
-                Iterator<Map.Entry<String, List<BlameString>>> delegate = data.entrySet().iterator();
-                return new Iterator<>() {
+			@Override
+			public Iterator<Map.Entry<String, List<String>>> iterator() {
+				Iterator<Map.Entry<String, List<BlameString>>> delegate = data.entrySet().iterator();
+				return new Iterator<>() {
 
-                    @Override
-                    public boolean hasNext() {
-                        return delegate.hasNext();
-                    }
+					@Override
+					public boolean hasNext() {
+						return delegate.hasNext();
+					}
 
-                    @Override
-                    public Map.Entry<String, List<String>> next() {
-                        Map.Entry<String, List<BlameString>> den = delegate.next();
-                        return new AbstractMap.SimpleImmutableEntry<>(den.getKey(), unwrap(den.getValue()));
-                    }
-                };
-            }
+					@Override
+					public Map.Entry<String, List<String>> next() {
+						Map.Entry<String, List<BlameString>> den = delegate.next();
+						return new AbstractMap.SimpleImmutableEntry<>(den.getKey(), unwrap(den.getValue()));
+					}
+				};
+			}
 
-            @Override
-            public int size() {
-                return size();
-            }
+			@Override
+			public int size() {
+				return size();
+			}
 
-        };
+		};
 	}
 
 	public int size() {
@@ -310,63 +310,63 @@ public class QDCSS {
 	public Map<String, String> flatten() {
 		return new AbstractMap<>() {
 
-            @Override
-            public String get(Object key) {
-                return QDCSS.this.get((String) key).orElse(null);
-            }
+			@Override
+			public String get(Object key) {
+				return QDCSS.this.get((String) key).orElse(null);
+			}
 
-            @Override
-            public boolean containsKey(Object key) {
-                return QDCSS.this.containsKey((String) key);
-            }
+			@Override
+			public boolean containsKey(Object key) {
+				return QDCSS.this.containsKey((String) key);
+			}
 
-            @Override
-            public Set<String> keySet() {
-                return QDCSS.this.keySet();
-            }
+			@Override
+			public Set<String> keySet() {
+				return QDCSS.this.keySet();
+			}
 
-            @Override
-            public int size() {
-                return QDCSS.this.size();
-            }
+			@Override
+			public int size() {
+				return QDCSS.this.size();
+			}
 
-            @Override
-            public Set<Entry<String, String>> entrySet() {
-                return new AbstractSet<>() {
+			@Override
+			public Set<Entry<String, String>> entrySet() {
+				return new AbstractSet<>() {
 
-                    @Override
-                    public Iterator<Entry<String, String>> iterator() {
-                        Iterator<Entry<String, List<String>>> delegate = QDCSS.this.entrySet().iterator();
-                        return new Iterator<>() {
+					@Override
+					public Iterator<Entry<String, String>> iterator() {
+						Iterator<Entry<String, List<String>>> delegate = QDCSS.this.entrySet().iterator();
+						return new Iterator<>() {
 
-                            @Override
-                            public boolean hasNext() {
-                                return delegate.hasNext();
-                            }
+							@Override
+							public boolean hasNext() {
+								return delegate.hasNext();
+							}
 
-                            @Override
-                            public Entry<String, String> next() {
-                                Entry<String, List<String>> den = delegate.next();
-                                return new SimpleImmutableEntry<>(den.getKey(), getLast(den.getValue()));
-                            }
-                        };
-                    }
+							@Override
+							public Entry<String, String> next() {
+								Entry<String, List<String>> den = delegate.next();
+								return new SimpleImmutableEntry<>(den.getKey(), getLast(den.getValue()));
+							}
+						};
+					}
 
-                    @Override
-                    public int size() {
-                        return size();
-                    }
+					@Override
+					public int size() {
+						return size();
+					}
 
-                };
-            }
+				};
+			}
 
-        };
+		};
 	}
-	
+
 	private static final Pattern JUNK_PATTERN = Pattern.compile("^(\\s*(/\\*.*?\\*/)?\\s*)*$", Pattern.DOTALL);
 	private static final Pattern RULESET_PATTERN = Pattern.compile("[#.]?(\\w+?)\\s*\\{(.*?)\\}", Pattern.DOTALL);
 	private static final Pattern RULE_PATTERN = Pattern.compile("(\\S+?)\\s*:\\s*(\\\".*?\\\"|'.*?'|.+?)\\s*(;|$)");
-	
+
 	public static QDCSS load(String fileName, String s) throws SyntaxErrorException {
 		// vanilla CSS is a very simple grammar, so we can parse it using only regexes
 		Map<String, List<BlameString>> data = new LinkedHashMap<>();
@@ -431,7 +431,7 @@ public class QDCSS {
 	}
 
 	private static final Splitter SLASH_SPLITTER = Splitter.on('/');
-	
+
 	public static QDCSS load(URL u) throws IOException {
 		try (InputStream in = u.openStream()) {
 			return load(Iterables.getLast(SLASH_SPLITTER.split(u.getPath())), in);

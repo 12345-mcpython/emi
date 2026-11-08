@@ -122,24 +122,24 @@ public class ItemEmiStack extends EmiStack implements Batchable {
 			EmiRender.renderRemainderIcon(this, context.raw(), x, y);
 		}
 	}
-	
+
 	@Override
 	public boolean isSideLit() {
 		return client.getItemRenderer().getModel(getItemStack(), null, null, 0).usesBlockLight();
 	}
-	
+
 	@Override
 	public boolean isUnbatchable() {
 		ItemStack stack = getItemStack();
 		return unbatchable || stack.hasFoil() || stack.isDamaged() || !EmiAgnos.canBatch(stack)
 			|| client.getItemRenderer().getModel(getItemStack(), null, null, 0).isCustomRenderer();
 	}
-	
+
 	@Override
 	public void setUnbatchable() {
 		this.unbatchable = true;
 	}
-	
+
 	@Override
 	public void renderForBatch(MultiBufferSource vcp, GuiGraphics draw, int x, int y, int z, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);

@@ -11,7 +11,7 @@ public class EmiRecipeCategoryProperties {
 	public int order;
 	public Supplier<EmiRenderable> icon, simplified;
 	public Comparator<EmiRecipe> sort;
-	
+
 	public static int getOrder(EmiRecipeCategory category) {
 		EmiRecipeCategoryProperties props = EmiData.categoryPriorities.get(category.getId().toString());
 		if (props != null) {
@@ -19,7 +19,7 @@ public class EmiRecipeCategoryProperties {
 		}
 		return 0;
 	}
-	
+
 	public static Comparator<EmiRecipe> getSort(EmiRecipeCategory category) {
 		EmiRecipeCategoryProperties props = EmiData.categoryPriorities.get(category.getId().toString());
 		if (props != null && props.sort != null) {

@@ -139,7 +139,7 @@ public class EmiSearch {
 		synchronized (EmiSearch.class) {
 			SearchWorker worker = new SearchWorker(query, EmiScreenManager.getSearchSource());
 			currentWorker = worker;
-			
+
 			searchThread = new Thread(worker);
 			searchThread.setDaemon(true);
 			searchThread.start();
@@ -169,24 +169,24 @@ public class EmiSearch {
 				if (negated) {
 					q = q.substring(1);
 				}
-                switch (q) {
-                    case "" -> {
-                        continue;
-                    }
-                    case "&" -> {
-                        // Default behavior
-                        continue;
-                        // Default behavior
-                    }
-                    case "|" -> {
-                        if (!queries.isEmpty()) {
-                            full.add(new LogicalAndQuery(queries));
-                            queries = Lists.newArrayList();
-                        }
-                        continue;
-                    }
-                }
-                QueryType type = QueryType.fromString(q);
+				switch (q) {
+					case "" -> {
+						continue;
+					}
+					case "&" -> {
+						// Default behavior
+						continue;
+						// Default behavior
+					}
+					case "|" -> {
+						if (!queries.isEmpty()) {
+							full.add(new LogicalAndQuery(queries));
+							queries = Lists.newArrayList();
+						}
+						continue;
+					}
+				}
+				QueryType type = QueryType.fromString(q);
 				Function<String, Query> constructor = type.queryConstructor;
 				Function<String, Query> regexConstructor = type.regexQueryConstructor;
 				if (type == QueryType.DEFAULT) {

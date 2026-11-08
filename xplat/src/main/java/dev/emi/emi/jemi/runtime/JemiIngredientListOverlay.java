@@ -28,8 +28,8 @@ public class JemiIngredientListOverlay implements IIngredientListOverlay {
 	@Override
 	public <T> @Nullable T getIngredientUnderMouse(IIngredientType<T> ingredientType) {
 		Optional<ITypedIngredient<?>> opt = getIngredientUnderMouse();
-        return opt.map(iTypedIngredient -> iTypedIngredient.getIngredient(ingredientType).orElse(null)).orElse(null);
-    }
+		return opt.map(iTypedIngredient -> iTypedIngredient.getIngredient(ingredientType).orElse(null)).orElse(null);
+	}
 
 	@Override
 	public boolean isListDisplayed() {
@@ -54,5 +54,5 @@ public class JemiIngredientListOverlay implements IIngredientListOverlay {
 		}
 		return List.of();
 	}
-	
+
 }

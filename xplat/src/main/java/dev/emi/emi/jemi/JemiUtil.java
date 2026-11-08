@@ -23,7 +23,7 @@ import net.minecraft.world.level.material.Fluid;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JemiUtil {
-	
+
 	public static EmiIngredient getIngredient(List<ITypedIngredient<?>> ingredients) {
 		if (ingredients.isEmpty()) {
 			return EmiStack.EMPTY;

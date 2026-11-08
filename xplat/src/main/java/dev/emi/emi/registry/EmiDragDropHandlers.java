@@ -30,7 +30,7 @@ public class EmiDragDropHandlers {
 			handler.render(screen, stack, draw, mouseX, mouseY, delta);
 		}
 	}
-	
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static boolean dropStack(Screen screen, EmiIngredient stack, int x, int y) {
 		if (fromClass.containsKey(screen.getClass())) {

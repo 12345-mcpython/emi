@@ -16,20 +16,20 @@ public class CraftingRecipeHandler implements StandardRecipeHandler<CraftingMenu
 	@Override
 	public List<Slot> getInputSources(CraftingMenu handler) {
 		List<Slot> list = Lists.newArrayList();
-		for (int i = 1; i < 10; i++) { 
+		for (int i = 1; i < 10; i++) {
 			list.add(handler.getSlot(i));
 		}
 		int invStart = 10;
-		for (int i = invStart; i < invStart + 36; i++) { 
+		for (int i = invStart; i < invStart + 36; i++) {
 			list.add(handler.getSlot(i));
 		}
 		return list;
 	}
-	
+
 	@Override
 	public List<Slot> getCraftingSlots(CraftingMenu handler) {
 		List<Slot> list = Lists.newArrayList();
-		for (int i = 1; i < 10; i++) { 
+		for (int i = 1; i < 10; i++) {
 			list.add(handler.getSlot(i));
 		}
 		return list;

@@ -30,7 +30,7 @@ import dev.emi.emi.runtime.EmiDrawContext;
 public abstract class AbstractInventoryScreenMixin<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
 	@Unique
 	private static final boolean hasInventoryTabs = EmiAgnos.isModLoaded("inventorytabs");
-	
+
 	private AbstractInventoryScreenMixin() { super(null, null, null); }
 
 	@Shadow
@@ -42,7 +42,7 @@ public abstract class AbstractInventoryScreenMixin<T extends AbstractContainerMe
 	private void renderBackgrounds(GuiGraphics draw, int x, int height, Iterable<MobEffectInstance> statusEffects, boolean wide) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Shadow
 	private void renderIcons(GuiGraphics draw, int x, int height, Iterable<MobEffectInstance> statusEffects, boolean wide) {
 		throw new UnsupportedOperationException();
@@ -120,7 +120,7 @@ public abstract class AbstractInventoryScreenMixin<T extends AbstractContainerMe
 			context.raw().renderTooltip(minecraft.font, list, Optional.empty(), mouseX, Math.max(mouseY, 16));
 		}
 	}
-	
+
 	@ModifyVariable(at = @At(value = "STORE", ordinal = 0),
 		method = "renderEffects", ordinal = 0)
 	private boolean squishEffects(boolean original) {

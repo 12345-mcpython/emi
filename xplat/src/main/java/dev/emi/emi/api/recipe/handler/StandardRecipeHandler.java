@@ -24,7 +24,7 @@ import dev.emi.emi.registry.EmiRecipeFiller;
 import dev.emi.emi.runtime.EmiDrawContext;
 
 public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends EmiRecipeHandler<T> {
-	
+
 	/**
 	 * @return The slots for the recipe handler to source ingredients from.
 	 * Typically this should include the player's inventory, and crafting slots.
@@ -88,7 +88,7 @@ public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends 
 	}
 
 	@ApiStatus.Internal
-    static void renderMissing(EmiRecipe recipe, EmiPlayerInventory inv, List<Widget> widgets, GuiGraphics draw) {
+	static void renderMissing(EmiRecipe recipe, EmiPlayerInventory inv, List<Widget> widgets, GuiGraphics draw) {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);
 		context.enableDepthTest();
 		Map<EmiIngredient, Boolean> availableForCrafting = getAvailable(recipe, inv);
@@ -106,7 +106,7 @@ public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends 
 			}
 		}
 	}
-	
+
 	private static Map<EmiIngredient, Boolean> getAvailable(EmiRecipe recipe, EmiPlayerInventory inventory) {
 		Map<EmiIngredient, Boolean> availableForCrafting = new IdentityHashMap<>();
 		List<Boolean> list = inventory.getCraftAvailability(recipe);

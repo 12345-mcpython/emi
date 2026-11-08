@@ -35,7 +35,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 @EventBusSubscriber(modid = "emi", bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class EmiClientNeoForge {
-	
+
 	@SubscribeEvent
 	public static void clientInit(FMLClientSetupEvent event) {
 		StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(NeoForgeRenderTypes::get).toList());

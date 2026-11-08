@@ -26,7 +26,7 @@ public class CraftingResultSlotMixin {
 	private CraftingContainer craftSlots;
 	@Shadow @Final
 	private Player player;
-	
+
 	@Inject(at = @At("HEAD"), method = "checkTakeAchievements(Lnet/minecraft/world/item/ItemStack;)V")
 	private void onCrafted(ItemStack stack, CallbackInfo info) {
 		Level world = player.level();

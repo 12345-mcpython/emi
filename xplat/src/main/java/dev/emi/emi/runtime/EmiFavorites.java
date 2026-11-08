@@ -164,22 +164,22 @@ public class EmiFavorites {
 					ies.getItemStack().setCount(1);
 				}
 				if (!es.isEmpty()) {
-                    for (EmiFavorite fav : favorites) {
-                        if (fav.getRecipe() == context && fav.strictEquals(es)) {
-                            return;
-                        }
-                    }
+					for (EmiFavorite fav : favorites) {
+						if (fav.getRecipe() == context && fav.strictEquals(es)) {
+							return;
+						}
+					}
 					favorites.add(new EmiFavorite(es, context));
 				}
 			} else {
 				if (stack.isEmpty()) {
 					return;
 				}
-                for (EmiFavorite fav : favorites) {
-                    if (fav.getRecipe() == null && fav.strictEquals(stack)) {
-                        return;
-                    }
-                }
+				for (EmiFavorite fav : favorites) {
+					if (fav.getRecipe() == null && fav.strictEquals(stack)) {
+						return;
+					}
+				}
 				favorites.add(new EmiFavorite(stack, null));
 			}
 		}
@@ -274,7 +274,7 @@ public class EmiFavorites {
 
 	private static class CompoundList<T> extends AbstractList<T> {
 		private final List<? extends T> a;
-        private final List<? extends T> b;
+		private final List<? extends T> b;
 
 		public CompoundList(List<? extends T> a, List<? extends T> b) {
 			this.a = a;

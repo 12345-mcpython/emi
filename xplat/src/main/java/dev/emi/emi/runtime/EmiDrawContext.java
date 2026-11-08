@@ -13,7 +13,7 @@ import net.minecraft.util.FormattedCharSequence;
 public class EmiDrawContext {
 	private final Minecraft client = Minecraft.getInstance();
 	private final GuiGraphics context;
-	
+
 	private EmiDrawContext(GuiGraphics context) {
 		this.context = context;
 	}

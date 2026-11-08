@@ -66,7 +66,7 @@ public abstract class EmiStack implements EmiIngredient {
 	public long getAmount() {
 		return amount;
 	}
-	
+
 	public EmiStack setAmount(long amount) {
 		this.amount = amount;
 		return this;
@@ -75,7 +75,7 @@ public abstract class EmiStack implements EmiIngredient {
 	public float getChance() {
 		return chance;
 	}
-	
+
 	public EmiStack setChance(float chance) {
 		this.chance = chance;
 		return this;

@@ -152,8 +152,8 @@ public class ConfigScreen extends Screen {
 			EmiConfig.setGlobalState(!EmiConfig.useGlobalConfig);
 			ConfigScreen.this.resize(minecraft, width, height);
 		}, () -> (EmiConfig.useGlobalConfig ? 40 : 0), () -> (List<Component>) (Object) Arrays.stream(I18n.get("tooltip.emi.config.global").split("\n"))
-            .map(s -> minecraft.font.getSplitter().splitLines(FormattedText.of(s), maxWidth, Style.EMPTY))
-            .flatMap(Collection::stream).map(v -> EmiPort.literal(v.getString())).toList()));
+			.map(s -> minecraft.font.getSplitter().splitLines(FormattedText.of(s), maxWidth, Style.EMPTY))
+			.flatMap(Collection::stream).map(v -> EmiPort.literal(v.getString())).toList()));
 		this.addRenderableWidget(resetButton);
 		this.addWidget(search.field);
 
@@ -196,39 +196,39 @@ public class ConfigScreen extends Screen {
 					if (field.getType() == boolean.class) {
 						entry = new BooleanWidget(translation, getFieldTooltip(field), searchSupplier, new Mutator<>() {
 
-                            public Boolean getValue() {
-                                try {
-                                    return field.getBoolean(null);
-                                } catch (Exception e) {
-                                }
-                                return false;
-                            }
+							public Boolean getValue() {
+								try {
+									return field.getBoolean(null);
+								} catch (Exception e) {
+								}
+								return false;
+							}
 
-                            public void setValue(Boolean value) {
-                                try {
-                                    field.setBoolean(null, value);
-                                } catch (Exception e) {
-                                }
-                            }
-                        });
+							public void setValue(Boolean value) {
+								try {
+									field.setBoolean(null, value);
+								} catch (Exception e) {
+								}
+							}
+						});
 					} else if (field.getType() == int.class) {
 						entry = new IntWidget(translation, getFieldTooltip(field), searchSupplier, new Mutator<>() {
 
-                            public Integer getValue() {
-                                try {
-                                    return field.getInt(null);
-                                } catch (Exception e) {
-                                }
-                                return -1;
-                            }
+							public Integer getValue() {
+								try {
+									return field.getInt(null);
+								} catch (Exception e) {
+								}
+								return -1;
+							}
 
-                            public void setValue(Integer value) {
-                                try {
-                                    field.setInt(null, value);
-                                } catch (Exception e) {
-                                }
-                            }
-                        });
+							public void setValue(Integer value) {
+								try {
+									field.setInt(null, value);
+								} catch (Exception e) {
+								}
+							}
+						});
 					} else if (field.getType() == EmiBind.class) {
 						entry = new EmiBindWidget(this, getFieldTooltip(field), searchSupplier, (EmiBind) field.get(null));
 					} else if (field.getType() == ScreenAlign.class) {
@@ -326,22 +326,22 @@ public class ConfigScreen extends Screen {
 	@SuppressWarnings("unchecked")
 	public <T> Mutator<T> objectMutator(Field field) {
 		return new Mutator<>() {
-            public T getValue() {
-                try {
-                    return (T) field.get(null);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
+			public T getValue() {
+				try {
+					return (T) field.get(null);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
 
-            public void setValue(T en) {
-                try {
-                    field.set(null, en);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
+			public void setValue(T en) {
+				try {
+					field.set(null, en);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		};
 	}
 
 	public void updateChanges() {
@@ -360,7 +360,7 @@ public class ConfigScreen extends Screen {
 		this.resetButton.active = different > 0;
 		this.resetButton.setMessage(EmiPort.translatable("screen.emi.config.reset", different));
 	}
-	
+
 	@Override
 	public void render(GuiGraphics raw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);

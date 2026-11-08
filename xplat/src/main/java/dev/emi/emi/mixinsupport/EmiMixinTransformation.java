@@ -107,7 +107,7 @@ public class EmiMixinTransformation {
 			}
 		}
 	}
-	
+
 	public static void applyTransform(ClassNode clazz) {
 		AnnotationNode transform = EmiMixinPlugin.popInvisible(clazz, Transform.class);
 		if (transform != null) {
@@ -119,7 +119,7 @@ public class EmiMixinTransformation {
 			clazz.access |= flags;
 		}
 	}
-	
+
 	public static boolean applyTransform(MethodNode method) {
 		AnnotationNode transform = EmiMixinPlugin.popInvisible(method, Transform.class);
 		if (transform != null) {
@@ -139,7 +139,7 @@ public class EmiMixinTransformation {
 		}
 		return false;
 	}
-	
+
 	public static boolean applyTransform(FieldNode field) {
 		AnnotationNode transform = EmiMixinPlugin.popInvisible(field, Transform.class);
 		if (transform != null) {

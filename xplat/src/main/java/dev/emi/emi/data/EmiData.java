@@ -33,7 +33,7 @@ public class EmiData {
 	public static List<Supplier<IndexStackData>> stackData = List.of();
 	public static List<Supplier<EmiAlias>> aliases = List.of();
 	public static List<Supplier<EmiRecipe>> recipes = List.of();
-	
+
 	public static void init(Consumer<EmiResourceReloadListener> register) {
 		register.accept(new RecipeDefaultLoader());
 		register.accept(new EmiTagExclusionsLoader());
@@ -201,7 +201,7 @@ public class EmiData {
 						list.add(() -> {
 							EmiWorldInteractionRecipe.Builder builder = EmiWorldInteractionRecipe.builder();
 							getArrayOrSingleton(json, "left").map(EmiIngredientSerializer::getDeserialized).forEach(
-                                    builder::leftInput
+									builder::leftInput
 							);
 							getArrayOrSingleton(json, "right").map(EmiIngredientSerializer::getDeserialized).forEach(
 								i -> builder.rightInput(i, false)

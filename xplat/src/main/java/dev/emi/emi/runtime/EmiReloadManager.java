@@ -102,7 +102,7 @@ public class EmiReloadManager {
 			}
 		}
 	}
-	
+
 	public static void reload() {
 		synchronized (EmiReloadManager.class) {
 			// A direct reload (including the world-entry tick) consumes any queued
@@ -138,7 +138,7 @@ public class EmiReloadManager {
 	public static int getStatus() {
 		return status;
 	}
-	
+
 	private static class ReloadWorker implements Runnable {
 
 		@Override
@@ -181,7 +181,7 @@ public class EmiReloadManager {
 					List<EmiPluginContainer> plugins = Lists.newArrayList();
 					plugins.addAll(EmiAgnos.getPlugins().stream()
 						.sorted(Comparator.comparingInt(ReloadWorker::entrypointPriority)).toList());
-					
+
 					if (EmiAgnos.isModLoaded("jei")) {
 						plugins.add(new EmiPluginContainer(new JemiPlugin(), "jemi"));
 					}
@@ -212,7 +212,7 @@ public class EmiReloadManager {
 						continue;
 					}
 					EmiRegistry registry = new EmiRegistryImpl();
-					
+
 					for (EmiPluginContainer container : plugins) {
 						step(EmiPort.literal("Loading plugin from " + container.id()), 10_000);
 						long start = System.currentTimeMillis();

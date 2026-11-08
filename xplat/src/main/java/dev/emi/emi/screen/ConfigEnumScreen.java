@@ -62,7 +62,7 @@ public class ConfigEnumScreen<T> extends Screen {
 	public void onClose() {
 		Minecraft.getInstance().setScreen(last);
 	}
-	
+
 	@Override
 	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {

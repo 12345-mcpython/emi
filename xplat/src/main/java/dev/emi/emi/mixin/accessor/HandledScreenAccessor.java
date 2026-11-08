@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(AbstractContainerScreen.class)
 public interface HandledScreenAccessor {
-	
+
 	@Accessor("hoveredSlot")
 	Slot getFocusedSlot();
 

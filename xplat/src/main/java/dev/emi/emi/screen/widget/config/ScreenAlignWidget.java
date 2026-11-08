@@ -12,20 +12,20 @@ import dev.emi.emi.screen.ConfigScreen.Mutator;
 public class ScreenAlignWidget extends ConfigEntryWidget {
 	private final Mutator<ScreenAlign> mutator;
 	private final Button horizontal;
-    private final Button vertical;
+	private final Button vertical;
 
 	public ScreenAlignWidget(Component name, List<ClientTooltipComponent> tooltip, Supplier<String> search, Mutator<ScreenAlign> mutator) {
 		super(name, tooltip, search, 20);
 		this.mutator = mutator;
 
 		horizontal = EmiPort.newButton(0, 0, 106, 20, getHorizontalText(), button -> EnumWidget.page(mutator.get().horizontal, v -> true, c -> {
-            mutator.get().horizontal = (ScreenAlign.Horizontal) c;
-            mutator.set(mutator.get());
-        }));
+			mutator.get().horizontal = (ScreenAlign.Horizontal) c;
+			mutator.set(mutator.get());
+		}));
 		vertical = EmiPort.newButton(0, 0, 106, 20, getVerticalText(), button -> EnumWidget.page(mutator.get().vertical, v -> true, c -> {
-            mutator.get().vertical = (ScreenAlign.Vertical) c;
-            mutator.set(mutator.get());
-        }));
+			mutator.get().vertical = (ScreenAlign.Vertical) c;
+			mutator.set(mutator.get());
+		}));
 		this.setChildren(List.of(horizontal, vertical));
 	}
 

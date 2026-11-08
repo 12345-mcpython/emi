@@ -11,11 +11,11 @@ import dev.emi.emi.api.widget.WidgetHolder;
 
 public abstract class EmiPatternCraftingRecipe extends EmiCraftingRecipe {
 	protected final int unique = EmiUtil.RANDOM.nextInt();
-	
+
 	public EmiPatternCraftingRecipe(List<EmiIngredient> input, EmiStack output, ResourceLocation id) {
 		super(input, output, id);
 	}
-	
+
 	public EmiPatternCraftingRecipe(List<EmiIngredient> input, EmiStack output, ResourceLocation id, boolean shapeless) {
 		super(input, output, id, shapeless);
 	}

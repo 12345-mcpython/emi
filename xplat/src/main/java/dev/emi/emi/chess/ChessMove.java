@@ -1,6 +1,6 @@
 package dev.emi.emi.chess;
 
-record ChessMove(int start, int end, int type) {	
+record ChessMove(int start, int end, int type) {
 	private static final ChessMove[] COMPUTED = new ChessMove[64 * 64];
 
 	public static ChessMove of(int start, int end, int type) {

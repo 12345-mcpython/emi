@@ -19,11 +19,11 @@ public class EmiBind {
 	public final String translationKey;
 	public final List<ModifiedKey> defaultKeys;
 	public List<ModifiedKey> boundKeys;
-	
+
 	public EmiBind(String translationKey, int code) {
 		this(translationKey, 0, code);
 	}
-	
+
 	public EmiBind(String translationKey, int modifiers, int code) {
 		this(translationKey, ModifiedKey.of(code, modifiers));
 	}
@@ -138,11 +138,11 @@ public class EmiBind {
 			if (parts.length > 0) {
 				key = InputConstants.getKey(parts[parts.length - 1]);
 				for (int i = 0; i < parts.length - 1; i++) {
-                    switch (parts[i]) {
-                        case "ctrl", "control" -> modifiers |= EmiInput.CONTROL_MASK;
-                        case "alt" -> modifiers |= EmiInput.ALT_MASK;
-                        case "shift" -> modifiers |= EmiInput.SHIFT_MASK;
-                    }
+					switch (parts[i]) {
+						case "ctrl", "control" -> modifiers |= EmiInput.CONTROL_MASK;
+						case "alt" -> modifiers |= EmiInput.ALT_MASK;
+						case "shift" -> modifiers |= EmiInput.SHIFT_MASK;
+					}
 				}
 			}
 			modifiedKeys.add(new ModifiedKey(key, modifiers));
@@ -190,7 +190,7 @@ public class EmiBind {
 			EmiPort.append(text, key().getDisplayName());
 			return text;
 		}
-	
+
 		private void appendModifiers(MutableComponent text, int modifiers) {
 			if ((modifiers & EmiInput.CONTROL_MASK) > 0) {
 				EmiPort.append(text, EmiPort.translatable("key.keyboard.control"));

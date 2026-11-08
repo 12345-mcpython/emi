@@ -16,7 +16,7 @@ public class EmiSmithingRecipe implements EmiRecipe {
 	protected final EmiIngredient input;
 	protected final EmiIngredient addition;
 	protected final EmiStack output;
-	
+
 	public EmiSmithingRecipe(EmiIngredient template, EmiIngredient input, EmiIngredient addition, EmiStack output, ResourceLocation id) {
 		this.id = id;
 		this.template = template;

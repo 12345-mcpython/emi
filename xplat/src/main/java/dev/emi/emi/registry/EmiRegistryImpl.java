@@ -141,7 +141,7 @@ public class EmiRegistryImpl implements EmiRegistry {
 	public void addGenericStackProvider(EmiStackProvider<Screen> provider) {
 		EmiStackProviders.generic.add(provider);
 	}
-	
+
 	@Override
 	public <T extends AbstractContainerMenu> void addRecipeHandler(MenuType<T> type, EmiRecipeHandler<T> handler) {
 		EmiRecipeFiller.handlers.computeIfAbsent(type, (c) -> Lists.newArrayList()).add(handler);

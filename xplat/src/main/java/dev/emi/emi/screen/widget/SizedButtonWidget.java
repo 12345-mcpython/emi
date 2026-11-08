@@ -22,7 +22,7 @@ public class SizedButtonWidget extends Button {
 	protected ResourceLocation texture = EmiRenderHelper.BUTTONS;
 	protected final Supplier<List<Component>> text;
 	protected final int u;
-    protected int v;
+	protected int v;
 
 	public SizedButtonWidget(int x, int y, int width, int height, int u, int v, BooleanSupplier isActive, OnPress action) {
 		this(x, y, width, height, u, v, isActive, action, () -> 0);
@@ -62,7 +62,7 @@ public class SizedButtonWidget extends Button {
 		}
 		return v;
 	}
-	
+
 	@Override
 	public void renderWidget(GuiGraphics raw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);

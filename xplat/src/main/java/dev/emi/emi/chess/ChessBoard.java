@@ -8,7 +8,7 @@ class ChessBoard {
 	public ChessPiece[] pieces = new ChessPiece[64];
 	public ChessMove lastMove;
 	public int castles;
-	
+
 	private ChessBoard() {
 	}
 

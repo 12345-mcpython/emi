@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 public class ProxyRecipeManager {
 	private static final Minecraft client = Minecraft.getInstance();
 	private static Map<Recipe<?>, ResourceLocation> recipeIds = Map.of();
-	
+
 	public static boolean isAvailable() {
 		return getRaw() != null;
 	}

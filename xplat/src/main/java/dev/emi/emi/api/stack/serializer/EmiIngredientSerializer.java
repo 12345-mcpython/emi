@@ -10,7 +10,7 @@ import dev.emi.emi.registry.EmiIngredientSerializers;
 public interface EmiIngredientSerializer<T extends EmiIngredient> {
 
 	String getType();
-	
+
 	EmiIngredient deserialize(JsonElement element);
 
 	JsonElement serialize(T stack);

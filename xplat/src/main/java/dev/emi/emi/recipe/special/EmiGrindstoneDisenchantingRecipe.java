@@ -90,7 +90,7 @@ public class EmiGrindstoneDisenchantingRecipe implements EmiRecipe {
 			if (lvl < minLvl) {
 				lvl = minLvl;
 			}
-			
+
 			for (Enchantment e : list) {
 				if (e == enchantment || !Enchantment.areCompatible(EmiPort.getEnchantmentRegistry().wrapAsHolder(e), EmiPort.getEnchantmentRegistry().wrapAsHolder(enchantment))) {
 					continue outer;

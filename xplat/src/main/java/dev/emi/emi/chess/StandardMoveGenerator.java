@@ -33,33 +33,33 @@ class StandardMoveGenerator extends MoveGenerator {
 
 	public int evaluate(ChessBoard board, PieceColor turn, int depth, int alpha, int beta) {
 		List<ChessMove> moves = board.getAllMoves(turn);
-        for (ChessMove move : moves) {
-            int rCastles = board.castles;
-            ChessMove rLast = board.lastMove;
-            ChessPiece captured = board.get(move.end());
-            board.move(move);
-            int value;
-            if (depth <= 0) {
-                value = eval.evaluate(board);
-                if (turn == PieceColor.BLACK) {
-                    value = -value;
-                }
-            } else {
-                value = -evaluate(board, turn.opposite(), depth - 1, -beta, -alpha);
-            }
-            board.unmove(move);
-            board.castles = rCastles;
-            board.lastMove = rLast;
-            board.set(move.end(), captured);
-            if (value >= beta) {
-                return value;
-            } else if (value > alpha) {
-                alpha = value;
-            }
-        }
+		for (ChessMove move : moves) {
+			int rCastles = board.castles;
+			ChessMove rLast = board.lastMove;
+			ChessPiece captured = board.get(move.end());
+			board.move(move);
+			int value;
+			if (depth <= 0) {
+				value = eval.evaluate(board);
+				if (turn == PieceColor.BLACK) {
+					value = -value;
+				}
+			} else {
+				value = -evaluate(board, turn.opposite(), depth - 1, -beta, -alpha);
+			}
+			board.unmove(move);
+			board.castles = rCastles;
+			board.lastMove = rLast;
+			board.set(move.end(), captured);
+			if (value >= beta) {
+				return value;
+			} else if (value > alpha) {
+				alpha = value;
+			}
+		}
 		return alpha;
 	}
-	
+
 	class Worker implements Runnable {
 		private final ChessBoard board;
 

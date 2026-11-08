@@ -10,7 +10,7 @@ import dev.emi.emi.EmiPort;
 
 public class EmiTooltip {
 	public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("0.##");
-	
+
 	public static ClientTooltipComponent chance(String type, float chance) {
 		return ClientTooltipComponent.create(EmiPort.ordered(
 			EmiPort.translatable("tooltip.emi.chance." + type,

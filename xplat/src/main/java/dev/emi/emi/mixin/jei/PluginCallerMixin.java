@@ -27,7 +27,7 @@ public class PluginCallerMixin {
 	);
 	@Unique
 	private static final Set<String> SKIPPED_MODS = JemiUtil.getHandledMods();
-	
+
 	@Redirect(at = @At(value = "INVOKE", target = "java/util/function/Consumer.accept(Ljava/lang/Object;)V"),
 		method = "callOnPlugins", remap = false)
 	private static void callOnPlugins(Consumer<IModPlugin> target, Object value, String title, List<IModPlugin> plugins, Consumer<IModPlugin> func) {

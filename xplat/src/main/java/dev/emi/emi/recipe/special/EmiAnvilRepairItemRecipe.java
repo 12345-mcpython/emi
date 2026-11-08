@@ -76,7 +76,7 @@ public class EmiAnvilRepairItemRecipe implements EmiRecipe {
 		items.add(getTool(random));
 		items.add(getTool(random));
 		items.add(getMergeItems(items));
-		
+
 		return EmiStack.of(items.get(item));
 	}
 

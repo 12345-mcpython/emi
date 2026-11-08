@@ -202,7 +202,7 @@ public class EmiFavorite implements EmiIngredient, Batchable {
 			if (state == -1) {
 				return list;
 			}
-			
+
 			Component craftKey = null;
 
 			if (EmiConfig.helpLevel.has(HelpLevel.NORMAL) && EmiRecipeFiller.getFirstValidHandler(recipe, EmiApi.getHandledScreen()) != null) {

@@ -12,7 +12,7 @@ import dev.emi.emi.api.EmiApi;
 public class EmiHistory {
 	private static final List<Screen> HISTORIES = Lists.newArrayList();
 	private static final List<Screen> FORWARD_HISTORIES = Lists.newArrayList();
-	
+
 	public static boolean isEmpty() {
 		return HISTORIES.isEmpty();
 	}

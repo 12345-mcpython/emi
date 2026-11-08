@@ -8,7 +8,7 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 
 public interface EmiRecipeManager {
-	
+
 	List<EmiRecipeCategory> getCategories();
 
 	List<EmiIngredient> getWorkstations(EmiRecipeCategory category);

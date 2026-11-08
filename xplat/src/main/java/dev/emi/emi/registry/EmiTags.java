@@ -168,7 +168,7 @@ public class EmiTags {
 		}
 		*/
 	}
-	
+
 	public static void reload() {
 		EmiTagKey.reload();
 		TAGS.clear();
@@ -232,15 +232,15 @@ public class EmiTags {
 
 	private static <T> List<EmiTagKey<T>> consolodateTags(List<EmiTagKey<T>> tags) {
 		Map<Set<T>, EmiTagKey<T>> map = Maps.newHashMap();
-        for (EmiTagKey<T> key : tags) {
-            Set<T> values = key.getSet();
-            EmiTagKey<T> original = map.get(values);
-            if (original != null) {
-                map.put(values, betterTag(key, original));
-            } else {
-                map.put(values, key);
-            }
-        }
+		for (EmiTagKey<T> key : tags) {
+			Set<T> values = key.getSet();
+			EmiTagKey<T> original = map.get(values);
+			if (original != null) {
+				map.put(values, betterTag(key, original));
+			} else {
+				map.put(values, key);
+			}
+		}
 		return map.values().stream().toList();
 	}
 

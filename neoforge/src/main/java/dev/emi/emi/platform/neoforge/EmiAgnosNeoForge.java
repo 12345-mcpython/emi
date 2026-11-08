@@ -339,8 +339,8 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 
 	@Override
 	protected Object2FloatMap<ItemLike> getComposterMapAgnos() {
-        Registry<Item> registry = BuiltInRegistries.ITEM;
-        Map<ResourceKey<Item>, Compostable> map = registry.getDataMap(NeoForgeDataMaps.COMPOSTABLES);
+		Registry<Item> registry = BuiltInRegistries.ITEM;
+		Map<ResourceKey<Item>, Compostable> map = registry.getDataMap(NeoForgeDataMaps.COMPOSTABLES);
 		Object2FloatMap<ItemLike> ret = new Object2FloatLinkedOpenHashMap<>();
 		for (Map.Entry<ResourceKey<Item>, Compostable> entry : map.entrySet()) {
 			ret.put(registry.get(entry.getKey()), entry.getValue().chance());

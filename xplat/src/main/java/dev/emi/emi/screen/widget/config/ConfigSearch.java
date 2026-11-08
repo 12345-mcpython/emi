@@ -31,7 +31,7 @@ public class ConfigSearch {
 	public String getSearch() {
 		return field.getValue();
 	}
-	
+
 	private static class ConfigSearchWidgetField extends EditBox {
 
 		public ConfigSearchWidgetField(Font textRenderer, int x, int y, int width, int height, Component text) {

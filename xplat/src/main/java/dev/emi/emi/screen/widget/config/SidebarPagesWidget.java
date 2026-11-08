@@ -30,14 +30,14 @@ public class SidebarPagesWidget extends ConfigEntryWidget {
 			final int j = i;
 			SidebarPages.SidebarPage page = pages.pages.get(i);
 			buttons.add(EmiPort.newButton(0, 0, 194, 20, page.type.getText(), b -> EnumWidget.page(page.type, t -> pages.canShowChess() || t != SidebarType.CHESS, t -> {
-                pages.pages.get(j).type = (SidebarType) t;
-                pages.unique();
-            })));
+				pages.pages.get(j).type = (SidebarType) t;
+				pages.unique();
+			})));
 		}
 		buttons.add(EmiPort.newButton(0, 0, 20, 20, EmiPort.literal("+"), b -> EnumWidget.page(SidebarType.INDEX, t -> pages.canShowChess() || t != SidebarType.CHESS, t -> {
-            pages.pages.add(new SidebarPages.SidebarPage((SidebarType) t));
-            pages.unique();
-        })));
+			pages.pages.add(new SidebarPages.SidebarPage((SidebarType) t));
+			pages.unique();
+		})));
 	}
 
 	@Override

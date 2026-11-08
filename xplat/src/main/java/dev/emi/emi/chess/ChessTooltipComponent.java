@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 class ChessTooltipComponent implements EmiTooltipComponent {
 	private final ChessPiece dragged, hovered;
 	private final Component description;
-	
+
 	public ChessTooltipComponent(ChessPiece dragged, ChessPiece hovered, Component description) {
 		this.dragged = dragged;
 		this.hovered = hovered;

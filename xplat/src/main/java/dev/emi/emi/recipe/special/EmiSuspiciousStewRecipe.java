@@ -53,7 +53,7 @@ public class EmiSuspiciousStewRecipe extends EmiPatternCraftingRecipe {
 			return EmiStack.of(stack);
 		}, unique, x, y);
 	}
-	
+
 	private Item getFlower(Random random) {
 		return FLOWERS.get(random.nextInt(FLOWERS.size()));
 	}

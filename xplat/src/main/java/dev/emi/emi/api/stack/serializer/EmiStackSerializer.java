@@ -21,7 +21,7 @@ import dev.emi.emi.runtime.EmiLog;
 
 public interface EmiStackSerializer<T extends EmiStack> extends EmiIngredientSerializer<T> {
 	Pattern STACK_REGEX = Pattern.compile("^([\\w_\\-./]+):([\\w_\\-.]+):([\\w_\\-./]+)(\\{.*\\})?$");
-	
+
 	EmiStack create(ResourceLocation id, DataComponentPatch componentChanges, long amount);
 
 	private static <T> DynamicOps<T> withRegistryAccess(DynamicOps<T> ops) {

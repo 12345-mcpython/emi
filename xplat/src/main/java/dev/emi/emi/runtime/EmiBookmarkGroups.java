@@ -502,7 +502,7 @@ public final class EmiBookmarkGroups {
 					EmiIngredient input = chosen(anchor, source);
 					if (input.isEmpty()) continue;
 					MaterialNode node = new MaterialNode(input);
-                    double outstanding = node.catalyst ? input.getAmount() : multiply(input.getAmount(), batches) * chance(input.getChance());
+					double outstanding = node.catalyst ? input.getAmount() : multiply(input.getAmount(), batches) * chance(input.getChance());
 					for (Stock stock : stocks) {
 						if (outstanding <= 1.0e-9) break;
 						if (!matches(input, stock.ingredient) || stock.amount <= 0) continue;

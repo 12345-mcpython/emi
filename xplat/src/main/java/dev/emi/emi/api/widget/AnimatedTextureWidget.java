@@ -55,5 +55,5 @@ public class AnimatedTextureWidget extends TextureWidget {
 			}
 		}
 		context.drawTexture(this.texture, mx, my, mw, mh, mu, mv, mrw, mrh, textureWidth, textureHeight);
-	}	
+	}
 }

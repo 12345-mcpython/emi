@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ClientTextTooltip.class)
 public interface OrderedTextTooltipComponentAccessor {
-	
+
 	@Accessor("text")
-    FormattedCharSequence getText();
+	FormattedCharSequence getText();
 }

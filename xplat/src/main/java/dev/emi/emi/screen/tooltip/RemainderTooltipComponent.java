@@ -74,7 +74,7 @@ public class RemainderTooltipComponent implements EmiTooltipComponent {
 			}
 		}
 	}
-	
+
 	@Override
 	public void drawTooltipText(TextRenderData text) {
 		for (int i = 0; i < remainders.size(); i++) {

@@ -174,21 +174,21 @@ public class TreeCost {
 		}
 		long original = amount;
 		List<EmiStack> ingredientStacks = node.ingredient.getEmiStacks();
-        for (EmiStack ingredientStack : ingredientStacks) {
-            if (chance.chanced()) {
-                double desired = amount * chance.chance();
-                double given = getChancedRemainder(ingredientStack, desired, catalyst, chance);
-                if (given > 0) {
-                    double scaled = given / chance.chance();
-                    amount -= (long) scaled;
-                    if (amount > 0) {
-                        chance = new ChanceState((float) ((amount - (scaled % 1)) * chance.chance() / amount), true);
-                    }
-                }
-            } else {
-                amount -= getRemainder(ingredientStack, amount, catalyst);
-            }
-        }
+		for (EmiStack ingredientStack : ingredientStacks) {
+			if (chance.chanced()) {
+				double desired = amount * chance.chance();
+				double given = getChancedRemainder(ingredientStack, desired, catalyst, chance);
+				if (given > 0) {
+					double scaled = given / chance.chance();
+					amount -= (long) scaled;
+					if (amount > 0) {
+						chance = new ChanceState((float) ((amount - (scaled % 1)) * chance.chance() / amount), true);
+					}
+				}
+			} else {
+				amount -= getRemainder(ingredientStack, amount, catalyst);
+			}
+		}
 		if (amount == 0) {
 			if (trackProgress) {
 				complete(node);
@@ -198,7 +198,7 @@ public class TreeCost {
 		if (trackProgress && amount != original) {
 			node.progress = ProgressState.PARTIAL;
 		}
-		
+
 		long effectiveCrafts = amount;
 		if (recipe != null) {
 			long minBatches = (long) Math.ceil(amount / (double) node.divisor);

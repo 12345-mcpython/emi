@@ -183,7 +183,7 @@ public class EmiMixinPlugin implements IMixinConfigPlugin {
 
 	// Helpers to remove the AnnotationNode upon retrieval, to avoid transformations being applied
 	// multiple times and corrupting class structures. See #1171
-	
+
 	public static @Nullable AnnotationNode popInvisible(ClassNode node, Class<? extends Annotation> type) {
 		return pop(node.invisibleAnnotations, type);
 	}
@@ -195,7 +195,7 @@ public class EmiMixinPlugin implements IMixinConfigPlugin {
 	public static @Nullable AnnotationNode popInvisible(FieldNode node, Class<? extends Annotation> type) {
 		return pop(node.invisibleAnnotations, type);
 	}
-	
+
 	private static @Nullable AnnotationNode pop(List<AnnotationNode> anns, Class<? extends Annotation> type) {
 		if (anns == null) return null;
 		String desc = Type.getDescriptor(type);

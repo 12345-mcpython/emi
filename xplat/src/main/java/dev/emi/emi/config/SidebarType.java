@@ -14,7 +14,7 @@ public enum SidebarType implements ConfigEnum {
 	EMPTY("empty", 96, 146),
 	CHESS("chess", 48, 146),
 	;
-	
+
 	private final String name;
 	public final int u, v;
 

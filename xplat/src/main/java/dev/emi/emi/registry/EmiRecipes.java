@@ -52,7 +52,7 @@ public class EmiRecipes {
 
 	public static final Map<EmiStack, List<EmiRecipe>> byWorkstation = Maps.newHashMap();
 	public static final List<EmiRecipeDecorator> decorators = Lists.newArrayList();
-	
+
 	public static void clear() {
 		setWorker(null);
 		lateRecipes.clear();
@@ -140,7 +140,7 @@ public class EmiRecipes {
 			this.categories = categories.stream().distinct().toList();
 			this.workstations = workstations;
 			this.recipes = List.copyOf(recipes);
-	
+
 			Object2IntMap<ResourceLocation> duplicateIds = new Object2IntOpenHashMap<>();
 			Set<ResourceLocation> incorrectIds = new ObjectArraySet<>();
 			for (EmiRecipe recipe : recipes) {
@@ -171,7 +171,7 @@ public class EmiRecipes {
 					}
 				}
 			}
-	
+
 			if (EmiConfig.devMode) {
 				for (ResourceLocation id : duplicateIds.keySet()) {
 					EmiReloadLog.warn(duplicateIds.getInt(id) + " recipes loaded with the same id: " + id);
@@ -180,7 +180,7 @@ public class EmiRecipes {
 					EmiReloadLog.warn("Recipe " + id + " not present in recipe manager. Consider prefixing its path with '/' if it is synthetic.");
 				}
 			}
-	
+
 			Map<EmiStack, Set<EmiRecipe>> byInput = new Object2ObjectOpenCustomHashMap<>(new EmiStackList.ComparisonHashStrategy());
 			Map<EmiStack, Set<EmiRecipe>> byOutput = new Object2ObjectOpenCustomHashMap<>(new EmiStackList.ComparisonHashStrategy());
 

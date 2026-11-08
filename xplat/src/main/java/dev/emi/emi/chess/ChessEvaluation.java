@@ -75,7 +75,7 @@ class ChessEvaluation {
 					case PAWN -> 100;
 					case ROOK -> 500;
 					case KNIGHT, BISHOP -> 300;
-                    case QUEEN -> 900;
+					case QUEEN -> 900;
 					case KING -> 69000;
 				};
 				int loc = i;

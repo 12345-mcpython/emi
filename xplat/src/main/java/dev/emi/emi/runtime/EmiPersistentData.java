@@ -13,7 +13,7 @@ import dev.emi.emi.bom.CraftingPlans;
 public class EmiPersistentData {
 	public static final File FILE = new File("emi.json");
 	public static final Gson GSON = new Gson().newBuilder().setPrettyPrinting().create();
-	
+
 	public static void save() {
 		try {
 			JsonObject json = new JsonObject();

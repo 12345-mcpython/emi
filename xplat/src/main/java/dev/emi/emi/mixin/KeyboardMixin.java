@@ -18,7 +18,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 public class KeyboardMixin {
 	@Shadow @Final
 	private Minecraft minecraft;
-	
+
 	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/gui/screens/Screen.wrapScreenError(Ljava/lang/Runnable;Ljava/lang/String;Ljava/lang/String;)V"),
 		method = "keyPress(JIIII)V", cancellable = true)
 	public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo info) {
@@ -35,7 +35,7 @@ public class KeyboardMixin {
 			EmiLog.error("Error while handling key press", e);
 		}
 	}
-	
+
 	@Inject(at = @At("HEAD"),
 		method = "charTyped(JII)V", cancellable = true)
 	public void onChar(long window, int codePoint, int modifiers, CallbackInfo info) {

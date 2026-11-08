@@ -17,7 +17,7 @@ public interface EmiIngredient extends EmiRenderable {
 	int RENDER_AMOUNT = 2;
 	int RENDER_INGREDIENT = 4;
 	int RENDER_REMAINDER = 8;
-	
+
 	/**
 	 * @return The {@link EmiStack}s represented by this ingredient.
 	 * 	List is never empty. For an empty ingredient, us {@link EmiStack#EMPTY}

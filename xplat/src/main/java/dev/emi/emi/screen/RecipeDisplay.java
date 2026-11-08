@@ -29,7 +29,7 @@ public class RecipeDisplay {
 	private int leftWidth = 0, rightWidth = 0;
 	private int rows = 0;
 	public Throwable exception;
-	
+
 	public RecipeDisplay(EmiRecipe recipe) {
 		this.recipe = recipe;
 		width = recipe.getDisplayWidth();

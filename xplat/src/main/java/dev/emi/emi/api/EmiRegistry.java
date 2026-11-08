@@ -52,7 +52,7 @@ public interface EmiRegistry {
 	 * @return The vanilla recipe manager, for iterating recipe types.
 	 */
 	RecipeManager getRecipeManager();
-	
+
 	/**
 	 * Adds a recipe category.
 	 * Recipes are organized based on recipe category.

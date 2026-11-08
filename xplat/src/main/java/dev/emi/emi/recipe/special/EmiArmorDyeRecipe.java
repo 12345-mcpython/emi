@@ -49,7 +49,7 @@ public class EmiArmorDyeRecipe extends EmiPatternCraftingRecipe {
 	public SlotWidget getOutputWidget(int x, int y) {
 		return new GeneratedSlotWidget(r -> EmiStack.of(DyedItemColor.applyDyes(new ItemStack(armor), getDyes(r))), unique, x, y);
 	}
-	
+
 	private List<DyeItem> getDyes(Random random) {
 		List<DyeItem> dyes = Lists.newArrayList();
 		int amount = 1 + random.nextInt(8);

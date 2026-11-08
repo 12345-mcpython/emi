@@ -13,7 +13,7 @@ public class JemiWidgetBuilder extends JemiPlaceable<JemiWidgetBuilder> {
 	public void addWidgets(WidgetHolder holder) {
 		constructor.accept(this, holder);
 	}
-	
+
 	public interface WidgetConstructor {
 
 		void accept(JemiWidgetBuilder builder, WidgetHolder holder);

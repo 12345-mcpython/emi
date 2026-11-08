@@ -56,5 +56,5 @@ public class TextureWidget extends Widget implements WidgetTooltipHolder<Texture
 		EmiDrawContext context = EmiDrawContext.wrap(draw);
 		context.resetColor();
 		context.drawTexture(texture, x, y, width, height, u, v, regionWidth, regionHeight, textureWidth, textureHeight);
-	}	
+	}
 }

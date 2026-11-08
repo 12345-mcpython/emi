@@ -31,7 +31,7 @@ public class EmiStackProviders {
 		fromClass.clear();
 		generic.clear();
 	}
-	
+
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static EmiStackInteraction getStackAt(Screen screen, int x, int y, boolean notClick) {
 		if (fromClass.containsKey(screen.getClass())) {
