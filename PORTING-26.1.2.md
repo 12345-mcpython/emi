@@ -84,9 +84,11 @@ Started intentionally so the checkpoint could build; each has a TODO in the code
 ## JEI on 1.21.4
 
 The Fabric platform is back; only NeoForge gets JEI. `jei-1.21.4-fabric` does not exist, so
-`jei_version` points at `mezz.jei:jei-1.21.4-neoforge:20.0.0.4`, the common sources compile jemi against
-that jar, and the Fabric jar keeps the jemi classes out of its archive. On Fabric the JEI plugin annotation
-is never scanned and `jei.PluginCallerMixin` is `@Pseudo`, so nothing of the bridge is loaded.
+`jei_version` points at `mezz.jei:jei-1.21.4-neoforge:20.0.0.4` and the common sources compile jemi against
+that jar, so both platform jars carry the bridge classes. On Fabric nothing touches them: the JEI plugin
+annotation is never scanned and `jei.PluginCallerMixin` is `@Pseudo`, which Mixin skips when the target
+class is absent. Confirmed by launching the Fabric dev client, which starts normally with only the expected
+`ClassNotFoundException` warning for `mezz/jei/library/load/PluginCaller`.
 
 jemi was ported from the JEI 19 API to the JEI 20 API: `IIngredientAcceptor`, `IRecipeType` /
 `IRecipeHolderType`, `RecipeIngredientRole.CRAFTING_STATION`, `getSubtypeData`, `getUid`, no
