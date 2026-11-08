@@ -68,13 +68,17 @@ public class EmiShapedRecipe extends EmiCraftingRecipe {
 
 	private static List<EmiIngredient> padIngredients(ShapedRecipe recipe) {
 		List<EmiIngredient> list = Lists.newArrayList();
-		int i = 0;
+		int width = recipe.getWidth();
+		int height = recipe.getHeight();
+		java.util.List<java.util.Optional<net.minecraft.world.item.crafting.Ingredient>> pattern = recipe.getIngredients();
 		for (int y = 0; y < 3; y++) {
 			for (int x = 0; x < 3; x++) {
-				if (x >= recipe.getWidth() || y >= recipe.getHeight() || i >= recipe.placementInfo().ingredients().size()) {
-					list.add(EmiStack.EMPTY);
+				int index = y * width + x;
+				if (x < width && y < height && index < pattern.size()) {
+					java.util.Optional<net.minecraft.world.item.crafting.Ingredient> ingredient = pattern.get(index);
+					list.add(ingredient.isPresent() ? EmiIngredient.of(ingredient.get()) : EmiStack.EMPTY);
 				} else {
-					list.add(EmiIngredient.of(recipe.placementInfo().ingredients().get(i++)));
+					list.add(EmiStack.EMPTY);
 				}
 			}
 		}

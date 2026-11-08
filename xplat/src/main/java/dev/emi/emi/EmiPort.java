@@ -191,7 +191,19 @@ public final class EmiPort {
 		if (displays.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		return displays.get(0).result().resolveForFirstStack(emptyContext());
+		return displays.get(0).result().resolveForFirstStack(displayContext());
+	}
+
+	/**
+	 * Slot displays such as tag or composite displays need the level registries to resolve; an empty
+	 * context silently yields nothing, which used to drop recipes entirely on 1.21.2+.
+	 */
+	public static net.minecraft.util.context.ContextMap displayContext() {
+		net.minecraft.client.Minecraft client = net.minecraft.client.Minecraft.getInstance();
+		if (client.level != null) {
+			return net.minecraft.world.item.crafting.display.SlotDisplayContext.fromLevel(client.level);
+		}
+		return emptyContext();
 	}
 
 	public static net.minecraft.util.context.ContextMap emptyContext() {
