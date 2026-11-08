@@ -92,6 +92,8 @@ public class EmiReloadManager {
 	}
 
 	public static void clear() {
+		// The local data pack recipes belong to the current world, drop them with everything else.
+		LocalRecipes.invalidate();
 		synchronized (EmiReloadManager.class) {
 			loadedResourcesMask = 0;
 			synchronizedReloadPending = false;
