@@ -80,3 +80,26 @@ Started intentionally so the checkpoint could build; each has a TODO in the code
 - Each of those changes the same rendering and recipe code that is already degraded here, so the recipe-display pipeline
   and the
   item render state work should land before the later hops.
+
+## 1.21.4 is NeoForge only
+
+Fabric was dropped from the 1.21.4 line. The reason is JEI: for 1.21.4 JEI only ships a NeoForge
+build (`mezz.jei:jei-1.21.4-neoforge`, 20.0.0.x), while `jei-1.21.4-fabric` does not exist, so the
+Fabric platform could never reach feature parity with the JEI integration enabled.
+
+What changed:
+
+* `enabled_platforms=neoforge`, the `fabric` module is gone and so is `xplat/.../fabric.mod.json`;
+* `xplat/build.gradle` no longer expands or includes Fabric metadata and takes the version from
+  `:neoforge`;
+* `net.fabricmc:fabric-loader` stays as a compile dependency because one common class uses
+  `@Environment(EnvType.CLIENT)`.
+
+Verified: `:neoforge:build` succeeds, the jar has 608 entries with `META-INF/neoforge.mods.toml`
+and no Fabric classes or metadata, and the platform independent harnesses still pass (crafting tree
+79, crafting plans 290 + 7, bookmark groups 141, bookmark crafting 59, bookmark material transfer).
+
+`tests/crafting-tree-smoke` and its `world` variant still target `:fabric:runClient` and therefore do
+not run on this line until they are ported to a NeoForge fixture mod (they need a
+`META-INF/neoforge.mods.toml` plus a `@Mod` entry point instead of the Fabric entrypoint).
+

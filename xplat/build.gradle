@@ -27,11 +27,7 @@ sourceSets.main.java.exclude 'dev/emi/emi/jemi/**'
 sourceSets.main.java.exclude 'dev/emi/emi/mixin/jei/**'
 
 processResources {
-	inputs.property "version", project(":fabric").version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": project(":fabric").version
-	}
+	inputs.property "version", project(":neoforge").version
 }
 
 sourceSets.main.java.exclude 'dev/emi/emi/jemi/**'
@@ -54,7 +50,6 @@ def apiJar = tasks.register('apiJar', Jar, {
 	def remapJar = tasks.named('remapJar', RemapJarTask)
 	dependsOn remapJar
 	from zipTree(remapJar.flatMap { it.archiveFile })
-	include 'fabric.mod.json'
 	include 'emi.mixins.json'
 	include 'emi.accesswidener'
 	include 'dev/emi/emi/api/**'
@@ -81,7 +76,6 @@ def mojmapSourcesJar = tasks.register('mojmapSourcesJar', Jar, {
 def mojmapApiJar = tasks.register('mojmapApiJar', Jar, {
 	archiveClassifier = 'mojmap-api'
 	from sourceSets.main.output
-	include 'fabric.mod.json'
 	include 'emi.mixins.json'
 	include 'emi.accesswidener'
 	include 'dev/emi/emi/api/**'
