@@ -27,7 +27,7 @@ public class JemiIngredientConsumer implements IIngredientAcceptor<JemiIngredien
 
     @Override
     public JemiIngredientConsumer add(SlotDisplay display) {
-        ItemStack stack = display.resolveForFirstStack(EmiPort.emptyContext());
+        ItemStack stack = display.resolveForFirstStack(EmiPort.displayContext());
         if (!stack.isEmpty()) {
             stacks.add(EmiStack.of(stack));
         }
