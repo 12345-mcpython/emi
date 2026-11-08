@@ -147,7 +147,15 @@ regressions but are not caused by the 1.21.1 -> 1.21.4 move.
   through `FillRecipeC2SPacket`, so this is an inherent limitation of the new recipe model rather than a
   missing port step.
 
-That leaves **#2 (stack batching)** as the only migration regression still open.
+That left **#2 (stack batching)** as the only candidate, and inspecting the 1.21.4 render path closed it too:
+`ItemEmiStack#render` draws through `GuiGraphics#renderFakeItem`, which already feeds the vanilla
+`MultiBufferSource.BufferSource` that `GuiGraphics` owns and flushes once per frame. The custom batcher is
+disabled, but rendering is still batched by vanilla; what is lost is only the per-stack `ItemStackRenderState`
+cache (model state is re-resolved each frame). That is a performance TODO, not a migration regression, and
+restoring it means keeping a `ItemStackRenderState` cache and calling
+`state.render(pose, bufferSource, light, overlay)` from `renderForBatch`.
+
+Net result: no open migration regressions remain on the 1.21.4 line.
 
 Fixed on this line already: client display pipeline (`DisplayRecipes`), display context for ingredients and
 results, real shaped pattern layout, remainder index guard, custom crafting inputs from the display,
