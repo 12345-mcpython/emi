@@ -122,3 +122,25 @@ servers.
 server recipes and nothing is registered twice. The reload logs
 `[EMI] Registered N recipes from client displays`.
 
+## Regression register (1.21.4 line)
+
+Outstanding regressions left by the 1.21.1 to 1.21.4 migration. MC 1.21.4 sources are available locally in
+`.gradle/loom-cache/minecraftMaven/net/minecraft/*/...-sources.jar` (mojmap names), which is what each
+entry points at.
+
+| # | Where | Symptom | Reference in MC 1.21.4 source |
+| --- | --- | --- | --- |
+| 1 | `screen/EmiScreenshotRecorder.java:58` | Recipe export renders without the 1.21.4 projection setup | `client/renderer/GameRenderer`, `com.mojang.blaze3d.vertex.ProjectionMatrixBuffer`, `client/gui/render/RenderTarget` |
+| 2 | `screen/StackBatcher.java:13` | Batched stack rendering disabled, everything draws unbatched (performance) | `client/renderer/RenderType`, `com.mojang.blaze3d.vertex.VertexConsumer` / `MeshData` (the old `VertexBuffer` / `BufferUploader` path is gone) |
+| 3 | `VanillaPlugin.java:479` | `isDamageable` replaced by a `maxDamage > 0` approximation | `world/item/ItemStack#isDamageableItem` |
+| 4 | `bom/TreeCost.java:105` | Chanced remainders are not part of the cost calculation | `world/item/crafting/CraftingRecipe#getRemainingItems`, `bom/ChanceState` |
+| 5 | `recipe/special/EmiBookCloningRecipe.java:21` | Book cloning recipe details are incomplete | `world/item/crafting/BookCloningRecipe` |
+| 6 | `api/recipe/EmiRecipe#getBackingRecipe` | No `RecipeHolder` on a server, so paths that need the backing recipe degrade in multiplayer | `world/item/crafting/RecipeAccess`, `client/multiplayer/ClientRecipeContainer` |
+
+Fixed on this line already: client display pipeline (`DisplayRecipes`), display context for ingredients and
+results, real shaped pattern layout, remainder index guard, custom crafting inputs from the display,
+`canFit` grid check, server packet guard, tag model particle textures.
+
+Dead code, not a regression: `EmiSuspiciousStewRecipe` (the vanilla recipe no longer exists), and
+`EmiPort#getQuads(BakedModel)` (baked models still exist in 1.21.4, they go away in 1.21.5).
+
