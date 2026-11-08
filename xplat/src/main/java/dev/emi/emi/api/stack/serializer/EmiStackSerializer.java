@@ -69,7 +69,7 @@ public interface EmiStackSerializer<T extends EmiStack> extends EmiIngredientSer
 				if (changesJson != null) {
 					changes = DataComponentPatch.CODEC.decode(withRegistryAccess(JsonOps.INSTANCE), changesJson).getOrThrow().getFirst();
 				} else if (nbt != null) {
-					changes = DataComponentPatch.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), TagParser.parseTag(nbt)).getOrThrow().getFirst();
+					changes = DataComponentPatch.CODEC.decode(withRegistryAccess(NbtOps.INSTANCE), TagParser.parseCompoundFully(nbt)).getOrThrow().getFirst();
 				}
 				EmiStack stack = create(id, changes, amount);
 				if (chance != 1) {
@@ -92,7 +92,7 @@ public interface EmiStackSerializer<T extends EmiStack> extends EmiIngredientSer
 		String nbt = null;
 		DataComponentPatch componentChanges = stack.getComponentChanges();
 		if (componentChanges != DataComponentPatch.EMPTY) {
-			nbt = DataComponentPatch.CODEC.encodeStart(withRegistryAccess(NbtOps.INSTANCE), componentChanges).getOrThrow().getAsString();
+			nbt = DataComponentPatch.CODEC.encodeStart(withRegistryAccess(NbtOps.INSTANCE), componentChanges).getOrThrow().toString();
 		}
 		if (stack.getAmount() == 1 && stack.getChance() == 1 && stack.getRemainder().isEmpty()) {
 			String s = getType() + ":" + stack.getId();

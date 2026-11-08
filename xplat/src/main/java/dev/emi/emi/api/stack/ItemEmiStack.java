@@ -126,7 +126,7 @@ public class ItemEmiStack extends EmiStack implements Batchable {
 	@Override
 	public boolean isSideLit() {
 		ItemStackRenderState state = new ItemStackRenderState();
-		client.getItemModelResolver().updateForTopItem(state, getItemStack(), ItemDisplayContext.GUI, false, client.level, null, 0);
+		client.getItemModelResolver().updateForTopItem(state, getItemStack(), ItemDisplayContext.GUI, client.level, null, 0);
 		return state.usesBlockLight();
 	}
 	

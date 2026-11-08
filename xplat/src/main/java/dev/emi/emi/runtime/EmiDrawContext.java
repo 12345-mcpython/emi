@@ -106,19 +106,16 @@ public class EmiDrawContext {
 	}
 
 	public void enableDepthTest() {
-		RenderSystem.enableDepthTest();
+		// 1.21.5 moved render state into the render pipeline; the GUI pass sets depth itself.
 	}
 
 	public void disableDepthTest() {
-		RenderSystem.disableDepthTest();
 	}
 
 	public void enableBlend() {
-		RenderSystem.enableBlend();
 	}
 
 	public void disableBlend() {
-		RenderSystem.disableBlend();
 	}
 
 	public void resetColor() {
