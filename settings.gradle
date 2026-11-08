@@ -8,6 +8,7 @@ pluginManagement {
 }
 
 include("xplat")
+include("fabric")
 include("neoforge")
 
 rootProject.name = "emi"
