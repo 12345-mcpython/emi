@@ -66,6 +66,10 @@ public class EmiClientNeoForge {
 		for (net.minecraft.world.item.crafting.RecipeHolder<?> holder : event.getRecipeMap().values()) {
 			map.put(holder.id().location(), holder.value());
 		}
+		if (map.isEmpty()) {
+			// The event is also posted for servers that are not NeoForge; nothing to apply there.
+			return;
+		}
 		LocalRecipes.acceptSynced(map);
 		EmiReloadManager.reload();
 	}

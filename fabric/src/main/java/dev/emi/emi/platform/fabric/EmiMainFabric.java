@@ -46,9 +46,9 @@ public class EmiMainFabric implements ModInitializer {
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			EmiNetwork.sendToClient(handler.player, new PingS2CPacket());
-			if (ServerPlayNetworking.canSend(handler.player, EmiRecipeSyncS2CPacket.TYPE)) {
-				EmiRecipeSync.send(handler.player);
-			}
+			// Send unconditionally: NeoForge clients do not appear in Fabric's canSend registry, and
+			// clients without EMI ignore the unknown payload.
+			EmiRecipeSync.send(handler.player);
 		});
 	}
 
