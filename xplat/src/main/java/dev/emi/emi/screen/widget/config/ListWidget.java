@@ -373,9 +373,23 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		}
 	}
 
+	/**
+	 * 1.21.4+ dispatches clicks through {@code getChildAt}, so only the first child under the cursor gets
+	 * {@code mouseClicked}. The list used to claim the whole screen, which swallowed clicks meant for the
+	 * jump buttons next to it; restrict the hit area to the rows and the scrollbar.
+	 */
 	@Override
 	public boolean isMouseOver(double mouseX, double mouseY) {
-		return mouseY >= (double)this.top && mouseY <= (double)this.bottom && mouseX >= (double)this.left && mouseX <= (double)this.right;
+		if (mouseY < (double)this.top || mouseY >= (double)this.bottom) {
+			return false;
+		}
+		int rowWidth = this.getRowWidth() / 2;
+		int mid = this.left + this.width / 2;
+		int rowLeft = mid - rowWidth;
+		int rowRight = mid + rowWidth;
+		int scrollbar = this.getScrollbarPositionX();
+		return (mouseX >= (double)rowLeft && mouseX <= (double)rowRight)
+			|| (mouseX >= (double)scrollbar && mouseX < (double)(scrollbar + 6));
 	}
 
 	protected void renderList(GuiGraphics draw, int x, int y, int mouseX, int mouseY, float delta) {
