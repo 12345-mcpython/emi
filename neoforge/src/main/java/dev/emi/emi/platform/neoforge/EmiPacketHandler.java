@@ -4,6 +4,7 @@ import dev.emi.emi.network.CommandS2CPacket;
 import dev.emi.emi.network.CreateItemC2SPacket;
 import dev.emi.emi.network.EmiChessPacket;
 import dev.emi.emi.network.EmiNetwork;
+import dev.emi.emi.network.EmiRecipeSyncS2CPacket;
 import dev.emi.emi.network.SyncPayloads;
 import dev.emi.emi.network.EmiPacket;
 import dev.emi.emi.network.FillRecipeC2SPacket;
@@ -41,6 +42,10 @@ public class EmiPacketHandler {
 	        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC, (payload, context) ->
 	            context.enqueueWork(() -> EmiLog.info("Server recipe sync finished")));
         }
+        registrar.playToClient(EmiRecipeSyncS2CPacket.TYPE,
+            net.minecraft.network.codec.StreamCodec.of((buf, v) -> v.write(buf), EmiRecipeSyncS2CPacket::new),
+            (payload, context) -> context.enqueueWork(() -> payload.apply(context.player())));
+
         registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToServer(ID_CHESS_SERVERBOUND, makeReader(ID_CHESS_SERVERBOUND, EmiChessPacket.C2S::new), EmiPacketHandler::handleServerbound);

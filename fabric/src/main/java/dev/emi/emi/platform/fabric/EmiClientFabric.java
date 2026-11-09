@@ -11,6 +11,8 @@ import dev.emi.emi.data.EmiData;
 import dev.emi.emi.network.CommandS2CPacket;
 import dev.emi.emi.network.EmiChessPacket;
 import dev.emi.emi.network.EmiNetwork;
+import dev.emi.emi.network.EmiRecipeSyncS2CPacket;
+import dev.emi.emi.runtime.EmiRecipeSyncClient;
 import dev.emi.emi.network.SyncPayloads;
 import dev.emi.emi.network.EmiPacket;
 import dev.emi.emi.network.PingS2CPacket;
@@ -92,6 +94,10 @@ public class EmiClientFabric implements ClientModInitializer {
 		PayloadTypeRegistry.playS2C().register(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC);
 		ClientPlayNetworking.registerGlobalReceiver(SyncPayloads.FabricFinished.TYPE, (payload, context) ->
 			context.client().execute(() -> EmiLog.info("Server recipe sync finished")));
+
+		EmiRecipeSyncS2CPacket.clientHandler = EmiRecipeSyncClient::handle;
+		ClientPlayNetworking.registerGlobalReceiver(EmiRecipeSyncS2CPacket.TYPE, (payload, context) ->
+			context.client().execute(() -> payload.apply(context.player())));
 
 		registerPacketReader(EmiNetwork.PING, PingS2CPacket::new);
 		registerPacketReader(EmiNetwork.COMMAND, CommandS2CPacket::new);

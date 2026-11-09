@@ -49,6 +49,7 @@ public class EmiNeoForge {
 	public void playerConnect(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getEntity() instanceof ServerPlayer spe) {
 			EmiNetwork.sendToClient(spe, new PingS2CPacket());
+			dev.emi.emi.runtime.EmiRecipeSync.send(spe);
 		}
 	}
 }
