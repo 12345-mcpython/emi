@@ -9,6 +9,7 @@ import dev.emi.emi.platform.EmiClient;
 import dev.emi.emi.registry.EmiTags;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.EmiReloadManager;
+import dev.emi.emi.runtime.LocalRecipes;
 import dev.emi.emi.screen.ConfigScreen;
 import dev.emi.emi.screen.EmiScreenBase;
 import dev.emi.emi.screen.EmiScreenManager;
@@ -40,6 +41,7 @@ public class EmiClientNeoForge {
 		StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(f -> f.get()).toList());
 		EmiClient.init();
 		EmiNetwork.initClient(packet -> PacketDistributor.sendToServer(EmiPacketHandler.wrap(packet)));
+		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::recipesReceived);
 		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::tagsReloaded);
 		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::renderScreenForeground);
 		NeoForge.EVENT_BUS.addListener(EmiClientNeoForge::postRenderScreen);
@@ -56,6 +58,21 @@ public class EmiClientNeoForge {
 	@SubscribeEvent
 	public static void registerResourceReloaders(AddClientReloadListenersEvent event) {
 		EmiData.init(reloader -> event.addListener(reloader.getEmiId(), reloader));
+	}
+
+	/**
+	 * NeoForge servers push their whole recipe map through {@code neoforge:recipe_content}, and NeoForge
+	 * re-posts it as this event. It is the only way to see server side data pack and mod recipes without EMI
+	 * on the server, because 1.21.2+ clients no longer receive the vanilla recipe table.
+	 */
+	public static void recipesReceived(net.neoforged.neoforge.client.event.RecipesReceivedEvent event) {
+		java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>> map =
+			new java.util.LinkedHashMap<>();
+		for (net.minecraft.world.item.crafting.RecipeHolder<?> holder : event.getRecipeMap().values()) {
+			map.put(holder.id().location(), holder.value());
+		}
+		LocalRecipes.acceptSynced(map);
+		EmiReloadManager.reload();
 	}
 
 	public static void tagsReloaded(TagsUpdatedEvent event) {
