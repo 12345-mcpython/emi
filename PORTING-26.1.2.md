@@ -241,5 +241,7 @@ batches are flushed before the copy, and `CommandEncoder#copyTextureToBuffer` re
 transparent background survives (`Screenshot#takeScreenshot` would force the alpha channel opaque). A
 2026-11-09 client smoke (`tests/screenshot-smoke`, 192x96 capture from a 1280x800 window at GUI scale 3)
 confirmed the output size, the transparent corner, an opaque rectangle, a rendered stone item and a rendered
-text run.
+text run. One limitation remains: `GuiGraphics#enableScissor` still computes the scissor box from the window
+height and GUI scale, so a third-party recipe renderer that clips would be off inside the offscreen target.
+EMI's own recipe and tree exports do not use scissor.
 
