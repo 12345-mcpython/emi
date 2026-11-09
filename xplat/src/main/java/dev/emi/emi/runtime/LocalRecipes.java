@@ -45,9 +45,15 @@ public class LocalRecipes {
 	 * {@code fabric:recipe_sync} / {@code neoforge:recipe_content} channels).
 	 */
 	public static void acceptSynced(Map<ResourceLocation, Recipe<?>> recipes) {
+		if (recipes.isEmpty()) {
+			// NeoForge posts the event even when the server sends nothing, and an empty map must not
+			// shadow the local data pack fallback.
+			EmiLog.warn("[EMI] Server recipe sync provided no recipes, keeping the local sources");
+			return;
+		}
 		synced = Map.copyOf(recipes);
 		cache = null;
-		EmiLog.warn("Server recipe sync provided " + recipes.size() + " recipes");
+		EmiLog.warn("[EMI] Server recipe sync provided " + recipes.size() + " recipes");
 	}
 
 	public static Map<ResourceLocation, Recipe<?>> get() {
