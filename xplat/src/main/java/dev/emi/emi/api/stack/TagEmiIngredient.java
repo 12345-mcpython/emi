@@ -115,7 +115,29 @@ public class TagEmiIngredient implements EmiIngredient {
 
 		if ((flags & RENDER_ICON) != 0) {
 			if (stacks.size() > 0) {
-				stacks.get(0).render(context.raw(), x, y, delta, -1 ^ RENDER_AMOUNT);
+				if (stacks.size() > 1 && !EmiTags.MODELED_TAGS.containsKey(tagKey)) {
+					// 1.21.5 cannot bake tag models any more, so draw the members as a 2x2 mini grid
+					// instead of falling back to a single icon.
+					List<EmiStack> distinct = Lists.newArrayList();
+					java.util.Set<Object> seen = new java.util.HashSet<>();
+					for (EmiStack stack : stacks) {
+						if (seen.add(stack.getKey())) {
+							distinct.add(stack);
+						}
+						if (distinct.size() >= 4) {
+							break;
+						}
+					}
+					for (int i = 0; i < Math.min(4, distinct.size()); i++) {
+						context.push();
+						context.matrices().translate(x + (i % 2) * 8, y + (i / 2) * 8, 0);
+						context.matrices().scale(0.5f, 0.5f, 1f);
+						distinct.get(i).render(context.raw(), 0, 0, delta, -1 ^ (RENDER_AMOUNT | RENDER_INGREDIENT | RENDER_REMAINDER));
+						context.pop();
+					}
+				} else {
+					stacks.get(0).render(context.raw(), x, y, delta, -1 ^ RENDER_AMOUNT);
+				}
 			}
 		}
 		if ((flags & RENDER_AMOUNT) != 0 && !tagKey.isOf(EmiPort.getFluidRegistry())) {
