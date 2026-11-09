@@ -216,10 +216,12 @@ component, `ItemModelResolver#updateForTopItem`'s handedness argument.
 `:fabric:build` and `:neoforge:build` now succeed on the `1.21.5` branch, so every module compiles and the
 jars are produced. One path is deliberately degraded until it gets its own rewrite:
 
-* tag representation models: `EmiTags#registerTagModels` is a stub, so tag stacks render as their first
-  ingredient. 1.21.5 removed `ModelResourceLocation` and Fabric replaced `addModels(ResourceLocation...)`
-  with the typed `ExtraModelKey` API, so rebaking the tag icons needs the new item model pipeline. An earlier
-  2x2 procedural grid was reverted; the first-ingredient fallback is the pre-1.21.5 behaviour.
+* tag representation models: `EmiTags#registerTagModels` is a stub on 1.21.5, but the visible behaviour is
+  unchanged from the 1.21.4 line: `TagEmiIngredient#render` already fell back to the first member there,
+  because the 1.21.4 port dropped the baked tag model path (`EmiAgnos#getBakedTagModel`, `EmiPort#getQuads`
+  are dead code on that line). 1.21.1 still rendered the modelled 2x2-style tag icons. Restoring them needs
+  the new item model pipeline (`ItemModelResolver` / `ExtraModelKey`); an earlier 2x2 procedural grid
+  (`ca5b19a`) was reverted (`9d97c0a`).
 
 Everything else from 1.21.4 is intact, including the display pipeline, the local data pack fallback, the
 server sync receivers and the JEI 21 bridge (NeoForge only, `jei-1.21.5-neoforge:21.4.0.27`).
