@@ -35,11 +35,6 @@ public class EmiPacketHandler {
         		LocalRecipes.acceptSynced(payload.recipes());
         		EmiReloadManager.reload();
         	}));
-        registrar.playToClient(SyncPayloads.NeoForge.TYPE, SyncPayloads.NeoForge.CODEC, (payload, context) ->
-        	context.enqueueWork(() -> {
-        		LocalRecipes.acceptSynced(payload.recipes());
-        		EmiReloadManager.reload();
-        	}));
         registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToServer(ID_CHESS_SERVERBOUND, makeReader(ID_CHESS_SERVERBOUND, EmiChessPacket.C2S::new), EmiPacketHandler::handleServerbound);
