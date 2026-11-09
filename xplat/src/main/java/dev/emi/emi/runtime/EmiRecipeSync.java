@@ -40,6 +40,6 @@ public class EmiRecipeSync {
 			EmiNetwork.sendToClient(player, new EmiRecipeSyncS2CPacket(last, chunk));
 			sent += chunk.size();
 		}
-		EmiLog.warn("[EMI] Sent " + sent + " recipes to " + player.getGameProfile().getName());
+		EmiLog.info("Sent " + sent + " recipes to " + player.getGameProfile().getName());
 	}
 }
