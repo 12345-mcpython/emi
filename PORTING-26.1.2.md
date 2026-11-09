@@ -253,3 +253,56 @@ stats panel were blurred and dimmed by the in-world menu background after they h
 screenshot smoke opens a real `BoMScreen` and asserts that the "plans" header keeps its `0xFFB6C7E8` colour;
 before the fix the same probe found no matching pixels and a brightest pixel of `0x3A404B`.
 
+## 1.21.8 hop (planned, from `1.21.5`)
+
+`1.21.5 -> 1.21.8` skips two releases. `1.21.6` carries the GUI rework and the Blaze3d buffer/uniform
+rework, `1.21.7` is small, and `1.21.8` only adds `GraphicsWorkarounds`. Primers:
+`E:\code\java\move\port\primers\1.21.6`, `1.21.7`, `1.21.8`.
+
+### Version matrix
+
+| Component | 1.21.5 (current) | 1.21.8 (next) |
+|---|---|---|
+| Minecraft | 1.21.5 | 1.21.8 |
+| NeoForge | 21.5.101 | 21.8.57 |
+| Fabric API | 0.128.2+1.21.5 | `0.136.1+1.21.8` (Modrinth, 2025-11-16) |
+| JEI | `jei-1.21.5-neoforge:21.4.0.27` | `jei-1.21.8-neoforge:24.2.0.6` (NeoForge only, Modrinth) |
+| Loom | 1.10.455 | needs a newer Loom (1.11+); `maven.fabricmc.net` was unreachable from this machine, resolve before branching |
+| Java | 21 | 21 |
+
+### Breaking changes that touch EMI
+
+| # | Change (1.21.6 unless noted) | EMI touch points | Plan |
+|---|---|---|---|
+| 1 | GUI prepare/render split: `GuiGraphics` submits to `GuiRenderState` (takes it instead of `MultiBufferSource`), `flush` is removed, `pose()` returns `Matrix3x2fStack`, draw methods take `RenderPipeline` + `TextureSetup`, `drawSpecial` is removed | `runtime/EmiDrawContext`, `EmiRenderHelper`, `screen/*`, `screen/widget/config/ListWidget`, `api/widget/*` | rework the two wrappers first, then compile screen by screen; visual pass for layering |
+| 2 | `drawString` now takes ARGB and alpha 0 renders nothing | `EmiDrawContext.drawText*`, literal colours such as `0xFFFFFF` / `0x22ffff` | normalise inside `EmiDrawContext` (`color \| 0xFF000000` when alpha is 0) and audit literals |
+| 3 | `render*Tooltip` -> `set*TooltipForNextFrame` / `renderDeferredTooltip`; `AbstractWidget#getTooltip` removed; `ClientTooltipComponent#renderText` takes `GuiGraphics`; `TooltipRenderUtil` drops the Z offset | `EmiRenderHelper.drawTooltip`, `EmiScreenManager` (dev overlay), `RecipeScreen`, `ResolutionButtonWidget`, `EmiTooltipComponent`, `mixin/accessor/DrawContextAccessor` | migrate to the deferred tooltip API, keep EMI's tooltip builder |
+| 4 | Screenshot capture: the prepare phase only submits states, `GuiRenderer` renders later, so the current "override `getMainRenderTarget` + draw through `GuiGraphics`" no longer fills an offscreen target | `runtime/EmiScreenshotRecorder`, `tests/screenshot-smoke`, `BoMScreen#screenshot`, `RecipeScreenshotButtonWidget` | redesign; inspect `GuiRenderer` / `PictureInPictureRenderer` on 1.21.8 first, prefer Picture-in-Picture or a `GuiRenderer` target entry, fallbacks: main-target render + crop, or direct `RenderPipeline` submission |
+| 5 | Blaze3d rework: `GpuBuffer` / `BufferType` / `BufferUsage` replaced by usage ints plus `GpuBufferSlice` / `MappedView`; `createRenderPass(Supplier<String>, GpuTextureView...)`; `RenderPass#enableScissor` removed; `RenderSystem.SCISSOR_STATE` private; `setProjectionMatrix` takes a `GpuBufferSlice`; `Lighting` is `AutoCloseable` with `setupFor` | same recorder (readback, projection, lighting, scissor) | rewrite those parts; read back through `createBuffer(..., usage)` and `MappedView` |
+| 6 | `Screenshot#grab` / `takeScreenshot` take a downscale factor | recorder if the vanilla readback is used; tests | pass `1` |
+| 7 | `Window#getGuiScale` / `setGuiScale` use `int` | `EmiPort#getGuiScale`, screenshot scale maths | trivial |
+| 8 | `Minecraft#disconnect(Screen)` removed (`disconnectWithProgressScreen` / `disconnectWithSavingScreen`); `ToastManager` takes `Options`; `Screen#renderBlurredBackground` takes `GuiGraphics`; `GuiGraphics#blurBeforeThisStratum` | `MinecraftClientMixin`, `ToastManagerMixin`, `BoMScreen` background fix | update mixin targets and re-verify the BoM background order |
+| 9 | (1.21.7) `GuiItemRenderState` uses `TrackingItemRenderState`, `ItemStackRenderState#getModelIdentity` moved, `RenderPipeline$Builder#withColorLogic` deprecated | `api/stack/ItemEmiStack`, `screen/StackBatcher` (no-op shim) | verify `ItemStackRenderState` usage; EMI does not read the model identity today |
+| 10 | NBT access through `ValueInput` / `ValueOutput` instead of `CompoundTag` | only `recipe/special/EmiBookCloningRecipe` imports `CompoundTag` | leave or migrate the sample recipe |
+| 11 | New vanilla item tags in 1.21.6 (`harnesses`, `happy_ghast_food`, `happy_ghast_tempt_items`) plus later additions | dev-mode untranslated tag warnings, `en_us.json` / `zh_cn.json` | rerun `python scripts/scan_untranslated_tags.py --client-jar <1.21.8 client jar>` and add names or exclusions |
+| 12 | Tag provider rewrite (`TagAppender`, `ItemTagsProvider` removed) | EMI does not generate tags | none |
+| 13 | `GameRenderer` no longer takes `ResourceManager`; `Minecraft#getMobEffectTextures` removed | EMI does not use them | none |
+
+### Port order
+
+1. Branch `1.21.8` from `1.21.5`; bump `minecraft_version`, `neoforge_version`, `jei_version`, the Fabric API version and Loom; resolve the new dependencies online.
+2. `:xplat:compileJava`, then cluster the errors: GUI, screenshot, Blaze3d, mixin targets, misc.
+3. Rework `EmiDrawContext` / `EmiRenderHelper` first (they funnel most GUI calls), then the screens and widgets.
+4. Normalise text colours and migrate tooltips.
+5. Redesign the capture path and update `tests/screenshot-smoke`; verify size, alpha, item, text and a real `plan.png` export.
+6. Update mixin targets and re-verify the BoM background order with `renderBlurredBackground(GuiGraphics)` / `blurBeforeThisStratum`.
+7. Rerun the tag scan and add the new names.
+8. `:fabric:build`, `:neoforge:build`, `:neoforge:runServer`, the screenshot smoke and a real-client pass over the recipe screen, the BoM screen, the config screens, tooltips and the sidebar.
+9. Update this document and the handoff, then rebuild dist.
+
+### Risks
+
+- The new GUI sort (strata, node tree, scissor -> pipeline -> texture comparator) changes draw order. EMI's tooltips, ghost stacks, sidebar and drag preview were tuned for submit order; expect overlap or depth issues and budget a visual pass.
+- Screenshot export is the largest unknown. If Picture-in-Picture cannot render arbitrary `GuiGraphics` content, fall back to rendering into the main target and cropping (the old route B) and accept one frame of flicker.
+- JEI 24 (`24.2.0.6`) API details are unknown offline; jemi may need `IIngredientAcceptor` / `IDrawable` updates. Fabric still has no JEI for 1.21.6+.
+- The Fabric API and Loom versions for 1.21.8 must be resolved online before the branch can build.
