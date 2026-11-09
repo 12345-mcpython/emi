@@ -36,6 +36,8 @@ public class EmiPacketHandler {
         		LocalRecipes.acceptSynced(payload.recipes());
         		EmiReloadManager.reload();
         	}));
+        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC, (payload, context) ->
+            context.enqueueWork(() -> EmiLog.info("Server recipe sync finished")));
         registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToServer(ID_CHESS_SERVERBOUND, makeReader(ID_CHESS_SERVERBOUND, EmiChessPacket.C2S::new), EmiPacketHandler::handleServerbound);
