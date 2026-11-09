@@ -332,8 +332,11 @@ and text), a 700x520 capture that is larger than the window (2100x1560, captured
 markers and the line crossing the seams intact) and the real BoM header probe (`pixels=540`, `0xFFB6C7E8`).
 The 1.21.6 item tags were scanned and named in `en_us.json` + `zh_cn.json`
 (`harnesses`, `happy_ghast_food`, `happy_ghast_tempt_items`), so the dev-mode warning list is empty again.
-`:neoforge:runServer` reaches `Done (3.185s)!` on 1.21.8. Still to verify: the NeoForge client runtime, the
-JEI 24 jemi bridge, and a full visual pass over the recipe screen, config screens and tooltips.
+`:neoforge:runServer` reaches `Done (3.185s)!` on 1.21.8. The NeoForge client also runs: it joins a
+singleplayer world, EMI receives 1407 recipes, JEI 24.2.0.6 starts, the jemi bridge initializes and the EMI
+reload completes with no mixin errors (screenshot `neoforge/run/screenshots/2026-11-09_21.19.08.png`).
+Still to verify: a full visual pass over the config screens, tooltips, fluid tanks and the BoM tree export in a
+real world.
 
 ### Port order
 
