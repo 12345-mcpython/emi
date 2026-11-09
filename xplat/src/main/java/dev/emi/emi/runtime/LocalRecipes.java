@@ -57,7 +57,7 @@ public class LocalRecipes {
 		}
 		synced = Map.copyOf(recipes);
 		cache = null;
-		EmiLog.warn("Server recipe sync provided " + recipes.size() + " recipes");
+		EmiLog.info("Server recipe sync provided " + recipes.size() + " recipes");
 	}
 
 	public static boolean hasSynced() {
