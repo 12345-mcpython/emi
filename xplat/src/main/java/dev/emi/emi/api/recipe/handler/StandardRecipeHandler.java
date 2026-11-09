@@ -24,6 +24,7 @@ import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.platform.EmiClient;
 import dev.emi.emi.registry.EmiRecipeFiller;
 import dev.emi.emi.runtime.EmiDrawContext;
+import dev.emi.emi.platform.EmiClientState;
 
 public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends EmiRecipeHandler<T> {
 	
@@ -69,7 +70,7 @@ public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends 
 		if (stacks != null) {
 			if (stacks != null) {
 				Minecraft.getInstance().setScreen(context.getScreen());
-				if (!EmiClient.onServer) {
+				if (!EmiClientState.onServer) {
 					return EmiRecipeFiller.clientFill(this, recipe, context.getScreen(), stacks, context.getDestination());
 				} else {
 					EmiClient.sendFillRecipe(this, context.getScreen(), context.getScreenHandler().containerId, switch(context.getDestination()) {

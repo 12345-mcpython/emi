@@ -1,9 +1,9 @@
 package dev.emi.emi.network;
 
-import dev.emi.emi.platform.EmiClient;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
+import dev.emi.emi.platform.EmiClientState;
 
 public class PingS2CPacket implements EmiPacket {
 
@@ -19,7 +19,7 @@ public class PingS2CPacket implements EmiPacket {
 
 	@Override
 	public void apply(Player player) {
-		EmiClient.onServer = true;
+		EmiClientState.onServer = true;
 	}
 
 	@Override

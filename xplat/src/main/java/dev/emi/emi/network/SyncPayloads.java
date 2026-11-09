@@ -8,7 +8,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 
-import dev.emi.emi.EmiPort;
 import dev.emi.emi.runtime.LocalRecipes;
 
 /**
@@ -25,7 +24,7 @@ public final class SyncPayloads {
 	/** {@code fabric:recipe_sync}: serializer grouped recipe holders. */
 	public record Fabric(Map<ResourceLocation, Recipe<?>> recipes) implements CustomPacketPayload {
 		public static final CustomPacketPayload.Type<Fabric> TYPE =
-			new CustomPacketPayload.Type<>(EmiPort.id("fabric", "recipe_sync"));
+			new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("fabric", "recipe_sync"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, Fabric> CODEC =
 			StreamCodec.of((buf, payload) -> { }, buf -> new Fabric(LocalRecipes.decodeFabric(buf)));
 
@@ -38,7 +37,7 @@ public final class SyncPayloads {
 	/** {@code fabric:recipe_sync_finished}: marker the bridge sends after the recipe list. */
 	public record FabricFinished() implements CustomPacketPayload {
 		public static final CustomPacketPayload.Type<FabricFinished> TYPE =
-			new CustomPacketPayload.Type<>(EmiPort.id("fabric", "recipe_sync_finished"));
+			new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath("fabric", "recipe_sync_finished"));
 		public static final StreamCodec<RegistryFriendlyByteBuf, FabricFinished> CODEC =
 			StreamCodec.of((buf, payload) -> { }, buf -> new FabricFinished());
 

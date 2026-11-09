@@ -1,6 +1,5 @@
 package dev.emi.emi.platform.neoforge;
 
-import dev.emi.emi.EmiPort;
 import dev.emi.emi.network.CommandS2CPacket;
 import dev.emi.emi.network.CreateItemC2SPacket;
 import dev.emi.emi.network.EmiChessPacket;
@@ -22,8 +21,8 @@ import dev.emi.emi.runtime.EmiReloadManager;
 import dev.emi.emi.runtime.EmiLog;
 
 public class EmiPacketHandler {
-    private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(EmiPort.id("emi:chess_s2c"));
-    private static final CustomPacketPayload.Type<EmiChessPacket.C2S> ID_CHESS_SERVERBOUND = new CustomPacketPayload.Type<EmiChessPacket.C2S>(EmiPort.id("emi:chess_c2s"));
+    private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(net.minecraft.resources.ResourceLocation.parse("emi:chess_s2c"));
+    private static final CustomPacketPayload.Type<EmiChessPacket.C2S> ID_CHESS_SERVERBOUND = new CustomPacketPayload.Type<EmiChessPacket.C2S>(net.minecraft.resources.ResourceLocation.parse("emi:chess_c2s"));
 
     public static void init(RegisterPayloadHandlersEvent event) {
         var registrar = event.registrar("emi").optional();
@@ -31,13 +30,16 @@ public class EmiPacketHandler {
         registrar.playToServer(EmiNetwork.FILL_RECIPE, makeReader(EmiNetwork.FILL_RECIPE, FillRecipeC2SPacket::new), EmiPacketHandler::handleServerbound);
         registrar.playToServer(EmiNetwork.CREATE_ITEM, makeReader(EmiNetwork.CREATE_ITEM, CreateItemC2SPacket::new), EmiPacketHandler::handleServerbound);
         // Third party server recipe sync, optional so a server without it is unaffected.
-        registrar.playToClient(SyncPayloads.Fabric.TYPE, SyncPayloads.Fabric.CODEC, (payload, context) ->
-        	context.enqueueWork(() -> {
-        		LocalRecipes.acceptSynced(payload.recipes());
-        		EmiReloadManager.reload();
-        	}));
-        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC, (payload, context) ->
-        	context.enqueueWork(() -> EmiLog.info("Server recipe sync finished")));
+        // The recipe sync consumers touch client classes, so they are only wired on the client.
+        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+	        registrar.playToClient(SyncPayloads.Fabric.TYPE, SyncPayloads.Fabric.CODEC, (payload, context) ->
+	        	context.enqueueWork(() -> {
+	        		LocalRecipes.acceptSynced(payload.recipes());
+	        		EmiReloadManager.reload();
+	        	}));
+	        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC, (payload, context) ->
+	        	context.enqueueWork(() -> EmiLog.info("Server recipe sync finished")));
+        }
         registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToServer(ID_CHESS_SERVERBOUND, makeReader(ID_CHESS_SERVERBOUND, EmiChessPacket.C2S::new), EmiPacketHandler::handleServerbound);
