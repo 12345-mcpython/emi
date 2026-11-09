@@ -1,9 +1,12 @@
 package dev.emi.emi.test;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
@@ -15,6 +18,10 @@ import dev.emi.emi.EmiPort;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.EmiScreenshotRecorder;
 import dev.emi.emi.screen.BoMScreen;
+import dev.emi.emi.screen.ConfigScreen;
+import dev.emi.emi.screen.widget.config.ConfigJumpButton;
+import dev.emi.emi.screen.widget.config.ListWidget;
+import net.minecraft.client.gui.screens.Screen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
@@ -85,16 +92,26 @@ public class ScreenshotSmoke implements ClientModInitializer {
 					}
 				}
 				case 5 -> {
-					client.setScreen(new BoMScreen(null));
+					client.setScreen(new ConfigScreen(null));
 					ticks = 0;
 					state = 6;
 				}
 				case 6 -> {
 					if (++ticks >= 8) {
-						requestBomShot(client);
+						checkConfigJumps(client);
 					}
 				}
 				case 7 -> {
+					client.setScreen(new BoMScreen(null));
+					ticks = 0;
+					state = 8;
+				}
+				case 8 -> {
+					if (++ticks >= 8) {
+						requestBomShot(client);
+					}
+				}
+				case 9 -> {
 					if (++ticks > 200) {
 						fail(client, "Timed out waiting for the BoM frame");
 					}
@@ -238,7 +255,7 @@ public class ScreenshotSmoke implements ClientModInitializer {
 		if (problem != null) {
 			finish(client, false, problem);
 		} else {
-			LOGGER.info("SCREENSHOT SMOKE tiled checks passed, opening the BoM screen");
+			LOGGER.info("SCREENSHOT SMOKE tiled checks passed, opening the config screen");
 			state = 5;
 		}
 	}
@@ -258,7 +275,7 @@ public class ScreenshotSmoke implements ClientModInitializer {
 	 * and darkened by the in-world menu background.
 	 */
 	private void requestBomShot(Minecraft client) {
-		state = 7;
+		state = 10;
 		ticks = 0;
 		Screenshot.takeScreenshot(client.getMainRenderTarget(), image -> {
 			try (image) {
@@ -299,15 +316,72 @@ public class ScreenshotSmoke implements ClientModInitializer {
 		}
 	}
 
+
+	private void checkConfigJumps(Minecraft client) {
+		if (!(client.screen instanceof ConfigScreen config)) {
+			finish(client, false, "Config screen did not open");
+			return;
+		}
+		try {
+			Field childrenField = Screen.class.getDeclaredField("children");
+			childrenField.setAccessible(true);
+			List<?> children = (List<?>) childrenField.get(config);
+			List<ConfigJumpButton> buttons = new ArrayList<>();
+			for (Object child : children) {
+				if (child instanceof ConfigJumpButton button) {
+					buttons.add(button);
+				}
+			}
+			Field listField = ConfigScreen.class.getDeclaredField("list");
+			listField.setAccessible(true);
+			ListWidget list = (ListWidget) listField.get(config);
+			if (buttons.isEmpty()) {
+				finish(client, false, "No config jump buttons were added");
+				return;
+			}
+			int handled = 0;
+			int scrolled = 0;
+			List<Integer> scrolls = new ArrayList<>();
+			for (ConfigJumpButton button : buttons) {
+				double x = button.getX() + button.getWidth() / 2.0;
+				double y = button.getY() + button.getHeight() / 2.0;
+				double before = list.getScrollAmount();
+				boolean clicked = config.mouseClicked(x, y, 0);
+				config.mouseReleased(x, y, 0);
+				double after = list.getScrollAmount();
+				if (clicked) {
+					handled++;
+				}
+				if (after != before) {
+					scrolled++;
+					scrolls.add((int) after);
+				}
+			}
+			LOGGER.info("SCREENSHOT SMOKE config jump buttons={} handled={} scrolled={} scrolls={}",
+				buttons.size(), handled, scrolled, scrolls);
+			if (handled != buttons.size()) {
+				finish(client, false, "Config jump buttons did not receive the clicks");
+			} else if (scrolled == 0) {
+				finish(client, false, "No config jump button scrolled the list");
+			} else {
+				LOGGER.info("SCREENSHOT SMOKE config jump checks passed, opening the BoM screen");
+				state = 7;
+				ticks = 0;
+			}
+		} catch (Throwable e) {
+			finish(client, false, "Config jump check crashed: " + e);
+		}
+	}
+
 	private void fail(Minecraft client, String reason) {
 		finish(client, false, reason);
 	}
 
 	private void finish(Minecraft client, boolean pass, String message) {
-		if (state == 9) {
+		if (state == 99) {
 			return;
 		}
-		state = 9;
+		state = 99;
 		String line = (pass ? "PASS " : "FAIL ") + message;
 		LOGGER.info("SCREENSHOT SMOKE {}", line);
 		try {
