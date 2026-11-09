@@ -16,7 +16,6 @@ import dev.emi.emi.screen.StackBatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
@@ -47,11 +46,6 @@ public class EmiClientNeoForge {
 				(container, last) -> new ConfigScreen(last));
 	}
 
-	@SubscribeEvent
-	public static void registerAdditionalModels(ModelEvent.RegisterAdditional event) {
-		Minecraft client = Minecraft.getInstance();
-		EmiTags.registerTagModels(client.getResourceManager(), loc -> event.register(loc.id()), "standalone");
-	}
 
 	@SubscribeEvent
 	public static void registerResourceReloaders(AddClientReloadListenersEvent event) {

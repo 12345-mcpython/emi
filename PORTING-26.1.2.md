@@ -210,3 +210,20 @@ back to the first ingredient), `VertexBuffer`/`BufferUploader` helpers in `EmiPo
 `RenderSystem#enableDepthTest/enableBlend`, `TagParser#parseTag`, `Tag#getAsString`, `DyedItemColor`'s second
 component, `ItemModelResolver#updateForTopItem`'s handedness argument.
 
+### 1.21.5 compiles
+
+`:fabric:build` and `:neoforge:build` now succeed on the `1.21.5` branch, so every module compiles and the
+jars are produced. Two paths are deliberately degraded until they get their own rewrite:
+
+* recipe screenshot export: `EmiScreenshotRecorder` only logs that it is unavailable. 1.21.5 needs a capture
+  through `GpuTexture` plus a `CommandEncoder` render pass, and reads the pixels back with
+  `GpuDevice#createBufferFromTexture`; `RenderTarget` no longer has `bindWrite`, and `RenderSystem` lost
+  `recordRenderCall`, the projection setters and the blend/colour state calls.
+* tag representation models: `EmiTags#registerTagModels` is a stub, so tag stacks render as their first
+  ingredient. 1.21.5 removed `ModelResourceLocation` and Fabric replaced `addModels(ResourceLocation...)`
+  with the typed `ExtraModelKey` API, so rebaking the tag icons needs the new item model pipeline.
+* `EmiPort#draw` only builds the mesh now, which drops the tint on tinted sprites.
+
+Everything else from 1.21.4 is intact, including the display pipeline, the local data pack fallback, the
+server sync receivers and the JEI 21 bridge (NeoForge only, `jei-1.21.5-neoforge:21.4.0.27`).
+

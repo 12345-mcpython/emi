@@ -1,151 +1,18 @@
 package dev.emi.emi.runtime;
 
-import java.io.File;
-import java.util.function.Consumer;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import org.joml.Matrix4f;
-import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.systems.RenderSystem;
-import org.joml.Matrix4f;
-import com.mojang.blaze3d.vertex.VertexSorting;
-import dev.emi.emi.EmiPort;
-import dev.emi.emi.config.EmiConfig;
-import org.joml.Matrix4fStack;
-
+/**
+ * Recipe screenshot export.
+ * <p>
+ * 1.21.5 replaced the framebuffer path with {@code GpuTexture} plus command encoders: {@code RenderTarget}
+ * no longer exposes {@code bindWrite}, {@code RenderSystem} lost {@code recordRenderCall} and the projection
+ * setters, and reading pixels back needs {@code GpuDevice#createBufferFromTexture}. Until that is reworked the
+ * exporter reports that it is unavailable instead of producing a blank image.
+ */
 public class EmiScreenshotRecorder {
-	private static final String SCREENSHOTS_DIRNAME = "screenshots";
-
-	/**
-	 * Saves a screenshot to the game's `screenshots` directory, doing the appropriate setup so that anything rendered in renderer will be captured
-	 * and saved.
-	 * <p>
-	 * <b>Note:</b> the path can have <code>/</code> characters, indicating subdirectories. Java handles these correctly on Windows. The path should
-	 * <b>not</b> contain the <code>.png</code> extension, as that will be added after checking for duplicates. If a file with this path already
-	 * exists, then path will be suffixed with a <code>_#</code>, before adding the <code>.png</code> extension, where <code>#</code> represents an
-	 * increasing number to avoid conflicts.
-	 * <p>
-	 * <b>Note 2:</b> The width and height parameters are reflected in the viewport when rendering. But the EMI-config
-	 * <code>ui.recipe-screenshot-scale</code> value causes the resulting image to be scaled.
-	 *
-	 * @param path     the path to save the screenshot to, without extension.
-	 * @param width    the width of the screenshot, not counting EMI-config scale.
-	 * @param height   the height of the screenshot, not counting EMI-config scale.
-	 * @param renderer a function to render the things being screenshotted.
-	 */
 	public static void saveScreenshot(String path, int width, int height, Runnable renderer) {
-		if (!RenderSystem.isOnRenderThread()) {
-			RenderSystem.recordRenderCall(() -> saveScreenshotInner(path, width, height, renderer));
-		} else {
-			saveScreenshotInner(path, width, height, renderer);
-		}
+		EmiLog.warn("Recipe screenshot export is unavailable on 1.21.5; " + path
+			+ " (" + width + "x" + height + ") was not captured");
+		EmiLog.warn("1.21.5 needs the GpuTexture and command encoder based capture path, see PORTING-26.1.2.md");
 	}
 
-	private static void saveScreenshotInner(String path, int width, int height, Runnable renderer) {
-		Minecraft client = Minecraft.getInstance();
-		int scale = EmiConfig.recipeScreenshotScale < 1 ? EmiPort.getGuiScale(client) : EmiConfig.recipeScreenshotScale;
-		NativeImage nativeImage = null;
-		try {
-			RenderTarget framebuffer = new TextureTarget(width * scale, height * scale, true);
-			framebuffer.setClearColor(0f, 0f, 0f, 0f);
-			framebuffer.clear();
-			framebuffer.bindWrite(true);
-			try {
-				// 1.21.4 keeps the projection in RenderSystem, so back it up and install an orthographic
-				// projection matching the offscreen target before drawing into it.
-				RenderSystem.backupProjectionMatrix();
-				RenderSystem.setProjectionMatrix(
-					new Matrix4f().setOrtho(0f, width * scale, height * scale, 0f, 1000f, 21000f),
-					ProjectionType.ORTHOGRAPHIC);
-				try {
-					renderer.run();
-					nativeImage = takeScreenshot(framebuffer);
-				} finally {
-					RenderSystem.restoreProjectionMatrix();
-				}
-			} finally {
-				framebuffer.destroyBuffers();
-				client.getMainRenderTarget().bindWrite(true);
-			}
-			saveScreenshotInner(client.gameDirectory, path, nativeImage,
-				message -> client.execute(() -> client.gui.getChat().addMessage(message)));
-			nativeImage = null;
-		} catch (Throwable e) {
-			EmiLog.error("Failed to capture screenshot", e);
-			try {
-				client.execute(() -> {
-					try {
-						client.gui.getChat().addMessage(EmiPort.translatable("screenshot.failure", e.getMessage()));
-					} catch (Throwable feedbackError) {
-						EmiLog.error("Failed to report screenshot error", feedbackError);
-					}
-				});
-			} catch (Throwable feedbackError) {
-				EmiLog.error("Failed to schedule screenshot error", feedbackError);
-			}
-		} finally {
-			if (nativeImage != null) {
-				nativeImage.close();
-			}
-		}
-	}
-
-	private static void saveScreenshotInner(File gameDirectory, String suggestedPath, NativeImage nativeImage, Consumer<Component> messageReceiver) {
-
-		File screenshots = new File(gameDirectory, SCREENSHOTS_DIRNAME);
-		screenshots.mkdir();
-
-		String filename = getScreenshotFilename(screenshots, suggestedPath);
-		File file = new File(screenshots, filename);
-
-		// Make sure the parent file exists. Note: `/`s in suggestedPath are valid, as they indicate subdirectories. Java even translates this
-		// correctly on Windows.
-		File parent = file.getParentFile();
-		parent.mkdirs();
-
-		Util.ioPool().execute(() -> {
-			try {
-				nativeImage.writeToFile(file);
-
-				Component text = EmiPort.literal(filename,
-					Style.EMPTY.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath())));
-				messageReceiver.accept(EmiPort.translatable("screenshot.success", text));
-			} catch (Throwable e) {
-				EmiLog.error("Failed to write screenshot", e);
-				messageReceiver.accept(EmiPort.translatable("screenshot.failure", e.getMessage()));
-			} finally {
-				nativeImage.close();
-			}
-		});
-	}
-
-	private static NativeImage takeScreenshot(RenderTarget framebuffer) {
-		int i = framebuffer.width;
-		int j = framebuffer.height;
-		NativeImage nativeImage = new NativeImage(i, j, false);
-		boolean captured = false;
-		try {
-			RenderSystem.bindTexture(framebuffer.getColorTextureId());
-			nativeImage.downloadTexture(0, false);
-			nativeImage.flipY();
-			captured = true;
-			return nativeImage;
-		} finally {
-			if (!captured) nativeImage.close();
-		}
-	}
-
-	private static String getScreenshotFilename(File directory, String path) {
-		int i = 1;
-		while ((new File(directory, path + (i == 1 ? "" : "_" + i) + ".png")).exists()) {
-			++i;
-		}
-		return path + (i == 1 ? "" : "_" + i) + ".png";
-	}
 }

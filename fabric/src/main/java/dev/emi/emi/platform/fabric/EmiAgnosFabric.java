@@ -240,8 +240,6 @@ public class EmiAgnosFabric extends EmiAgnos {
 	}
 
 	@Override
-
-	@Override
 	protected boolean isEnchantableAgnos(ItemStack stack, Enchantment enchantment) {
 		return true;
 	}

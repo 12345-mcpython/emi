@@ -65,11 +65,12 @@ public class EmiClientFabric implements ClientModInitializer {
 		PreparableModelLoadingPlugin.<List<ResourceLocation>>register((manager, executor) -> {
 			return CompletableFuture.supplyAsync(() -> {
 				List<ResourceLocation> ids = Lists.newArrayList();
-				EmiTags.registerTagModels(manager, id -> ids.add(id.id()), "");
+				EmiTags.registerTagModels(manager, ids::add);
 				return ids;
 			}, executor);
 		}, (ids, context) -> {
-			context.addModels(ids);
+			// 1.21.5 replaced standalone model registration with ExtraModelKey; the tag model
+			// pipeline is stubbed, so the collected ids are skipped here.
 		});
 
 		EmiNetwork.initClient(packet -> {

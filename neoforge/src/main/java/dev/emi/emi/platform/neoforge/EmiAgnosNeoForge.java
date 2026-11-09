@@ -44,7 +44,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentPatch;
@@ -318,12 +317,8 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 	}
 
 	@Override
-
-	@Override
 	protected boolean isEnchantableAgnos(ItemStack stack, Enchantment enchantment) {
-		ItemStack enchantedBook = new ItemStack(Items.ENCHANTED_BOOK);
-		enchantedBook.enchant(Holder.direct(enchantment), enchantment.getMaxLevel());
-		return stack.isBookEnchantable(enchantedBook);
+		return true;
 	}
 
 	@Override

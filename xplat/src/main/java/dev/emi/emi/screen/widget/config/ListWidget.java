@@ -203,7 +203,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			bufferBuilder.addVertex(j - 1, n + m - 1, 0).setColor(192, 192, 192, 255);
 			bufferBuilder.addVertex(j - 1, n, 0).setColor(192, 192, 192, 255);
 			bufferBuilder.addVertex(i, n, 0).setColor(192, 192, 192, 255);
-			BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+			dev.emi.emi.EmiPort.draw(bufferBuilder);
 		}
 	}
 
@@ -421,14 +421,14 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 				bufferBuilder.addVertex(q, m + n + 2, 0);
 				bufferBuilder.addVertex(q, m - 2, 0);
 				bufferBuilder.addVertex(p, m - 2, 0);
-				BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+				dev.emi.emi.EmiPort.draw(bufferBuilder);
 				RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
 				bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 				bufferBuilder.addVertex(p + 1, m + n + 1, 0);
 				bufferBuilder.addVertex(q - 1, m + n + 1, 0);
 				bufferBuilder.addVertex(q - 1, m - 1, 0);
 				bufferBuilder.addVertex(p + 1, m - 1, 0);
-				BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
+				dev.emi.emi.EmiPort.draw(bufferBuilder);
 			}
 			p = this.getRowLeft();
 			((Entry)entry).render(draw, j, k, p, o - 3, n, mouseX, mouseY, Objects.equals(this.hoveredEntry, entry), delta);
