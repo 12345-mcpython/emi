@@ -28,10 +28,22 @@ public class EmiNeoForge {
 		});
 		NeoForge.EVENT_BUS.addListener(this::registerCommands);
 		NeoForge.EVENT_BUS.addListener(this::playerConnect);
+		NeoForge.EVENT_BUS.addListener(this::datapackSync);
 	}
 
 	public void registerCommands(RegisterCommandsEvent event) {
 		EmiCommands.registerCommands(event.getDispatcher());
+	}
+
+	/**
+	 * NeoForge only ships recipes that a mod explicitly asks for, and nothing does by default, so a
+	 * NeoForge server would otherwise answer the recipe sync with an empty payload. Asking for every
+	 * registered recipe type keeps modded recipes available too.
+	 */
+	public void datapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
+		for (net.minecraft.world.item.crafting.RecipeType<?> type : net.minecraft.core.registries.BuiltInRegistries.RECIPE_TYPE) {
+			event.sendRecipes(type);
+		}
 	}
 
 	public void playerConnect(PlayerEvent.PlayerLoggedInEvent event) {
