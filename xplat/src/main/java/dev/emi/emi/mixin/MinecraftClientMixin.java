@@ -1,6 +1,7 @@
 package dev.emi.emi.mixin;
 
 import java.util.concurrent.CompletableFuture;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,6 +21,18 @@ import dev.emi.emi.platform.EmiClientState;
 public class MinecraftClientMixin {
 	@Shadow
 	public ClientLevel level;
+
+	/**
+	 * GUI render types resolve their output target through this getter, so an offscreen recipe screenshot
+	 * answers it with its own target instead of binding a framebuffer, which 1.21.5 removed.
+	 */
+	@Inject(at = @At("HEAD"), method = "getMainRenderTarget", cancellable = true)
+	private void overrideMainRenderTarget(CallbackInfoReturnable<RenderTarget> info) {
+		RenderTarget target = dev.emi.emi.runtime.EmiScreenshotRecorder.getCaptureTarget();
+		if (target != null) {
+			info.setReturnValue(target);
+		}
+	}
 
 	@Inject(at = @At("TAIL"), method = "tick")
 	private void warmupEmi(CallbackInfo info) {

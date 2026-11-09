@@ -1,0 +1,32 @@
+// Opt in only: gradlew -I tests/screenshot-smoke/init.gradle :fabric:runClient
+// This script is never applied by the normal project build.
+gradle.projectsEvaluated {
+    def fabric = gradle.rootProject.project(':fabric')
+    def common = gradle.rootProject.project(':xplat')
+    def fixtureRoot = new File(gradle.rootProject.projectDir, 'tests/screenshot-smoke')
+    def smoke = fabric.sourceSets.create('screenshotSmoke') {
+        java.srcDir(new File(fixtureRoot, 'src/main/java'))
+        resources.srcDir(new File(fixtureRoot, 'src/main/resources'))
+    }
+    smoke.compileClasspath += fabric.sourceSets.main.output + fabric.sourceSets.main.compileClasspath + common.sourceSets.main.output
+    smoke.runtimeClasspath += smoke.output + fabric.sourceSets.main.output + fabric.sourceSets.main.runtimeClasspath + common.sourceSets.main.output
+    fabric.configurations.getByName(smoke.implementationConfigurationName).extendsFrom(fabric.configurations.implementation)
+    fabric.configurations.getByName(smoke.runtimeOnlyConfigurationName).extendsFrom(fabric.configurations.runtimeOnly)
+
+    fabric.loom.mods.create('emi_screenshot_smoke') {
+        sourceSet(smoke)
+    }
+    fabric.loom.runs.named('client') {
+        source(smoke)
+        // Isolated game directory: no normal options or screenshots are touched.
+        runDir('run/screenshot-smoke')
+        property('emi.screenshotSmoke', 'true')
+        vmArgs('-Xmx2G')
+        programArgs('--width', '1280', '--height', '800')
+    }
+    fabric.tasks.named('runClient').configure {
+        dependsOn(fabric.tasks.named(smoke.classesTaskName))
+        dependsOn(common.tasks.named('classes'))
+    }
+    fabric.logger.lifecycle('Optional screenshot smoke sourceSet enabled; normal production artifacts are unchanged.')
+}

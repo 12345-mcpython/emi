@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "emi_screenshot_smoke",
+  "version": "1.0.0",
+  "name": "EMI screenshot smoke",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.emi.emi.test.ScreenshotSmoke"]
+  },
+  "depends": {
+    "emi": "*"
+  }
+}

@@ -1,14 +1,15 @@
 # Porting EMI from 1.21.1 to 26.1.2
 
-Status: **1.21.4 checkpoint delivered** (builds + regression harnesses green). Target 26.1.2 not reached yet.
+Status: **1.21.5 port delivered** (builds, dedicated server dist safety, recipe sync, recipe screenshot export).
+Target 26.1.2 not reached yet.
 
 ## Branches
 
 | Branch        | Contents                                                                                       |
 |---------------|------------------------------------------------------------------------------------------------|
 | `1.21`        | last fully featured release line (Minecraft 1.21.1)                                            |
-| `1.21.4-port` | the working 1.21.4 checkpoint (`b49d133`, tag `1.21.4-port`); the next hops continue from here |
-| `1.21.5-wip`  | version bump to 1.21.5 plus the blocker inventory; does not compile yet                        |
+| `1.21.4`      | finished 1.21.4 line (JEI 20 + full recipe sync)                                               |
+| `1.21.5`      | current line: 1.21.5 port, now including the offscreen recipe screenshot capture              |
 
 ## Checkpoint plan
 
@@ -213,16 +214,12 @@ component, `ItemModelResolver#updateForTopItem`'s handedness argument.
 ### 1.21.5 compiles
 
 `:fabric:build` and `:neoforge:build` now succeed on the `1.21.5` branch, so every module compiles and the
-jars are produced. Two paths are deliberately degraded until they get their own rewrite:
+jars are produced. One path is deliberately degraded until it gets its own rewrite:
 
-* recipe screenshot export: `EmiScreenshotRecorder` only logs that it is unavailable. 1.21.5 needs a capture
-  through `GpuTexture` plus a `CommandEncoder` render pass, and reads the pixels back with
-  `GpuDevice#createBufferFromTexture`; `RenderTarget` no longer has `bindWrite`, and `RenderSystem` lost
-  `recordRenderCall`, the projection setters and the blend/colour state calls.
 * tag representation models: `EmiTags#registerTagModels` is a stub, so tag stacks render as their first
   ingredient. 1.21.5 removed `ModelResourceLocation` and Fabric replaced `addModels(ResourceLocation...)`
-  with the typed `ExtraModelKey` API, so rebaking the tag icons needs the new item model pipeline.
-* `EmiPort#draw` only builds the mesh now, which drops the tint on tinted sprites.
+  with the typed `ExtraModelKey` API, so rebaking the tag icons needs the new item model pipeline. An earlier
+  2x2 procedural grid was reverted; the first-ingredient fallback is the pre-1.21.5 behaviour.
 
 Everything else from 1.21.4 is intact, including the display pipeline, the local data pack fallback, the
 server sync receivers and the JEI 21 bridge (NeoForge only, `jei-1.21.5-neoforge:21.4.0.27`).
@@ -234,12 +231,15 @@ the `emi:recipe_sync` channel EMI servers push on join (chunked, 256 recipes per
 last chunk arrives), `fabric:recipe_sync` for the Paper bridge, and the client data pack fallback. Duplicate
 deliveries of the same table are ignored so the index reloads once.
 
-Tag icons use a procedural 2x2 grid when `EmiTags.MODELED_TAGS` has no entry for the tag, which is always
-the case on 1.21.5 because `ModelResourceLocation` and the standalone model registration were removed.
+Tag icons fall back to their first ingredient (see above); the earlier 2x2 grid was reverted.
 
-Only the recipe screenshot export is still degraded. 1.21.5 removed `RenderTarget#bindWrite`/`clear`, the
-projection setters and `RenderSystem#recordRenderCall`, and `GuiGraphics` has no way to target a custom
-framebuffer, so the exporter needs its own `CommandEncoder#createRenderPass` over a `TextureTarget` colour
-texture plus a draw path that does not go through `GuiGraphics`. `Screenshot.takeScreenshot(RenderTarget,
-Consumer<NativeImage>)` is still available for the readback half.
+Recipe screenshot export works again on 1.21.5. `RenderType` resolves its output target per draw through
+`Minecraft#getMainRenderTarget`, so the exporter renders into an offscreen `TextureTarget` and
+`MinecraftClientMixin` answers that lookup with the capture target while the renderer runs - 1.21.5 has no
+global `RenderTarget#bindWrite`. The projection and model-view setup mirrors `GameRenderer`, pending GUI
+batches are flushed before the copy, and `CommandEncoder#copyTextureToBuffer` reads the pixels back so the
+transparent background survives (`Screenshot#takeScreenshot` would force the alpha channel opaque). A
+2026-11-09 client smoke (`tests/screenshot-smoke`, 192x96 capture from a 1280x800 window at GUI scale 3)
+confirmed the output size, the transparent corner, an opaque rectangle, a rendered stone item and a rendered
+text run.
 
