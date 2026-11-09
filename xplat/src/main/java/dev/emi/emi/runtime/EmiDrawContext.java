@@ -53,12 +53,12 @@ public class EmiDrawContext {
 
 	public void drawTexture(ResourceLocation texture, int x, int y, int z, float u, float v, int width, int height, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
-		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight);
+		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight, packedColor());
 	}
 
 	public void drawTexture(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
-		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
+		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight, packedColor());
 	}
 
 	public void fill(int x, int y, int width, int height, int color) {
@@ -136,6 +136,15 @@ public class EmiDrawContext {
 		colorG = g;
 		colorB = b;
 		colorA = a;
+	}
+
+	/** The blit path takes the tint as vertex colour, so the shader-colour state alone does nothing. */
+	private int packedColor() {
+		int a = Math.max(0, Math.min(255, Math.round(colorA * 255f)));
+		int r = Math.max(0, Math.min(255, Math.round(colorR * 255f)));
+		int g = Math.max(0, Math.min(255, Math.round(colorG * 255f)));
+		int b = Math.max(0, Math.min(255, Math.round(colorB * 255f)));
+		return (a << 24) | (r << 16) | (g << 8) | b;
 	}
 
 	public float red() {
