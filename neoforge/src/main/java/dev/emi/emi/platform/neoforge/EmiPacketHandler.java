@@ -19,6 +19,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import dev.emi.emi.runtime.LocalRecipes;
 import dev.emi.emi.runtime.EmiReloadManager;
+import dev.emi.emi.runtime.EmiLog;
 
 public class EmiPacketHandler {
     private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(EmiPort.id("emi:chess_s2c"));
@@ -35,6 +36,8 @@ public class EmiPacketHandler {
         		LocalRecipes.acceptSynced(payload.recipes());
         		EmiReloadManager.reload();
         	}));
+        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC, (payload, context) ->
+        	context.enqueueWork(() -> EmiLog.info("Server recipe sync finished")));
         registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new), EmiPacketHandler::handleClientbound);
         registrar.playToServer(ID_CHESS_SERVERBOUND, makeReader(ID_CHESS_SERVERBOUND, EmiChessPacket.C2S::new), EmiPacketHandler::handleServerbound);
