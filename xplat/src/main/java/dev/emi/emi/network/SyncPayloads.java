@@ -47,17 +47,4 @@ public final class SyncPayloads {
 			return TYPE;
 		}
 	}
-
-	/** {@code neoforge:recipe_content}: recipe type filter plus recipe holders. */
-	public record NeoForge(Map<ResourceLocation, Recipe<?>> recipes) implements CustomPacketPayload {
-		public static final CustomPacketPayload.Type<NeoForge> TYPE =
-			new CustomPacketPayload.Type<>(EmiPort.id("neoforge", "recipe_content"));
-		public static final StreamCodec<RegistryFriendlyByteBuf, NeoForge> CODEC =
-			StreamCodec.of((buf, payload) -> { }, buf -> new NeoForge(LocalRecipes.decodeNeoForge(buf)));
-
-		@Override
-		public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
-			return TYPE;
-		}
-	}
 }

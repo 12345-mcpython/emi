@@ -4,10 +4,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -24,7 +22,6 @@ import net.minecraft.server.packs.VanillaPackResources;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import dev.emi.emi.EmiPort;
@@ -157,26 +154,6 @@ public class LocalRecipes {
 				} catch (Throwable t) {
 					failed++;
 				}
-			}
-		}
-		return recipes;
-	}
-
-	/** Reads the {@code neoforge:recipe_content} payload: a recipe type filter plus holders. */
-	public static Map<ResourceLocation, Recipe<?>> decodeNeoForge(RegistryFriendlyByteBuf buf) {
-		Map<ResourceLocation, Recipe<?>> recipes = new LinkedHashMap<>();
-		int types = buf.readVarInt();
-		Set<Object> ignored = new HashSet<>();
-		for (int i = 0; i < types; i++) {
-			ignored.add(buf.readVarInt());
-		}
-		int count = buf.readVarInt();
-		for (int i = 0; i < count; i++) {
-			try {
-				RecipeHolder<?> holder = RecipeHolder.STREAM_CODEC.decode(buf);
-				recipes.put(holder.id().location(), holder.value());
-			} catch (Throwable t) {
-				failed++;
 			}
 		}
 		return recipes;

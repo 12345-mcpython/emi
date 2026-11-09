@@ -87,16 +87,11 @@ public class EmiClientFabric implements ClientModInitializer {
 				LocalRecipes.acceptSynced(payload.recipes());
 				EmiReloadManager.reload();
 			}));
-		PayloadTypeRegistry.playS2C().register(SyncPayloads.NeoForge.TYPE, SyncPayloads.NeoForge.CODEC);
+		// NeoForge clients receive neoforge:recipe_content through NeoForge itself and are
+		// handled by RecipesReceivedEvent, so nothing is registered for that channel here.
 		PayloadTypeRegistry.playS2C().register(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC);
 		ClientPlayNetworking.registerGlobalReceiver(SyncPayloads.FabricFinished.TYPE, (payload, context) ->
 			context.client().execute(() -> EmiLog.info("Server recipe sync finished")));
-
-		ClientPlayNetworking.registerGlobalReceiver(SyncPayloads.NeoForge.TYPE, (payload, context) ->
-			context.client().execute(() -> {
-				LocalRecipes.acceptSynced(payload.recipes());
-				EmiReloadManager.reload();
-			}));
 
 		registerPacketReader(EmiNetwork.PING, PingS2CPacket::new);
 		registerPacketReader(EmiNetwork.COMMAND, CommandS2CPacket::new);
