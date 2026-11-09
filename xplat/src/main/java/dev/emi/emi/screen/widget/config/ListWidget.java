@@ -161,7 +161,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		int i = this.getScrollbarPositionX();
 		int j = i + 6;
 		Tesselator tessellator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 		this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
 
 		{	// Render background
@@ -190,7 +189,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			if (n < this.top) {
 				n = this.top;
 			}
-			bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+			BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 			bufferBuilder.addVertex(i, this.bottom, 0).setColor(0, 0, 0, 255);
 			bufferBuilder.addVertex(j, this.bottom, 0).setColor(0, 0, 0, 255);
 			bufferBuilder.addVertex(j, this.top, 0).setColor(0, 0, 0, 255);
