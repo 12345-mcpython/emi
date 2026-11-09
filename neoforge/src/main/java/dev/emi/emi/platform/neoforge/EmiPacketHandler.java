@@ -19,6 +19,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import dev.emi.emi.runtime.LocalRecipes;
 import dev.emi.emi.runtime.EmiReloadManager;
+import dev.emi.emi.runtime.EmiLog;
 
 public class EmiPacketHandler {
     private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(EmiPort.id("emi:chess_s2c"));
