@@ -44,8 +44,6 @@ import net.minecraft.world.level.material.Fluid;
 import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.MeshData;
 import dev.emi.emi.api.stack.Comparison;
 
 /**
@@ -119,14 +117,6 @@ public final class EmiPort {
 
 
 
-	public static void draw(BufferBuilder bufferBuilder) {
-		// 1.21.5 removed BufferUploader; submitting a raw builder now needs a render pass from the command
-		// encoder. The mesh still owns the builder buffers, so it has to be closed or the next reuse warns
-		// "Clearing BufferBuilder with unused batches".
-		try (MeshData mesh = bufferBuilder.buildOrThrow()) {
-			// Drawing the mesh needs a RenderPass; tinted sprites keep their base colour until then.
-		}
-	}
 
 	public static int getGuiScale(Minecraft client) {
 		return (int) client.getWindow().getGuiScale();

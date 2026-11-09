@@ -24,10 +24,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import dev.emi.emi.EmiPort;
 
 /**
@@ -160,7 +156,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		int m;
 		int i = this.getScrollbarPositionX();
 		int j = i + 6;
-		Tesselator tessellator = Tesselator.getInstance();
 		this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
 
 		{	// Render background
@@ -189,20 +184,9 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			if (n < this.top) {
 				n = this.top;
 			}
-			BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-			bufferBuilder.addVertex(i, this.bottom, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(j, this.bottom, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(j, this.top, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(i, this.top, 0).setColor(0, 0, 0, 255);
-			bufferBuilder.addVertex(i, n + m, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(j, n + m, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(j, n, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(i, n, 0).setColor(128, 128, 128, 255);
-			bufferBuilder.addVertex(i, n + m - 1, 0).setColor(192, 192, 192, 255);
-			bufferBuilder.addVertex(j - 1, n + m - 1, 0).setColor(192, 192, 192, 255);
-			bufferBuilder.addVertex(j - 1, n, 0).setColor(192, 192, 192, 255);
-			bufferBuilder.addVertex(i, n, 0).setColor(192, 192, 192, 255);
-			dev.emi.emi.EmiPort.draw(bufferBuilder);
+			draw.fill(i, this.bottom, j, this.top, 0xFF000000);
+			draw.fill(i, n + m, j, n, 0xFF808080);
+			draw.fill(i, n + m - 1, j - 1, n, 0xFFC0C0C0);
 		}
 	}
 
@@ -396,8 +380,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 
 	protected void renderList(GuiGraphics draw, int x, int y, int mouseX, int mouseY, float delta) {
 		int i = this.getEntryCount();
-		Tesselator tessellator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
+		// selection background below
 		for (int j = 0; j < i; ++j) {
 			int p;
 			int k = this.getRowTop(j);
@@ -416,18 +399,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 				int q = this.left + this.width / 2 + o / 2;
 				float f = this.isFocused() ? 1.0f : 0.5f;
 				RenderSystem.setShaderColor(f, f, f, 1.0f);
-				bufferBuilder.addVertex(p, m + n + 2, 0);
-				bufferBuilder.addVertex(q, m + n + 2, 0);
-				bufferBuilder.addVertex(q, m - 2, 0);
-				bufferBuilder.addVertex(p, m - 2, 0);
-				dev.emi.emi.EmiPort.draw(bufferBuilder);
 				RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
-				bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
-				bufferBuilder.addVertex(p + 1, m + n + 1, 0);
-				bufferBuilder.addVertex(q - 1, m + n + 1, 0);
-				bufferBuilder.addVertex(q - 1, m - 1, 0);
-				bufferBuilder.addVertex(p + 1, m - 1, 0);
-				dev.emi.emi.EmiPort.draw(bufferBuilder);
 			}
 			p = this.getRowLeft();
 			((Entry)entry).render(draw, j, k, p, o - 3, n, mouseX, mouseY, Objects.equals(this.hoveredEntry, entry), delta);

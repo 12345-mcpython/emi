@@ -21,10 +21,7 @@ import org.joml.Vector2i;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import dev.emi.emi.api.EmiApi;
 import dev.emi.emi.api.recipe.EmiRecipe;
@@ -42,6 +39,9 @@ import dev.emi.emi.registry.EmiRecipeFiller;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.EmiLog;
 import dev.emi.emi.screen.EmiScreenManager;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 
 public class EmiRenderHelper {
 	public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("#,###.##");
@@ -87,14 +87,12 @@ public class EmiRenderHelper {
 		if (sprite == null) {
 			return;
 		}
-		EmiPort.setPositionColorTexShader();
-		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-		
+		// 1.21.5 selects the shader through the render type; the GUI pipeline supplies the vertex colour.
 		float r = ((color >> 16) & 255) / 256f;
 		float g = ((color >> 8) & 255) / 256f;
 		float b = (color & 255) / 256f;
-		
-		BufferBuilder bufferBuilder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+		MultiBufferSource.BufferSource source = Minecraft.getInstance().renderBuffers().bufferSource();
+		VertexConsumer consumer = source.getBuffer(RenderType.guiTextured(sprite.atlasLocation()));
 		float xMin = (float) x;
 		float yMin = (float) y;
 		float xMax = xMin + width;
@@ -106,11 +104,10 @@ public class EmiRenderHelper {
 		float uMax = sprite.getU1() - uSpan / 16 * (16 - (width + xOff));
 		float vMax = sprite.getV1() - vSpan / 16 * (16 - (height + yOff));
 		Matrix4f model = matrices.last().pose();
-		bufferBuilder.addVertex(model, xMin, yMax, 1).setColor(r, g, b, 1).setUv(uMin, vMax);
-		bufferBuilder.addVertex(model, xMax, yMax, 1).setColor(r, g, b, 1).setUv(uMax, vMax);
-		bufferBuilder.addVertex(model, xMax, yMin, 1).setColor(r, g, b, 1).setUv(uMax, vMin);
-		bufferBuilder.addVertex(model, xMin, yMin, 1).setColor(r, g, b, 1).setUv(uMin, vMin);
-		EmiPort.draw(bufferBuilder);
+		consumer.addVertex(model, xMin, yMax, 1).setColor(r, g, b, 1).setUv(uMin, vMax);
+		consumer.addVertex(model, xMax, yMax, 1).setColor(r, g, b, 1).setUv(uMax, vMax);
+		consumer.addVertex(model, xMax, yMin, 1).setColor(r, g, b, 1).setUv(uMax, vMin);
+		consumer.addVertex(model, xMin, yMin, 1).setColor(r, g, b, 1).setUv(uMin, vMin);
 	}
 
 	public static void drawScroll(EmiDrawContext context, int x, int y, int width, int height, int progress, int total, int color) {
