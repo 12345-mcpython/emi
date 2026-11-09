@@ -129,7 +129,9 @@ public class EmiDrawContext {
 		setColor(r, g, b, 1f);
 	}
 
-	private float colorR = 1f, colorG = 1f, colorB = 1f, colorA = 1f;
+	// Tint state is global on purpose: widgets often set a colour on one context and draw through
+	// another one (e.g. ConfigJumpButton -> SizedButtonWidget), which used to share the shader colour.
+	private static float colorR = 1f, colorG = 1f, colorB = 1f, colorA = 1f;
 
 	public void setColor(float r, float g, float b, float a) {
 		colorR = r;
