@@ -46,7 +46,7 @@ public class TextWidget extends Widget {
 		context.push();
 		int xOff = horizontalAlignment.offset(CLIENT.font.width(text));
 		int yOff = verticalAlignment.offset(CLIENT.font.lineHeight);
-		context.matrices().translate(xOff, yOff, 300);
+		context.matrices().translate(xOff, yOff);
 		if (shadow) {
 			context.drawTextWithShadow(text, x, y, color);
 		} else {

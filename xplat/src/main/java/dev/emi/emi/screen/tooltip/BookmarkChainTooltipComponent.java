@@ -61,8 +61,8 @@ public class BookmarkChainTooltipComponent implements EmiTooltipComponent {
 				int width = render.text.width(text);
 				float scale = Math.min(1f, 17f / Math.max(1, width));
 				context.push();
-				context.matrices().translate(x + SLOT - 1, y + SLOT - 1, 300);
-				context.matrices().scale(scale, scale, 1);
+				context.matrices().translate(x + SLOT - 1, y + SLOT - 1);
+				context.matrices().scale(scale, scale);
 				context.drawTextWithShadow(text, -width, -9,
 					missingOnly || entry.missing() > 0 ? 0xFFFF7070 : 0xFFFFFFFF);
 				context.pop();

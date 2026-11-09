@@ -44,16 +44,16 @@ class ChessEmiStack extends EmiStack {
 			}
 			if (type != null) {
 				context.push();
-				context.matrices().translate(0, 0, 10);
+				context.matrices().translate(0, 0);
 				context.fill(x - 1, y - 1, 18, 18, 0x55000000);
-				context.matrices().translate(0, 0, 90);
+				context.matrices().translate(0, 0);
 				context.drawTexture(EmiRenderHelper.PIECES, x, y, 100, type.u, chess.pendingPromotion > 31 ? 0 : 16, 16, 16, 256, 256);
 				context.pop();
 				return;
 			}
 		}
 		context.push();
-		context.matrices().translate(0, 0, 10);
+		context.matrices().translate(0, 0);
 		if (chess.isTarget(position)) {
 			context.fill(x - 1, y - 1, 18, 18, 0x5555ff00);
 		}
@@ -68,7 +68,7 @@ class ChessEmiStack extends EmiStack {
 		context.pop();
 		if (piece != null) {
 			context.push();
-			context.matrices().translate(0, 0, 100);
+			context.matrices().translate(0, 0);
 			context.drawTexture(EmiRenderHelper.PIECES, x, y, 100, piece.type().u, piece.color() == PieceColor.BLACK ? 0 : 16, 16, 16, 256, 256);
 			context.pop();
 		}

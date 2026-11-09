@@ -23,7 +23,6 @@ import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.ApiStatus;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.Lighting;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.render.EmiRender;
@@ -107,7 +106,6 @@ public class ItemEmiStack extends EmiStack implements Batchable {
 		EmiDrawContext context = EmiDrawContext.wrap(draw);
 		ItemStack stack = getItemStack();
 		if ((flags & RENDER_ICON) != 0) {
-			Lighting.setupFor3DItems();
 			draw.renderFakeItem(stack, x, y);
 			draw.renderItemDecorations(client.font, stack, x, y, "");
 		}

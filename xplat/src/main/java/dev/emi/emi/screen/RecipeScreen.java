@@ -255,7 +255,7 @@ public class RecipeScreen extends Screen {
 		EmiScreenManager.drawForeground(context, mouseX, mouseY, delta);
 		super.render(context.raw(), mouseX, mouseY, delta);
 		if (categoryHovered) {
-			context.raw().renderComponentTooltip(minecraft.font, List.of(
+			context.raw().setComponentTooltipForNextFrame(minecraft.font, List.of(
 				tab.category.getName(),
 				EmiPort.translatable("emi.view_all_recipes")
 			), mouseX, mouseY);

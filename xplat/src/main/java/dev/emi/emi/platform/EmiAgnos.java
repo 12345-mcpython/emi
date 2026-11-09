@@ -12,7 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
-import com.mojang.blaze3d.vertex.PoseStack;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.FluidEmiStack;
@@ -121,15 +120,15 @@ public abstract class EmiAgnos {
 
 	protected abstract boolean isFloatyFluidAgnos(FluidEmiStack stack);
 
-	public static void renderFluid(FluidEmiStack stack, PoseStack matrices, int x, int y, float delta) {
-		renderFluid(stack, matrices, x, y, delta, 0, 0, 16, 16);
+	public static void renderFluid(FluidEmiStack stack, net.minecraft.client.gui.GuiGraphics draw, int x, int y, float delta) {
+		renderFluid(stack, draw, x, y, delta, 0, 0, 16, 16);
 	}
 
-	public static void renderFluid(FluidEmiStack stack, PoseStack matrices, int x, int y, float delta, int xOff, int yOff, int width, int height) {
-		delegate.renderFluidAgnos(stack, matrices, x, y, delta, xOff, yOff, width, height);
+	public static void renderFluid(FluidEmiStack stack, net.minecraft.client.gui.GuiGraphics draw, int x, int y, float delta, int xOff, int yOff, int width, int height) {
+		delegate.renderFluidAgnos(stack, draw, x, y, delta, xOff, yOff, width, height);
 	}
 
-	protected abstract void renderFluidAgnos(FluidEmiStack stack, PoseStack matrices, int x, int y, float delta, int xOff, int yOff, int width, int height);
+	protected abstract void renderFluidAgnos(FluidEmiStack stack, net.minecraft.client.gui.GuiGraphics draw, int x, int y, float delta, int xOff, int yOff, int width, int height);
 
 	public static EmiStack createFluidStack(Object object) {
 		return delegate.createFluidStackAgnos(object);

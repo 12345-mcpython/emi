@@ -46,7 +46,7 @@ public class ResolutionButtonWidget extends Button {
 		context.drawTexture(EmiRenderHelper.WIDGETS, x, y, u, 128, width, height);
 		if (this.isHovered()) {
 			Minecraft client = Minecraft.getInstance();
-			raw.renderComponentTooltip(client.font, List.of(
+			raw.setComponentTooltipForNextFrame(client.font, List.of(
 				EmiPort.translatable("tooltip.emi.resolution"),
 				EmiPort.translatable("tooltip.emi.select_resolution"),
 				EmiPort.translatable("tooltip.emi.default_resolution"),

@@ -7,7 +7,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -40,13 +39,13 @@ public class MinecraftClientMixin {
 		dev.emi.emi.screen.EmiScreenManager.warmupTick();
 	}
 
-	@Inject(at = @At("HEAD"), method = "reloadResourcePacks(ZLnet/minecraft/client/Minecraft$GameLoadCookie;)Ljava/util/concurrent/CompletableFuture;")
-	private void beforeResourceReload(boolean force, @Coerce Object loadingContext, CallbackInfoReturnable<CompletableFuture<Void>> info) {
+	@Inject(at = @At("HEAD"), method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;")
+	private void beforeResourceReload(CallbackInfoReturnable<CompletableFuture<Void>> info) {
 		dev.emi.emi.screen.EmiScreenManager.setResourcesReloading(true);
 	}
 
-	@Inject(at = @At("RETURN"), method = "reloadResourcePacks(ZLnet/minecraft/client/Minecraft$GameLoadCookie;)Ljava/util/concurrent/CompletableFuture;")
-	private void reloadResources(boolean force, @Coerce Object loadingContext, CallbackInfoReturnable<CompletableFuture<Void>> info) {
+	@Inject(at = @At("RETURN"), method = "reloadResourcePacks()Ljava/util/concurrent/CompletableFuture;")
+	private void reloadResources(CallbackInfoReturnable<CompletableFuture<Void>> info) {
 		CompletableFuture<Void> future = info.getReturnValue();
 		if (future != null) {
 			future.whenComplete((ignored, error) -> Minecraft.getInstance().execute(() -> {
@@ -64,7 +63,7 @@ public class MinecraftClientMixin {
 		}
 	}
 
-	@Inject(at = @At("HEAD"), method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V")
+	@Inject(at = @At("HEAD"), method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V")
 	private void disconnect(CallbackInfo info) {
 		EmiLog.info("Disconnecting from server, EMI data cleared");
 		EmiReloadManager.clear();

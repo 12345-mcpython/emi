@@ -773,7 +773,7 @@ public class EmiScreenManager {
 
 	private static void renderWidgets(EmiDrawContext context, int mouseX, int mouseY, float delta, EmiScreenBase base) {
 		context.push();
-		context.matrices().translate(0, 0, 100);
+		context.matrices().translate(0, 0);
 		emi.render(context.raw(), mouseX, mouseY, delta);
 		tree.render(context.raw(), mouseX, mouseY, delta);
 		search.render(context.raw(), mouseX, mouseY, delta);
@@ -805,7 +805,7 @@ public class EmiScreenManager {
 	private static void renderDraggedStack(EmiDrawContext context, int mouseX, int mouseY, float delta, EmiScreenBase base) {
 		if (!draggedStack.isEmpty()) {
 			context.push();
-			context.matrices().translate(0, 0, 400);
+			context.matrices().translate(0, 0);
 			EmiDragDropHandlers.render(base.screen(), draggedStack, context.raw(), mouseX, mouseY, delta);
 			draggedStack.render(context.raw(), mouseX - 8, mouseY - 8, delta, EmiIngredient.RENDER_ICON);
 			context.pop();
@@ -894,7 +894,7 @@ public class EmiScreenManager {
 				context.drawTextWithShadow(EmiPort.literal(warnCount), devTextX, screen.height - 21, color);
 				int width = Math.max(client.font.width(title), client.font.width(warnCount));
 				if (mouseX >= devTextX && mouseX < width + devTextX && mouseY > screen.height - 28) {
-					context.raw().renderComponentTooltip(client.font, Stream.concat(Stream.of(" EMI detected some issues, see log for full details"),
+					context.raw().setComponentTooltipForNextFrame(client.font, Stream.concat(Stream.of(" EMI detected some issues, see log for full details"),
 							EmiReloadLog.warnings.stream()).map(s -> {
 								String a = s;
 								if (a.length() > 10 && client.font.width(a) > screen.width - 20) {
@@ -963,7 +963,7 @@ public class EmiScreenManager {
 				}
 				EmiStack stack = EmiStack.of(slot.getItem());
 				context.push();
-				context.matrices().translate(0, 0, 300);
+				context.matrices().translate(0, 0);
 				if (query != null) {
 					if (!query.test(stack)) {
 						context.fill(slot.x - 1, slot.y - 1, 18, 18, 0x77000000);
@@ -1641,7 +1641,7 @@ public class EmiScreenManager {
 				if (isVisible()) {
 					EmiProfiler.swap(side.getName());
 					context.push();
-					context.matrices().translate(0, 0, 100);
+					context.matrices().translate(0, 0);
 					pageLeft.render(context.raw(), mouseX, mouseY, delta);
 					cycle.render(context.raw(), mouseX, mouseY, delta);
 					pageRight.render(context.raw(), mouseX, mouseY, delta);

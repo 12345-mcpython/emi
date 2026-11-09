@@ -8,7 +8,7 @@
     "accessor.AxeItemAccessor",
     "accessor.BrewingRecipeRegistryAccessor",
     "accessor.CraftingResultSlotAccessor",
-    "accessor.DrawContextAccessor",
+    "accessor.GuiGraphicsAccessor",
     "accessor.HandledScreenAccessor",
     "accessor.HoeItemAccessor",
     "accessor.OrderedTextTooltipComponentAccessor",

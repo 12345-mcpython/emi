@@ -195,8 +195,8 @@ public final class BookmarkSidebar {
             if (cell.item != null && !cell.item.input && cell.item.recipe != null) {
                 if (batchLabels.add(cell.item.anchor)) {
                     context.push();
-                    context.matrices().translate(cx, cy, 250);
-                    context.matrices().scale(0.5f, 0.5f, 1);
+                    context.matrices().translate(cx, cy);
+                    context.matrices().scale(0.5f, 0.5f);
                     context.drawText(EmiPort.literal("×" + cell.item.batches), 0, 0, 0xffb0b0b0);
                     context.pop();
                 }
@@ -210,7 +210,7 @@ public final class BookmarkSidebar {
         }
         if (movingGroup && pressedGroup != null && !groupPreview.isEmpty()) {
             context.push();
-            context.matrices().translate(0, 0, 400);
+            context.matrices().translate(0, 0);
             int color = pressedGroup.crafting ? 0xff45a967 : 0xff999999;
             for (DragCell ghost : groupPreview)
                 ghost.favorite.render(context.raw(), mx + ghost.dx + 1, my + ghost.dy + 1, delta,
@@ -637,8 +637,8 @@ public final class BookmarkSidebar {
                 int width = net.minecraft.client.Minecraft.getInstance().font.width(text);
                 float scale = Math.min(1f, 17f / Math.max(1, width));
                 context.push();
-                context.matrices().translate(x + 17, y + 17, 300);
-                context.matrices().scale(scale, scale, 1);
+                context.matrices().translate(x + 17, y + 17);
+                context.matrices().scale(scale, scale);
                 context.drawTextWithShadow(text, -width, -9);
                 context.pop();
             }

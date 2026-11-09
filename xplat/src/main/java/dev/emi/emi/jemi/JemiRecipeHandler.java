@@ -104,8 +104,8 @@ public class JemiRecipeHandler<T extends AbstractContainerMenu, R> implements Em
 					}
 				});
 				draw.push();
-				draw.matrices().translate(-100000, -100000, -100000);
-				draw.matrices().scale(0, 0, 0);
+				draw.matrices().translate(-100000, -100000);
+				draw.matrices().scale(0, 0);
 				err.showError(raw, EmiScreenManager.lastMouseX, EmiScreenManager.lastMouseY, view, 0, 0);
 				draw.pop();
 				view.getSlotViews().forEach(v -> {

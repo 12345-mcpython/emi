@@ -99,7 +99,7 @@ public class JemiSlotWidget extends SlotWidget {
 		if (slot.overlay != null) {
 			context.enableBlend();
 			context.push();
-			context.matrices().translate(0, 0, 200);
+			context.matrices().translate(0, 0);
 			slot.overlay.drawable().draw(context.raw(), x + 1 + slot.overlay.xOff(), y + 1 + slot.overlay.yOff());
 			context.pop();
 		}

@@ -1,16 +1,11 @@
 package dev.emi.emi.screen.tooltip;
 
-import org.joml.Matrix4f;
-
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.runtime.EmiDrawContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.Font.DisplayMode;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
 
@@ -33,22 +28,20 @@ public interface EmiTooltipComponent extends ClientTooltipComponent {
 	}
 
 	@Override
-	default void renderText(Font textRenderer, int x, int y, Matrix4f matrix, BufferSource vertexConsumers) {
-		drawTooltipText(new TextRenderData(textRenderer, x, y, matrix, vertexConsumers));
+	default void renderText(GuiGraphics raw, Font textRenderer, int x, int y) {
+		drawTooltipText(new TextRenderData(raw, textRenderer, x, y));
 	}
 
 	public static class TextRenderData {
-		private final Matrix4f matrix;
-		private final BufferSource vertexConsumers;
+		private final GuiGraphics context;
 		public final Font renderer;
 		public final int x, y;
 		
-		public TextRenderData(Font renderer, int x, int y, Matrix4f matrix, BufferSource vertexConsumers) {
+		public TextRenderData(GuiGraphics context, Font renderer, int x, int y) {
+			this.context = context;
 			this.renderer = renderer;
 			this.x = x;
 			this.y = y;
-			this.matrix = matrix;
-			this.vertexConsumers = vertexConsumers;
 		}
 
 		public void draw(String text, int x, int y, int color, boolean shadow) {
@@ -56,7 +49,7 @@ public interface EmiTooltipComponent extends ClientTooltipComponent {
 		}
 
 		public void draw(Component text, int x, int y, int color, boolean shadow) {
-			renderer.drawInBatch(text, x + this.x, y + this.y, color, shadow, matrix, vertexConsumers, DisplayMode.NORMAL, 0, LightTexture.FULL_BRIGHT);
+			context.drawString(renderer, text, x + this.x, y + this.y, (color & 0xFF000000) == 0 ? color | 0xFF000000 : color, shadow);
 		}
 	}
 

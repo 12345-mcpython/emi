@@ -1,12 +1,13 @@
 package dev.emi.emi.runtime;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.RenderPipelines;
+import org.joml.Matrix3x2fStack;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.api.stack.EmiIngredient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
@@ -27,20 +28,20 @@ public class EmiDrawContext {
 		return context;
 	}
 
-	public PoseStack matrices() {
+	public Matrix3x2fStack matrices() {
 		return context.pose();
 	}
 
 	public void push() {
-		matrices().pushPose();
+		matrices().pushMatrix();
 	}
 
 	public void pop() {
-		matrices().popPose();
+		matrices().popMatrix();
 	}
 
 	public void translate(float x, float y) {
-		matrices().translate(x, y, 0);
+		matrices().translate(x, y);
 	}
 
 	public void drawTexture(ResourceLocation texture, int x, int y, int u, int v, int width, int height) {
@@ -53,16 +54,21 @@ public class EmiDrawContext {
 
 	public void drawTexture(ResourceLocation texture, int x, int y, int z, float u, float v, int width, int height, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
-		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, textureWidth, textureHeight);
+		context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, textureWidth, textureHeight);
 	}
 
 	public void drawTexture(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
-		context.blit(RenderType::guiTextured, texture, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
+		context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight);
 	}
 
 	public void fill(int x, int y, int width, int height, int color) {
 		context.fill(x, y, x + width, y + height, color);
+	}
+
+	/** 1.21.6 treats the colour as ARGB; opaque is the historical behaviour. */
+	private static int textColor(int color) {
+		return (color & 0xFF000000) == 0 ? color | 0xFF000000 : color;
 	}
 
 	public void drawText(Component text, int x, int y) {
@@ -70,11 +76,11 @@ public class EmiDrawContext {
 	}
 
 	public void drawText(Component text, int x, int y, int color) {
-		context.drawString(client.font, text, x, y, color, false);
+		context.drawString(client.font, text, x, y, textColor(color), false);
 	}
 
 	public void drawText(FormattedCharSequence text, int x, int y, int color) {
-		context.drawString(client.font, text, x, y, color, false);
+		context.drawString(client.font, text, x, y, textColor(color), false);
 	}
 
 	public void drawTextWithShadow(Component text, int x, int y) {
@@ -82,11 +88,11 @@ public class EmiDrawContext {
 	}
 
 	public void drawTextWithShadow(Component text, int x, int y, int color) {
-		context.drawString(client.font, text, x, y, color, true);
+		context.drawString(client.font, text, x, y, textColor(color), true);
 	}
 
 	public void drawTextWithShadow(FormattedCharSequence text, int x, int y, int color) {
-		context.drawString(client.font, text, x, y, color, true);
+		context.drawString(client.font, text, x, y, textColor(color), true);
 	}
 
 	public void drawCenteredText(Component text, int x, int y) {
@@ -94,7 +100,7 @@ public class EmiDrawContext {
 	}
 
 	public void drawCenteredText(Component text, int x, int y, int color) {
-		context.drawString(client.font, text, x - client.font.width(text) / 2, y, color, false);
+		context.drawString(client.font, text, x - client.font.width(text) / 2, y, textColor(color), false);
 	}
 
 	public void drawCenteredTextWithShadow(Component text, int x, int y) {
@@ -102,7 +108,7 @@ public class EmiDrawContext {
 	}
 
 	public void drawCenteredTextWithShadow(Component text, int x, int y, int color) {
-		context.drawCenteredString(client.font, text.getVisualOrderText(), x, y, color);
+		context.drawCenteredString(client.font, text.getVisualOrderText(), x, y, textColor(color));
 	}
 
 	public void enableDepthTest() {

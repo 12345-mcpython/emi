@@ -49,9 +49,9 @@ public class TankWidget extends SlotWidget {
 					for (int ox = 0; ox < w; ox += 16) {
 						int rw = Math.min(16, w - ox);
 						if (floaty) {
-							EmiAgnos.renderFluid(fes, draw.pose(), x + ox, sy + oy, delta, 0, 0, rw, rh);
+							EmiAgnos.renderFluid(fes, draw, x + ox, sy + oy, delta, 0, 0, rw, rh);
 						} else {
-							EmiAgnos.renderFluid(fes, draw.pose(), x + ox, sy + (oy + rh) * -1, delta, 0, 16 - rh, rw, rh);
+							EmiAgnos.renderFluid(fes, draw, x + ox, sy + (oy + rh) * -1, delta, 0, 16 - rh, rw, rh);
 						}
 					}
 				}

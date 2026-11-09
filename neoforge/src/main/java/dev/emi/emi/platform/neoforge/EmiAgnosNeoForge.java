@@ -283,7 +283,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 	}
 
 	@Override
-	protected void renderFluidAgnos(FluidEmiStack stack, PoseStack matrices, int x, int y, float delta, int xOff, int yOff, int width, int height) {
+	protected void renderFluidAgnos(FluidEmiStack stack, net.minecraft.client.gui.GuiGraphics draw, int x, int y, float delta, int xOff, int yOff, int width, int height) {
 		FluidStack fs = new FluidStack(stack.getKeyOfType(Fluid.class).builtInRegistryHolder(), 1000, stack.getComponentChanges());
 		IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fs.getFluid());
 		ResourceLocation texture = ext.getStillTexture(fs);
@@ -293,7 +293,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 		int color = ext.getTintColor(fs);
 		Minecraft client = Minecraft.getInstance();
 		TextureAtlasSprite sprite = client.getTextureAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS).apply(texture);
-		EmiRenderHelper.drawTintedSprite(matrices, sprite, color, x, y, xOff, yOff, width, height);
+		EmiRenderHelper.drawTintedSprite(draw, sprite, color, x, y, xOff, yOff, width, height);
 	}
 
 	@Override

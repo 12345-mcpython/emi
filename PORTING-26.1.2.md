@@ -314,6 +314,26 @@ with **30 unique errors in 13 files** (96 javac lines including repeats):
 Note: the first mapping download failed once with `Failed to setup mappings: loom:mappings:layered+hash.40545`
 and succeeded on the retry; that is transient, not a version mismatch.
 
+### 1.21.8 progress (2026-11-09)
+
+`:fabric:build` and `:neoforge:build` succeed on the `1.21.8` branch. The GUI layer was migrated to the
+prepare/render split: `EmiDrawContext` exposes a `Matrix3x2fStack`, `blit` uses `RenderPipelines.GUI_TEXTURED`,
+text colours are normalised to opaque, tooltips go through `set*TooltipForNextFrame` / `renderTooltip`, and
+fluid sprites are submitted as a tinted `BlitRenderState` (through the new `GuiGraphicsAccessor`). The
+screenshot exporter was redesigned: it builds its own `GuiRenderState` + `GuiRenderer`, installs the capture
+`TextureTarget` as the main render target, and captures the image tile by tile because the new renderer always
+projects against the window. `MinecraftClientMixin` now targets `reloadResourcePacks()` and
+`disconnect(Screen, boolean)`, `HandledScreenMixin` injects into `renderContents`, `DrawContextMixin` targets
+`setTooltipForNextFrame`, and `DrawContextAccessor` was replaced by the public `GuiGraphics#renderTooltip`.
+NeoForge 21.8 removed `EventBusSubscriber.Bus` and moved client packet sending to `ClientPacketDistributor`.
+
+The Fabric screenshot smoke passes on 1.21.8: a 192x96 capture (transparent corner, red rectangle, stone item
+and text) plus the real BoM header probe (`pixels=540`, `0xFFB6C7E8`). Still to verify: the tiled capture path
+for images larger than the window (the BoM tree export), the NeoForge client runtime, the new 1.21.6 tags
+(`harnesses`, `happy_ghast_food`, `happy_ghast_tempt_items`) through
+`scripts/scan_untranslated_tags.py`, and a full visual pass over the recipe screen, config screens and
+tooltips.
+
 ### Port order
 
 1. Branch `1.21.8` from `1.21.5`; bump `minecraft_version`, `neoforge_version`, `jei_version`, the Fabric API version and Loom; resolve the new dependencies online.

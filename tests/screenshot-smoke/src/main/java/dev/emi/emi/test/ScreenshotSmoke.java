@@ -106,13 +106,11 @@ public class ScreenshotSmoke implements ClientModInitializer {
 			}
 		}
 		LOGGER.info("SCREENSHOT SMOKE capturing {}x{} at scale {}", CAPTURE_WIDTH, CAPTURE_HEIGHT, scale);
-		GuiGraphics graphics = new GuiGraphics(client, client.renderBuffers().bufferSource());
-		EmiDrawContext context = EmiDrawContext.wrap(graphics);
-		EmiScreenshotRecorder.saveScreenshot("emi/smoke/capture", CAPTURE_WIDTH, CAPTURE_HEIGHT, () -> {
+		EmiScreenshotRecorder.saveScreenshot("emi/smoke/capture", CAPTURE_WIDTH, CAPTURE_HEIGHT, graphics -> {
+			EmiDrawContext context = EmiDrawContext.wrap(graphics);
 			context.fill(4, 4, 32, 16, 0xFFFF0000);
 			graphics.renderFakeItem(new ItemStack(Items.STONE), 44, 4);
 			graphics.drawString(client.font, "EMI", 4, 23, 0xFFFFFFFF, false);
-			graphics.flush();
 		});
 	}
 

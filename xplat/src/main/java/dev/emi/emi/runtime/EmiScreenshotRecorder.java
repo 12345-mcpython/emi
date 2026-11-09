@@ -1,29 +1,32 @@
 package dev.emi.emi.runtime;
 
 import java.io.File;
+import java.util.List;
 import java.util.function.Consumer;
 
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
+import org.joml.Matrix3x2fStack;
 
-import com.mojang.blaze3d.ProjectionType;
-import com.mojang.blaze3d.buffers.BufferType;
-import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.ScissorState;
 import com.mojang.blaze3d.textures.GpuTexture;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.config.EmiConfig;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.render.GuiRenderer;
+import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -31,16 +34,16 @@ import net.minecraft.network.chat.Style;
 /**
  * Recipe screenshot export.
  * <p>
- * 1.21.5 has no global framebuffer binding anymore: every {@code RenderType} builds its own render pass from
- * the output state's render target, and the GUI render types resolve that target through
- * {@code Minecraft#getMainRenderTarget}. A capture therefore installs a {@code TextureTarget} of its own and
- * {@code MinecraftClientMixin} answers that lookup with it while the renderer runs; the projection and model
- * view are set up the same way {@code GameRenderer} prepares the GUI. Pixels are read back through
- * {@code CommandEncoder#copyTextureToBuffer} instead of {@code Screenshot#takeScreenshot}, because the latter
- * forces the alpha channel to opaque and recipe images keep a transparent background.
+ * 1.21.6 turned GUI drawing into a prepare/render split: {@code GuiGraphics} only submits elements to a
+ * {@code GuiRenderState}, and a {@code GuiRenderer} renders them afterwards. The exporter therefore builds a
+ * private render state, runs the renderer against it and renders with the capture target installed as the
+ * main render target, which is what {@code GuiRenderer} asks {@code Minecraft} for. The renderer always
+ * projects against the window (logical size = window pixels / GUI scale), so images larger than the window
+ * are captured tile by tile and stitched together.
  */
 public class EmiScreenshotRecorder {
 	private static final String SCREENSHOTS_DIRNAME = "screenshots";
+	private static final int BUFFER_CAPACITY = 786432;
 	@Nullable
 	private static RenderTarget captureTarget;
 
@@ -53,23 +56,21 @@ public class EmiScreenshotRecorder {
 	}
 
 	/**
-	 * Saves a screenshot to the game's `screenshots` directory, doing the appropriate setup so that anything rendered in renderer will be captured
-	 * and saved.
+	 * Saves a screenshot to the game's `screenshots` directory, doing the appropriate setup so that anything
+	 * rendered through the supplied graphics will be captured and saved.
 	 * <p>
-	 * <b>Note:</b> the path can have <code>/</code> characters, indicating subdirectories. Java handles these correctly on Windows. The path should
-	 * <b>not</b> contain the <code>.png</code> extension, as that will be added after checking for duplicates. If a file with this path already
-	 * exists, then path will be suffixed with a <code>_#</code>, before adding the <code>.png</code> extension, where <code>#</code> represents an
-	 * increasing number to avoid conflicts.
+	 * <b>Note:</b> the path can have <code>/</code> characters, indicating subdirectories. The path should
+	 * <b>not</b> contain the <code>.png</code> extension, as that will be added after checking for duplicates.
 	 * <p>
-	 * <b>Note 2:</b> The width and height parameters are reflected in the viewport when rendering. But the EMI-config
-	 * <code>ui.recipe-screenshot-scale</code> value causes the resulting image to be scaled.
+	 * <b>Note 2:</b> The width and height parameters are reflected in the viewport when rendering. But the
+	 * EMI-config <code>ui.recipe-screenshot-scale</code> value causes the resulting image to be scaled.
 	 *
 	 * @param path     the path to save the screenshot to, without extension.
 	 * @param width    the width of the screenshot, not counting EMI-config scale.
 	 * @param height   the height of the screenshot, not counting EMI-config scale.
-	 * @param renderer a function to render the things being screenshotted.
+	 * @param renderer draws the screenshot content; it runs once per tile.
 	 */
-	public static void saveScreenshot(String path, int width, int height, Runnable renderer) {
+	public static void saveScreenshot(String path, int width, int height, Consumer<GuiGraphics> renderer) {
 		if (RenderSystem.isOnRenderThread()) {
 			saveScreenshotInner(path, width, height, renderer);
 		} else {
@@ -77,33 +78,88 @@ public class EmiScreenshotRecorder {
 		}
 	}
 
-	private static void saveScreenshotInner(String path, int width, int height, Runnable renderer) {
+	private static void saveScreenshotInner(String path, int width, int height, Consumer<GuiGraphics> renderer) {
 		Minecraft client = Minecraft.getInstance();
-		int scale = EmiConfig.recipeScreenshotScale < 1 ? EmiPort.getGuiScale(client) : EmiConfig.recipeScreenshotScale;
-		scale = Math.max(1, scale);
-		RenderTarget target = new TextureTarget("EMI recipe screenshot", width * scale, height * scale, true);
-		ScissorState previousScissor = new ScissorState();
-		previousScissor.copyFrom(RenderSystem.SCISSOR_STATE);
-		Matrix4fStack modelView = RenderSystem.getModelViewStack();
-		boolean restoredProjection = false;
-		boolean restoredModelView = false;
+		int guiScale = Math.max(1, EmiPort.getGuiScale(client));
+		int scale = EmiConfig.recipeScreenshotScale < 1 ? guiScale : EmiConfig.recipeScreenshotScale;
+		int imageWidth = width * scale;
+		int imageHeight = height * scale;
+		if (width <= 0 || height <= 0 || imageWidth <= 0 || imageHeight <= 0) {
+			return;
+		}
+		int windowWidth = Math.max(1, client.getWindow().getWidth());
+		int windowHeight = Math.max(1, client.getWindow().getHeight());
+
+		// Logical size of one tile in GUI units; the renderer projects the window onto the target.
+		float poseScale = (float) scale / guiScale;
+		float tileGuiWidth = windowWidth / (float) scale;
+		float tileGuiHeight = windowHeight / (float) scale;
+		int tilesX = Math.max(1, (int) Math.ceil(width / tileGuiWidth));
+		int tilesY = Math.max(1, (int) Math.ceil(height / tileGuiHeight));
+		int tileCount = tilesX * tilesY;
+
+		NativeImage image = new NativeImage(imageWidth, imageHeight, false);
+		RenderTarget target = new TextureTarget("EMI screenshot", windowWidth, windowHeight, true);
+		GuiRenderState renderState = new GuiRenderState();
+		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(BUFFER_CAPACITY));
+		GuiRenderer guiRenderer = new GuiRenderer(renderState, bufferSource, List.of());
+		GuiGraphics graphics = new GuiGraphics(client, renderState);
+		GpuBuffer fogBuffer = RenderSystem.getDevice()
+			.createBuffer(() -> "EMI screenshot fog", GpuBuffer.USAGE_UNIFORM, FogRenderer.FOG_UBO_SIZE);
+		GpuBufferSlice fog = fogBuffer.slice(0, FogRenderer.FOG_UBO_SIZE);
+		ScissorState previousScissor = RenderSystem.getScissorStateForRenderTypeDraws();
+		boolean scissorWasEnabled = previousScissor.enabled();
+		int previousScissorX = previousScissor.x();
+		int previousScissorY = previousScissor.y();
+		int previousScissorWidth = previousScissor.width();
+		int previousScissorHeight = previousScissor.height();
+		int[] remaining = {tileCount};
+		boolean success = false;
 		try {
 			RenderSystem.getDevice().createCommandEncoder()
-				.clearColorAndDepthTextures(target.getColorTexture(), 0x00000000, target.getDepthTexture(), 1.0);
-			RenderSystem.disableScissor();
+				.clearColorAndDepthTextures(target.getColorTexture(), 0, target.getDepthTexture(), 1.0);
 			captureTarget = target;
 			RenderSystem.backupProjectionMatrix();
-			RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0f, width, height, 0f, 1000f, 21000f), ProjectionType.ORTHOGRAPHIC);
-			restoredProjection = true;
-			modelView.pushMatrix();
-			modelView.translation(0f, 0f, -11000f);
-			restoredModelView = true;
-			Lighting.setupFor3DItems();
-			renderer.run();
-			// Renderers may leave their batches queued, and no render pass may be open while copying the texture out.
-			client.renderBuffers().bufferSource().endBatch();
-			readPixels(target, image -> saveScreenshotInner(client, path, image,
-				message -> client.execute(() -> client.gui.getChat().addMessage(message))));
+			for (int ty = 0; ty < tilesY; ty++) {
+				for (int tx = 0; tx < tilesX; tx++) {
+					int offsetX = tx * windowWidth;
+					int offsetY = ty * windowHeight;
+					int tileWidth = Math.min(windowWidth, imageWidth - offsetX);
+					int tileHeight = Math.min(windowHeight, imageHeight - offsetY);
+					if (tileWidth <= 0 || tileHeight <= 0) {
+						continue;
+					}
+					Matrix3x2fStack pose = graphics.pose();
+					pose.pushMatrix();
+					pose.scale(poseScale, poseScale);
+					pose.translate(-tx * tileGuiWidth, -ty * tileGuiHeight);
+					renderer.accept(graphics);
+					pose.popMatrix();
+					guiRenderer.render(fog);
+					GpuBuffer buffer = RenderSystem.getDevice()
+						.createBuffer(() -> "EMI screenshot buffer", GpuBuffer.USAGE_MAP_READ | GpuBuffer.USAGE_COPY_DST,
+							windowWidth * windowHeight * 4);
+					CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
+					encoder.copyTextureToBuffer(target.getColorTexture(), buffer, 0, () -> {
+						try (GpuBuffer.MappedView view = encoder.mapBuffer(buffer, true, false)) {
+							for (int row = 0; row < tileHeight; row++) {
+								int sourceRow = tileHeight - row - 1;
+								for (int column = 0; column < tileWidth; column++) {
+									int color = view.data().getInt((sourceRow * tileWidth + column) * 4);
+									image.setPixelABGR(offsetX + column, offsetY + row, color);
+								}
+							}
+						} finally {
+							buffer.close();
+						}
+						if (--remaining[0] == 0) {
+							saveScreenshotInner(client, path, image,
+								message -> client.execute(() -> client.gui.getChat().addMessage(message)));
+						}
+					}, 0, 0, windowHeight - tileHeight, tileWidth, tileHeight);
+				}
+			}
+			success = true;
 		} catch (Throwable e) {
 			EmiLog.error("Failed to capture screenshot", e);
 			try {
@@ -119,15 +175,20 @@ public class EmiScreenshotRecorder {
 			}
 		} finally {
 			captureTarget = null;
-			if (restoredModelView) {
-				modelView.popMatrix();
+			RenderSystem.restoreProjectionMatrix();
+			ScissorState scissor = RenderSystem.getScissorStateForRenderTypeDraws();
+			if (scissorWasEnabled) {
+				scissor.enable(previousScissorX, previousScissorY, previousScissorWidth, previousScissorHeight);
+			} else {
+				scissor.disable();
 			}
-			if (restoredProjection) {
-				RenderSystem.restoreProjectionMatrix();
-			}
-			RenderSystem.SCISSOR_STATE.copyFrom(previousScissor);
-			// The colour texture is only read by the copy issued above, so it can be released right away.
 			target.destroyBuffers();
+			guiRenderer.close();
+			bufferSource.endBatch();
+			fogBuffer.close();
+			if (!success) {
+				image.close();
+			}
 		}
 	}
 
@@ -158,44 +219,6 @@ public class EmiScreenshotRecorder {
 				nativeImage.close();
 			}
 		});
-	}
-
-	/**
-	 * Copies the colour texture of an offscreen target into a {@code NativeImage}, preserving the alpha channel.
-	 */
-	private static void readPixels(RenderTarget target, Consumer<NativeImage> consumer) {
-		GpuTexture texture = target.getColorTexture();
-		if (texture == null) {
-			throw new IllegalStateException("Screenshot target has no colour texture");
-		}
-		int width = target.width;
-		int height = target.height;
-		int pixelSize = texture.getFormat().pixelSize();
-		GpuBuffer buffer = RenderSystem.getDevice()
-			.createBuffer(() -> "EMI screenshot buffer", BufferType.PIXEL_PACK, BufferUsage.STATIC_READ, width * height * pixelSize);
-		CommandEncoder encoder = RenderSystem.getDevice().createCommandEncoder();
-		encoder.copyTextureToBuffer(texture, buffer, 0, () -> {
-			try (GpuBuffer.ReadView view = encoder.readBuffer(buffer)) {
-				NativeImage image = new NativeImage(width, height, false);
-				boolean handedOff = false;
-				try {
-					for (int y = 0; y < height; y++) {
-						int row = y * width * pixelSize;
-						for (int x = 0; x < width; x++) {
-							image.setPixelABGR(x, height - y - 1, view.data().getInt(row + x * pixelSize));
-						}
-					}
-					consumer.accept(image);
-					handedOff = true;
-				} finally {
-					if (!handedOff) {
-						image.close();
-					}
-				}
-			} finally {
-				buffer.close();
-			}
-		}, 0);
 	}
 
 	private static String getScreenshotFilename(File directory, String path) {

@@ -36,7 +36,7 @@ public abstract class HandledScreenMixin extends Screen {
 	@Inject(at = @At(value = "INVOKE",
 			target = "net/minecraft/client/gui/screens/inventory/AbstractContainerScreen.renderLabels(Lnet/minecraft/client/gui/GuiGraphics;II)V",
 			shift = Shift.AFTER),
-		method = "render")
+		method = "renderContents")
 	private void renderForeground(GuiGraphics raw, int mouseX, int mouseY, float delta, CallbackInfo info) {
 		if (EmiAgnos.isForge()) {
 			return;

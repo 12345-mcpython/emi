@@ -398,7 +398,7 @@ public class BoMScreen extends Screen {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
 		// Since 1.20.5 the menu blur runs in Screen#renderBackground, which super.render calls at the end of
 		// this method. Apply the background here so the blur cannot smear the tree and the stats panel.
-		this.renderBlurredBackground();
+		this.renderBlurredBackground(raw);
 		context.fill(0, 0, width, height, 0xDD000000);
 		this.renderMenuBackground(raw);
 		lastMouseX = mouseX;
@@ -409,7 +409,7 @@ public class BoMScreen extends Screen {
 		raw.enableScissor(canvas.x(), canvas.y(), canvas.right(), canvas.bottom());
 		context.push();
 		context.translate((float) (canvas.x() + canvas.width() / 2.0 + panX), (float) (canvas.y() + panY));
-		context.matrices().scale(zoom, zoom, 1);
+		context.matrices().scale(zoom, zoom);
 		renderGraph(context, delta);
 		context.pop();
 		raw.disableScissor();
@@ -691,8 +691,7 @@ public class BoMScreen extends Screen {
 		// Guard before allocating GPU/CPU storage. Oversized trees remain fully editable.
 		long pixels = (long) imageWidth * imageHeight * scale * scale;
 		if (imageWidth * (long) scale > 8192 || imageHeight * (long) scale > 8192 || pixels > 16_777_216L) { notice = tr("image_too_large"); return; }
-		EmiScreenshotRecorder.saveScreenshot("emi/trees/plan", imageWidth, imageHeight, () -> {
-			GuiGraphics raw = new GuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
+		EmiScreenshotRecorder.saveScreenshot("emi/trees/plan", imageWidth, imageHeight, raw -> {
 			EmiDrawContext context = EmiDrawContext.wrap(raw);
 			context.fill(0, 0, imageWidth, imageHeight, 0xff171b24);
 			context.drawText(title, 12, 8);
@@ -706,7 +705,6 @@ public class BoMScreen extends Screen {
 				if (row.ingredient != null) row.ingredient.render(raw, x, y, 0, ~(EmiIngredient.RENDER_AMOUNT | EmiIngredient.RENDER_REMAINDER));
 				context.drawText(EmiPort.literal(font.plainSubstrByWidth(row.text.getString(), 202)), x + (row.ingredient == null ? 0 : 22), y + 4);
 			}
-			raw.flush();
 		});
 	}
 

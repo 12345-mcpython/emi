@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
@@ -160,7 +160,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 
 		{	// Render background
 			ResourceLocation identifier = this.client.level == null ? MENU_LIST_BACKGROUND_TEXTURE : INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
-			draw.blit(RenderType::guiTextured, identifier, left, top, right, bottom + (int)scrollAmount, right - left, bottom - top, 32, 32);
+			draw.blit(RenderPipelines.GUI_TEXTURED, identifier, left, top, right, bottom + (int)scrollAmount, right - left, bottom - top, 32, 32);
 		}
 
 		draw.enableScissor(left, top, right, bottom);
@@ -173,8 +173,8 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		{	// Render header & footer separators
 			ResourceLocation identifier = this.client.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
 			ResourceLocation identifier2 = this.client.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
-			draw.blit(RenderType::guiTextured, identifier, left, top - 2, 0.0F, 0.0F, width, 2, 32, 2);
-			draw.blit(RenderType::guiTextured, identifier2, left, bottom, 0.0F, 0.0F, width, 2, 32, 2);
+			draw.blit(RenderPipelines.GUI_TEXTURED, identifier, left, top - 2, 0.0F, 0.0F, width, 2, 32, 2);
+			draw.blit(RenderPipelines.GUI_TEXTURED, identifier2, left, bottom, 0.0F, 0.0F, width, 2, 32, 2);
 		}
 
 		if ((o = this.getMaxScroll()) > 0) {
@@ -394,13 +394,6 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 			n -= 4;
 			Entry entry = this.getEntry(j);
 			int o = this.getRowWidth();
-			if (this.renderSelection && this.isSelectedEntry(j)) {
-				p = this.left + this.width / 2 - o / 2;
-				int q = this.left + this.width / 2 + o / 2;
-				float f = this.isFocused() ? 1.0f : 0.5f;
-				RenderSystem.setShaderColor(f, f, f, 1.0f);
-				RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
-			}
 			p = this.getRowLeft();
 			((Entry)entry).render(draw, j, k, p, o - 3, n, mouseX, mouseY, Objects.equals(this.hoveredEntry, entry), delta);
 		}

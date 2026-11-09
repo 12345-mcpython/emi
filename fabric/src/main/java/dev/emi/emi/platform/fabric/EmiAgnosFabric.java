@@ -210,7 +210,7 @@ public class EmiAgnosFabric extends EmiAgnos {
 	}
 
 	@Override
-	protected void renderFluidAgnos(FluidEmiStack stack, PoseStack matrices, int x, int y, float delta, int xOff, int yOff, int width, int height) {
+	protected void renderFluidAgnos(FluidEmiStack stack, net.minecraft.client.gui.GuiGraphics draw, int x, int y, float delta, int xOff, int yOff, int width, int height) {
 		FluidVariant fluid = FluidVariant.of(stack.getKeyOfType(Fluid.class), stack.getComponentChanges());
 		TextureAtlasSprite[] sprites = FluidVariantRendering.getSprites(fluid);
 		if (sprites == null || sprites.length < 1 || sprites[0] == null) {
@@ -219,7 +219,7 @@ public class EmiAgnosFabric extends EmiAgnos {
 		TextureAtlasSprite sprite = sprites[0];
 		int color = FluidVariantRendering.getColor(fluid);
 		
-		EmiRenderHelper.drawTintedSprite(matrices, sprite, color, x, y, xOff, yOff, width, height);
+		EmiRenderHelper.drawTintedSprite(draw, sprite, color, x, y, xOff, yOff, width, height);
 	}
 
 	@Override
