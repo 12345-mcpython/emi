@@ -24,6 +24,7 @@ import dev.emi.emi.platform.EmiClient;
 import dev.emi.emi.registry.EmiRecipeFiller;
 import dev.emi.emi.runtime.EmiBookmarkGroups.Group;
 import dev.emi.emi.runtime.EmiBookmarkGroups.Row;
+import dev.emi.emi.platform.EmiClientState;
 
 /** Client-thread, bounded, one-batch runner. Production is confirmed only by server inventory packets. */
 public final class BookmarkCrafting {
@@ -435,7 +436,7 @@ public final class BookmarkCrafting {
 			if (stacks == null) return false;
 			StandardRecipeHandler<AbstractContainerMenu> standard = (StandardRecipeHandler<AbstractContainerMenu>) recipeHandler(budget);
 			boolean accepted;
-			if (EmiClient.onServer) { EmiClient.sendFillRecipe(standard, screen, syncId, production ? 2 : 0, stacks, budget.recipe); accepted = true; }
+			if (EmiClientState.onServer) { EmiClient.sendFillRecipe(standard, screen, syncId, production ? 2 : 0, stacks, budget.recipe); accepted = true; }
 			else accepted = EmiRecipeFiller.clientFill(standard, budget.recipe, screen, stacks,
 				production ? EmiCraftContext.Destination.INVENTORY : EmiCraftContext.Destination.NONE);
 			if (accepted) { EmiSidebars.craft(budget.recipe); Minecraft.getInstance().setScreen(screen); }

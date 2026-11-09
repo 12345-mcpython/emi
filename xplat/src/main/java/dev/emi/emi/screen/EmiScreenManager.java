@@ -87,6 +87,7 @@ import dev.emi.emi.screen.widget.SidebarButtonWidget;
 import dev.emi.emi.screen.widget.SizedButtonWidget;
 import dev.emi.emi.search.EmiSearch;
 import dev.emi.emi.search.EmiSearch.CompiledQuery;
+import dev.emi.emi.platform.EmiClientState;
 
 public class EmiScreenManager {
 	private static final int PADDING_SIZE = 1;
@@ -818,7 +819,7 @@ public class EmiScreenManager {
 				cursor = handled.getMenu().getCarried();
 			}
 			ScreenSpace space = getHoveredSpace(mouseX, mouseY);
-			if (EmiApi.isCheatMode() && EmiClient.onServer && !cursor.isEmpty() && space != null && space.getType() == SidebarType.INDEX && EmiConfig.deleteCursorStack.isBound()) {
+			if (EmiApi.isCheatMode() && EmiClientState.onServer && !cursor.isEmpty() && space != null && space.getType() == SidebarType.INDEX && EmiConfig.deleteCursorStack.isBound()) {
 				List<ClientTooltipComponent> list = List.of(
 					ClientTooltipComponent.create(EmiPort.ordered(EmiPort.translatable("emi.delete_stack"))),
 					ClientTooltipComponent.create(EmiPort.ordered(EmiConfig.deleteCursorStack.getBindText()))
@@ -1488,7 +1489,7 @@ public class EmiScreenManager {
 			client.player.containerMenu.setCarried(is);
 			return true;
 		}
-		if (EmiClient.onServer) {
+		if (EmiClientState.onServer) {
 			EmiNetwork.sendToServer(new CreateItemC2SPacket(mode, is));
 			return true;
 		} else {
@@ -1506,7 +1507,7 @@ public class EmiScreenManager {
 	}
 	
 	private static boolean deleteCursor(int mx, int my) {
-		if (!EmiClient.onServer) {
+		if (!EmiClientState.onServer) {
 			// Deleting a server side stack needs EMI on the server; without it the local clear would
 			// only desync the cursor, so leave the click to vanilla instead.
 			return false;

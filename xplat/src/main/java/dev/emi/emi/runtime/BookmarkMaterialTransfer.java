@@ -21,6 +21,7 @@ import dev.emi.emi.runtime.EmiBookmarkGroups.Row;
 import dev.emi.emi.network.EmiNetwork;
 import dev.emi.emi.network.FillRecipeC2SPacket;
 import dev.emi.emi.platform.EmiClient;
+import dev.emi.emi.platform.EmiClientState;
 
 /** Exact, bounded item-only withdrawals. No QUICK_MOVE, fabricated stacks or client-prediction acknowledgements. */
 public final class BookmarkMaterialTransfer {
@@ -298,9 +299,9 @@ public final class BookmarkMaterialTransfer {
 			if (syncId == -1 && slot == -1) { cursor = stack.copy(); cursorVersion = ++sequence; }
 			else if (syncId == handler.containerId && slot >= 0 && slot < server.size()) { server.set(slot, stack.copy()); versions[slot] = ++sequence; }
 		}
-		@Override public boolean exactSupported() { return EmiClient.onServer; }
+		@Override public boolean exactSupported() { return EmiClientState.onServer; }
 		@Override public void transferExact(int source, int destination, int count) {
-			if (!valid() || !EmiClient.onServer || !handler.getCarried().isEmpty()
+			if (!valid() || !EmiClientState.onServer || !handler.getCarried().isEmpty()
 				|| !sources.contains(source) || !destinations.contains(destination)) throw new IllegalStateException("Invalid exact transfer");
 			Slot from = handler.slots.get(source), to = handler.slots.get(destination);
 			ItemStack actual = from.getItem();
