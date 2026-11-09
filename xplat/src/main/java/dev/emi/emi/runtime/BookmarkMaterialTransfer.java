@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import dev.emi.emi.platform.EmiClientState;
 
 /**
  * Exact, bounded item-only withdrawals. No QUICK_MOVE, fabricated stacks or client-prediction acknowledgements.
@@ -558,12 +559,12 @@ public final class BookmarkMaterialTransfer {
 
         @Override
         public boolean exactSupported() {
-            return EmiClient.onServer;
+            return EmiClientState.onServer;
         }
 
         @Override
         public void transferExact(int source, int destination, int count) {
-            if (!valid() || !EmiClient.onServer || !handler.getCarried().isEmpty()
+            if (!valid() || !EmiClientState.onServer || !handler.getCarried().isEmpty()
                     || !sources.contains(source) || !destinations.contains(destination))
                 throw new IllegalStateException("Invalid exact transfer");
             Slot from = handler.slots.get(source), to = handler.slots.get(destination);

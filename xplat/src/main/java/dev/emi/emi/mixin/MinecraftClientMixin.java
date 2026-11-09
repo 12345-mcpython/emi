@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.CompletableFuture;
+import dev.emi.emi.platform.EmiClientState;
 
 @Mixin(Minecraft.class)
 public class MinecraftClientMixin {
@@ -55,6 +56,6 @@ public class MinecraftClientMixin {
         EmiLog.info("Disconnecting from server, EMI data cleared");
         EmiReloadManager.clear();
         dev.emi.emi.screen.EmiScreenManager.resetWarmup();
-        EmiClient.onServer = false;
+        EmiClientState.onServer = false;
     }
 }

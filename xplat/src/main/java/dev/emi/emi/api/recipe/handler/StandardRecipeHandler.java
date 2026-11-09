@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import dev.emi.emi.platform.EmiClientState;
 
 public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends EmiRecipeHandler<T> {
 
@@ -67,7 +68,7 @@ public interface StandardRecipeHandler<T extends AbstractContainerMenu> extends 
         if (stacks != null) {
             if (stacks != null) {
                 Minecraft.getInstance().setScreen(context.screen());
-                if (!EmiClient.onServer) {
+                if (!EmiClientState.onServer) {
                     return EmiRecipeFiller.clientFill(this, recipe, context.screen(), stacks, context.destination());
                 } else {
                     EmiClient.sendFillRecipe(this, context.screen(), context.getScreenHandler().containerId, switch (context.destination()) {

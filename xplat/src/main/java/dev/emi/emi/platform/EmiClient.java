@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 
 public class EmiClient {
     public static final Map<Consumer<UseOnContext>, List<ItemLike>> HOE_ACTIONS = Maps.newHashMap();
-    public static boolean onServer = false;
 
     public static void init() {
         EmiConfig.loadConfig();

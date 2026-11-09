@@ -19,6 +19,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
+import dev.emi.emi.platform.EmiClientState;
 
 /**
  * Client-thread, bounded, one-batch runner. Production is confirmed only by server inventory packets.
@@ -627,7 +628,7 @@ public final class BookmarkCrafting {
             if (stacks == null) return false;
             StandardRecipeHandler<AbstractContainerMenu> standard = (StandardRecipeHandler<AbstractContainerMenu>) recipeHandler(budget);
             boolean accepted;
-            if (EmiClient.onServer) {
+            if (EmiClientState.onServer) {
                 EmiClient.sendFillRecipe(standard, screen, syncId, production ? 2 : 0, stacks, budget.recipe);
                 accepted = true;
             } else accepted = EmiRecipeFiller.clientFill(standard, budget.recipe, screen, stacks,
