@@ -14,20 +14,22 @@ import com.mojang.blaze3d.platform.NativeImage;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.runtime.EmiDrawContext;
 import dev.emi.emi.runtime.EmiScreenshotRecorder;
+import dev.emi.emi.screen.BoMScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * Verification fixture for the 1.21.5 offscreen recipe screenshot exporter.
+ * Verification fixture for the 1.21.5 offscreen recipe screenshot exporter and the BoM background order.
  * <p>
- * Waits for the title screen, asks EmiScreenshotRecorder for a 64x32 capture (red rectangle, a stone
- * item), then validates the written PNG: the transparent background must survive, the rectangle must be
- * opaque red, and the item and text areas must contain rendered pixels.
+ * Waits for the title screen, asks EmiScreenshotRecorder for a 64x32 capture (red rectangle, a stone item
+ * and a text run), validates the written PNG, then opens a real BoMScreen and checks that its header text was
+ * not blurred or dimmed by the menu background that {@code super.render} would draw last.
  */
 public class ScreenshotSmoke implements ClientModInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger("emi-screenshot-smoke");
@@ -68,6 +70,21 @@ public class ScreenshotSmoke implements ClientModInitializer {
 						fail(client, "Timed out waiting for the export file");
 					} else {
 						check(client);
+					}
+				}
+				case 4 -> {
+					client.setScreen(new BoMScreen(null));
+					ticks = 0;
+					state = 5;
+				}
+				case 5 -> {
+					if (++ticks >= 8) {
+						requestBomShot(client);
+					}
+				}
+				case 6 -> {
+					if (++ticks > 200) {
+						fail(client, "Timed out waiting for the BoM frame");
 					}
 				}
 				default -> {
@@ -156,10 +173,58 @@ public class ScreenshotSmoke implements ClientModInitializer {
 			// The io thread may still be writing; retry on a later tick.
 			return;
 		}
-		if (problem == null) {
-			finish(client, true, "PASS");
-		} else {
+		if (problem != null) {
 			finish(client, false, problem);
+		} else {
+			LOGGER.info("SCREENSHOT SMOKE export checks passed, opening the BoM screen");
+			state = 4;
+		}
+	}
+
+	/**
+	 * Captures the real BoM screen frame. The "plans" header is drawn by BoMScreen before
+	 * {@code super.render}; if the menu blur still ran at the end of that method the header would be smeared
+	 * and darkened by the in-world menu background.
+	 */
+	private void requestBomShot(Minecraft client) {
+		state = 6;
+		ticks = 0;
+		Screenshot.takeScreenshot(client.getMainRenderTarget(), image -> {
+			try (image) {
+				checkBomFrame(client, image);
+			} catch (Throwable e) {
+				finish(client, false, "BoM frame check crashed: " + e);
+			}
+		});
+	}
+
+	private void checkBomFrame(Minecraft client, NativeImage image) {
+		// BoMScreen draws the header in 0xFFB6C7E8; NativeImage#getPixel returns ARGB.
+		int matches = 0;
+		int brightest = 0;
+		int brightestColor = 0;
+		for (int y = 9 * scale; y < 22 * scale; y++) {
+			for (int x = 3 * scale; x < 90 * scale; x++) {
+				int color = image.getPixel(x, y);
+				int alpha = color >>> 24;
+				int red = (color >> 16) & 0xFF;
+				int green = (color >> 8) & 0xFF;
+				int blue = color & 0xFF;
+				if (Math.abs(red - 0xB6) < 45 && Math.abs(green - 0xC7) < 45 && Math.abs(blue - 0xE8) < 45) {
+					matches++;
+				}
+				int luminance = red + green + blue;
+				if (luminance > brightest) {
+					brightest = luminance;
+					brightestColor = color;
+				}
+			}
+		}
+		LOGGER.info("SCREENSHOT SMOKE BoM header pixels={} brightest=0x{}", matches, Integer.toHexString(brightestColor));
+		if (matches < 20) {
+			finish(client, false, "BoM header was blurred or dimmed by the menu background");
+		} else {
+			finish(client, true, "PASS");
 		}
 	}
 
@@ -168,10 +233,10 @@ public class ScreenshotSmoke implements ClientModInitializer {
 	}
 
 	private void finish(Minecraft client, boolean pass, String message) {
-		if (state == 4) {
+		if (state == 9) {
 			return;
 		}
-		state = 4;
+		state = 9;
 		String line = (pass ? "PASS " : "FAIL ") + message;
 		LOGGER.info("SCREENSHOT SMOKE {}", line);
 		try {

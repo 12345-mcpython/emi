@@ -396,6 +396,9 @@ public class BoMScreen extends Screen {
 	@Override
 	public void render(GuiGraphics raw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
+		// Since 1.20.5 the menu blur runs in Screen#renderBackground, which super.render calls at the end of
+		// this method. Apply the background here so the blur cannot smear the tree and the stats panel.
+		this.renderBlurredBackground();
 		context.fill(0, 0, width, height, 0xDD000000);
 		this.renderMenuBackground(raw);
 		lastMouseX = mouseX;
@@ -427,6 +430,11 @@ public class BoMScreen extends Screen {
 				if (row.ingredient != null) EmiRenderHelper.drawTooltip(this, context, row.ingredient.getTooltip(), mouseX, mouseY);
 			}
 		}
+	}
+
+	@Override
+	public void renderBackground(GuiGraphics raw, int mouseX, int mouseY, float delta) {
+		// render() draws the blurred background before the tree; the default would blur the tree.
 	}
 
 	private void renderPlans(EmiDrawContext context) {

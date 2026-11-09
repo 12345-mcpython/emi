@@ -245,3 +245,9 @@ text run. One limitation remains: `GuiGraphics#enableScissor` still computes the
 height and GUI scale, so a third-party recipe renderer that clips would be off inside the offscreen target.
 EMI's own recipe and tree exports do not use scissor.
 
+`BoMScreen` draws its background at the start of `render()` now. Since 1.20.5 the menu blur lives in
+`Screen#renderBackground`, which `super.render` executes at the end of the old method, so the tree and the
+stats panel were blurred and dimmed by the in-world menu background after they had already been drawn. The
+screenshot smoke opens a real `BoMScreen` and asserts that the "plans" header keeps its `0xFFB6C7E8` colour;
+before the fix the same probe found no matching pixels and a brightest pixel of `0x3A404B`.
+
