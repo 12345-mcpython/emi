@@ -25,16 +25,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * Verification fixture for the 1.21.5 offscreen recipe screenshot exporter and the BoM background order.
+ * Verification fixture for the offscreen recipe screenshot exporter, the tiled capture path and the BoM
+ * background order.
  * <p>
  * Waits for the title screen, asks EmiScreenshotRecorder for a 64x32 capture (red rectangle, a stone item
- * and a text run), validates the written PNG, then opens a real BoMScreen and checks that its header text was
- * not blurred or dimmed by the menu background that {@code super.render} would draw last.
+ * and a text run), validates the written PNG, then captures a 700x520 image that is larger than the window and
+ * checks the corner markers and a line crossing the tile seams. Finally it opens a real BoMScreen and checks
+ * that its header text was not blurred or dimmed by the menu background that {@code super.render} would draw
+ * last.
  */
 public class ScreenshotSmoke implements ClientModInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger("emi-screenshot-smoke");
 	private static final int CAPTURE_WIDTH = 64;
 	private static final int CAPTURE_HEIGHT = 32;
+	private static final int LARGE_WIDTH = 700;
+	private static final int LARGE_HEIGHT = 520;
 
 	private int state = 0;
 	private int ticks;
@@ -73,16 +78,23 @@ public class ScreenshotSmoke implements ClientModInitializer {
 					}
 				}
 				case 4 -> {
-					client.setScreen(new BoMScreen(null));
-					ticks = 0;
-					state = 5;
+					if (++ticks > 300) {
+						fail(client, "Timed out waiting for the tiled export file");
+					} else {
+						checkLarge(client);
+					}
 				}
 				case 5 -> {
+					client.setScreen(new BoMScreen(null));
+					ticks = 0;
+					state = 6;
+				}
+				case 6 -> {
 					if (++ticks >= 8) {
 						requestBomShot(client);
 					}
 				}
-				case 6 -> {
+				case 7 -> {
 					if (++ticks > 200) {
 						fail(client, "Timed out waiting for the BoM frame");
 					}
@@ -174,9 +186,70 @@ public class ScreenshotSmoke implements ClientModInitializer {
 		if (problem != null) {
 			finish(client, false, problem);
 		} else {
-			LOGGER.info("SCREENSHOT SMOKE export checks passed, opening the BoM screen");
-			state = 4;
+			LOGGER.info("SCREENSHOT SMOKE single-tile checks passed, capturing a tiled image");
+			captureLarge(client);
 		}
+	}
+
+	/**
+	 * Captures an image larger than the window so the exporter has to stitch several tiles.
+	 */
+	private void captureLarge(Minecraft client) {
+		state = 4;
+		ticks = 0;
+		LOGGER.info("SCREENSHOT SMOKE capturing {}x{} tiled at scale {}", LARGE_WIDTH, LARGE_HEIGHT, scale);
+		EmiScreenshotRecorder.saveScreenshot("emi/smoke/large", LARGE_WIDTH, LARGE_HEIGHT, graphics -> {
+			EmiDrawContext context = EmiDrawContext.wrap(graphics);
+			context.fill(0, 0, LARGE_WIDTH, LARGE_HEIGHT, 0xFF202020);
+			context.fill(0, 0, 8, 8, 0xFFFF0000);
+			context.fill(LARGE_WIDTH - 8, 0, 8, 8, 0xFF00FF00);
+			context.fill(0, LARGE_HEIGHT - 8, 8, 8, 0xFF0000FF);
+			context.fill(LARGE_WIDTH - 8, LARGE_HEIGHT - 8, 8, 8, 0xFFFFFF00);
+			context.fill(0, LARGE_HEIGHT / 2, LARGE_WIDTH, 2, 0xFF00FFFF);
+			context.fill(LARGE_WIDTH / 2, 0, 2, LARGE_HEIGHT, 0xFFFF00FF);
+		});
+	}
+
+	private void checkLarge(Minecraft client) {
+		Path file = client.gameDirectory.toPath().resolve("screenshots/emi/smoke/large.png");
+		if (!Files.isRegularFile(file) || file.toFile().length() == 0) {
+			return;
+		}
+		String problem = null;
+		try (InputStream in = Files.newInputStream(file); NativeImage image = NativeImage.read(in)) {
+			int expectedWidth = LARGE_WIDTH * scale;
+			int expectedHeight = LARGE_HEIGHT * scale;
+			StringBuilder details = new StringBuilder("size=" + image.getWidth() + "x" + image.getHeight()
+				+ " expected=" + expectedWidth + "x" + expectedHeight);
+			if (image.getWidth() != expectedWidth || image.getHeight() != expectedHeight) {
+				problem = "Unexpected tiled image size";
+			}
+			problem = checkColor(image, problem, "top-left", 4 * scale, 4 * scale, 0xFFFF0000, details);
+			problem = checkColor(image, problem, "top-right", (LARGE_WIDTH - 4) * scale, 4 * scale, 0xFF00FF00, details);
+			problem = checkColor(image, problem, "bottom-left", 4 * scale, (LARGE_HEIGHT - 4) * scale, 0xFF0000FF, details);
+			problem = checkColor(image, problem, "bottom-right", (LARGE_WIDTH - 4) * scale, (LARGE_HEIGHT - 4) * scale, 0xFFFFFF00, details);
+			problem = checkColor(image, problem, "line-left", 100 * scale, LARGE_HEIGHT / 2 * scale, 0xFF00FFFF, details);
+			problem = checkColor(image, problem, "line-second-tile", 200 * scale, LARGE_HEIGHT / 2 * scale, 0xFF00FFFF, details);
+			problem = checkColor(image, problem, "line-right", (LARGE_WIDTH - 10) * scale, LARGE_HEIGHT / 2 * scale, 0xFF00FFFF, details);
+			LOGGER.info("SCREENSHOT SMOKE tiled {}", details);
+		} catch (Exception e) {
+			return;
+		}
+		if (problem != null) {
+			finish(client, false, problem);
+		} else {
+			LOGGER.info("SCREENSHOT SMOKE tiled checks passed, opening the BoM screen");
+			state = 5;
+		}
+	}
+
+	private String checkColor(NativeImage image, String problem, String label, int x, int y, int expected, StringBuilder details) {
+		int color = image.getPixel(x, y);
+		details.append(" ").append(label).append("=0x").append(Integer.toHexString(color));
+		if (problem == null && color != expected) {
+			return label + " marker did not survive tiling";
+		}
+		return problem;
 	}
 
 	/**
@@ -185,7 +258,7 @@ public class ScreenshotSmoke implements ClientModInitializer {
 	 * and darkened by the in-world menu background.
 	 */
 	private void requestBomShot(Minecraft client) {
-		state = 6;
+		state = 7;
 		ticks = 0;
 		Screenshot.takeScreenshot(client.getMainRenderTarget(), image -> {
 			try (image) {

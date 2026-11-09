@@ -328,11 +328,12 @@ projects against the window. `MinecraftClientMixin` now targets `reloadResourceP
 NeoForge 21.8 removed `EventBusSubscriber.Bus` and moved client packet sending to `ClientPacketDistributor`.
 
 The Fabric screenshot smoke passes on 1.21.8: a 192x96 capture (transparent corner, red rectangle, stone item
-and text) plus the real BoM header probe (`pixels=540`, `0xFFB6C7E8`). Still to verify: the tiled capture path
-for images larger than the window (the BoM tree export), the NeoForge client runtime, the new 1.21.6 tags
-(`harnesses`, `happy_ghast_food`, `happy_ghast_tempt_items`) through
-`scripts/scan_untranslated_tags.py`, and a full visual pass over the recipe screen, config screens and
-tooltips.
+and text), a 700x520 capture that is larger than the window (2100x1560, captured as 2x2 tiles with the corner
+markers and the line crossing the seams intact) and the real BoM header probe (`pixels=540`, `0xFFB6C7E8`).
+The 1.21.6 item tags were scanned and named in `en_us.json` + `zh_cn.json`
+(`harnesses`, `happy_ghast_food`, `happy_ghast_tempt_items`), so the dev-mode warning list is empty again.
+`:neoforge:runServer` reaches `Done (3.185s)!` on 1.21.8. Still to verify: the NeoForge client runtime, the
+JEI 24 jemi bridge, and a full visual pass over the recipe screen, config screens and tooltips.
 
 ### Port order
 
