@@ -17,10 +17,16 @@ public class EmiRecipeSyncClient {
 
 	public static void handle(EmiRecipeSyncS2CPacket packet) {
 		pending.putAll(packet.recipes());
-		if (packet.last()) {
-			LocalRecipes.acceptSynced(pending);
-			pending.clear();
-			EmiReloadManager.reload();
+		if (!packet.last()) {
+			return;
 		}
+		Map<ResourceLocation, Recipe<?>> complete = new LinkedHashMap<>(pending);
+		pending.clear();
+		if (LocalRecipes.hasSynced()) {
+			// The loader sync already delivered the table, do not reload twice.
+			return;
+		}
+		LocalRecipes.acceptSynced(complete);
+		EmiReloadManager.reload();
 	}
 }
