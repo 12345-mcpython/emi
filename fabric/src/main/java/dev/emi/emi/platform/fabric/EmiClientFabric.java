@@ -35,6 +35,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import dev.emi.emi.runtime.LocalRecipes;
 import dev.emi.emi.runtime.EmiReloadManager;
+import dev.emi.emi.runtime.EmiLog;
 
 public class EmiClientFabric implements ClientModInitializer {
 
@@ -87,12 +88,10 @@ public class EmiClientFabric implements ClientModInitializer {
 				LocalRecipes.acceptSynced(payload.recipes());
 				EmiReloadManager.reload();
 			}));
-		PayloadTypeRegistry.playS2C().register(SyncPayloads.NeoForge.TYPE, SyncPayloads.NeoForge.CODEC);
-		ClientPlayNetworking.registerGlobalReceiver(SyncPayloads.NeoForge.TYPE, (payload, context) ->
-			context.client().execute(() -> {
-				LocalRecipes.acceptSynced(payload.recipes());
-				EmiReloadManager.reload();
-			}));
+		// NeoForge owns neoforge:recipe_content and re-posts it as RecipesReceivedEvent.
+		PayloadTypeRegistry.playS2C().register(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC);
+		ClientPlayNetworking.registerGlobalReceiver(SyncPayloads.FabricFinished.TYPE, (payload, context) ->
+			context.client().execute(() -> EmiLog.info("Server recipe sync finished")));
 
 		registerPacketReader(EmiNetwork.PING, PingS2CPacket::new);
 		registerPacketReader(EmiNetwork.COMMAND, CommandS2CPacket::new);
