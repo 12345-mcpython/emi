@@ -87,6 +87,7 @@ import dev.emi.emi.screen.widget.SidebarButtonWidget;
 import dev.emi.emi.screen.widget.SizedButtonWidget;
 import dev.emi.emi.search.EmiSearch;
 import dev.emi.emi.search.EmiSearch.CompiledQuery;
+import dev.emi.emi.platform.EmiClientState;
 
 public class EmiScreenManager {
 	private static final int PADDING_SIZE = 1;
@@ -1488,7 +1489,7 @@ public class EmiScreenManager {
 			client.player.containerMenu.setCarried(is);
 			return true;
 		}
-		if (EmiClient.onServer) {
+		if (EmiClientState.onServer) {
 			EmiNetwork.sendToServer(new CreateItemC2SPacket(mode, is));
 			return true;
 		} else {

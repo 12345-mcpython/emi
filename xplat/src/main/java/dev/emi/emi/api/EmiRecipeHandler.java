@@ -16,6 +16,7 @@ import dev.emi.emi.api.recipe.handler.EmiCraftContext;
 import dev.emi.emi.api.recipe.handler.StandardRecipeHandler;
 import dev.emi.emi.platform.EmiClient;
 import dev.emi.emi.registry.EmiRecipeFiller;
+import dev.emi.emi.platform.EmiClientState;
 
 /**
  * @deprecated Migrate to {@link StandardRecipeHandler}
@@ -104,7 +105,7 @@ public interface EmiRecipeHandler<T extends AbstractContainerMenu> extends Stand
 			stacks = mutateFill(recipe, screen, stacks);
 			if (stacks != null) {
 				Minecraft.getInstance().setScreen(screen);
-				if (!EmiClient.onServer) {
+				if (!EmiClientState.onServer) {
 					return EmiRecipeFiller.clientFill(this, recipe, screen, stacks, switch (action) {
 						case FILL -> EmiCraftContext.Destination.NONE;
 						case QUICK_MOVE -> EmiCraftContext.Destination.INVENTORY;
