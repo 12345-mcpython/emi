@@ -227,3 +227,19 @@ jars are produced. Two paths are deliberately degraded until they get their own 
 Everything else from 1.21.4 is intact, including the display pipeline, the local data pack fallback, the
 server sync receivers and the JEI 21 bridge (NeoForge only, `jei-1.21.5-neoforge:21.4.0.27`).
 
+### 1.21.5 status after the sync and icon work
+
+Recipe sources on 1.21.5 now match 1.21.4: the integrated server, NeoForge's own `recipe_content` event,
+the `emi:recipe_sync` channel EMI servers push on join (chunked, 256 recipes per packet, applied once the
+last chunk arrives), `fabric:recipe_sync` for the Paper bridge, and the client data pack fallback. Duplicate
+deliveries of the same table are ignored so the index reloads once.
+
+Tag icons use a procedural 2x2 grid when `EmiTags.MODELED_TAGS` has no entry for the tag, which is always
+the case on 1.21.5 because `ModelResourceLocation` and the standalone model registration were removed.
+
+Only the recipe screenshot export is still degraded. 1.21.5 removed `RenderTarget#bindWrite`/`clear`, the
+projection setters and `RenderSystem#recordRenderCall`, and `GuiGraphics` has no way to target a custom
+framebuffer, so the exporter needs its own `CommandEncoder#createRenderPass` over a `TextureTarget` colour
+texture plus a draw path that does not go through `GuiGraphics`. `Screenshot.takeScreenshot(RenderTarget,
+Consumer<NativeImage>)` is still available for the readback half.
+
