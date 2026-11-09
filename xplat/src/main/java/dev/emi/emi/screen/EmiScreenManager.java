@@ -712,6 +712,7 @@ public class EmiScreenManager {
 			EmiProfiler.pop();
 			return;
 		}
+		ensureWidgetsPositioned(base.screen());
 		boolean visible = !isDisabled();
 		emi.visible = EmiConfig.emiConfigButtonVisibility.resolve(visible);
 		tree.visible = EmiConfig.recipeTreeButtonVisibility.resolve(visible);
@@ -976,6 +977,24 @@ public class EmiScreenManager {
 				context.pop();
 			}
 			context.pop();
+		}
+	}
+
+	private static Screen positionedWidgetsScreen;
+	private static int positionedWidgetsWidth = -1, positionedWidgetsHeight = -1;
+
+	/**
+	 * {@link #addWidgets} can run before the screen's menu has slots (or be skipped while the screen is
+	 * still being set up), which leaves the search bar and the sidebar buttons at the origin. Retry once
+	 * per screen and size while rendering, when the screen base is known to be usable.
+	 */
+	private static void ensureWidgetsPositioned(Screen screen) {
+		if (screen != positionedWidgetsScreen || screen.width != positionedWidgetsWidth
+				|| screen.height != positionedWidgetsHeight) {
+			positionedWidgetsScreen = screen;
+			positionedWidgetsWidth = screen.width;
+			positionedWidgetsHeight = screen.height;
+			addWidgets(screen);
 		}
 	}
 
