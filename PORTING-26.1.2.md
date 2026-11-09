@@ -288,6 +288,32 @@ rework, `1.21.7` is small, and `1.21.8` only adds `GraphicsWorkarounds`. Primers
 | 12 | Tag provider rewrite (`TagAppender`, `ItemTagsProvider` removed) | EMI does not generate tags | none |
 | 13 | `GameRenderer` no longer takes `ResourceManager`; `Minecraft#getMobEffectTextures` removed | EMI does not use them | none |
 
+### First compile inventory (2026-11-09)
+
+The local `1.21.8` branch has the dependency bump (`minecraft_version=1.21.8`, Fabric API
+`0.136.1+1.21.8`, NeoForge `21.8.57`, JEI `jei-1.21.8-neoforge:24.2.0.6`, Architectury Loom `1.13.469`).
+Dependencies resolve and the Minecraft 1.21.8 mappings download; the first `:xplat:compileJava` run fails
+with **30 unique errors in 13 files** (96 javac lines including repeats):
+
+| File | Unique errors | Cause |
+|---|---|---|
+| `runtime/EmiScreenshotRecorder` | 9 | `GpuBuffer` / `BufferType` / `BufferUsage` / `MappedView` rework, `setProjectionMatrix(GpuBufferSlice)`, `Lighting` changes, and the GUI is now deferred |
+| `screen/widget/config/ListWidget` | 5 | `GuiGraphics#pose()` returns `Matrix3x2fStack`; scissor helpers changed |
+| `runtime/EmiDrawContext` | 3 | `Matrix3x2fStack` vs `PoseStack`; `blit(RenderType::..., ...)` no longer exists |
+| `screen/BoMScreen` | 3 | `renderBlurredBackground(GuiGraphics)`, `new GuiGraphics(client, ...)` needs a `GuiRenderState`, `raw.flush()` gone |
+| `api/widget/TankWidget` | 2 | `pose()` type |
+| `api/stack/ItemEmiStack` | 1 | item model / render state API |
+| `EmiRenderHelper` | 1 | blit / texture setup |
+| `screen/EmiScreenManager` | 1 | `renderComponentTooltip` -> `setComponentTooltipForNextFrame` |
+| `screen/RecipeScreen` | 1 | same tooltip rename |
+| `screen/tooltip/EmiTooltipComponent` | 1 | `ClientTooltipComponent#renderText` signature |
+| `screen/widget/ResolutionButtonWidget` | 1 | same tooltip rename |
+| `screen/DisabledToast` | 1 | toast rendering API |
+| `widget/RecipeScreenshotButtonWidget` | 1 | `new GuiGraphics(client, bufferSource)` -> `GuiRenderState` |
+
+Note: the first mapping download failed once with `Failed to setup mappings: loom:mappings:layered+hash.40545`
+and succeeded on the retry; that is transient, not a version mismatch.
+
 ### Port order
 
 1. Branch `1.21.8` from `1.21.5`; bump `minecraft_version`, `neoforge_version`, `jei_version`, the Fabric API version and Loom; resolve the new dependencies online.
