@@ -50,9 +50,9 @@ public class LocalRecipes {
 			return;
 		}
 		if (recipes.isEmpty()) {
-			// NeoForge posts the event even when the server sends nothing, and an empty map must not
-			// shadow the local data pack fallback.
-			EmiLog.warn("Server recipe sync provided no recipes, keeping the local sources");
+			// NeoForge posts the event even when the server sends nothing (and it fires on any server),
+			// so an empty map must not shadow the local data pack fallback. Stay silent: the client
+			// logs the real count once a server actually pushes recipes.
 			return;
 		}
 		synced = Map.copyOf(recipes);

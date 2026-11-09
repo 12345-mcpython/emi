@@ -22,7 +22,7 @@ import dev.emi.emi.runtime.EmiReloadManager;
 import dev.emi.emi.runtime.EmiLog;
 
 public class EmiPacketHandler {
-    private static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(net.minecraft.resources.ResourceLocation.parse("emi:chess_s2c"));
+    public static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(net.minecraft.resources.ResourceLocation.parse("emi:chess_s2c"));
     private static final CustomPacketPayload.Type<EmiChessPacket.C2S> ID_CHESS_SERVERBOUND = new CustomPacketPayload.Type<EmiChessPacket.C2S>(net.minecraft.resources.ResourceLocation.parse("emi:chess_c2s"));
 
     public static void init(RegisterPayloadHandlersEvent event) {
@@ -30,25 +30,19 @@ public class EmiPacketHandler {
 
         registrar.playToServer(EmiNetwork.FILL_RECIPE, makeReader(EmiNetwork.FILL_RECIPE, FillRecipeC2SPacket::new), EmiPacketHandler::handleServerbound);
         registrar.playToServer(EmiNetwork.CREATE_ITEM, makeReader(EmiNetwork.CREATE_ITEM, CreateItemC2SPacket::new), EmiPacketHandler::handleServerbound);
-        // Third party server recipe sync, optional so a server without it is unaffected.
-        // The recipe sync consumers touch client classes, so they are only wired on the client.
+        // Clientbound handlers live in EmiClientPacketHandler (NeoForge 21.8 split them out of this event);
+        // here only the payload type/codec has to be known so the server can send it.
         if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
-	        registrar.playToClient(SyncPayloads.Fabric.TYPE, SyncPayloads.Fabric.CODEC, (payload, context) ->
-	        	context.enqueueWork(() -> {
-	        		LocalRecipes.acceptSynced(payload.recipes());
-	        		EmiReloadManager.reload();
-	        	}));
-	        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC, (payload, context) ->
-	        	context.enqueueWork(() -> EmiLog.info("Server recipe sync finished")));
+	        registrar.playToClient(SyncPayloads.Fabric.TYPE, SyncPayloads.Fabric.CODEC);
+	        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC);
         }
         registrar.playToClient(EmiRecipeSyncS2CPacket.TYPE,
-            net.minecraft.network.codec.StreamCodec.of((buf, v) -> v.write(buf), EmiRecipeSyncS2CPacket::new),
-            (payload, context) -> context.enqueueWork(() -> payload.apply(context.player())));
+            net.minecraft.network.codec.StreamCodec.of((buf, v) -> v.write(buf), EmiRecipeSyncS2CPacket::new));
 
-        registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new), EmiPacketHandler::handleClientbound);
-        registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new), EmiPacketHandler::handleClientbound);
+        registrar.playToClient(EmiNetwork.PING, makeReader(EmiNetwork.PING, PingS2CPacket::new));
+        registrar.playToClient(EmiNetwork.COMMAND, makeReader(EmiNetwork.COMMAND, CommandS2CPacket::new));
         registrar.playToServer(ID_CHESS_SERVERBOUND, makeReader(ID_CHESS_SERVERBOUND, EmiChessPacket.C2S::new), EmiPacketHandler::handleServerbound);
-        registrar.playToClient(ID_CHESS_CLIENTBOUND, makeReader(ID_CHESS_CLIENTBOUND, EmiChessPacket.S2C::new), EmiPacketHandler::handleClientbound);
+        registrar.playToClient(ID_CHESS_CLIENTBOUND, makeReader(ID_CHESS_CLIENTBOUND, EmiChessPacket.S2C::new));
     }
 
     public static EmiPacket wrap(EmiPacket packet) {
