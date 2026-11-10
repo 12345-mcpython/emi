@@ -369,3 +369,16 @@ public `Batchable` interface stay as a compatibility shim for third-party ingred
 - Screenshot export is the largest unknown. If Picture-in-Picture cannot render arbitrary `GuiGraphics` content, fall back to rendering into the main target and cropping (the old route B) and accept one frame of flicker.
 - JEI 24 (`24.2.0.6`) API details are unknown offline; jemi may need `IIngredientAcceptor` / `IDrawable` updates. Fabric still has no JEI for 1.21.6+.
 - The Fabric API and Loom versions for 1.21.8 must be resolved online before the branch can build.
+
+## 1.21.10（2026-11-10，已完成）
+
+从 `1.21.8` 拉 `1.21.10` 分支，主要处理 1.21.9 的大改：
+
+- 输入事件对象化（`MouseButtonEvent`/`KeyEvent`/`CharacterEvent`、`MouseHandler#onButton`）
+- `Level#isClientSide()`、`PreparableReloadListener` 的 `SharedState`
+- 渲染提交化：`GuiRenderer` 需要 `SubmitNodeCollector` + `FeatureRenderDispatcher`
+- 图集：`AtlasManager#getAtlasOrThrow` + `AtlasIds.BLOCKS`（1.21.10 不接受 `TextureAtlas.LOCATION_BLOCKS`）
+- 截图 capture 与游戏共用 `renderBuffers().bufferSource()`，否则 item atlas 不 flush
+- Fabric JEI/jemi 恢复启用（JEI 26 的 `fabric:recipe_sync` 冲突用 try-register 规避）
+
+验证：双平台编译通过，Fabric/NeoForge 实机通过；screenshot smoke 全过。已知：JEI 26.3.0.31 与 NeoForge 21.10.64 不兼容（JEI 侧），多物品标签图标仍 stub。
