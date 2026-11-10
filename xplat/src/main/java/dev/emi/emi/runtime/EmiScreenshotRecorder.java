@@ -16,7 +16,6 @@ import com.mojang.blaze3d.systems.CommandEncoder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.ScissorState;
 import com.mojang.blaze3d.textures.GpuTexture;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.config.EmiConfig;
@@ -43,7 +42,6 @@ import net.minecraft.network.chat.Style;
  */
 public class EmiScreenshotRecorder {
 	private static final String SCREENSHOTS_DIRNAME = "screenshots";
-	private static final int BUFFER_CAPACITY = 786432;
 	@Nullable
 	private static RenderTarget captureTarget;
 
@@ -101,7 +99,7 @@ public class EmiScreenshotRecorder {
 		NativeImage image = new NativeImage(imageWidth, imageHeight, false);
 		RenderTarget target = new TextureTarget("EMI screenshot", windowWidth, windowHeight, true);
 		GuiRenderState renderState = new GuiRenderState();
-		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(BUFFER_CAPACITY));
+		MultiBufferSource.BufferSource bufferSource = client.renderBuffers().bufferSource();
 		var gameRenderer = client.gameRenderer;
 		GuiRenderer guiRenderer = new GuiRenderer(renderState, bufferSource,
 			gameRenderer.getSubmitNodeStorage(), gameRenderer.getFeatureRenderDispatcher(), List.of());

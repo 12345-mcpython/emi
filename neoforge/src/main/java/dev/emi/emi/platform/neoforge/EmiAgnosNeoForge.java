@@ -289,7 +289,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 		ResourceLocation texture = ext.getStillTexture(fs);
 		TextureAtlasSprite sprite;
 		if (texture != null) {
-			sprite = client.getAtlasManager().getAtlasOrThrow(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS).getSprite(texture);
+			sprite = client.getAtlasManager().getAtlasOrThrow(net.minecraft.data.AtlasIds.BLOCKS).getSprite(texture);
 		} else {
 			// 1.21.8 vanilla fluids no longer expose a still texture through the extension; the block
 			// model still has one, which is what the world renderer uses for water and lava.
