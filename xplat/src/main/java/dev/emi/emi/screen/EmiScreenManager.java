@@ -802,6 +802,13 @@ public class EmiScreenManager {
 					panel.space.th * ENTRY_SIZE, 0xFF00FF00, panel.side.getName());
 			}
 		}
+		// Every EditBox child of the screen, to find stray search fields.
+		for (var child : screen.children()) {
+			if (child instanceof net.minecraft.client.gui.components.EditBox box) {
+				drawDebugBounds(context, box.getX(), box.getY(), box.getWidth(), box.getHeight(), 0xFFFF8000,
+					"editbox:" + box.getClass().getSimpleName());
+			}
+		}
 		context.pop();
 		long now = System.currentTimeMillis();
 		if (now - lastLayoutLog > 1000) {
@@ -822,6 +829,13 @@ public class EmiScreenManager {
 				} else {
 					message.append("(").append(panel.space.tx).append(",").append(panel.space.ty).append(",")
 						.append(panel.space.tw).append(",").append(panel.space.th).append(")");
+				}
+			}
+			for (var child : screen.children()) {
+				if (child instanceof net.minecraft.client.gui.components.EditBox box) {
+					message.append(" editbox[").append(box.getClass().getSimpleName()).append("]=(")
+						.append(box.getX()).append(",").append(box.getY()).append(",").append(box.getWidth())
+						.append(",").append(box.getHeight()).append(",value=").append(box.getValue()).append(")");
 				}
 			}
 			EmiLog.info(message.toString());
