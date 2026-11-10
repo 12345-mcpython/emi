@@ -60,7 +60,6 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.fml.ModContainer;
@@ -348,11 +347,6 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 			}
 		}
 		return fuelMap;
-	}
-
-	@Override
-	protected boolean isEnchantableAgnos(ItemStack stack, Enchantment enchantment) {
-		return true;
 	}
 
 	@Override

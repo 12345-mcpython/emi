@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
 import dev.emi.emi.api.EmiRegistry;
@@ -150,8 +149,6 @@ public abstract class EmiAgnos {
 
 
 
-	protected abstract boolean isEnchantableAgnos(ItemStack stack, Enchantment enchantment);
-	
 	public static Object2FloatMap<ItemLike> getComposterMap() {
 		return delegate.getComposterMapAgnos();
 	}

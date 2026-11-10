@@ -48,7 +48,6 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.material.Fluid;
@@ -270,11 +269,6 @@ public class EmiAgnosFabric extends EmiAgnos {
 			}
 		}
 		return fuelMap;
-	}
-
-	@Override
-	protected boolean isEnchantableAgnos(ItemStack stack, Enchantment enchantment) {
-		return true;
 	}
 
 	@Override
