@@ -314,8 +314,31 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 
 	@Override
 	protected Map<Item, Integer> getFuelMapAgnos() {
+		try {
+			return fuelMapFromLevel();
+		} catch (Throwable t) {
+			// Dedicated servers never need this map; never let a missing client class break them.
+			return Map.of();
+		}
+	}
+
+	private static Map<Item, Integer> fuelMapFromLevel() {
+		Minecraft client = Minecraft.getInstance();
+		if (client.level == null) {
+			return Map.of();
+		}
+		net.minecraft.world.level.block.entity.FuelValues values = client.level.fuelValues();
+		if (values == null) {
+			values = net.minecraft.world.level.block.entity.FuelValues.vanillaBurnTimes(
+				client.level.registryAccess(), client.level.enabledFeatures());
+		}
 		Object2IntMap<Item> fuelMap = new Object2IntOpenHashMap<>();
-		// TODO fuel values are a data map now; rebuild once the neoforge api settles.
+		for (Item item : values.fuelItems()) {
+			int time = values.burnDuration(item.getDefaultInstance());
+			if (time > 0) {
+				fuelMap.put(item, time);
+			}
+		}
 		return fuelMap;
 	}
 
