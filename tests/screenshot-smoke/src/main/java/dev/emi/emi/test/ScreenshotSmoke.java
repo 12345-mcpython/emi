@@ -346,8 +346,10 @@ public class ScreenshotSmoke implements ClientModInitializer {
 				double x = button.getX() + button.getWidth() / 2.0;
 				double y = button.getY() + button.getHeight() / 2.0;
 				double before = list.getScrollAmount();
-				boolean clicked = config.mouseClicked(x, y, 0);
-				config.mouseReleased(x, y, 0);
+				var click = new net.minecraft.client.input.MouseButtonEvent(x, y,
+					new net.minecraft.client.input.MouseButtonInfo(0, 0));
+				boolean clicked = config.mouseClicked(click, false);
+				config.mouseReleased(click);
 				double after = list.getScrollAmount();
 				if (clicked) {
 					handled++;

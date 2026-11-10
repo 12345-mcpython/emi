@@ -138,6 +138,10 @@ public class EmiScreenshotRecorder {
 					renderer.accept(graphics);
 					pose.popMatrix();
 					guiRenderer.render(fog);
+					// Items and other 3D features are submitted to the shared node storage; the game
+					// renderer normally flushes them after the gui pass, so the capture has to as well.
+					gameRenderer.getFeatureRenderDispatcher().renderAllFeatures();
+					gameRenderer.getFeatureRenderDispatcher().endFrame();
 					GpuBuffer buffer = RenderSystem.getDevice()
 						.createBuffer(() -> "EMI screenshot buffer", GpuBuffer.USAGE_MAP_READ | GpuBuffer.USAGE_COPY_DST,
 							windowWidth * windowHeight * 4);
