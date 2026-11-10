@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonInfo;
 
 @Mixin(MouseHandler.class)
 public class MouseMixin {
@@ -21,49 +22,30 @@ public class MouseMixin {
 	@Shadow
 	private double xpos, ypos;
 	@Shadow
-	private int activeButton = -1;
-
+	private MouseButtonInfo activeButton;
 	@Shadow private double accumulatedDX;
-
 	@Shadow private double accumulatedDY;
 
-	// 1.21.4 removed Screen.wrapScreenError and Screen.mouseScrolled, which used to be the
-	// injection points, so these hooks sit on the handler entry points instead.
-	@Inject(at = @At("HEAD"), method = "onPress(JIII)V", cancellable = true)
-	private void onMouseDown(long window, int button, int action, int mods, CallbackInfo info) {
-		if (action != 1) {
-			return;
-		}
+	// 1.21.10 wraps button presses in a MouseButtonInfo and dispatches them from MouseHandler#onButton.
+	@Inject(at = @At("HEAD"), method = "onButton(JLnet/minecraft/client/input/MouseButtonInfo;I)V", cancellable = true)
+	private void onButton(long window, MouseButtonInfo buttonInfo, int action, CallbackInfo info) {
 		try {
 			Screen screen = minecraft.screen;
 			if (screen instanceof AbstractContainerScreen<?> hs) {
 				double mx = this.xpos * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth();
 				double my = this.ypos * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight();
-				if (EmiScreenManager.mouseClicked(mx, my, button)) {
-					info.cancel();
+				if (action == 1) {
+					if (EmiScreenManager.mouseClicked(mx, my, buttonInfo.button())) {
+						info.cancel();
+					}
+				} else if (action == 0) {
+					if (EmiScreenManager.mouseReleased(mx, my, buttonInfo.button())) {
+						info.cancel();
+					}
 				}
 			}
 		} catch (Exception e) {
-			EmiLog.error("Error while handling mouse press", e);
-		}
-	}
-
-	@Inject(at = @At("HEAD"), method = "onPress(JIII)V", cancellable = true)
-	private void onMouseUp(long window, int button, int action, int mods, CallbackInfo info) {
-		if (action != 0) {
-			return;
-		}
-		try {
-			Screen screen = minecraft.screen;
-			if (screen instanceof AbstractContainerScreen<?> hs) {
-				double mx = this.xpos * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth();
-				double my = this.ypos * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight();
-				if (EmiScreenManager.mouseReleased(mx, my, button)) {
-					info.cancel();
-				}
-			}
-		} catch (Exception e) {
-			EmiLog.error("Error while handling mouse release", e);
+			EmiLog.error("Error while handling mouse button", e);
 		}
 	}
 
@@ -76,7 +58,8 @@ public class MouseMixin {
 				double my = this.ypos * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight();
 				double dx = this.accumulatedDX * minecraft.getWindow().getGuiScaledWidth() / minecraft.getWindow().getScreenWidth();
 				double dy = this.accumulatedDY * minecraft.getWindow().getGuiScaledHeight() / minecraft.getWindow().getScreenHeight();
-				EmiScreenManager.mouseDragged(mx, my, activeButton, dx, dy);
+				int button = this.activeButton == null ? -1 : this.activeButton.button();
+				EmiScreenManager.mouseDragged(mx, my, button, dx, dy);
 			}
 		} catch (Exception e) {
 			EmiLog.error("Error while handling mouse drag", e);
