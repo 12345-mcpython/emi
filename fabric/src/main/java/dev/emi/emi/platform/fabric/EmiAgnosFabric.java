@@ -213,11 +213,20 @@ public class EmiAgnosFabric extends EmiAgnos {
 	protected void renderFluidAgnos(FluidEmiStack stack, net.minecraft.client.gui.GuiGraphics draw, int x, int y, float delta, int xOff, int yOff, int width, int height) {
 		FluidVariant fluid = FluidVariant.of(stack.getKeyOfType(Fluid.class), stack.getComponentChanges());
 		TextureAtlasSprite[] sprites = FluidVariantRendering.getSprites(fluid);
-		if (sprites == null || sprites.length < 1 || sprites[0] == null) {
+		TextureAtlasSprite sprite = sprites == null || sprites.length < 1 ? null : sprites[0];
+		if (sprite == null) {
+			// Fall back to the block model icon, the same one the world renderer uses for water.
+			net.minecraft.world.level.block.state.BlockState state = fluid.getFluid()
+				.defaultFluidState().createLegacyBlock();
+			sprite = Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(state);
+		}
+		if (sprite == null) {
 			return;
 		}
-		TextureAtlasSprite sprite = sprites[0];
 		int color = FluidVariantRendering.getColor(fluid);
+		if (color == -1) {
+			color = 0xFFFFFFFF;
+		}
 		
 		EmiRenderHelper.drawTintedSprite(draw, sprite, color, x, y, xOff, yOff, width, height);
 	}

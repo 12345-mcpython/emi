@@ -286,13 +286,24 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 	protected void renderFluidAgnos(FluidEmiStack stack, net.minecraft.client.gui.GuiGraphics draw, int x, int y, float delta, int xOff, int yOff, int width, int height) {
 		FluidStack fs = new FluidStack(stack.getKeyOfType(Fluid.class).builtInRegistryHolder(), 1000, stack.getComponentChanges());
 		IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fs.getFluid());
+		Minecraft client = Minecraft.getInstance();
 		ResourceLocation texture = ext.getStillTexture(fs);
-		if (texture == null) {
+		TextureAtlasSprite sprite;
+		if (texture != null) {
+			sprite = client.getTextureAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS).apply(texture);
+		} else {
+			// 1.21.8 vanilla fluids no longer expose a still texture through the extension; the block
+			// model still has one, which is what the world renderer uses for water and lava.
+			net.minecraft.world.level.block.state.BlockState state = fs.getFluid().defaultFluidState().createLegacyBlock();
+			sprite = client.getModelManager().getBlockModelShaper().getParticleIcon(state);
+		}
+		if (sprite == null) {
 			return;
 		}
 		int color = ext.getTintColor(fs);
-		Minecraft client = Minecraft.getInstance();
-		TextureAtlasSprite sprite = client.getTextureAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS).apply(texture);
+		if (color == -1 && fs.getFluid().isSame(net.minecraft.world.level.material.Fluids.WATER)) {
+			color = 0xFF3F76E4;
+		}
 		EmiRenderHelper.drawTintedSprite(draw, sprite, color, x, y, xOff, yOff, width, height);
 	}
 
