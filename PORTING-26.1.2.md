@@ -338,6 +338,18 @@ reload completes with no mixin errors (screenshot `neoforge/run/screenshots/2026
 Still to verify: a full visual pass over the config screens, tooltips, fluid tanks and the BoM tree export in a
 real world.
 
+#### Item rendering batching on 1.21.6+
+
+`StackBatcher` stays a no-op shim: 1.21.4 replaced the per-`RenderType` vertex buffers with pipelines, so the old
+batcher cannot be restored. Starting with 1.21.6 the vanilla `GuiRenderer` batches items itself: every
+`GuiGraphics#renderFakeItem` submits a `GuiItemRenderState`, the prepare pass bakes it into the gui item atlas
+(`GuiRenderer#prepareItemElements`) and the draw pass emits one textured quad per slot. Drawing stacks per slot is
+therefore already batched; what remains is the per-frame atlas prepare, not the draw calls. The obsolete
+`ui.use-batched-renderer` option was removed in `860619d` (it had no effect since 1.21.4), together with the
+NeoForge `StackBatcher.EXTRA_RENDER_LAYERS` registration. Further optimisation means submitting fewer states
+(visibility culling) and caching `ItemStackRenderState`, not reviving the custom batcher. `StackBatcher` and the
+public `Batchable` interface stay as a compatibility shim for third-party ingredient implementations.
+
 ### Port order
 
 1. Branch `1.21.8` from `1.21.5`; bump `minecraft_version`, `neoforge_version`, `jei_version`, the Fabric API version and Loom; resolve the new dependencies online.
