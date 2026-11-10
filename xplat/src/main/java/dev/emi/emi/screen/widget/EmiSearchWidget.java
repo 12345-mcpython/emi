@@ -222,8 +222,20 @@ public class EmiSearchWidget extends EditBox {
 		return super.keyPressed(keyCode, scanCode, modifiers);
 	}
 
+	private static long lastDebugLog;
+
 	@Override
 	public void renderWidget(GuiGraphics raw, int mouseX, int mouseY, float delta) {
+		if (EmiConfig.devMode) {
+			long now = System.currentTimeMillis();
+			if (now - lastDebugLog > 1000) {
+				lastDebugLog = now;
+				dev.emi.emi.runtime.EmiLog.info("search widget " + System.identityHashCode(this) + " at "
+					+ this.getX() + "," + this.getY() + " size=" + this.getWidth() + "x" + this.getHeight()
+					+ " focused=" + this.isFocused() + " value='" + this.getValue() + "' main="
+					+ (this == dev.emi.emi.screen.EmiScreenManager.search));
+			}
+		}
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
 		this.setEditable(EmiConfig.enabled);
 		String lower = getValue().toLowerCase();
