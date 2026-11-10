@@ -12,10 +12,9 @@ import net.minecraft.client.renderer.RenderType;
 /**
  * Batched stack rendering is disabled from 1.21.4 onwards.
  * <p>
- * The gui now renders through render pipelines that own their own buffer state, so the
- * per-render-type vertex batching this class used is no longer possible. Everything draws
- * straight through {@link GuiGraphics} instead; the class stays as a thin shim so the
- * screen code keeps working.
+ * The gui now owns its own buffer and render types, so the per-render-type vertex batching
+ * this class used is no longer possible. Everything draws straight through {@link GuiGraphics}
+ * and the vanilla gui batching; the class stays as a thin shim for API compatibility.
  */
 public class StackBatcher {
 

@@ -1,6 +1,5 @@
 package dev.emi.emi.platform.neoforge;
 
-import java.util.Arrays;
 
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.data.EmiData;
@@ -13,7 +12,6 @@ import dev.emi.emi.runtime.LocalRecipes;
 import dev.emi.emi.screen.ConfigScreen;
 import dev.emi.emi.screen.EmiScreenBase;
 import dev.emi.emi.screen.EmiScreenManager;
-import dev.emi.emi.screen.StackBatcher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -22,7 +20,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.neoforge.client.NeoForgeRenderTypes;
 import net.neoforged.neoforge.client.event.ContainerScreenEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.AddClientReloadListenersEvent;
@@ -37,7 +34,6 @@ public class EmiClientNeoForge {
 	
 	@SubscribeEvent
 	public static void clientInit(FMLClientSetupEvent event) {
-		StackBatcher.EXTRA_RENDER_LAYERS.addAll(Arrays.stream(NeoForgeRenderTypes.values()).map(f -> f.get()).toList());
 		EmiClient.init();
 		dev.emi.emi.network.EmiRecipeSyncS2CPacket.clientHandler = dev.emi.emi.runtime.EmiRecipeSyncClient::handle;
 		EmiNetwork.initClient(packet -> PacketDistributor.sendToServer(EmiPacketHandler.wrap(packet)));
