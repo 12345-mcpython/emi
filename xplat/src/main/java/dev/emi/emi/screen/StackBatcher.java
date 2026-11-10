@@ -13,9 +13,11 @@ import net.minecraft.client.renderer.RenderType;
  * Batched stack rendering is disabled from 1.21.4 onwards.
  * <p>
  * The gui now renders through render pipelines that own their own buffer state, so the
- * per-render-type vertex batching this class used is no longer possible. Everything draws
- * straight through {@link GuiGraphics} instead; the class stays as a thin shim so the
- * screen code keeps working.
+ * per-render-type vertex batching this class used is no longer possible. From 1.21.6 the
+ * vanilla {@code GuiRenderer} batches item rendering itself: every {@code renderFakeItem}
+ * submits a render state which is baked into the gui item atlas during the prepare pass and
+ * drawn as a single textured quad afterwards, so drawing stacks per slot is already batched.
+ * This class stays as a thin shim so the screen and API code keeps compiling.
  */
 public class StackBatcher {
 

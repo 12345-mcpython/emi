@@ -108,11 +108,6 @@ public class EmiConfig {
 	@ConfigValue("ui.fluid-unit")
 	public static FluidUnit fluidUnit = EmiAgnos.isForge() ? FluidUnit.MILLIBUCKETS : FluidUnit.LITERS;
 
-	@Comment("Whether to use the batched render system. Batching is faster, but may have incompatibilities"
-		+ " with shaders or other mods.")
-	@ConfigValue("ui.use-batched-renderer")
-	public static boolean useBatchedRenderer = true;
-
 	@Comment("The bookmark quantity step used by Ctrl + Alt + scroll. Minimum: 1.")
 	@ConfigValue("ui.bookmark-quantity-step")
 	public static int bookmarkQuantityStep = 64;
