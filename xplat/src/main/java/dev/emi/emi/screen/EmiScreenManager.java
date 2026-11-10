@@ -761,6 +761,8 @@ public class EmiScreenManager {
 		renderSlotOverlays(context, mouseX, mouseY, delta, base);
 		EmiProfiler.pop();
 
+		renderLayoutDebug(context, base);
+
 		context.disableDepthTest();
 	}
 
@@ -770,6 +772,70 @@ public class EmiScreenManager {
 			renderDraggedStack(context, mouseX, mouseY, delta, base);
 			renderCurrentTooltip(context, mouseX, mouseY, delta, base);
 		}
+	}
+
+	private static long lastLayoutLog;
+
+	/**
+	 * Development overlay: outlines every EMI widget and panel so layout problems (for example the search
+	 * bar ending up in a corner) can be read off the screen. Also logs the numbers once a second.
+	 */
+	private static void renderLayoutDebug(EmiDrawContext context, EmiScreenBase base) {
+		if (!EmiConfig.devMode) {
+			return;
+		}
+		Screen screen = base.screen();
+		if (screen == null) {
+			return;
+		}
+		context.push();
+		context.disableDepthTest();
+		// Origin marker.
+		context.fill(0, 0, 8, 1, 0xFFFF0000);
+		context.fill(0, 0, 1, 8, 0xFFFF0000);
+		drawDebugBounds(context, search.getX(), search.getY(), search.getWidth(), search.getHeight(), 0xFFFF00FF, "search");
+		drawDebugBounds(context, emi.getX(), emi.getY(), emi.getWidth(), emi.getHeight(), 0xFF00FFFF, "emi");
+		drawDebugBounds(context, tree.getX(), tree.getY(), tree.getWidth(), tree.getHeight(), 0xFF00FFFF, "tree");
+		for (SidebarPanel panel : panels) {
+			if (panel.space != null) {
+				drawDebugBounds(context, panel.space.tx, panel.space.ty, panel.space.tw * ENTRY_SIZE,
+					panel.space.th * ENTRY_SIZE, 0xFF00FF00, panel.side.getName());
+			}
+		}
+		context.pop();
+		long now = System.currentTimeMillis();
+		if (now - lastLayoutLog > 1000) {
+			lastLayoutLog = now;
+			StringBuilder message = new StringBuilder("layout screen=").append(screen.getClass().getSimpleName())
+				.append(" size=").append(screen.width).append("x").append(screen.height)
+				.append(" center=").append(EmiConfig.centerSearchBar)
+				.append(" searchSidebar=").append(EmiConfig.searchSidebar)
+				.append(" search=(").append(search.getX()).append(",").append(search.getY()).append(",")
+				.append(search.getWidth()).append(",").append(search.getHeight()).append(",visible=")
+				.append(search.visible).append(")")
+				.append(" emi=(").append(emi.getX()).append(",").append(emi.getY()).append(")")
+				.append(" tree=(").append(tree.getX()).append(",").append(tree.getY()).append(")");
+			for (SidebarPanel panel : panels) {
+				message.append(" ").append(panel.side.getName()).append("=");
+				if (panel.space == null) {
+					message.append("null");
+				} else {
+					message.append("(").append(panel.space.tx).append(",").append(panel.space.ty).append(",")
+						.append(panel.space.tw).append(",").append(panel.space.th).append(")");
+				}
+			}
+			EmiLog.info(message.toString());
+		}
+	}
+
+	private static void drawDebugBounds(EmiDrawContext context, int x, int y, int width, int height, int color,
+			String label) {
+		context.fill(x, y, width, 1, color);
+		context.fill(x, y + height - 1, width, 1, color);
+		context.fill(x, y, 1, height, color);
+		context.fill(x + width - 1, y, 1, height, color);
+		context.drawText(EmiPort.literal(label + " " + x + "," + y + " " + width + "x" + height), x + 2, y + 2,
+			0xFFFFFFFF);
 	}
 
 	private static void renderWidgets(EmiDrawContext context, int mouseX, int mouseY, float delta, EmiScreenBase base) {
