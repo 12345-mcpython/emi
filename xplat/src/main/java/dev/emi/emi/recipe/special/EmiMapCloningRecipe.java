@@ -6,13 +6,13 @@ import dev.emi.emi.api.widget.GeneratedSlotWidget;
 import dev.emi.emi.api.widget.SlotWidget;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 public class EmiMapCloningRecipe extends EmiPatternCraftingRecipe {
 
-	public EmiMapCloningRecipe(ResourceLocation id) {
+	public EmiMapCloningRecipe(Identifier id) {
 		super(List.of(
 						EmiStack.of(Items.FILLED_MAP),
 						EmiStack.of(Items.MAP)),

@@ -9,7 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.emi.emi.EmiPort;
@@ -19,7 +19,7 @@ import dev.emi.emi.runtime.EmiDrawContext;
 public class SizedButtonWidget extends Button {
 	private final BooleanSupplier isActive;
 	private final IntSupplier vOffset;
-	protected ResourceLocation texture = EmiRenderHelper.BUTTONS;
+	protected Identifier texture = EmiRenderHelper.BUTTONS;
 	protected Supplier<List<Component>> text;
 	protected int u, v;
 
@@ -63,7 +63,7 @@ public class SizedButtonWidget extends Button {
 	}
 	
 	@Override
-	public void renderWidget(GuiGraphics raw, int mouseX, int mouseY, float delta) {
+	public void renderContents(GuiGraphics raw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
 		context.enableDepthTest();
 		context.drawTexture(texture, this.x, this.y, getU(mouseX, mouseY), getV(mouseX, mouseY), this.width, this.height);

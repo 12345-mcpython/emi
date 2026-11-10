@@ -56,10 +56,10 @@ public class EmiClientNeoForge {
 	 * and mod recipes, since 1.21.2+ clients no longer receive the vanilla recipe table.
 	 */
 	public static void recipesReceived(net.neoforged.neoforge.client.event.RecipesReceivedEvent event) {
-		java.util.Map<net.minecraft.resources.ResourceLocation, net.minecraft.world.item.crafting.Recipe<?>> map =
+		java.util.Map<net.minecraft.resources.Identifier, net.minecraft.world.item.crafting.Recipe<?>> map =
 			new java.util.LinkedHashMap<>();
 		for (net.minecraft.world.item.crafting.RecipeHolder<?> holder : event.getRecipeMap().values()) {
-			map.put(holder.id().location(), holder.value());
+			map.put(holder.id().identifier(), holder.value());
 		}
 		if (map.isEmpty()) {
 			// The event is also posted for servers that are not NeoForge; nothing to apply there.

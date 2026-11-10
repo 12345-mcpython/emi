@@ -7,10 +7,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class DisabledToast implements Toast {
-	private static final ResourceLocation TEXTURE = EmiPort.id("toast/advancement");
+	private static final Identifier TEXTURE = EmiPort.id("toast/advancement");
 
 	@Override
 	public void render(GuiGraphics raw, Font font, long time) {

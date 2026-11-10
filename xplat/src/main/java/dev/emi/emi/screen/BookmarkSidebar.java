@@ -384,7 +384,7 @@ public final class BookmarkSidebar {
             startRow = endRow = header(mx, my) ? -1 : absoluteRow(my);
             pressButton = button;
             moved = false;
-            pressedAt = net.minecraft.Util.getMillis();
+            pressedAt = net.minecraft.util.Util.getMillis();
             edgeDirection = 0;
             movingGroup = EmiInput.isShiftDown() && button == 0 && pressedGroup != null
                 && pressedGroup != EmiBookmarkGroups.defaultGroup();
@@ -393,7 +393,7 @@ public final class BookmarkSidebar {
         }
         if (cell != null && cell.item != null && !cell.item.input && button == 0 && EmiInput.isShiftDown()) {
             pressedCell = cell; moved = false; pressButton = button;
-            pressedAt = net.minecraft.Util.getMillis();
+            pressedAt = net.minecraft.util.Util.getMillis();
             edgeDirection = 0;
             return true;
         }
@@ -408,7 +408,7 @@ public final class BookmarkSidebar {
     }
     private void updateDrag(int mx, int my) {
         if (pressedCell == null && pressedGroup == null && startRow < 0) return;
-        long now = net.minecraft.Util.getMillis();
+        long now = net.minecraft.util.Util.getMillis();
         ScreenSpace space = panel.space;
         if (pressedCell != null) moved |= cellAt(mx, my) != pressedCell || now - pressedAt >= DRAG_THRESHOLD_MS;
         else if (startRow >= 0) moved |= !space.contains(mx, my) || absoluteRow(my) != startRow || now - pressedAt >= DRAG_THRESHOLD_MS;

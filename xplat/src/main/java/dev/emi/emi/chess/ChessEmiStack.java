@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -95,7 +95,7 @@ class ChessEmiStack extends EmiStack {
 	}
 
 	@Override
-	public ResourceLocation getId() {
+	public Identifier getId() {
 		return EmiPort.id("emi:/chess/" + position);
 	}
 

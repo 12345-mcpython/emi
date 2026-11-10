@@ -15,7 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.VanillaPackResources;
@@ -36,15 +36,15 @@ import dev.emi.emi.EmiPort;
  * directly through {@link PackResources#listResources} with {@link PackType#SERVER_DATA}.
  */
 public class LocalRecipes {
-	private static Map<ResourceLocation, Recipe<?>> cache = null;
-	private static Map<ResourceLocation, Recipe<?>> synced = null;
+	private static Map<Identifier, Recipe<?>> cache = null;
+	private static Map<Identifier, Recipe<?>> synced = null;
 	private static int failed = 0;
 
 	/**
 	 * Recipes pushed by a server side recipe sync (EMI on the server, or a compat plugin using the
 	 * {@code fabric:recipe_sync} / {@code neoforge:recipe_content} channels).
 	 */
-	public static void acceptSynced(Map<ResourceLocation, Recipe<?>> recipes) {
+	public static void acceptSynced(Map<Identifier, Recipe<?>> recipes) {
 		if (synced != null && synced.size() == recipes.size()) {
 			// Both the loader sync and the emi channel can deliver the same table.
 			return;
@@ -64,7 +64,7 @@ public class LocalRecipes {
 		return synced != null;
 	}
 
-	public static Map<ResourceLocation, Recipe<?>> get() {
+	public static Map<Identifier, Recipe<?>> get() {
 		if (synced != null) {
 			return synced;
 		}
@@ -84,14 +84,14 @@ public class LocalRecipes {
 		return failed;
 	}
 
-	private static Map<ResourceLocation, Recipe<?>> load() {
-		Map<ResourceLocation, Recipe<?>> recipes = new LinkedHashMap<>();
+	private static Map<Identifier, Recipe<?>> load() {
+		Map<Identifier, Recipe<?>> recipes = new LinkedHashMap<>();
 		failed = 0;
 		Minecraft client = Minecraft.getInstance();
 		if (client.level == null) {
 			return recipes;
 		}
-		Map<ResourceLocation, IoSupplier<InputStream>> files = new LinkedHashMap<>();
+		Map<Identifier, IoSupplier<InputStream>> files = new LinkedHashMap<>();
 		VanillaPackResources vanilla = client.getVanillaPackResources();
 		if (vanilla != null) {
 			collect(vanilla, files);
@@ -108,7 +108,7 @@ public class LocalRecipes {
 			return recipes;
 		}
 		RegistryOps<JsonElement> ops = RegistryOps.create(JsonOps.INSTANCE, client.level.registryAccess());
-		for (Map.Entry<ResourceLocation, IoSupplier<InputStream>> entry : files.entrySet()) {
+		for (Map.Entry<Identifier, IoSupplier<InputStream>> entry : files.entrySet()) {
 			try (InputStream stream = entry.getValue().get();
 					Reader reader = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
 				JsonElement json = JsonParser.parseReader(reader);
@@ -128,7 +128,7 @@ public class LocalRecipes {
 		return recipes;
 	}
 
-	private static void collect(PackResources pack, Map<ResourceLocation, IoSupplier<InputStream>> files) {
+	private static void collect(PackResources pack, Map<Identifier, IoSupplier<InputStream>> files) {
 		for (String namespace : pack.getNamespaces(PackType.SERVER_DATA)) {
 			pack.listResources(PackType.SERVER_DATA, namespace, "recipe", (id, supplier) -> {
 				if (id.getPath().endsWith(".json")) {
@@ -138,7 +138,7 @@ public class LocalRecipes {
 		}
 	}
 
-	private static ResourceLocation stripPrefix(ResourceLocation file) {
+	private static Identifier stripPrefix(Identifier file) {
 		String path = file.getPath();
 		if (path.startsWith("recipe/")) {
 			path = path.substring("recipe/".length());
@@ -150,16 +150,16 @@ public class LocalRecipes {
 	}
 
 	/** Reads the {@code fabric:recipe_sync} payload: a list of serializer grouped holders. */
-	public static Map<ResourceLocation, Recipe<?>> decodeFabric(RegistryFriendlyByteBuf buf) {
-		Map<ResourceLocation, Recipe<?>> recipes = new LinkedHashMap<>();
+	public static Map<Identifier, Recipe<?>> decodeFabric(RegistryFriendlyByteBuf buf) {
+		Map<Identifier, Recipe<?>> recipes = new LinkedHashMap<>();
 		int groups = buf.readVarInt();
 		for (int g = 0; g < groups; g++) {
-			ResourceLocation serializerId = buf.readResourceLocation();
+			Identifier serializerId = buf.readIdentifier();
 			RecipeSerializer<?> serializer = BuiltInRegistries.RECIPE_SERIALIZER.get(serializerId)
 				.map(net.minecraft.core.Holder.Reference::value).orElse(null);
 			int count = buf.readVarInt();
 			for (int i = 0; i < count; i++) {
-				ResourceLocation id = buf.readResourceLocation();
+				Identifier id = buf.readIdentifier();
 				if (serializer == null) {
 					continue;
 				}

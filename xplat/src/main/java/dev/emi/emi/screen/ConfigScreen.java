@@ -141,7 +141,7 @@ public class ConfigScreen extends Screen {
 		this.resetButton = EmiPort.newButton(x + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> {
 			EmiConfig.loadConfig(QDCSS.load("revert", originalConfig));
 			Minecraft client = Minecraft.getInstance();
-			this.init(client, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
+			this.init(client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
 		});
 		this.addRenderableWidget(EmiPort.newButton(x + w / 2 + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> {
 			this.onClose();
@@ -152,7 +152,7 @@ public class ConfigScreen extends Screen {
 		}));
 		this.addRenderableWidget(new SizedButtonWidget(x + w - 20, height - 52, 20, 20, 164, 0, () -> true, widget -> {
 			EmiConfig.setGlobalState(!EmiConfig.useGlobalConfig);
-			ConfigScreen.this.resize(minecraft, width, height);
+			ConfigScreen.this.resize(width, height);
 		}, () -> (EmiConfig.useGlobalConfig ? 40 : 0), () -> {
 			return (List<Component>) (Object) Arrays.stream(I18n.get("tooltip.emi.config.global").split("\n"))
 				.map(s -> minecraft.font.getSplitter().splitLines(FormattedText.of(s), maxWidth, Style.EMPTY))

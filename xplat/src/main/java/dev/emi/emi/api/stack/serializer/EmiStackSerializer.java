@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -22,7 +22,7 @@ import dev.emi.emi.runtime.EmiLog;
 public interface EmiStackSerializer<T extends EmiStack> extends EmiIngredientSerializer<T> {
 	static final Pattern STACK_REGEX = Pattern.compile("^([\\w_\\-./]+):([\\w_\\-.]+):([\\w_\\-./]+)(\\{.*\\})?$");
 	
-	EmiStack create(ResourceLocation id, DataComponentPatch componentChanges, long amount);
+	EmiStack create(Identifier id, DataComponentPatch componentChanges, long amount);
 
 	private static <T> DynamicOps<T> withRegistryAccess(DynamicOps<T> ops) {
 		Minecraft instance = Minecraft.getInstance();
@@ -36,7 +36,7 @@ public interface EmiStackSerializer<T extends EmiStack> extends EmiIngredientSer
 
 	@Override
 	default EmiIngredient deserialize(JsonElement element) {
-		ResourceLocation id = null;
+		Identifier id = null;
 		String nbt = null;
 		JsonObject changesJson = null;
 		long amount = 1;

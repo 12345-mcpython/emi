@@ -5,7 +5,7 @@ import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.FluidEmiStack;
 import dev.emi.emi.platform.EmiAgnos;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 
 public class TankWidget extends SlotWidget {
@@ -26,7 +26,7 @@ public class TankWidget extends SlotWidget {
 	 * Sets the slot to use a custom texture.
 	 * The size of the texture drawn is based on the size of the tank.
 	 */
-	public SlotWidget backgroundTexture(ResourceLocation id, int u, int v) {
+	public SlotWidget backgroundTexture(Identifier id, int u, int v) {
 		return super.backgroundTexture(textureId, u, v);
 	}
 

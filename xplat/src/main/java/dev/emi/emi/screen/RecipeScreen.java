@@ -7,7 +7,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -39,7 +39,7 @@ import dev.emi.emi.screen.widget.ResolutionButtonWidget;
 import dev.emi.emi.screen.widget.SizedButtonWidget;
 
 public class RecipeScreen extends Screen {
-	private static final ResourceLocation TEXTURE = EmiPort.id("emi", "textures/gui/background.png");
+	private static final Identifier TEXTURE = EmiPort.id("emi", "textures/gui/background.png");
 	public static @Nullable EmiIngredient resolve = null;
 	private @Nullable EmiIngredient resolutionTarget;
 

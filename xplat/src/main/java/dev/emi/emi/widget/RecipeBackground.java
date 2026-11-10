@@ -6,10 +6,10 @@ import dev.emi.emi.api.widget.Bounds;
 import dev.emi.emi.api.widget.Widget;
 import dev.emi.emi.runtime.EmiDrawContext;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class RecipeBackground extends Widget {
-	private static final ResourceLocation TEXTURE = EmiPort.id("emi", "textures/gui/background.png");
+	private static final Identifier TEXTURE = EmiPort.id("emi", "textures/gui/background.png");
 	private final int x, y, width, height;
 
 	public RecipeBackground(int x, int y, int width, int height) {

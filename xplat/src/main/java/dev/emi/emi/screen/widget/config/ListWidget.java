@@ -18,7 +18,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,8 +31,8 @@ import dev.emi.emi.EmiPort;
  * This is the lesser of two evils, at least this way I have vanilla compat.
  */
 public class ListWidget extends AbstractContainerEventHandler implements Renderable, NarratableEntry {
-	private static final ResourceLocation MENU_LIST_BACKGROUND_TEXTURE = EmiPort.id("minecraft", "textures/gui/menu_list_background.png");
-	private static final ResourceLocation INWORLD_MENU_LIST_BACKGROUND_TEXTURE = EmiPort.id("minecraft", "textures/gui/inworld_menu_list_background.png");
+	private static final Identifier MENU_LIST_BACKGROUND_TEXTURE = EmiPort.id("minecraft", "textures/gui/menu_list_background.png");
+	private static final Identifier INWORLD_MENU_LIST_BACKGROUND_TEXTURE = EmiPort.id("minecraft", "textures/gui/inworld_menu_list_background.png");
 
 	protected final Minecraft client;
 	private final List<Entry> children = Lists.newArrayList();
@@ -159,7 +159,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		this.hoveredEntry = this.isMouseOver(mouseX, mouseY) ? this.getEntryAtPosition(mouseX, mouseY) : null;
 
 		{	// Render background
-			ResourceLocation identifier = this.client.level == null ? MENU_LIST_BACKGROUND_TEXTURE : INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
+			Identifier identifier = this.client.level == null ? MENU_LIST_BACKGROUND_TEXTURE : INWORLD_MENU_LIST_BACKGROUND_TEXTURE;
 			draw.blit(RenderPipelines.GUI_TEXTURED, identifier, left, top, right, bottom + (int)scrollAmount, right - left, bottom - top, 32, 32);
 		}
 
@@ -171,8 +171,8 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 
 
 		{	// Render header & footer separators
-			ResourceLocation identifier = this.client.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
-			ResourceLocation identifier2 = this.client.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
+			Identifier identifier = this.client.level == null ? Screen.HEADER_SEPARATOR : Screen.INWORLD_HEADER_SEPARATOR;
+			Identifier identifier2 = this.client.level == null ? Screen.FOOTER_SEPARATOR : Screen.INWORLD_FOOTER_SEPARATOR;
 			draw.blit(RenderPipelines.GUI_TEXTURED, identifier, left, top - 2, 0.0F, 0.0F, width, 2, 32, 2);
 			draw.blit(RenderPipelines.GUI_TEXTURED, identifier2, left, bottom, 0.0F, 0.0F, width, 2, 32, 2);
 		}

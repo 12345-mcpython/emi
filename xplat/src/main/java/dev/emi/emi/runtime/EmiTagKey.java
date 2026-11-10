@@ -13,7 +13,7 @@ import net.minecraft.core.HolderSet.Named;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +47,7 @@ public class EmiTagKey<T> {
 		return raw.isFor(registry.key());
 	}
 
-	public ResourceLocation id() {
+	public Identifier id() {
 		return raw.location();
 	}
 
@@ -55,8 +55,8 @@ public class EmiTagKey<T> {
 		return raw.registry();
 	}
 
-	public ResourceLocation registryId() {
-		return raw.registry().location();
+	public Identifier registryId() {
+		return raw.registry().identifier();
 	}
 
 	public Stream<T> stream() {
@@ -97,7 +97,7 @@ public class EmiTagKey<T> {
 	}
 
 	private @Nullable String getTagTranslationKey() {
-		ResourceLocation registry = raw.registry().location();
+		Identifier registry = raw.registry().identifier();
 		if (registry.getNamespace().equals("minecraft")) {
 			String s = translatePrefix("tag." + registry.getPath().replace("/", ".") + ".", this.id());
 			if (s != null) {
@@ -112,7 +112,7 @@ public class EmiTagKey<T> {
 		return translatePrefix("tag.", this.id());
 	}
 
-	private static @Nullable String translatePrefix(String prefix, ResourceLocation id) {
+	private static @Nullable String translatePrefix(String prefix, Identifier id) {
 		String s = EmiUtil.translateId(prefix, id);
 		if (I18n.exists(s)) {
 			return s;
@@ -126,8 +126,8 @@ public class EmiTagKey<T> {
 		return null;
 	}
 
-	public @Nullable ResourceLocation getCustomModel() {
-		ResourceLocation rid = this.id();
+	public @Nullable Identifier getCustomModel() {
+		Identifier rid = this.id();
 		if (rid.getNamespace().equals("forge") && !EmiTags.MODELED_TAGS.containsKey(raw())) {
 			return EmiTagKey.of(TagKey.create(raw.registry(), EmiPort.id("c", rid.getPath()))).getCustomModel();
 		}
@@ -153,7 +153,7 @@ public class EmiTagKey<T> {
 		return (EmiTagKey<T>) CACHE.computeIfAbsent(raw, k -> new EmiTagKey<>(k));
 	}
 
-	public static <T> EmiTagKey<T> of(Registry<T> registry, ResourceLocation id) {
+	public static <T> EmiTagKey<T> of(Registry<T> registry, Identifier id) {
 		return of(TagKey.create(registry.key(), id));
 	}
 

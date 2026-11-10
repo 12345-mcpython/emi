@@ -50,7 +50,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -170,7 +170,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 				for (PotionBrewing.Mix<Potion> recipe : brewingRegistryAccess.getPotionRecipes()) {
 					try {
 						if (recipe.ingredient().items().findAny().isPresent()) {
-							ResourceLocation id = EmiPort.id("emi", "/brewing/" + pid
+							Identifier id = EmiPort.id("emi", "/brewing/" + pid
 								+ "/" + EmiUtil.subId(recipe.ingredient().items().findFirst().get().value())
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.from().value()))
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.to().value())));
@@ -194,8 +194,8 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 					Consumer<Holder<Potion>> potionRecipeGen = entry -> {
 						Potion potion = entry.value();
 						if (brewingRegistry.isBrewablePotion(entry)) {
-							ResourceLocation id = EmiPort.id("emi", "/brewing/item/"
-								+ EmiUtil.subId(entry.unwrapKey().get().location()) + "/" + gid + "/" + iid + "/" + oid);
+							Identifier id = EmiPort.id("emi", "/brewing/item/"
+								+ EmiUtil.subId(entry.unwrapKey().get().identifier()) + "/" + gid + "/" + iid + "/" + oid);
 							registry.addRecipe(new EmiBrewingRecipe(
 								EmiStack.of(EmiPort.setPotion(new ItemStack(recipe.from().value()), potion)), EmiIngredient.of(recipe.ingredient()),
 								EmiStack.of(EmiPort.setPotion(new ItemStack(recipe.to().value()), potion)), id));
@@ -220,7 +220,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 						EmiStack input = EmiStack.of(is);
 						EmiIngredient ingredient = EmiIngredient.of(recipe.getIngredient());
 						EmiStack output = EmiStack.of(recipe.getOutput(is, new ItemStack(recipe.getIngredient().items().findFirst().get().value())));
-						ResourceLocation id = EmiPort.id("emi", "/brewing/neoforge/"
+						Identifier id = EmiPort.id("emi", "/brewing/neoforge/"
 							+ EmiUtil.subId(input.getId()) + "/"
 							+ EmiUtil.subId(ingredient.getEmiStacks().get(0).getId()) + "/"
 							+ EmiUtil.subId(output.getId()));
@@ -286,7 +286,7 @@ public class EmiAgnosNeoForge extends EmiAgnos {
 		FluidStack fs = new FluidStack(stack.getKeyOfType(Fluid.class).builtInRegistryHolder(), 1000, stack.getComponentChanges());
 		IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fs.getFluid());
 		Minecraft client = Minecraft.getInstance();
-		ResourceLocation texture = ext.getStillTexture(fs);
+		Identifier texture = ext.getStillTexture(fs);
 		TextureAtlasSprite sprite;
 		if (texture != null) {
 			sprite = client.getAtlasManager().getAtlasOrThrow(net.minecraft.data.AtlasIds.BLOCKS).getSprite(texture);

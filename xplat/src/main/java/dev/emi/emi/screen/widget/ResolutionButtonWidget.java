@@ -30,7 +30,7 @@ public class ResolutionButtonWidget extends Button {
 	}
 
 	@Override
-	public void renderWidget(GuiGraphics raw, int mouseX, int mouseY, float delta) {
+	public void renderContents(GuiGraphics raw, int mouseX, int mouseY, float delta) {
 		EmiDrawContext context = EmiDrawContext.wrap(raw);
 		int u = 0;
 		if (this.isHovered()) {

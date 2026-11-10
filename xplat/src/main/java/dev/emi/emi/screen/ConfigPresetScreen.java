@@ -41,7 +41,7 @@ public class ConfigPresetScreen extends Screen {
 		this.resetButton = EmiPort.newButton(x + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> {
 			EmiConfig.loadConfig(QDCSS.load("revert", last.originalConfig));
 			Minecraft client = Minecraft.getInstance();
-			this.init(client, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
+			this.init(client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight());
 		});
 		this.addRenderableWidget(resetButton);
 		this.addRenderableWidget(EmiPort.newButton(x + w / 2 + 2, height - 30, w / 2 - 2, 20, EmiPort.translatable("gui.done"), button -> {

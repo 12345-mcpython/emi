@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 import dev.emi.emi.api.stack.EmiIngredient;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 
 /**
  * Batched stack rendering is disabled from 1.21.4 onwards.

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
@@ -18,15 +18,15 @@ import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.serializer.EmiIngredientSerializer;
 
 public class RecipeDefaults {
-	public final List<ResourceLocation> added = Lists.newArrayList();
+	public final List<Identifier> added = Lists.newArrayList();
 	public final List<Resolution> resolutions = Lists.newArrayList();
 	public final List<Tag> tags = Lists.newArrayList();
 
-	public void add(ResourceLocation id) {
+	public void add(Identifier id) {
 		added.add(id);
 	}
 
-	public void add(ResourceLocation id, JsonArray arr) {
+	public void add(Identifier id, JsonArray arr) {
 		resolutions.add(new Resolution(id, arr.asList()));
 	}
 
@@ -34,7 +34,7 @@ public class RecipeDefaults {
 		tags.add(new Tag(tag, stack));
 	}
 
-	public void remove(ResourceLocation id) {
+	public void remove(Identifier id) {
 		added.remove(id);
 		resolutions.removeIf(r -> r.recipe.equals(id));
 	}
@@ -52,7 +52,7 @@ public class RecipeDefaults {
 			return map;
 		}
 		EmiRecipeManager manager = EmiApi.getRecipeManager();
-		for (ResourceLocation id : added) {
+		for (Identifier id : added) {
 			EmiRecipe recipe = manager.getRecipe(id);
 			if (recipe != null) {
 				for (EmiIngredient stack : recipe.getOutputs()) {
@@ -81,7 +81,7 @@ public class RecipeDefaults {
 		return map;
 	}
 
-	public record Resolution(ResourceLocation recipe, List<JsonElement> stacks) {
+	public record Resolution(Identifier recipe, List<JsonElement> stacks) {
 	}
 
 	public record Tag(JsonElement tag, JsonElement stack) {

@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +25,7 @@ import it.unimi.dsi.fastutil.ints.IntLists;
 public class EmiFireworkStarFadeRecipe extends EmiPatternCraftingRecipe {
 	private static final List<DyeItem> DYES = Stream.of(DyeColor.values()).map(DyeItem::byColor).toList();
 
-	public EmiFireworkStarFadeRecipe(ResourceLocation id) {
+	public EmiFireworkStarFadeRecipe(Identifier id) {
 		super(List.of(
 			EmiIngredient.of(DYES.stream().map(i -> (EmiIngredient) EmiStack.of(i)).collect(Collectors.toList())),
 			EmiStack.of(Items.FIREWORK_STAR)), EmiStack.of(Items.FIREWORK_STAR), id);

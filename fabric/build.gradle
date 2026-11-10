@@ -15,7 +15,7 @@ buildscript {
 
 plugins {
 	id "dev.architectury.loom"
-	id "com.github.johnrengelman.shadow" version "7.1.2"
+	id "com.gradleup.shadow" version "9.6.1"
 }
 if (System.getenv("MODRINTH_TOKEN")) {
 	apply plugin: "com.modrinth.minotaur"
@@ -65,9 +65,6 @@ dependencies {
 	common(project(path: ":xplat", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":xplat", configuration: "transformProductionFabric")) { transitive false }
 
-	modCompileOnly("mezz.jei:${rootProject.jei_version_fabric}") {
-		transitive = false
-	}
 	modCompileOnly "com.terraformersmc:modmenu:6.1.0-rc.4"
 }
 

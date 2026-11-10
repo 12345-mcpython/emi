@@ -5,7 +5,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
@@ -30,7 +30,7 @@ public class EmiFireworkStarRecipe extends EmiPatternCraftingRecipe {
 
 	private static final List<Item> EFFECTS = List.of(Items.DIAMOND, Items.GLOWSTONE_DUST);
 
-	public EmiFireworkStarRecipe(ResourceLocation id) {
+	public EmiFireworkStarRecipe(Identifier id) {
 		super(List.of(
 				EmiIngredient.of(DYES.stream().map(i -> (EmiIngredient) EmiStack.of(i)).collect(Collectors.toList())),
 						EmiIngredient.of(SHAPES.stream().map(i -> (EmiIngredient) EmiStack.of(i)).collect(Collectors.toList())),

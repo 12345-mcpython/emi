@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.Recipe;
@@ -32,9 +32,9 @@ public class EmiRecipeSync {
 		int sent = 0;
 		for (int index = 0; index < holders.size(); index += RECIPES_PER_PACKET) {
 			int end = Math.min(index + RECIPES_PER_PACKET, holders.size());
-			Map<ResourceLocation, Recipe<?>> chunk = new LinkedHashMap<>();
+			Map<Identifier, Recipe<?>> chunk = new LinkedHashMap<>();
 			for (RecipeHolder<?> holder : holders.subList(index, end)) {
-				chunk.put(holder.id().location(), holder.value());
+				chunk.put(holder.id().identifier(), holder.value());
 			}
 			boolean last = end >= holders.size();
 			EmiNetwork.sendToClient(player, new EmiRecipeSyncS2CPacket(last, chunk));

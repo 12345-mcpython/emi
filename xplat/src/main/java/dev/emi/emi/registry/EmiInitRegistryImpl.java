@@ -31,6 +31,6 @@ public class EmiInitRegistryImpl implements EmiInitRegistry {
 	public void addRegistryAdapter(EmiRegistryAdapter<?> adapter) {
 		EmiTags.ADAPTERS_BY_CLASS.map().put(adapter.getBaseClass(), adapter);
 		EmiTags.ADAPTERS_BY_REGISTRY.put(adapter.getRegistry(), adapter);
-		EmiTags.ADAPTERS_BY_ID.put(adapter.getRegistry().key().location(), adapter);
+		EmiTags.ADAPTERS_BY_ID.put(adapter.getRegistry().key().identifier(), adapter);
 	}
 }

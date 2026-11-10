@@ -545,7 +545,7 @@ public class BoMScreen extends Screen {
 			EmiApi.displayRecipes(ingredient);
 			if (groupTree == null && minecraft.screen instanceof RecipeScreen rs) {
 				rs.setResolutionTarget(ingredient);
-				rs.init(minecraft, rs.width, rs.height);
+				rs.init(rs.width, rs.height);
 				if (recipe != null) EmiApi.focusRecipe(recipe);
 			}
 		}

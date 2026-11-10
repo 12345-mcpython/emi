@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -31,12 +31,12 @@ import dev.emi.emi.util.InheritanceMap;
 public class EmiTags {
 	public static final InheritanceMap<EmiRegistryAdapter<?>> ADAPTERS_BY_CLASS = new InheritanceMap<>(Maps.newHashMap());
 	public static final Map<Registry<?>, EmiRegistryAdapter<?>> ADAPTERS_BY_REGISTRY = Maps.newHashMap();
-	public static final Map<ResourceLocation, EmiRegistryAdapter<?>> ADAPTERS_BY_ID = Maps.newHashMap();
-	public static final ResourceLocation HIDDEN_FROM_RECIPE_VIEWERS = EmiPort.id("c", "hidden_from_recipe_viewers");
-	public static final Map<TagKey<?>, ResourceLocation> MODELED_TAGS = Maps.newHashMap();
+	public static final Map<Identifier, EmiRegistryAdapter<?>> ADAPTERS_BY_ID = Maps.newHashMap();
+	public static final Identifier HIDDEN_FROM_RECIPE_VIEWERS = EmiPort.id("c", "hidden_from_recipe_viewers");
+	public static final Map<TagKey<?>, Identifier> MODELED_TAGS = Maps.newHashMap();
 	private static final Map<Set<?>, List<EmiTagKey<?>>> CACHED_TAGS = Maps.newHashMap();
 	private static final Map<EmiTagKey<?>, List<?>> TAG_VALUES = Maps.newHashMap();
-	private static final Map<ResourceLocation, List<EmiTagKey<?>>> SORTED_TAGS = Maps.newHashMap();
+	private static final Map<Identifier, List<EmiTagKey<?>>> SORTED_TAGS = Maps.newHashMap();
 	public static final List<EmiTagKey<?>> TAGS = Lists.newArrayList();
 	public static TagExclusions exclusions = new TagExclusions();
 
@@ -140,11 +140,11 @@ public class EmiTags {
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static <T> List<EmiTagKey<T>> getTags(Registry<T> registry) {
-		return (List<EmiTagKey<T>>) (List) SORTED_TAGS.getOrDefault(registry.key().location(), List.of());
+		return (List<EmiTagKey<T>>) (List) SORTED_TAGS.getOrDefault(registry.key().identifier(), List.of());
 	}
 
 	public static void registerTagModels(net.minecraft.server.packs.resources.ResourceManager manager,
-			java.util.function.Consumer<net.minecraft.resources.ResourceLocation> consumer) {
+			java.util.function.Consumer<net.minecraft.resources.Identifier> consumer) {
 		// 1.21.5 replaced ModelResourceLocation with the item model pipeline; rebaking the tag icons needs
 		// the new ItemModelResolver path, so tag stacks fall back to their first ingredient for now.
 		MODELED_TAGS.clear();
@@ -164,7 +164,7 @@ public class EmiTags {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	private static <T> void reloadTags(Registry<T> registry) {
 		Set<T> hidden = EmiTagKey.of(registry, HIDDEN_FROM_RECIPE_VIEWERS).getSet();
-		ResourceLocation rid = registry.key().location();
+		Identifier rid = registry.key().identifier();
 		List<EmiTagKey<T>> tags = EmiTagKey.fromRegistry(registry)
 			.filter(key -> !exclusions.contains(rid, key.id()) && !hidden.containsAll(key.getList()))
 			.toList();
@@ -182,7 +182,7 @@ public class EmiTags {
 		tags = tags.stream()
 			.sorted((a, b) -> Long.compare(b.stream().count(), a.stream().count()))
 			.toList();
-		EmiTags.SORTED_TAGS.put(registry.key().location(), (List) tags);
+		EmiTags.SORTED_TAGS.put(registry.key().identifier(), (List) tags);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +21,7 @@ public class EmiSuspiciousStewRecipe extends EmiPatternCraftingRecipe {
 	private static final List<Item> FLOWERS = EmiPort.getItemRegistry().stream()
 		.filter(i -> i instanceof BlockItem bi && bi.getBlock() instanceof FlowerBlock).collect(Collectors.toList());
 
-	public EmiSuspiciousStewRecipe(ResourceLocation id) {
+	public EmiSuspiciousStewRecipe(Identifier id) {
 		super(List.of(
 				EmiStack.of(Items.BOWL),
 				EmiStack.of(Items.RED_MUSHROOM),

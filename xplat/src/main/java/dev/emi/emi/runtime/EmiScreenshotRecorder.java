@@ -19,7 +19,7 @@ import com.mojang.blaze3d.textures.GpuTexture;
 
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.config.EmiConfig;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.render.GuiRenderer;
@@ -103,7 +103,7 @@ public class EmiScreenshotRecorder {
 		var gameRenderer = client.gameRenderer;
 		GuiRenderer guiRenderer = new GuiRenderer(renderState, bufferSource,
 			gameRenderer.getSubmitNodeStorage(), gameRenderer.getFeatureRenderDispatcher(), List.of());
-		GuiGraphics graphics = new GuiGraphics(client, renderState);
+		GuiGraphics graphics = new GuiGraphics(client, renderState, (int) (windowWidth / poseScale), (int) (windowHeight / poseScale));
 		GpuBuffer fogBuffer = RenderSystem.getDevice()
 			.createBuffer(() -> "EMI screenshot fog", GpuBuffer.USAGE_UNIFORM, FogRenderer.FOG_UBO_SIZE);
 		GpuBufferSlice fog = fogBuffer.slice(0, FogRenderer.FOG_UBO_SIZE);

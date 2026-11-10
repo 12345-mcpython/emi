@@ -17,7 +17,6 @@ import dev.emi.emi.EmiUtil;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.FabricEmiStack;
-import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.FluidEmiStack;
@@ -41,7 +40,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PotionItem;
@@ -145,7 +144,7 @@ public class EmiAgnosFabric extends EmiAgnos {
 					try {
 						Ingredient recipeIngredient = recipe.ingredient();
 						if (recipeIngredient.items().findAny().isPresent()) {
-							ResourceLocation id = EmiPort.id("emi", "/brewing/" + pid
+							Identifier id = EmiPort.id("emi", "/brewing/" + pid
 								+ "/" + EmiUtil.subId(recipeIngredient.items().findFirst().get().value())
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.from().value()))
 								+ "/" + EmiUtil.subId(EmiPort.getPotionRegistry().getKey(recipe.to().value())));
@@ -169,8 +168,8 @@ public class EmiAgnosFabric extends EmiAgnos {
 					String oid = EmiUtil.subId(recipe.to().value());
 					Consumer<Holder<Potion>> potionRecipeGen = entry -> {
 						if (brewingRegistry.isBrewablePotion(entry)) {
-							ResourceLocation id = EmiPort.id("emi", "/brewing/item/"
-								+ EmiUtil.subId(entry.unwrapKey().get().location()) + "/" + gid + "/" + iid + "/" + oid);
+							Identifier id = EmiPort.id("emi", "/brewing/item/"
+								+ EmiUtil.subId(entry.unwrapKey().get().identifier()) + "/" + gid + "/" + iid + "/" + oid);
 							registry.addRecipe(new EmiBrewingRecipe(
 								EmiStack.of(EmiPort.setPotion(new ItemStack(recipe.from().value()), entry.value())), EmiIngredient.of(recipeIngredient),
 								EmiStack.of(EmiPort.setPotion(new ItemStack(recipe.to().value()), entry.value())), id));
@@ -233,9 +232,6 @@ public class EmiAgnosFabric extends EmiAgnos {
 
 	@Override
 	protected EmiStack createFluidStackAgnos(Object object) {
-		if (object instanceof IJeiFluidIngredient fluid) {
-			return FabricEmiStack.of(fluid.getFluidVariant(), fluid.getAmount());
-		}
 		return EmiStack.EMPTY;
 	}
 

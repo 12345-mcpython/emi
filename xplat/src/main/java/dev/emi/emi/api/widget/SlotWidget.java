@@ -7,7 +7,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -35,7 +35,7 @@ import dev.emi.emi.screen.tooltip.RecipeCostTooltipComponent;
 public class SlotWidget extends Widget {
 	protected final EmiIngredient stack;
 	protected final int x, y;
-	protected ResourceLocation textureId;
+	protected Identifier textureId;
 	protected int u, v;
 	protected int customWidth, customHeight;
 	protected boolean drawBack = true, output = false, catalyst = false, custom = false;
@@ -126,7 +126,7 @@ public class SlotWidget extends Widget {
 	 * which is set by {@link SlotWidget#large()}.
 	 * {@link SlotWidget#custom()} is an alternative for custom sizing.
 	 */
-	public SlotWidget backgroundTexture(ResourceLocation id, int u, int v) {
+	public SlotWidget backgroundTexture(Identifier id, int u, int v) {
 		this.textureId = id;
 		this.u = u;
 		this.v = v;
@@ -137,7 +137,7 @@ public class SlotWidget extends Widget {
 	 * Sets the slot to use a custom texture and custom sizing
 	 * @param id The texture identifier to use to draw the background
 	 */
-	public SlotWidget customBackground(ResourceLocation id, int u, int v, int width, int height) {
+	public SlotWidget customBackground(Identifier id, int u, int v, int width, int height) {
 		backgroundTexture(id, u, v);
 		this.custom = true;
 		this.customWidth = width;

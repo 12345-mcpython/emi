@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
@@ -40,12 +40,12 @@ public class ProxyRecipeManager {
 		return server.getRecipeManager();
 	}
 
-	public static @Nullable ResourceLocation getId(Recipe<?> recipe) {
+	public static @Nullable Identifier getId(Recipe<?> recipe) {
 		ResourceKey<Recipe<?>> key = recipeIds.get(recipe);
 		if (key != null) {
-			return key.location();
+			return key.identifier();
 		}
-		for (Map.Entry<ResourceLocation, Recipe<?>> entry : LocalRecipes.get().entrySet()) {
+		for (Map.Entry<Identifier, Recipe<?>> entry : LocalRecipes.get().entrySet()) {
 			if (entry.getValue() == recipe) {
 				return entry.getKey();
 			}
@@ -53,27 +53,27 @@ public class ProxyRecipeManager {
 		return null;
 	}
 
-	public static boolean hasId(ResourceLocation id) {
+	public static boolean hasId(Identifier id) {
 		for (ResourceKey<Recipe<?>> key : recipeIds.values()) {
-			if (key.location().equals(id)) {
+			if (key.identifier().equals(id)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public static @Nullable Recipe<?> getRecipe(ResourceLocation id) {
+	public static @Nullable Recipe<?> getRecipe(Identifier id) {
 		RecipeHolder<?> entry = getRecipeEntry(id);
 		return entry == null ? null : entry.value();
 	}
 
-	public static @Nullable RecipeHolder<?> getRecipeEntry(ResourceLocation id) {
+	public static @Nullable RecipeHolder<?> getRecipeEntry(Identifier id) {
 		RecipeManager raw = getRaw();
 		if (raw == null || id == null) {
 			return null;
 		}
 		for (RecipeHolder<?> holder : raw.getRecipes()) {
-			if (holder.id().location().equals(id)) {
+			if (holder.id().identifier().equals(id)) {
 				return holder;
 			}
 		}

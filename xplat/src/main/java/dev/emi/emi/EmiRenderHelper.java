@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.level.material.Fluid;
 import org.joml.Vector2i;
@@ -48,15 +48,15 @@ public class EmiRenderHelper {
 	public static final DecimalFormat TEXT_FORMAT = new DecimalFormat("#,###.##");
 	public static final Component EMPTY_TEXT = EmiPort.literal("");
 	public static final Minecraft CLIENT = Minecraft.getInstance();
-	public static final ResourceLocation WIDGETS = EmiPort.id("emi", "textures/gui/widgets.png");
-	public static final ResourceLocation BUTTONS = EmiPort.id("emi", "textures/gui/buttons.png");
-	public static final ResourceLocation BACKGROUND = EmiPort.id("emi", "textures/gui/background.png");
-	public static final ResourceLocation GRID = EmiPort.id("emi", "textures/gui/grid.png");
-	public static final ResourceLocation DASH = EmiPort.id("emi", "textures/gui/dash.png");
-	public static final ResourceLocation CONFIG = EmiPort.id("emi", "textures/gui/config.png");
-	public static final ResourceLocation PIECES = EmiPort.id("emi", "textures/gui/pieces.png");
+	public static final Identifier WIDGETS = EmiPort.id("emi", "textures/gui/widgets.png");
+	public static final Identifier BUTTONS = EmiPort.id("emi", "textures/gui/buttons.png");
+	public static final Identifier BACKGROUND = EmiPort.id("emi", "textures/gui/background.png");
+	public static final Identifier GRID = EmiPort.id("emi", "textures/gui/grid.png");
+	public static final Identifier DASH = EmiPort.id("emi", "textures/gui/dash.png");
+	public static final Identifier CONFIG = EmiPort.id("emi", "textures/gui/config.png");
+	public static final Identifier PIECES = EmiPort.id("emi", "textures/gui/pieces.png");
 
-	public static void drawNinePatch(EmiDrawContext context, ResourceLocation texture, int x, int y, int w, int h, int u, int v, int cornerLength, int centerLength) {
+	public static void drawNinePatch(EmiDrawContext context, Identifier texture, int x, int y, int w, int h, int u, int v, int cornerLength, int centerLength) {
 		int cor = cornerLength;
 		int cen = centerLength;
 		int corcen = cor + cen;
@@ -97,7 +97,7 @@ public class EmiRenderHelper {
 		float vMax = sprite.getV1() - vSpan / 16 * (16 - (height + yOff));
 		GpuTextureView view = Minecraft.getInstance().getTextureManager().getTexture(sprite.atlasLocation()).getTextureView();
 		((GuiGraphicsAccessor) draw).emi$getGuiRenderState().submitBlitToCurrentLayer(new BlitRenderState(RenderPipelines.GUI_TEXTURED,
-			TextureSetup.singleTexture(view), new Matrix3x2f(draw.pose()), x, y, x + width, y + height,
+			TextureSetup.singleTexture(view, RenderSystem.getSamplerCache().getClampToEdge(com.mojang.blaze3d.textures.FilterMode.NEAREST)), new Matrix3x2f(draw.pose()), x, y, x + width, y + height,
 			uMin, uMax, vMin, vMax, argb, null));
 	}
 

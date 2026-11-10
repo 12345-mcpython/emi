@@ -24,7 +24,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvents;
@@ -88,7 +88,7 @@ public final class EmiPort {
 		return text.getVisualOrderText();
 	}
 
-	public static Collection<ResourceLocation> findResources(ResourceManager manager, String prefix, Predicate<String> pred) {
+	public static Collection<Identifier> findResources(ResourceManager manager, String prefix, Predicate<String> pred) {
 		return manager.listResources(prefix, i -> pred.test(i.toString())).keySet();
 	}
 
@@ -150,10 +150,10 @@ public final class EmiPort {
 		return client.level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).listElements().toList();
 	}
 
-	public static ResourceLocation getEnchantmentId(Enchantment enchantment) {
+	public static Identifier getEnchantmentId(Enchantment enchantment) {
 		for (Holder.Reference<Enchantment> holder : getEnchantments()) {
 			if (holder.value() == enchantment) {
-				return holder.key().location();
+				return holder.key().identifier();
 			}
 		}
 		return EmiPort.id("minecraft", "unknown");
@@ -233,12 +233,12 @@ public final class EmiPort {
 		return DataComponentPatch.EMPTY;
 	}
 
-	public static ResourceLocation id(String id) {
-		return ResourceLocation.parse(id);
+	public static Identifier id(String id) {
+		return Identifier.parse(id);
 	}
 
-	public static ResourceLocation id(String namespace, String path) {
-		return ResourceLocation.fromNamespaceAndPath(namespace, path);
+	public static Identifier id(String namespace, String path) {
+		return Identifier.fromNamespaceAndPath(namespace, path);
 	}
 
 	public static void applyModelViewMatrix() {

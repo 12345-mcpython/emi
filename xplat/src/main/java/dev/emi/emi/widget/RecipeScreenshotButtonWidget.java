@@ -2,7 +2,7 @@ package dev.emi.emi.widget;
 
 import java.util.List;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import dev.emi.emi.EmiPort;
 import dev.emi.emi.EmiRenderHelper;
 import dev.emi.emi.api.recipe.EmiRecipe;
@@ -23,7 +23,7 @@ public class RecipeScreenshotButtonWidget extends RecipeButtonWidget {
 	public boolean mouseClicked(int mouseX, int mouseY, int button) {
 		this.playButtonSound();
 
-		ResourceLocation id = recipe.getId();
+		Identifier id = recipe.getId();
 		String path;
 		if (id == null) {
 			path = "unknown-recipe";

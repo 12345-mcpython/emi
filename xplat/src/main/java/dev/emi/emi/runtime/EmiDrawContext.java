@@ -9,7 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 
 public class EmiDrawContext {
@@ -44,20 +44,20 @@ public class EmiDrawContext {
 		matrices().translate(x, y);
 	}
 
-	public void drawTexture(ResourceLocation texture, int x, int y, int u, int v, int width, int height) {
+	public void drawTexture(Identifier texture, int x, int y, int u, int v, int width, int height) {
 		drawTexture(texture, x, y, width, height, u, v, width, height, 256, 256);
 	}
 
-	public void drawTexture(ResourceLocation texture, int x, int y, int z, float u, float v, int width, int height) {
+	public void drawTexture(Identifier texture, int x, int y, int z, float u, float v, int width, int height) {
 		drawTexture(texture, x, y, z, u, v, width, height, 256, 256);
 	}
 
-	public void drawTexture(ResourceLocation texture, int x, int y, int z, float u, float v, int width, int height, int textureWidth, int textureHeight) {
+	public void drawTexture(Identifier texture, int x, int y, int z, float u, float v, int width, int height, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
 		context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, textureWidth, textureHeight, packedColor());
 	}
 
-	public void drawTexture(ResourceLocation texture, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
+	public void drawTexture(Identifier texture, int x, int y, int width, int height, float u, float v, int regionWidth, int regionHeight, int textureWidth, int textureHeight) {
 		EmiPort.setPositionTexShader();
 		context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, u, v, width, height, regionWidth, regionHeight, textureWidth, textureHeight, packedColor());
 	}

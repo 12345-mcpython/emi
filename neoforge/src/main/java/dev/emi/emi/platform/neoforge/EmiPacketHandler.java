@@ -22,8 +22,8 @@ import dev.emi.emi.runtime.EmiReloadManager;
 import dev.emi.emi.runtime.EmiLog;
 
 public class EmiPacketHandler {
-    public static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(net.minecraft.resources.ResourceLocation.parse("emi:chess_s2c"));
-    private static final CustomPacketPayload.Type<EmiChessPacket.C2S> ID_CHESS_SERVERBOUND = new CustomPacketPayload.Type<EmiChessPacket.C2S>(net.minecraft.resources.ResourceLocation.parse("emi:chess_c2s"));
+    public static final CustomPacketPayload.Type<EmiChessPacket.S2C> ID_CHESS_CLIENTBOUND = new CustomPacketPayload.Type<EmiChessPacket.S2C>(net.minecraft.resources.Identifier.parse("emi:chess_s2c"));
+    private static final CustomPacketPayload.Type<EmiChessPacket.C2S> ID_CHESS_SERVERBOUND = new CustomPacketPayload.Type<EmiChessPacket.C2S>(net.minecraft.resources.Identifier.parse("emi:chess_c2s"));
 
     public static void init(RegisterPayloadHandlersEvent event) {
         var registrar = event.registrar("emi").optional();

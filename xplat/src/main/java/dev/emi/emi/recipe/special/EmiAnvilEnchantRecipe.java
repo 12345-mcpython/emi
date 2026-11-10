@@ -2,7 +2,7 @@ package dev.emi.emi.recipe.special;
 
 import java.util.List;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -22,9 +22,9 @@ public class EmiAnvilEnchantRecipe implements EmiRecipe {
 	private final Item tool;
 	private final Enchantment enchantment;
 	private final int level;
-	private final ResourceLocation id;
+	private final Identifier id;
 
-	public EmiAnvilEnchantRecipe(Item tool, Enchantment enchantment, int level, ResourceLocation id) {
+	public EmiAnvilEnchantRecipe(Item tool, Enchantment enchantment, int level, Identifier id) {
 		this.tool = tool;
 		this.enchantment = enchantment;
 		this.level = level;
@@ -37,7 +37,7 @@ public class EmiAnvilEnchantRecipe implements EmiRecipe {
 	}
 
 	@Override
-	public ResourceLocation getId() {
+	public Identifier getId() {
 		return id;
 	}
 

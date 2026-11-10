@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
@@ -22,7 +22,7 @@ public class EmiArmorDyeRecipe extends EmiPatternCraftingRecipe {
 	private static final List<DyeItem> DYES = Stream.of(DyeColor.values()).map(c -> DyeItem.byColor(c)).collect(Collectors.toList());
 	private final Item armor;
 
-	public EmiArmorDyeRecipe(Item armor, ResourceLocation id) {
+	public EmiArmorDyeRecipe(Item armor, Identifier id) {
 		super(List.of(
 			EmiIngredient.of(DYES.stream().map(i -> (EmiIngredient) EmiStack.of(i)).collect(Collectors.toList())),
 			EmiStack.of(armor)), EmiStack.of(armor), id);

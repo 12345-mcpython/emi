@@ -26,7 +26,7 @@ public class CreateItemC2SPacket implements EmiPacket {
 
 	@Override
 	public void apply(Player player) {
-		if ((player.hasPermissions(2) || player.isCreative()) && player.containerMenu != null) {
+		if ((player.permissions().hasPermission(new net.minecraft.server.permissions.Permission.HasCommandLevel(net.minecraft.server.permissions.PermissionLevel.GAMEMASTERS)) || player.isCreative()) && player.containerMenu != null) {
 			if (stack.isEmpty()) {
 				if (mode == 1 && !player.containerMenu.getCarried().isEmpty()) {
 					EmiLog.info(player.getName() + " deleted " + player.containerMenu.getCarried());

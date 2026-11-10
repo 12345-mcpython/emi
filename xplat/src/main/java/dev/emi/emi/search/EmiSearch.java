@@ -11,7 +11,7 @@ import net.minecraft.client.searchtree.SuffixArray;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -78,7 +78,7 @@ public class EmiSearch {
 						}
 					}
 				}
-				ResourceLocation id = stack.getId();
+				Identifier id = stack.getId();
 				if (id != null) {
 					mods.add(searchStack, EmiUtil.getModName(id.getNamespace()).toLowerCase());
 					mods.add(searchStack, id.getNamespace().toLowerCase());
@@ -86,7 +86,7 @@ public class EmiSearch {
 				}
 				if (stack.getItemStack().getItem() == Items.ENCHANTED_BOOK) {
 					for (Holder<Enchantment> e : stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY).keySet()) {
-						ResourceLocation eid = EmiPort.getEnchantmentId(e.value());
+						Identifier eid = EmiPort.getEnchantmentId(e.value());
 						if (eid != null && !eid.getNamespace().equals("minecraft")) {
 							mods.add(searchStack, EmiUtil.getModName(eid.getNamespace()).toLowerCase());
 						}

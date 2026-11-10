@@ -2,7 +2,7 @@ package dev.emi.emi.handler;
 
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.StonecutterMenu;
@@ -54,7 +54,7 @@ public class StonecuttingRecipeHandler implements StandardRecipeHandler<Stonecut
 		SingleRecipeInput inv = new SingleRecipeInput(recipe.getInputs().get(0).getEmiStacks().get(0).getItemStack());
 		List<StonecutterRecipe> recipes = ProxyRecipeManager.getMatches(RecipeType.STONECUTTING, inv);
 		for (int i = 0; i < recipes.size(); i++) {
-			ResourceLocation id = ProxyRecipeManager.getId(recipes.get(i));
+			Identifier id = ProxyRecipeManager.getId(recipes.get(i));
 			if (id != null && id.equals(recipe.getId())) {
 				StonecutterMenu sh = context.getScreenHandler();
 				client.gameMode.handleInventoryButtonClick(sh.containerId, i);

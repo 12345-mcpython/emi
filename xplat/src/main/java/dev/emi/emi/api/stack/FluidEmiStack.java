@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.material.Fluid;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +64,7 @@ public class FluidEmiStack extends EmiStack {
 	}
 
 	@Override
-	public ResourceLocation getId() {
+	public Identifier getId() {
 		return EmiPort.getFluidRegistry().getKey(fluid);
 	}
 

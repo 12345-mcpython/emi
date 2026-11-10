@@ -5,7 +5,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -77,7 +77,7 @@ public interface EmiRegistry {
 	/**
 	 * Adds a predicate to run on all current and future recipes to prevent certain ones with the given identifier from being added.
 	 */
-	default void removeRecipes(ResourceLocation id) {
+	default void removeRecipes(Identifier id) {
 		removeRecipes(r -> id.equals(r.getId()));
 	}
 

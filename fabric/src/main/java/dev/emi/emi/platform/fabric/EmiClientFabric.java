@@ -31,7 +31,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -60,15 +60,15 @@ public class EmiClientFabric implements ClientModInitializer {
 				}
 
 				@Override
-				public ResourceLocation getFabricId() {
+				public Identifier getFabricId() {
 					return reloader.getEmiId();
 				}
 			});
 		});
 
-		PreparableModelLoadingPlugin.<List<ResourceLocation>>register((manager, executor) -> {
+		PreparableModelLoadingPlugin.<List<Identifier>>register((manager, executor) -> {
 			return CompletableFuture.supplyAsync(() -> {
-				List<ResourceLocation> ids = Lists.newArrayList();
+				List<Identifier> ids = Lists.newArrayList();
 				EmiTags.registerTagModels(manager.resourceManager(), ids::add);
 				return ids;
 			}, executor);

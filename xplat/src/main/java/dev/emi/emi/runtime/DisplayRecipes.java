@@ -6,7 +6,7 @@ import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
@@ -110,7 +110,7 @@ public class DisplayRecipes {
 
 	private static EmiRecipe convert(RecipeDisplayEntry entry, ContextMap context) {
 		RecipeDisplay display = entry.display();
-		ResourceLocation id = EmiPort.id("emi", "/display/" + entry.id().index());
+		Identifier id = EmiPort.id("emi", "/display/" + entry.id().index());
 		EmiRecipeCategory category = categoryFor(display.craftingStation().resolveForFirstStack(context));
 		if (display instanceof ShapedCraftingRecipeDisplay shaped) {
 			List<EmiIngredient> inputs = resolve(shaped.ingredients(), context);
@@ -158,7 +158,7 @@ public class DisplayRecipes {
 
 	private static EmiRecipeCategory categoryFor(ItemStack station) {
 		if (!station.isEmpty()) {
-			ResourceLocation key = BuiltInRegistries.ITEM.getKey(station.getItem());
+			Identifier key = BuiltInRegistries.ITEM.getKey(station.getItem());
 			String path = key == null ? "" : key.getPath();
 			switch (path) {
 				case "blast_furnace" -> {
@@ -213,7 +213,7 @@ public class DisplayRecipes {
 	 * A flat input row, arrow and output row for displays that have no dedicated EMI equivalent.
 	 */
 	private static class DisplayRecipe extends BasicEmiRecipe {
-		public DisplayRecipe(EmiRecipeCategory category, ResourceLocation id, List<EmiIngredient> inputs, List<EmiStack> outputs) {
+		public DisplayRecipe(EmiRecipeCategory category, Identifier id, List<EmiIngredient> inputs, List<EmiStack> outputs) {
 			super(category, id, inputs.size() * 18 + 26 + outputs.size() * 18, 18);
 			this.inputs.addAll(inputs);
 			this.outputs.addAll(outputs);
