@@ -335,8 +335,9 @@ The 1.21.6 item tags were scanned and named in `en_us.json` + `zh_cn.json`
 `:neoforge:runServer` reaches `Done (3.185s)!` on 1.21.8. The NeoForge client also runs: it joins a
 singleplayer world, EMI receives 1407 recipes, JEI 24.2.0.6 starts, the jemi bridge initializes and the EMI
 reload completes with no mixin errors (screenshot `neoforge/run/screenshots/2026-11-09_21.19.08.png`).
-Still to verify: a full visual pass over the config screens, tooltips, fluid tanks and the BoM tree export in a
-real world.
+Real-client pass (2026-11-10): recipe screens, config screens, tooltips, fluid tanks and the BoM tree export
+all checked out on a NeoForge 1.21.8 client; only cosmetic differences from 1.21.1 remain (see the known gaps
+below: Fabric jemi, multi-item tag icons, and the vanilla item-atlas prepare cost).
 
 #### Item rendering batching on 1.21.6+
 
