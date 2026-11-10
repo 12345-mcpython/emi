@@ -137,11 +137,20 @@ public class EmiScreenshotRecorder {
 					pose.translate(-tx * tileGuiWidth, -ty * tileGuiHeight);
 					renderer.accept(graphics);
 					pose.popMatrix();
-					guiRenderer.render(fog);
-					// Items and other 3D features are submitted to the shared node storage; the game
-					// renderer normally flushes them after the gui pass, so the capture has to as well.
-					gameRenderer.getFeatureRenderDispatcher().renderAllFeatures();
-					gameRenderer.getFeatureRenderDispatcher().endFrame();
+					var previousColorOverride = RenderSystem.outputColorTextureOverride;
+					var previousDepthOverride = RenderSystem.outputDepthTextureOverride;
+					RenderSystem.outputColorTextureOverride = target.getColorTextureView();
+					RenderSystem.outputDepthTextureOverride = target.getDepthTextureView();
+					try {
+						guiRenderer.render(fog);
+						// Items and other 3D features are submitted during the gui prepare phase; flush
+						// them explicitly so they land in the capture target as well.
+						gameRenderer.getFeatureRenderDispatcher().renderAllFeatures();
+					} finally {
+						RenderSystem.outputColorTextureOverride = previousColorOverride;
+						RenderSystem.outputDepthTextureOverride = previousDepthOverride;
+						gameRenderer.getFeatureRenderDispatcher().endFrame();
+					}
 					GpuBuffer buffer = RenderSystem.getDevice()
 						.createBuffer(() -> "EMI screenshot buffer", GpuBuffer.USAGE_MAP_READ | GpuBuffer.USAGE_COPY_DST,
 							windowWidth * windowHeight * 4);
