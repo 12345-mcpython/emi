@@ -382,3 +382,14 @@ public `Batchable` interface stay as a compatibility shim for third-party ingred
 - Fabric JEI/jemi 恢复启用（JEI 26 的 `fabric:recipe_sync` 冲突用 try-register 规避）
 
 验证：双平台编译通过，Fabric/NeoForge 实机通过；screenshot smoke 全过。已知：JEI 26.3.0.31 与 NeoForge 21.10.64 不兼容（JEI 侧），多物品标签图标仍 stub。
+
+## 1.21.11（2026-11-10，已完成）
+
+- 构建链：Gradle 9.5.1 + Architectury Loom 1.17.493 + Shadow 9.6.1（旧 Shadow 7.x 在 Gradle 9 下不可用）
+- 依赖：MC 1.21.11 / NeoForge 21.11.48 / Fabric API 0.141.6+1.21.11 / Loader 0.20.1
+- **移除 JEI/jemi**：EMI 不再依赖 JEI，删除 jemi 包、JEI mixin、三个模块的 JEI 依赖
+- 全局改名：`ResourceLocation` → `Identifier`，工具类迁到 `net.minecraft.util.*`，`critereon` → `criterion`
+- 渲染适配：`RenderType` 新包、`TextureSetup` 需要 `GpuSampler`、`GuiGraphics(Minecraft, GuiRenderState, int, int)`、`AbstractButton#renderContents`
+- 权限：`PermissionSet` + `PermissionLevel.GAMEMASTERS`
+- 运行期：`ScreenMixin` 的 `init(II)V`/`resize(II)V`、按钮 `renderContents` 递归修复
+- 验证：双平台编译、Fabric smoke 全过、Fabric/NeoForge 实机通过
