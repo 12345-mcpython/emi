@@ -200,7 +200,7 @@ public class JemiRecipe<T> implements EmiRecipe {
 
 		@Override
 		public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-			return category.handleInput(recipe, EmiScreenManager.lastMouseX, EmiScreenManager.lastMouseY, InputConstants.getKey(keyCode, scanCode));
+			return category.handleInput(recipe, EmiScreenManager.lastMouseX, EmiScreenManager.lastMouseY, InputConstants.getKey(new net.minecraft.client.input.KeyEvent(keyCode, scanCode, modifiers)));
 		}
 	}
 }

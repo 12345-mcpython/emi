@@ -261,11 +261,14 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		this.updateScrollingState(mouseX, mouseY, button);
 		/*
 		for (Entry entry : this.children()) {
-			if (entry.mouseClicked(mouseX, mouseY, button)) {
+			if (entry.mouseClicked(event, doubleClick)) {
 				this.setFocused((Element)entry);
 				this.setDragging(true);
 				return true;
@@ -277,7 +280,7 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 		}
 		Entry entry = this.getEntryAtPosition(mouseX, mouseY);
 		if (entry != null) {
-			if (entry.mouseClicked(mouseX, mouseY, button)) {
+			if (entry.mouseClicked(event, doubleClick)) {
 				this.setFocused((GuiEventListener)entry);
 				this.setDragging(true);
 				return true;
@@ -287,16 +290,22 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 	}
 
 	@Override
-	public boolean mouseReleased(double mouseX, double mouseY, int button) {
+	public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (this.getFocused() != null) {
-			this.getFocused().mouseReleased(mouseX, mouseY, button);
+			this.getFocused().mouseReleased(event);
 		}
 		return false;
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-		if (super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY)) {
+	public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double deltaX, double deltaY) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
+		if (super.mouseDragged(event, deltaX, deltaY)) {
 			return true;
 		}
 		if (button != 0 || !this.scrolling) {
@@ -323,8 +332,11 @@ public class ListWidget extends AbstractContainerEventHandler implements Rendera
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-		if (super.keyPressed(keyCode, scanCode, modifiers)) {
+	public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+		int keyCode = event.key();
+		int scanCode = event.scancode();
+		int modifiers = event.modifiers();
+		if (super.keyPressed(event)) {
 			return true;
 		}
 		/*

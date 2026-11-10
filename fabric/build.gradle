@@ -65,10 +65,9 @@ dependencies {
 	common(project(path: ":xplat", configuration: "namedElements")) { transitive false }
 	shadowCommon(project(path: ":xplat", configuration: "transformProductionFabric")) { transitive false }
 
-	// JEI has no 1.21.4 release, so the jemi integration is excluded for this checkpoint.
-	// modCompileOnly("mezz.jei:${rootProject.jei_version}") {
-	// 	transitive = false
-	// }
+	modCompileOnly("mezz.jei:${rootProject.jei_version_fabric}") {
+		transitive = false
+	}
 	modCompileOnly "com.terraformersmc:modmenu:6.1.0-rc.4"
 }
 

@@ -44,7 +44,7 @@ public class EmiSearchWidget extends EditBox {
 		this.setTextColor(-1);
 		this.setTextColorUneditable(-1);
 		this.setMaxLength(256);
-		this.setFormatter((string, stringStart) -> {
+		this.addFormatter((string, stringStart) -> {
 			MutableComponent text = null;
 			int s = 0;
 			int last = 0;
@@ -170,12 +170,15 @@ public class EmiSearchWidget extends EditBox {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (!isMouseOver(mouseX, mouseY) || !EmiConfig.enabled) {
 			EmiPort.focus(this, false);
 			return false;
 		} else {
-			boolean b = super.mouseClicked(mouseX, mouseY, button == 1 ? 0 : button);
+			boolean b = super.mouseClicked(button == 1 ? new net.minecraft.client.input.MouseButtonEvent(mouseX, mouseY, new net.minecraft.client.input.MouseButtonInfo(0, event.modifiers())) : event, doubleClick);
 			if (isMouseOver(mouseX, mouseY)) {
 				EmiPort.focus(this, true);
 			}
@@ -197,7 +200,9 @@ public class EmiSearchWidget extends EditBox {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+	public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+		int keyCode = event.key();
+		int scanCode = event.scancode();
 		if (this.isFocused()) {
 			if (EmiConfig.clearSearch.matchesKey(keyCode, scanCode)) {
 				setValue("");
@@ -219,7 +224,7 @@ public class EmiSearchWidget extends EditBox {
 				}
 			}
 		}
-		return super.keyPressed(keyCode, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	private static long lastDebugLog;

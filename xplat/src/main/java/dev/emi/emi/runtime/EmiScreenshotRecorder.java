@@ -102,7 +102,9 @@ public class EmiScreenshotRecorder {
 		RenderTarget target = new TextureTarget("EMI screenshot", windowWidth, windowHeight, true);
 		GuiRenderState renderState = new GuiRenderState();
 		MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(new ByteBufferBuilder(BUFFER_CAPACITY));
-		GuiRenderer guiRenderer = new GuiRenderer(renderState, bufferSource, List.of());
+		var gameRenderer = client.gameRenderer;
+		GuiRenderer guiRenderer = new GuiRenderer(renderState, bufferSource,
+			gameRenderer.getSubmitNodeStorage(), gameRenderer.getFeatureRenderDispatcher(), List.of());
 		GuiGraphics graphics = new GuiGraphics(client, renderState);
 		GpuBuffer fogBuffer = RenderSystem.getDevice()
 			.createBuffer(() -> "EMI screenshot fog", GpuBuffer.USAGE_UNIFORM, FogRenderer.FOG_UBO_SIZE);

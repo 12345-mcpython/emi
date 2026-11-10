@@ -32,7 +32,7 @@ public class EmiPacketHandler {
         registrar.playToServer(EmiNetwork.CREATE_ITEM, makeReader(EmiNetwork.CREATE_ITEM, CreateItemC2SPacket::new), EmiPacketHandler::handleServerbound);
         // Clientbound handlers live in EmiClientPacketHandler (NeoForge 21.8 split them out of this event);
         // here only the payload type/codec has to be known so the server can send it.
-        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+        if (net.neoforged.fml.loading.FMLEnvironment.getDist().isClient()) {
 	        registrar.playToClient(SyncPayloads.Fabric.TYPE, SyncPayloads.Fabric.CODEC);
 	        registrar.playToClient(SyncPayloads.FabricFinished.TYPE, SyncPayloads.FabricFinished.CODEC);
         }

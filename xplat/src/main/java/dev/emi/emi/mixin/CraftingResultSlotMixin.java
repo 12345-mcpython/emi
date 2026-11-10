@@ -30,7 +30,7 @@ public class CraftingResultSlotMixin {
 	@Inject(at = @At("HEAD"), method = "checkTakeAchievements(Lnet/minecraft/world/item/ItemStack;)V")
 	private void onCrafted(ItemStack stack, CallbackInfo info) {
 		Level world = player.level();
-		if (world.isClientSide) {
+		if (world.isClientSide()) {
 			CraftingRecipe crafting = ProxyRecipeManager.getFirst(RecipeType.CRAFTING, craftSlots.asPositionedCraftInput().input());
 			if (crafting != null) {
 				EmiRecipe recipe = EmiApi.getRecipeManager().getRecipe(ProxyRecipeManager.getId(crafting));

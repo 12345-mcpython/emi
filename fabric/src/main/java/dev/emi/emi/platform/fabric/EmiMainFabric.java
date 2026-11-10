@@ -55,7 +55,7 @@ public class EmiMainFabric implements ModInitializer {
 	private <T extends EmiPacket> void registerPacketReader(CustomPacketPayload.Type<T> id, StreamDecoder<RegistryFriendlyByteBuf, T> decode) {
 		PayloadTypeRegistry.playC2S().register(id, StreamCodec.of((buf, v) -> v.write(buf), decode));
 		ServerPlayNetworking.registerGlobalReceiver(id, (payload, context) -> {
-			context.player().getServer().execute(() -> {
+			context.player().level().getServer().execute(() -> {
 				((EmiPacket)payload).apply(context.player());
 			});
 		});

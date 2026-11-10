@@ -36,7 +36,7 @@ public class SidebarButtonWidget extends SizedButtonWidget {
 	}
 
 	@Override
-	public void onPress() {
+	public void onPress(net.minecraft.client.input.InputWithModifiers input) {
 		panel.cycleType(EmiInput.isShiftDown() ? -1 : 1);
 	}
 

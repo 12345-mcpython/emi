@@ -373,14 +373,17 @@ public class ConfigScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
 		if (activeBind != null) {
 			pushModifier(0);
 			activeBind.setBind(activeBindOffset, new ModifiedKey(InputConstants.Type.MOUSE.getOrCreate(button), activeModifiers));
 			activeBind = null;
 			return true;
 		}
-		return super.mouseClicked(mouseX, mouseY, button);
+		return super.mouseClicked(event, doubleClick);
 	}
 
 	private void pushModifier(int lastModifier) {
@@ -390,7 +393,10 @@ public class ConfigScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+	public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+		int keyCode = event.key();
+		int scanCode = event.scancode();
+		int modifiers = event.modifiers();
 		if (activeBind != null) {
 			if (EmiInput.maskFromCode(keyCode) != 0) {
 				pushModifier(keyCode);
@@ -410,7 +416,7 @@ public class ConfigScreen extends Screen {
 			if (keyCode == GLFW.GLFW_KEY_TAB) {
 				return false;
 			}
-			if (super.keyPressed(keyCode, scanCode, modifiers)) {
+			if (super.keyPressed(event)) {
 				return true;
 			}
 			if (this.getFocused() instanceof EditBox tfw && tfw.isFocused()) {
@@ -422,7 +428,7 @@ public class ConfigScreen extends Screen {
 				if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 					this.onClose();
 					return true;
-				} else if (this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+				} else if (this.minecraft.options.keyInventory.matches(event)) {
 					this.onClose();
 					return true;
 				}
@@ -432,7 +438,10 @@ public class ConfigScreen extends Screen {
 	}
 
 	@Override
-	public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+	public boolean keyReleased(net.minecraft.client.input.KeyEvent event) {
+		int keyCode = event.key();
+		int scanCode = event.scancode();
+		int modifiers = event.modifiers();
 		if (activeBind != null) {
 			activeModifiers &= ~EmiInput.maskFromCode(keyCode);
 			if (keyCode == lastModifier) {
@@ -441,7 +450,7 @@ public class ConfigScreen extends Screen {
 			}
 			return true;
 		}
-		return super.keyReleased(keyCode, scanCode, modifiers);
+		return super.keyReleased(event);
 	}
 
 	@Override

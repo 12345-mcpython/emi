@@ -17,6 +17,7 @@ import dev.emi.emi.EmiUtil;
 import dev.emi.emi.api.EmiPlugin;
 import dev.emi.emi.api.EmiRegistry;
 import dev.emi.emi.api.FabricEmiStack;
+import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
 import dev.emi.emi.api.stack.EmiIngredient;
 import dev.emi.emi.api.stack.EmiStack;
 import dev.emi.emi.api.stack.FluidEmiStack;
@@ -232,7 +233,9 @@ public class EmiAgnosFabric extends EmiAgnos {
 
 	@Override
 	protected EmiStack createFluidStackAgnos(Object object) {
-		// JEI ingredient bridging is disabled while jemi is excluded on this checkpoint.
+		if (object instanceof IJeiFluidIngredient fluid) {
+			return FabricEmiStack.of(fluid.getFluidVariant(), fluid.getAmount());
+		}
 		return EmiStack.EMPTY;
 	}
 

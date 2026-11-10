@@ -21,7 +21,7 @@ public class EmiRecipeSync {
 	private static final int RECIPES_PER_PACKET = 256;
 
 	public static void send(ServerPlayer player) {
-		MinecraftServer server = player.getServer();
+		MinecraftServer server = player.level().getServer();
 		if (server == null) {
 			return;
 		}
@@ -40,6 +40,6 @@ public class EmiRecipeSync {
 			EmiNetwork.sendToClient(player, new EmiRecipeSyncS2CPacket(last, chunk));
 			sent += chunk.size();
 		}
-		EmiLog.info("Sent " + sent + " recipes to " + player.getGameProfile().getName());
+		EmiLog.info("Sent " + sent + " recipes to " + player.getName().getString());
 	}
 }

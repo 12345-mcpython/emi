@@ -552,8 +552,11 @@ public class BoMScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		if (super.mouseClicked(mouseX, mouseY, button)) return true;
+	public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean doubleClick) {
+		double mouseX = event.x();
+		double mouseY = event.y();
+		int button = event.button();
+		if (super.mouseClicked(event, doubleClick)) return true;
 		search.setFocused(false);
 		name.setFocused(false);
 		if (EmiConfig.back.matchesMouse(button)) { remember(); EmiHistory.pop(); return true; }
@@ -628,18 +631,24 @@ public class BoMScreen extends Screen {
 	}
 
 	@Override
-	public boolean mouseDragged(double mx, double my, int button, double dx, double dy) {
+	public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dx, double dy) {
+		double mx = event.x();
+		double my = event.y();
+		int button = event.button();
 		if (draggingGraph && (button == 0 || button == 2)) {
 			dragDistance += Math.abs(dx) + Math.abs(dy);
 			movedGraph |= dragDistance > 3;
 			if (movedGraph) { panX += dx; panY += dy; }
 			return true;
 		}
-		return super.mouseDragged(mx, my, button, dx, dy);
+		return super.mouseDragged(event, dx, dy);
 	}
 
 	@Override
-	public boolean mouseReleased(double mx, double my, int button) {
+	public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+		double mx = event.x();
+		double my = event.y();
+		int button = event.button();
 		if (draggingGraph && (button == 0 || button == 2)) {
 			Visual clicked = pressedNode;
 			boolean activate = button == 0 && !movedGraph && clicked != null && hovered(mx, my) == clicked;
@@ -653,11 +662,14 @@ public class BoMScreen extends Screen {
 			}
 			return true;
 		}
-		return super.mouseReleased(mx, my, button);
+		return super.mouseReleased(event);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+	public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+		int keyCode = event.key();
+		int scanCode = event.scancode();
+		int modifiers = event.modifiers();
 		if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
 			if (search.isFocused() || name.isFocused()) { search.setFocused(false); name.setFocused(false); return true; }
 			onClose(); return true;
@@ -666,12 +678,12 @@ public class BoMScreen extends Screen {
 			if (name.isFocused()) action("save"); else find(EmiInput.isShiftDown());
 			return true;
 		}
-		if (super.keyPressed(keyCode, scanCode, modifiers)) return true;
+		if (super.keyPressed(event)) return true;
 		if (search.isFocused() || name.isFocused()) return false;
 		if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_F) { setFocused(search); search.setFocused(true); return true; }
 		if (EmiInput.isControlDown() && keyCode == GLFW.GLFW_KEY_S) { action("save"); return true; }
 		if (EmiConfig.back.matchesKey(keyCode, scanCode)) { remember(); EmiHistory.pop(); return true; }
-		if (minecraft.options.keyInventory.matches(keyCode, scanCode)) { onClose(); return true; }
+		if (minecraft.options.keyInventory.matches(event)) { onClose(); return true; }
 		Visual v = hovered(lastMouseX, lastMouseY);
 		return v != null && stackAction(v, bind -> bind.matchesKey(keyCode, scanCode));
 	}

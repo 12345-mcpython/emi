@@ -1168,19 +1168,21 @@ public class EmiScreenManager {
 				return true;
 			}
 		}
-		if (search.mouseClicked(mouseX, mouseY, button)) {
+		net.minecraft.client.input.MouseButtonEvent click = new net.minecraft.client.input.MouseButtonEvent(mouseX,
+			mouseY, new net.minecraft.client.input.MouseButtonInfo(button, 0));
+		if (search.mouseClicked(click, false)) {
 			return true;
-		} else if (emi.mouseClicked(mouseX, mouseY, button)) {
+		} else if (emi.mouseClicked(click, false)) {
 			return true;
-		} else if (tree.mouseClicked(mouseX, mouseY, button)) {
+		} else if (tree.mouseClicked(click, false)) {
 			return true;
 		}
 		for (SidebarPanel panel : panels) {
-			if (panel.cycle.mouseClicked(mouseX, mouseY, button)) {
+			if (panel.cycle.mouseClicked(click, false)) {
 				return true;
-			} else if (panel.pageLeft.mouseClicked(mouseX, mouseY, button)) {
+			} else if (panel.pageLeft.mouseClicked(click, false)) {
 				return true;
-			} else if (panel.pageRight.mouseClicked(mouseX, mouseY, button)) {
+			} else if (panel.pageRight.mouseClicked(click, false)) {
 				return true;
 			}
 		}
@@ -1309,7 +1311,7 @@ public class EmiScreenManager {
 			}
 			return false;
 		}
-		if (EmiScreenManager.search.keyPressed(keyCode, scanCode, modifiers) || EmiScreenManager.search.canConsumeInput()) {
+		if (EmiScreenManager.search.keyPressed(new net.minecraft.client.input.KeyEvent(keyCode, scanCode, modifiers)) || EmiScreenManager.search.canConsumeInput()) {
 			return true;
 		}
 		if (hasFocusedTextField(client.screen, 10)) {

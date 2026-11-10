@@ -48,9 +48,9 @@ public class EmiClientFabric implements ClientModInitializer {
 			ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new IdentifiableResourceReloadListener() {
 
 				@Override
-				public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier barrier, ResourceManager manager,
-					Executor prepareExecutor, Executor applyExecutor) {
-					return reloader.reload(barrier, manager, prepareExecutor, applyExecutor);
+				public CompletableFuture<Void> reload(PreparableReloadListener.SharedState state,
+					Executor prepareExecutor, PreparableReloadListener.PreparationBarrier barrier, Executor applyExecutor) {
+					return reloader.reload(state, prepareExecutor, barrier, applyExecutor);
 				}
 
 				@Override
@@ -68,7 +68,7 @@ public class EmiClientFabric implements ClientModInitializer {
 		PreparableModelLoadingPlugin.<List<ResourceLocation>>register((manager, executor) -> {
 			return CompletableFuture.supplyAsync(() -> {
 				List<ResourceLocation> ids = Lists.newArrayList();
-				EmiTags.registerTagModels(manager, ids::add);
+				EmiTags.registerTagModels(manager.resourceManager(), ids::add);
 				return ids;
 			}, executor);
 		}, (ids, context) -> {
